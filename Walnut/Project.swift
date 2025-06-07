@@ -49,7 +49,7 @@ let settings: SettingsDictionary = [
     "PRODUCT_NAME": .string("Walnut"),
     "DISPLAY_NAME": .string("Walnut"),
     "PRODUCT_BUNDLE_IDENTIFIER": .string("m.walnut"),
-    "EXECUTABLE_NAME": .string("Walnut - Health Tracker"),
+    "EXECUTABLE_NAME": .string("Walnut"),
     "CURRENT_PROJECT_VERSION": .string("1.0"),
     "MARKETING_VERSION": "1",
     "OTHER_LDFLAGS": "-ObjC",
@@ -64,16 +64,17 @@ let project = Project(
     ),
     targets: [
         .target(
-            name: "Walnut - Health Tracker",
+            name: "Walnut",
             destinations: .iOS,
             product: .app,
             bundleId: "m.walnut",
             infoPlist: infoPlist,
-            sources: ["Sources/**/*"],
+            sources: [
+                "Sources/**/*"
+            ],
             resources: [
                 "Resources/**/*",
             ],
-            entitlements: .file(path: .relativeToRoot("Walnut/Walnut.entitlements")),
             dependencies: [
                 .external(name: "ComposableArchitecture"),
                 .external(name: "PostHog"),
@@ -91,7 +92,9 @@ let project = Project(
             product: .unitTests,
             bundleId: "io.tuist.WalnutTests",
             infoPlist: .default,
-            sources: ["Walnut/Tests/**"],
+            sources: [
+                "Tests/**"
+            ],
             resources: [],
             dependencies: [.target(name: "Walnut")]
         ),

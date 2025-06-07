@@ -1,12 +1,16 @@
 
 import SwiftUI
+import ComposableArchitecture
 
 public struct ContentView: View {
     public init() {}
 
     public var body: some View {
-        Text("Hello, World!")
-            .padding()
+        AddPatientView(
+            store: Store(initialState: AddPatientFeature.State()) {
+                AddPatientFeature()
+            }
+        )
     }
 }
 
