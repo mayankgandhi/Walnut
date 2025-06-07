@@ -35,3 +35,26 @@ extension Tag {
     @NSManaged public func removeFromDocuments(_ values: NSSet)
 }
 
+
+// MARK: - Tag Extensions
+extension Tag {
+    
+    /// Associated documents as array
+    var documentsArray: [Document] {
+        return documents?.allObjects as? [Document] ?? []
+    }
+    
+    /// Document count
+    var documentCount: Int {
+        return documents?.count ?? 0
+    }
+    
+    /// Convenience initializer
+    convenience init(context: NSManagedObjectContext, name: String, color: String? = nil) {
+        self.init(context: context)
+        self.id = UUID()
+        self.name = name
+        self.color = color ?? "healthBlue"
+        self.createdAt = Date()
+    }
+}

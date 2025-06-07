@@ -89,3 +89,45 @@ extension Patient {
     @objc(removeTestResults:)
     @NSManaged public func removeFromTestResults(_ values: NSSet)
 }
+
+// MARK: - Patient Extensions
+extension Patient {
+    
+    /// Full name computed property
+    var fullName: String {
+        return "\(firstName) \(lastName)"
+    }
+    
+    /// Age computed property
+    var age: Int? {
+        guard let dateOfBirth = dateOfBirth else { return nil }
+        return Calendar.current.dateComponents([.year], from: dateOfBirth, to: Date()).year
+    }
+    
+    /// Fetch all lab results for this patient sorted by date
+    var sortedLabResults: [LabResult] {
+        let results = labResults?.allObjects as? [LabResult] ?? []
+        return results.sorted { $0.resultDate > $1.resultDate }
+    }
+    
+    /// Get most recent lab result
+    var mostRecentLabResult: LabResult? {
+        return sortedLabResults.first
+    }
+    
+    /// Count of lab results
+    var labResultCount: Int {
+        return labResults?.count ?? 0
+    }
+    
+    /// Convenience initializer
+    convenience init(context: NSManagedObjectContext, firstName: String, lastName: String) {
+        self.init(context: context)
+        self.id = UUID()
+        self.firstName = firstName
+        self.lastName = lastName
+        self.isActive = true
+        self.createdAt = Date()
+        self.updatedAt = Date()
+    }
+}

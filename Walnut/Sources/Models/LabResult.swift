@@ -49,3 +49,49 @@ extension LabResult {
     @objc(removeTestResults:)
     @NSManaged public func removeFromTestResults(_ values: NSSet)
 }
+
+// MARK: - LabResult Extensions
+extension LabResult {
+    
+    /// Sorted test results
+    var sortedTestResults: [TestResult] {
+        let results = testResults?.allObjects as? [TestResult] ?? []
+        return results.sorted { $0.markerName < $1.markerName }
+    }
+    
+    /// Test results count
+    var testResultCount: Int {
+        return testResults?.count ?? 0
+    }
+    
+    /// Check if result is abnormal
+    var isAbnormal: Bool {
+        return status.lowercased() == "abnormal" || status.lowercased() == "critical"
+    }
+    
+    /// Status color
+    var statusColor: String {
+        switch status.lowercased() {
+        case "normal":
+            return "labNormal"
+        case "abnormal":
+            return "labWarning"
+        case "critical":
+            return "labCritical"
+        default:
+            return "textSecondary"
+        }
+    }
+    
+    /// Convenience initializer
+    convenience init(context: NSManagedObjectContext, testName: String, patient: Patient) {
+        self.init(context: context)
+        self.id = UUID()
+        self.testName = testName
+        self.resultDate = Date()
+        self.status = "pending"
+        self.patient = patient
+        self.createdAt = Date()
+        self.updatedAt = Date()
+    }
+}

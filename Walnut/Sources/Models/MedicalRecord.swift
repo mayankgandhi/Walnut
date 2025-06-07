@@ -49,3 +49,30 @@ extension MedicalRecord {
     @objc(removeLabResults:)
     @NSManaged public func removeFromLabResults(_ values: NSSet)
 }
+
+
+// MARK: - MedicalRecord Extensions
+extension MedicalRecord {
+    
+    /// Associated lab results as array
+    var labResultsArray: [LabResult] {
+        return labResults?.allObjects as? [LabResult] ?? []
+    }
+    
+    /// Check if record has associated lab results
+    var hasLabResults: Bool {
+        return labResultsArray.count > 0
+    }
+    
+    /// Convenience initializer
+    convenience init(context: NSManagedObjectContext, recordType: String, title: String, patient: Patient) {
+        self.init(context: context)
+        self.id = UUID()
+        self.recordType = recordType
+        self.title = title
+        self.date = Date()
+        self.patient = patient
+        self.createdAt = Date()
+        self.updatedAt = Date()
+    }
+}

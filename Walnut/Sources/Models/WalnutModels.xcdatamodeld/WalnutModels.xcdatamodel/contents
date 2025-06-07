@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23788" systemVersion="24F74" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="Document" representedClassName="Document" syncable="YES" codeGenerationType="class">
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="documentType" attributeType="String"/>
+        <attribute name="extractionError" optional="YES" attributeType="String"/>
+        <attribute name="fileName" attributeType="String"/>
+        <attribute name="fileSize" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="fileURL" attributeType="URI"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="mimeType" attributeType="String"/>
+        <attribute name="rawAPIResponse" optional="YES" attributeType="String"/>
+        <attribute name="thumbnailURL" optional="YES" attributeType="URI"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="uploadDate" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="labResults" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="LabResult" inverseName="document" inverseEntity="LabResult"/>
+        <relationship name="medicalRecords" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="MedicalRecord" inverseName="document" inverseEntity="MedicalRecord"/>
+        <relationship name="patient" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Patient" inverseName="documents" inverseEntity="Patient"/>
+        <relationship name="tags" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Tag" inverseName="documents" inverseEntity="Tag"/>
+    </entity>
+    <entity name="LabResult" representedClassName="LabResult" syncable="YES" codeGenerationType="class">
+        <attribute name="category" optional="YES" attributeType="String"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="labName" optional="YES" attributeType="String"/>
+        <attribute name="resultDate" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="status" attributeType="String"/>
+        <attribute name="testName" attributeType="String"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="document" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Document" inverseName="labResults" inverseEntity="Document"/>
+        <relationship name="medicalRecord" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MedicalRecord" inverseName="labResults" inverseEntity="MedicalRecord"/>
+        <relationship name="patient" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Patient" inverseName="labResults" inverseEntity="Patient"/>
+        <relationship name="testResults" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="TestResult" inverseName="labResult" inverseEntity="TestResult"/>
+    </entity>
+    <entity name="MedicalRecord" representedClassName="MedicalRecord" syncable="YES" codeGenerationType="class">
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="dateRecorded" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="notes" optional="YES" attributeType="String"/>
+        <attribute name="providerName" optional="YES" attributeType="String"/>
+        <attribute name="recordType" optional="YES" attributeType="String"/>
+        <attribute name="summary" optional="YES" attributeType="String"/>
+        <attribute name="title" attributeType="String"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="document" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Document" inverseName="medicalRecords" inverseEntity="Document"/>
+        <relationship name="labResults" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="LabResult" inverseName="medicalRecord" inverseEntity="LabResult"/>
+        <relationship name="patient" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Patient" inverseName="medicalRecords" inverseEntity="Patient"/>
+    </entity>
+    <entity name="Patient" representedClassName="Patient" syncable="YES" codeGenerationType="class">
+        <attribute name="bloodType" optional="YES" attributeType="String"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="dateOfBirth" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="emergencyContactName" optional="YES" attributeType="String"/>
+        <attribute name="emergencyContactPhone" optional="YES" attributeType="String"/>
+        <attribute name="firstName" attributeType="String"/>
+        <attribute name="gender" optional="YES" attributeType="String"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="insurancePolicyNumber" optional="YES" attributeType="String"/>
+        <attribute name="insuranceProvider" optional="YES" attributeType="String"/>
+        <attribute name="isActive" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="lastName" attributeType="String"/>
+        <attribute name="medicalRecordNumber" optional="YES" attributeType="String"/>
+        <attribute name="notes" optional="YES" attributeType="String"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="documents" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Document" inverseName="patient" inverseEntity="Document"/>
+        <relationship name="labResults" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="LabResult" inverseName="patient" inverseEntity="LabResult"/>
+        <relationship name="medicalRecords" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="MedicalRecord" inverseName="patient" inverseEntity="MedicalRecord"/>
+        <relationship name="testResults" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TestResult" inverseName="patient" inverseEntity="TestResult"/>
+    </entity>
+    <entity name="Tag" representedClassName="Tag" syncable="YES" codeGenerationType="class">
+        <attribute name="color" attributeType="String"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" attributeType="String"/>
+        <relationship name="documents" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Document" inverseName="tags" inverseEntity="Document"/>
+    </entity>
+    <entity name="TestResult" representedClassName="TestResult" syncable="YES" codeGenerationType="class">
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="markerCode" optional="YES" attributeType="String"/>
+        <attribute name="markerName" attributeType="String"/>
+        <attribute name="notes" optional="YES" attributeType="String"/>
+        <attribute name="numericValue" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="unit" optional="YES" attributeType="String"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="value" attributeType="String"/>
+        <relationship name="labResult" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="LabResult" inverseName="testResults" inverseEntity="LabResult"/>
+        <relationship name="patient" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Patient" inverseName="testResults" inverseEntity="Patient"/>
+    </entity>
+</model>

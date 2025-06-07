@@ -33,3 +33,37 @@ public class TestResult: NSManagedObject {
     @NSManaged public var labResult: LabResult? // Parent lab result
     @NSManaged public var patient: Patient? // Direct reference to patient for easier queries
 }
+
+// MARK: - TestResult Extensions
+extension TestResult {
+    
+    /// Check if result has numeric value
+    var hasNumericValue: Bool {
+        return numericValue != 0.0
+    }
+    
+    /// Formatted value with unit
+    var formattedValue: String {
+        if let unit = unit, !unit.isEmpty {
+            return "\(value) \(unit)"
+        }
+        return value
+    }
+    
+    /// Convenience initializer
+    convenience init(context: NSManagedObjectContext, markerName: String, value: String, labResult: LabResult) {
+        self.init(context: context)
+        self.id = UUID()
+        self.markerName = markerName
+        self.value = value
+        self.labResult = labResult
+        self.patient = labResult.patient
+        self.createdAt = Date()
+        self.updatedAt = Date()
+        
+        // Try to parse numeric value
+        if let numericValue = Double(value) {
+            self.numericValue = numericValue
+        }
+    }
+}
