@@ -3,14 +3,18 @@ import SwiftUI
 import ComposableArchitecture
 
 public struct ContentView: View {
+    
     public init() {}
 
     public var body: some View {
-        AddPatientView(
-            store: Store(initialState: AddPatientFeature.State()) {
-                AddPatientFeature()
-            }
-        )
+        PatientHomeView(store: Store(initialState: PatientHomeFeature.State(), reducer: {
+            PatientHomeFeature()
+        }))
+//        AddPatientView(
+//            store: Store(initialState: AddPatientFeature.State()) {
+//                AddPatientFeature()
+//            }
+//        )
     }
 }
 
