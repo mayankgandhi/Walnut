@@ -1,0 +1,222 @@
+{
+  "colors": [
+    {
+      "name": "WalnutBrown",
+      "light": {
+        "hex": "#8B4513",
+        "rgb": "139, 69, 19"
+      },
+      "dark": {
+        "hex": "#D4A574", 
+        "rgb": "212, 165, 116"
+      },
+      "usage": "Primary brand color, navigation bars, accent elements"
+    },
+    {
+      "name": "WalnutBackground",
+      "light": {
+        "hex": "#FAF7F2",
+        "rgb": "250, 247, 242"
+      },
+      "dark": {
+        "hex": "#000000",
+        "rgb": "0, 0, 0"
+      },
+      "usage": "Main background color"
+    },
+    {
+      "name": "WalnutSecondaryBackground",
+      "light": {
+        "hex": "#F5F1EB",
+        "rgb": "245, 241, 235"
+      },
+      "dark": {
+        "hex": "#1C1C1E",
+        "rgb": "28, 28, 30"
+      },
+      "usage": "Card backgrounds, secondary surfaces"
+    },
+    {
+      "name": "HealthGreen",
+      "light": {
+        "hex": "#87A96B",
+        "rgb": "135, 169, 107"
+      },
+      "dark": {
+        "hex": "#A8C98A",
+        "rgb": "168, 201, 138"
+      },
+      "usage": "Wellness indicators, positive health metrics"
+    },
+    {
+      "name": "HealthBlue",
+      "light": {
+        "hex": "#6B9BD1",
+        "rgb": "107, 155, 209"
+      },
+      "dark": {
+        "hex": "#8BB5E8",
+        "rgb": "139, 181, 232"
+      },
+      "usage": "Medical information, trust indicators"
+    },
+    {
+      "name": "HealthCoral",
+      "light": {
+        "hex": "#FF8A80",
+        "rgb": "255, 138, 128"
+      },
+      "dark": {
+        "hex": "#FF9A8A",
+        "rgb": "255, 154, 138"
+      },
+      "usage": "Warm accents, vitality indicators"
+    },
+    {
+      "name": "LabResultNormal",
+      "light": {
+        "hex": "#4CAF50",
+        "rgb": "76, 175, 80"
+      },
+      "dark": {
+        "hex": "#66BB6A",
+        "rgb": "102, 187, 106"
+      },
+      "usage": "Normal lab results, success states"
+    },
+    {
+      "name": "LabResultWarning",
+      "light": {
+        "hex": "#FF9800",
+        "rgb": "255, 152, 0"
+      },
+      "dark": {
+        "hex": "#FFB74D",
+        "rgb": "255, 183, 77"
+      },
+      "usage": "Borderline lab results, caution states"
+    },
+    {
+      "name": "LabResultCritical",
+      "light": {
+        "hex": "#F44336",
+        "rgb": "244, 67, 54"
+      },
+      "dark": {
+        "hex": "#EF5350",
+        "rgb": "239, 83, 80"
+      },
+      "usage": "Critical lab results, error states"
+    },
+    {
+      "name": "InfoBlue",
+      "light": {
+        "hex": "#2196F3",
+        "rgb": "33, 150, 243"
+      },
+      "dark": {
+        "hex": "#42A5F5",
+        "rgb": "66, 165, 245"
+      },
+      "usage": "Information highlights, links"
+    },
+    {
+      "name": "TextPrimary",
+      "light": {
+        "hex": "#1A1A1A",
+        "rgb": "26, 26, 26"
+      },
+      "dark": {
+        "hex": "#FFFFFF",
+        "rgb": "255, 255, 255"
+      },
+      "usage": "Primary text color"
+    },
+    {
+      "name": "TextSecondary",
+      "light": {
+        "hex": "#6B6B6B",
+        "rgb": "107, 107, 107"
+      },
+      "dark": {
+        "hex": "#8E8E93",
+        "rgb": "142, 142, 147"
+      },
+      "usage": "Secondary text, metadata"
+    },
+    {
+      "name": "TextTertiary",
+      "light": {
+        "hex": "#999999",
+        "rgb": "153, 153, 153"
+      },
+      "dark": {
+        "hex": "#6D6D70",
+        "rgb": "109, 109, 112"
+      },
+      "usage": "Placeholder text, disabled text"
+    },
+    {
+      "name": "BorderColor",
+      "light": {
+        "hex": "#E5E5E5",
+        "rgb": "229, 229, 229"
+      },
+      "dark": {
+        "hex": "#38383A",
+        "rgb": "56, 56, 58"
+      },
+      "usage": "Borders, dividers, separators"
+    },
+    {
+      "name": "ShadowColor",
+      "light": {
+        "hex": "#000000",
+        "rgb": "0, 0, 0",
+        "alpha": "0.08"
+      },
+      "dark": {
+        "hex": "#000000",
+        "rgb": "0, 0, 0",
+        "alpha": "0.3"
+      },
+      "usage": "Card shadows, elevation"
+    },
+    {
+      "name": "ChartBlue",
+      "light": {
+        "hex": "#007AFF",
+        "rgb": "0, 122, 255"
+      },
+      "dark": {
+        "hex": "#409CFF",
+        "rgb": "64, 156, 255"
+      },
+      "usage": "Data visualization, charts"
+    },
+    {
+      "name": "ChartPurple",
+      "light": {
+        "hex": "#5856D6",
+        "rgb": "88, 86, 214"
+      },
+      "dark": {
+        "hex": "#7D7AFF",
+        "rgb": "125, 122, 255"
+      },
+      "usage": "Secondary chart data"
+    },
+    {
+      "name": "ChartOrange",
+      "light": {
+        "hex": "#FF9500",
+        "rgb": "255, 149, 0"
+      },
+      "dark": {
+        "hex": "#FFB340",
+        "rgb": "255, 179, 64"
+      },
+      "usage": "Tertiary chart data"
+    }
+  ]
+}
