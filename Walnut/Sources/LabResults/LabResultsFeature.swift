@@ -32,8 +32,7 @@ struct LabResultsFeature {
                 state.isLoading = true
                 return .run { send in
                     // Simulate loading recent lab results
-                    let results = await loadRecentLabResults()
-                    await send(.resultsLoaded(results))
+                    await send(.resultsLoaded([]))
                 }
                 
             case let .resultsLoaded(results):

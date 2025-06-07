@@ -75,6 +75,7 @@ let project = Project(
             resources: [
                 "Resources/**/*",
             ],
+            entitlements: .file(path: .relativeToRoot("Walnut/Walnut.entitlements")),
             dependencies: [
                 .external(name: "ComposableArchitecture"),
                 .external(name: "PostHog"),

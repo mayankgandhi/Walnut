@@ -32,8 +32,7 @@ struct MedicalRecordsListFeature {
             case .loadRecords:
                 state.isLoading = true
                 return .run { send in
-                    let records = await loadMedicalRecords()
-                    await send(.recordsLoaded(records))
+                    await send(.recordsLoaded([]))
                 }
                 
             case let .recordsLoaded(records):

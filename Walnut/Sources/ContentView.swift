@@ -10,12 +10,8 @@ public struct ContentView: View {
         PatientHomeView(store: Store(initialState: PatientHomeFeature.State(), reducer: {
             PatientHomeFeature()
         }))
-//        AddPatientView(
-//            store: Store(initialState: AddPatientFeature.State()) {
-//                AddPatientFeature()
-//            }
-//        )
     }
+    
 }
 
 
