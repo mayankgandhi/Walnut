@@ -17,7 +17,7 @@ struct LabResultRow: View {
         Button(action: onTap) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(result.testName)
+                    Text(result.testName ?? "Test")
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundColor(.textPrimary)
