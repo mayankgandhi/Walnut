@@ -21,13 +21,13 @@ struct PatientRow: View {
                     .fill(Color.healthBlue.opacity(0.2))
                     .frame(width: 40, height: 40)
                     .overlay(
-                        Text("\(patient.firstName.prefix(1))\(patient.lastName.prefix(1))")
+                        Text("\((patient.firstName ?? "P").prefix(1) ) \((patient.lastName ?? "A").prefix(1) )")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.healthBlue)
                     )
                 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("\(patient.firstName) \(patient.lastName)")
+                    Text("\(patient.firstName ?? "Patient") \(patient.lastName ?? "Name")")
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundColor(.textPrimary)

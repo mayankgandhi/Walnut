@@ -70,7 +70,8 @@ let project = Project(
             bundleId: "m.walnut",
             infoPlist: infoPlist,
             sources: [
-                "Sources/**/**",
+                "Sources/**",  // This includes files directly in Sources/
+                "Sources/**/**",  // This includes files in subdirectories
             ],
             resources: [
                 "Resources/**/**",

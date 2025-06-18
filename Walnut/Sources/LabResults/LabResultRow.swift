@@ -21,15 +21,19 @@ struct LabResultRow: View {
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundColor(.textPrimary)
+                    if let resultDate = result.resultDate {
+                        Text(resultDate, formatter: DateFormatter.mediumStyle)
+                            .font(.caption)
+                            .foregroundColor(.textSecondary)
+                    }
                     
-                    Text(result.resultDate, formatter: DateFormatter.mediumStyle)
-                        .font(.caption)
-                        .foregroundColor(.textSecondary)
                 }
                 
                 Spacer()
                 
-                StatusBadge(status: result.status)
+                if let status = result.status {
+                    StatusBadge(status: status)
+                }
             }
             .padding(.vertical, 8)
         }

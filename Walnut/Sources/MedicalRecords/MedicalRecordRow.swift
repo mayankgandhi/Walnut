@@ -34,11 +34,13 @@ struct MedicalRecordRow: View {
                     .frame(width: 20)
                 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(record.title)
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(.textPrimary)
-                        .lineLimit(1)
+                    if let title = record.title {
+                        Text(title)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.textPrimary)
+                            .lineLimit(1)
+                    }
                     
                     if let summary = record.summary {
                         Text(summary)
@@ -47,9 +49,12 @@ struct MedicalRecordRow: View {
                             .lineLimit(2)
                     }
                     
-                    Text(record.date, formatter: DateFormatter.mediumStyle)
-                        .font(.caption)
-                        .foregroundColor(.textTertiary)
+                    if let dateRecorded = record.dateRecorded {
+                        Text(dateRecorded, formatter: DateFormatter.mediumStyle)
+                            .font(.caption)
+                            .foregroundColor(.textTertiary)
+                    }
+                    
                 }
                 
                 Spacer()

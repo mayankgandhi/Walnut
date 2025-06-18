@@ -20,7 +20,7 @@ protocol DataRepositoryProtocol {
     func fetchLabResults(for patient: Patient) -> [LabResult]
     func fetchRecentLabResults(limit: Int) -> [LabResult]
     
-    func createDocument(fileName: String, fileURL: URL, for patient: Patient) -> Document
+    func createDocument(fileName: String, fileURL: URL, for patient: Patient?) -> Document
     func fetchDocuments(for patient: Patient) -> [Document]
     
     func save()
@@ -49,8 +49,14 @@ class CoreDataRepository: DataRepositoryProtocol, ObservableObject {
     // MARK: - Patient Operations
     
     func createPatient(firstName: String, lastName: String, dateOfBirth: Date? = nil) -> Patient {
-        let patient = Patient(context: viewContext, firstName: firstName, lastName: lastName)
+        let patient = Patient(context: viewContext)
+        patient.id = UUID()
+        patient.firstName = firstName
+        patient.lastName = lastName
         patient.dateOfBirth = dateOfBirth
+        patient.isActive = true
+        patient.createdAt = Date()
+        patient.updatedAt = Date()
         save()
         return patient
     }
@@ -82,8 +88,14 @@ class CoreDataRepository: DataRepositoryProtocol, ObservableObject {
     // MARK: - Lab Result Operations
     
     func createLabResult(for patient: Patient, testName: String, date: Date = Date()) -> LabResult {
-        let labResult = LabResult(context: viewContext, testName: testName, patient: patient)
+        let labResult = LabResult(context: viewContext)
+        labResult.id = UUID()
+        labResult.testName = testName
+        labResult.patient = patient
         labResult.resultDate = date
+        labResult.status = "pending" // Default status
+        labResult.createdAt = Date()
+        labResult.updatedAt = Date()
         save()
         return labResult
     }
@@ -121,8 +133,21 @@ class CoreDataRepository: DataRepositoryProtocol, ObservableObject {
     // MARK: - Test Result Operations
     
     func createTestResult(for labResult: LabResult, markerName: String, value: String, unit: String? = nil) -> TestResult {
-        let testResult = TestResult(context: viewContext, markerName: markerName, value: value, labResult: labResult)
+        let testResult = TestResult(context: viewContext)
+        testResult.id = UUID()
+        testResult.markerName = markerName
+        testResult.value = value
         testResult.unit = unit
+        testResult.labResult = labResult
+        testResult.patient = labResult.patient! // Required relationship
+        testResult.createdAt = Date()
+        testResult.updatedAt = Date()
+        
+        // Try to parse numeric value if possible
+        if let numericValue = Double(value) {
+            testResult.numericValue = numericValue
+        }
+        
         save()
         return testResult
     }
@@ -143,8 +168,18 @@ class CoreDataRepository: DataRepositoryProtocol, ObservableObject {
     
     // MARK: - Document Operations
     
-    func createDocument(fileName: String, fileURL: URL, for patient: Patient) -> Document {
-        let document = Document(context: viewContext, fileName: fileName, fileURL: fileURL, patient: patient)
+    func createDocument(fileName: String, fileURL: URL, for patient: Patient? = nil) -> Document {
+        let document = Document(context: viewContext)
+        document.id = UUID()
+        document.fileName = fileName
+        document.fileURL = fileURL
+        document.patient = patient
+        document.createdAt = Date()
+        document.updatedAt = Date()
+        document.uploadDate = Date()
+        
+        // Detect document type from file extension
+        document.documentType = fileURL.pathExtension.lowercased()
         
         // Set file size
         if let attributes = try? FileManager.default.attributesOfItem(atPath: fileURL.path),
@@ -169,7 +204,15 @@ class CoreDataRepository: DataRepositoryProtocol, ObservableObject {
         ])
     }
     
+    func fetchUnassignedDocuments() -> [Document] {
+        let predicate = NSPredicate(format: "patient == nil")
+        return viewContext.fetch(Document.self, predicate: predicate, sortDescriptors: [
+            NSSortDescriptor(keyPath: \Document.uploadDate, ascending: false)
+        ])
+    }
+    
     func updateDocument(_ document: Document) {
+        document.updatedAt = Date()
         save()
     }
     
@@ -180,8 +223,14 @@ class CoreDataRepository: DataRepositoryProtocol, ObservableObject {
     
     // MARK: - Medical Record Operations
     
-    func createMedicalRecord(recordType: String, title: String, for patient: Patient) -> MedicalRecord {
-        let record = MedicalRecord(context: viewContext, recordType: recordType, title: title, patient: patient)
+    func createMedicalRecord(title: String, for patient: Patient, recordType: String? = nil) -> MedicalRecord {
+        let record = MedicalRecord(context: viewContext)
+        record.id = UUID()
+        record.title = title
+        record.patient = patient
+        record.recordType = recordType
+        record.createdAt = Date()
+        record.updatedAt = Date()
         save()
         return record
     }
@@ -189,14 +238,16 @@ class CoreDataRepository: DataRepositoryProtocol, ObservableObject {
     func fetchMedicalRecords(for patient: Patient) -> [MedicalRecord] {
         let predicate = NSPredicate(format: "patient == %@", patient)
         return viewContext.fetch(MedicalRecord.self, predicate: predicate, sortDescriptors: [
-            NSSortDescriptor(keyPath: \MedicalRecord.date, ascending: false)
+            NSSortDescriptor(keyPath: \MedicalRecord.dateRecorded, ascending: false),
+            NSSortDescriptor(keyPath: \MedicalRecord.createdAt, ascending: false)
         ])
     }
     
     func fetchMedicalRecords(ofType recordType: String) -> [MedicalRecord] {
         let predicate = NSPredicate(format: "recordType == %@", recordType)
         return viewContext.fetch(MedicalRecord.self, predicate: predicate, sortDescriptors: [
-            NSSortDescriptor(keyPath: \MedicalRecord.date, ascending: false)
+            NSSortDescriptor(keyPath: \MedicalRecord.dateRecorded, ascending: false),
+            NSSortDescriptor(keyPath: \MedicalRecord.createdAt, ascending: false)
         ])
     }
     
@@ -212,8 +263,12 @@ class CoreDataRepository: DataRepositoryProtocol, ObservableObject {
     
     // MARK: - Tag Operations
     
-    func createTag(name: String, color: String? = nil) -> Tag {
-        let tag = Tag(context: viewContext, name: name, color: color)
+    func createTag(name: String, color: String = "#007AFF") -> Tag {
+        let tag = Tag(context: viewContext)
+        tag.id = UUID()
+        tag.name = name
+        tag.color = color
+        tag.createdAt = Date()
         save()
         return tag
     }
@@ -231,6 +286,16 @@ class CoreDataRepository: DataRepositoryProtocol, ObservableObject {
     
     func deleteTag(_ tag: Tag) {
         viewContext.delete(tag)
+        save()
+    }
+    
+    func addTag(_ tag: Tag, to document: Document) {
+        document.addToTags(tag)
+        save()
+    }
+    
+    func removeTag(_ tag: Tag, from document: Document) {
+        document.removeFromTags(tag)
         save()
     }
     
