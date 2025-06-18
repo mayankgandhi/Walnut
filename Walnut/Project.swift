@@ -70,10 +70,10 @@ let project = Project(
             bundleId: "m.walnut",
             infoPlist: infoPlist,
             sources: [
-                "Sources/**/*"
+                "Sources/**/**"
             ],
             resources: [
-                "Resources/**/*",
+                "Resources/**/**",
             ],
             entitlements: .file(path: .relativeToRoot("Walnut/Walnut.entitlements")),
             dependencies: [
