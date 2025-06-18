@@ -5,11 +5,12 @@ import ComposableArchitecture
 public struct ContentView: View {
     
     public init() {}
+    static let store = Store(initialState: PatientHomeFeature.State(), reducer: {
+        PatientHomeFeature()
+    })
 
     public var body: some View {
-        PatientHomeView(store: Store(initialState: PatientHomeFeature.State(), reducer: {
-            PatientHomeFeature()
-        }))
+        PatientHomeView(store: ContentView.store)
     }
     
 }

@@ -6,7 +6,6 @@
 //  Copyright © 2025 m. All rights reserved.
 //
 
-
 import ComposableArchitecture
 import Foundation
 import SwiftUI
@@ -25,14 +24,13 @@ struct AddPatientFeature {
         var bloodType = ""
         var emergencyContactName = ""
         var emergencyContactPhone = ""
-        var insuranceProvider = ""
-        var insurancePolicyNumber = ""
-        var medicalRecordNumber = ""
         var notes = ""
         
         var isDatePickerPresented = false
         var isLoading = false
-        var errorMessage: String?
+        
+        // TCA Alert State
+        @Presents var alert: AlertState<Action.Alert>?
         
         // Validation
         var isFormValid: Bool {
@@ -52,57 +50,188 @@ struct AddPatientFeature {
         case dateOfBirthTapped
         case dismissDatePicker
         case savePatient
-        case patientSaveResponse(Result<Void, Error>)
-        case dismiss
+        case patientSaveResponse(Result<Patient, PatientError>)
+        case alert(PresentationAction<Alert>)
+        
+        case delegate(Delegate)
+        
+        enum Alert: Equatable {
+            case confirmDismiss
+            case retryAction
+        }
+        
+        enum Delegate {
+            case dismiss
+            case patientCreated(Patient)
+        }
     }
     
     @Dependency(\.dismiss) var dismiss
+    @Dependency(\.patientRepository) var patientRepository
     
     var body: some ReducerOf<Self> {
         BindingReducer()
         
         Reduce { state, action in
             switch action {
-            case .binding:
-                return .none
                 
-            case .dateOfBirthTapped:
-                state.isDatePickerPresented = true
-                return .none
-                
-            case .dismissDatePicker:
-                state.isDatePickerPresented = false
-                return .none
-                
+//            case .dateOfBirthTapped:
+//                state.isDatePickerPresented = true
+//                return .none
+//                
+//            case .dismissDatePicker:
+//                state.isDatePickerPresented = false
+//                return .none
+//                
             case .savePatient:
-                guard state.isFormValid else { return .none }
+                guard state.isFormValid else {
+                    state.alert = AlertState(
+                        title: TextState("Invalid Form"),
+                        message: TextState("Please fill in all required fields (First Name and Last Name)."),
+                        buttons: [
+                            ButtonState(role: .cancel) {
+                                TextState("OK")
+                            }]
+                    )
+                    return .none
+                }
                 
                 state.isLoading = true
-                state.errorMessage = nil
                 
-                // In a real app, you would inject a patient repository/service
                 return .run { [state] send in
                     do {
-                        // Simulate saving patient
-                        try await Task.sleep(for: .seconds(1))
-                        await send(.patientSaveResponse(.success(())))
+                        let patient = try patientRepository.createPatient(
+                            firstName: state.firstName,
+                            lastName: state.lastName,
+                            dateOfBirth: state.dateOfBirth,
+                            gender: state.gender.isEmpty ? nil : state.gender,
+                            bloodType: state.bloodType.isEmpty ? nil : state.bloodType,
+                            emergencyContactName: state.emergencyContactName.isEmpty ? nil : state.emergencyContactName,
+                            emergencyContactPhone: state.emergencyContactPhone.isEmpty ? nil : state.emergencyContactPhone,
+                            notes: state.notes.isEmpty ? nil : state.notes,
+                            isActive: true
+                        )
+                        await send(.patientSaveResponse(.success(patient)))
                     } catch {
-                        await send(.patientSaveResponse(.failure(error)))
+                        let patientError = error as? PatientError ?? .unknown(error.localizedDescription)
+                        await send(.patientSaveResponse(.failure(patientError)))
                     }
                 }
                 
-            case let .patientSaveResponse(.success):
+            case let .patientSaveResponse(.success(patient)):
                 state.isLoading = false
-                return .run { _ in await self.dismiss() }
+                return .send(.delegate(.patientCreated(patient)))
                 
             case let .patientSaveResponse(.failure(error)):
                 state.isLoading = false
-                state.errorMessage = error.localizedDescription
+                state.alert = alertForError(error)
                 return .none
                 
-            case .dismiss:
-                return .run { _ in await self.dismiss() }
+            case .alert(.presented(.confirmDismiss)):
+                return .send(.delegate(.dismiss))
+                
+            case .alert(.presented(.retryAction)):
+                return .send(.savePatient)
+                
+            default:
+                return .none
             }
+        }
+        .ifLet(\.$alert, action: \.alert)
+    }
+    
+    private func alertForError(_ error: PatientError) -> AlertState<Action.Alert> {
+        switch error {
+        case .duplicatePatient:
+            return AlertState(
+                title: TextState("Duplicate Patient"),
+                message: TextState("A patient with this name and date of birth already exists."),
+                buttons: [
+                    ButtonState(role: .cancel) {
+                        TextState("Cancel")
+                    },
+                    ButtonState(action: .retryAction) {
+                        TextState("Try Again")
+                    }
+                ]
+            )
+            
+        case .invalidData(let message):
+            return AlertState(
+                title: TextState("Invalid Data"),
+                message: TextState(message),
+                buttons: [
+                    ButtonState(role: .cancel) {
+                        TextState("OK")
+                    }
+                ]
+            )
+            
+        case .networkError:
+            return AlertState(
+                title: TextState("Network Error"),
+                message: TextState("Unable to save patient. Please check your internet connection and try again."),
+                buttons: [
+                    ButtonState(role: .cancel) {
+                        TextState("Cancel")
+                    },
+                    ButtonState(action: .retryAction) {
+                        TextState("Retry")
+                    }
+                ]
+            )
+            
+        case .databaseError:
+            return AlertState(
+                title: TextState("Database Error"),
+                message: TextState("Unable to save patient to local database. Please try again."),
+                buttons: [
+                    ButtonState(role: .cancel) {
+                        TextState("Cancel")
+                    },
+                    ButtonState(action: .retryAction) {
+                        TextState("Retry")
+                    }
+                ]
+            )
+            
+        case .unknown(let message):
+            return AlertState(
+                title: TextState("Error"),
+                message: TextState(message),
+                buttons: [
+                    ButtonState(role: .cancel) {
+                        TextState("Cancel")
+                    },
+                    ButtonState(action: .retryAction) {
+                        TextState("Try Again")
+                    }
+                ]
+            )
+        }
+    }}
+
+// MARK: - Patient Error Types
+
+enum PatientError: LocalizedError, Equatable {
+    case duplicatePatient
+    case invalidData(String)
+    case networkError
+    case databaseError
+    case unknown(String)
+    
+    var errorDescription: String? {
+        switch self {
+        case .duplicatePatient:
+            return "A patient with this information already exists"
+        case .invalidData(let message):
+            return "Invalid data: \(message)"
+        case .networkError:
+            return "Network connection error"
+        case .databaseError:
+            return "Database error occurred"
+        case .unknown(let message):
+            return message
         }
     }
 }

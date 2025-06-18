@@ -1,5 +1,5 @@
 //
-//  DataRepository.swift
+//  PatientRepository.swift
 //  Walnut
 //
 //  Created by Mayank Gandhi on 07/06/25.
@@ -8,26 +8,36 @@
 import CoreData
 import Foundation
 import Combine
+import Dependencies
 
 // MARK: - Data Repository Protocol
-protocol DataRepositoryProtocol {
-    func createPatient(firstName: String, lastName: String, dateOfBirth: Date?) -> Patient
-    func fetchPatients() -> [Patient]
-    func fetchActivePatients() -> [Patient]
-    func deletePatient(_ patient: Patient)
+protocol PatientRepositoryProtocol {
     
-    func createLabResult(for patient: Patient, testName: String, date: Date) -> LabResult
-    func fetchLabResults(for patient: Patient) -> [LabResult]
-    func fetchRecentLabResults(limit: Int) -> [LabResult]
+    func createPatient(
+        firstName: String,
+        lastName: String,
+        dateOfBirth: Date?,
+        gender: String?,
+        bloodType: String?,
+        emergencyContactName: String?,
+        emergencyContactPhone: String?,
+        notes: String?,
+        isActive: Bool
+    ) throws -> Patient
     
-    func createDocument(fileName: String, fileURL: URL, for patient: Patient?) -> Document
-    func fetchDocuments(for patient: Patient) -> [Document]
+    func fetchPatients() throws -> [Patient]
+    func fetchActivePatients() throws -> [Patient]
     
-    func save()
+    func searchPatients(query: String) throws -> [Patient]
+    
+    func deletePatient(_ patient: Patient) throws
 }
 
 // MARK: - Core Data Repository Implementation
-class CoreDataRepository: DataRepositoryProtocol, ObservableObject {
+class PatientRepository: PatientRepositoryProtocol, ObservableObject {
+    
+    static let shared = PatientRepository()
+    
     private let persistenceController: PersistenceController
     private var cancellables = Set<AnyCancellable>()
     
@@ -35,7 +45,7 @@ class CoreDataRepository: DataRepositoryProtocol, ObservableObject {
         persistenceController.container.viewContext
     }
     
-    init(persistenceController: PersistenceController = .shared) {
+    private init(persistenceController: PersistenceController = .shared) {
         self.persistenceController = persistenceController
         
         // Listen for context changes
@@ -48,281 +58,157 @@ class CoreDataRepository: DataRepositoryProtocol, ObservableObject {
     
     // MARK: - Patient Operations
     
-    func createPatient(firstName: String, lastName: String, dateOfBirth: Date? = nil) -> Patient {
-        let patient = Patient(context: viewContext)
-        patient.id = UUID()
-        patient.firstName = firstName
-        patient.lastName = lastName
-        patient.dateOfBirth = dateOfBirth
-        patient.isActive = true
-        patient.createdAt = Date()
-        patient.updatedAt = Date()
-        save()
-        return patient
-    }
-    
-    func fetchPatients() -> [Patient] {
-        return viewContext.fetch(Patient.self, sortDescriptors: [
-            NSSortDescriptor(keyPath: \Patient.lastName, ascending: true),
-            NSSortDescriptor(keyPath: \Patient.firstName, ascending: true)
-        ])
-    }
-    
-    func fetchActivePatients() -> [Patient] {
-        let predicate = NSPredicate(format: "isActive == %@", NSNumber(value: true))
-        return viewContext.fetch(Patient.self, predicate: predicate, sortDescriptors: [
-            NSSortDescriptor(keyPath: \Patient.lastName, ascending: true)
-        ])
-    }
-    
-    func updatePatient(_ patient: Patient) {
-        patient.updatedAt = Date()
-        save()
-    }
-    
-    func deletePatient(_ patient: Patient) {
-        viewContext.delete(patient)
-        save()
-    }
-    
-    // MARK: - Lab Result Operations
-    
-    func createLabResult(for patient: Patient, testName: String, date: Date = Date()) -> LabResult {
-        let labResult = LabResult(context: viewContext)
-        labResult.id = UUID()
-        labResult.testName = testName
-        labResult.patient = patient
-        labResult.resultDate = date
-        labResult.status = "pending" // Default status
-        labResult.createdAt = Date()
-        labResult.updatedAt = Date()
-        save()
-        return labResult
-    }
-    
-    func fetchLabResults(for patient: Patient) -> [LabResult] {
-        let predicate = NSPredicate(format: "patient == %@", patient)
-        return viewContext.fetch(LabResult.self, predicate: predicate, sortDescriptors: [
-            NSSortDescriptor(keyPath: \LabResult.resultDate, ascending: false)
-        ])
-    }
-    
-    func fetchRecentLabResults(limit: Int = 10) -> [LabResult] {
-        let request = NSFetchRequest<LabResult>(entityName: "LabResult")
-        request.sortDescriptors = [NSSortDescriptor(keyPath: \LabResult.resultDate, ascending: false)]
-        request.fetchLimit = limit
+    func createPatient(
+        firstName: String,
+        lastName: String,
+        dateOfBirth: Date? = nil,
+        gender: String? = nil,
+        bloodType: String? = nil,
+        emergencyContactName: String? = nil,
+        emergencyContactPhone: String? = nil,
+        notes: String? = nil,
+        isActive: Bool = true
+    ) throws -> Patient {
+        
+        // Validate input data
+        let trimmedFirstName = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedLastName = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !trimmedFirstName.isEmpty else {
+            throw PatientError.invalidData("First name cannot be empty")
+        }
+        
+        guard !trimmedLastName.isEmpty else {
+            throw PatientError.invalidData("Last name cannot be empty")
+        }
+        
+        // Check for duplicate patient
+        if let dateOfBirth = dateOfBirth {
+            let duplicateCheck = try checkForDuplicatePatient(
+                firstName: trimmedFirstName,
+                lastName: trimmedLastName,
+                dateOfBirth: dateOfBirth
+            )
+            
+            if duplicateCheck {
+                throw PatientError.duplicatePatient
+            }
+        }
+        
+        // Validate blood type if provided
+        if let bloodType = bloodType, !bloodType.isEmpty {
+            let validBloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+            if !validBloodTypes.contains(bloodType) {
+                throw PatientError.invalidData("Invalid blood type")
+            }
+        }
+        
+        // Validate phone number format if provided
+        if let phone = emergencyContactPhone, !phone.isEmpty {
+            if !isValidPhoneNumber(phone) {
+                throw PatientError.invalidData("Invalid phone number format")
+            }
+        }
         
         do {
-            return try viewContext.fetch(request)
+            let patient = Patient(context: viewContext)
+            patient.id = UUID()
+            patient.firstName = trimmedFirstName
+            patient.lastName = trimmedLastName
+            patient.dateOfBirth = dateOfBirth
+            patient.gender = gender
+            patient.bloodType = bloodType
+            patient.emergencyContactName = emergencyContactName
+            patient.emergencyContactPhone = emergencyContactPhone
+            patient.notes = notes
+            patient.isActive = isActive
+            patient.createdAt = Date()
+            patient.updatedAt = Date()
+            
+            try save()
+            return patient
+            
+        } catch let error as NSError {
+            if error.domain == NSCocoaErrorDomain {
+                throw PatientError.databaseError
+            } else {
+                throw PatientError.unknown(error.localizedDescription)
+            }
+        }
+    }
+    
+    func fetchPatients() throws -> [Patient] {
+        do {
+            return viewContext.fetch(Patient.self, sortDescriptors: [
+                NSSortDescriptor(keyPath: \Patient.lastName, ascending: true),
+                NSSortDescriptor(keyPath: \Patient.firstName, ascending: true)
+            ])
         } catch {
-            print("Error fetching recent lab results: \(error)")
-            return []
+            throw PatientError.databaseError
         }
     }
     
-    func updateLabResult(_ labResult: LabResult) {
-        labResult.updatedAt = Date()
-        save()
-    }
-    
-    func deleteLabResult(_ labResult: LabResult) {
-        viewContext.delete(labResult)
-        save()
-    }
-    
-    // MARK: - Test Result Operations
-    
-    func createTestResult(for labResult: LabResult, markerName: String, value: String, unit: String? = nil) -> TestResult {
-        let testResult = TestResult(context: viewContext)
-        testResult.id = UUID()
-        testResult.markerName = markerName
-        testResult.value = value
-        testResult.unit = unit
-        testResult.labResult = labResult
-        testResult.patient = labResult.patient! // Required relationship
-        testResult.createdAt = Date()
-        testResult.updatedAt = Date()
-        
-        // Try to parse numeric value if possible
-        if let numericValue = Double(value) {
-            testResult.numericValue = numericValue
+    func fetchActivePatients() throws -> [Patient] {
+        do {
+            let predicate = NSPredicate(format: "isActive == %@", NSNumber(value: true))
+            return viewContext.fetch(Patient.self, predicate: predicate, sortDescriptors: [
+                NSSortDescriptor(keyPath: \Patient.lastName, ascending: true)
+            ])
+        } catch {
+            throw PatientError.databaseError
         }
-        
-        save()
-        return testResult
     }
     
-    func fetchTestResults(for labResult: LabResult) -> [TestResult] {
-        let predicate = NSPredicate(format: "labResult == %@", labResult)
-        return viewContext.fetch(TestResult.self, predicate: predicate, sortDescriptors: [
-            NSSortDescriptor(keyPath: \TestResult.markerName, ascending: true)
-        ])
-    }
-    
-    func fetchTestResults(for patient: Patient, markerName: String) -> [TestResult] {
-        let predicate = NSPredicate(format: "patient == %@ AND markerName == %@", patient, markerName)
-        return viewContext.fetch(TestResult.self, predicate: predicate, sortDescriptors: [
-            NSSortDescriptor(keyPath: \TestResult.createdAt, ascending: false)
-        ])
-    }
-    
-    // MARK: - Document Operations
-    
-    func createDocument(fileName: String, fileURL: URL, for patient: Patient? = nil) -> Document {
-        let document = Document(context: viewContext)
-        document.id = UUID()
-        document.fileName = fileName
-        document.fileURL = fileURL
-        document.patient = patient
-        document.createdAt = Date()
-        document.updatedAt = Date()
-        document.uploadDate = Date()
-        
-        // Detect document type from file extension
-        document.documentType = fileURL.pathExtension.lowercased()
-        
-        // Set file size
-        if let attributes = try? FileManager.default.attributesOfItem(atPath: fileURL.path),
-           let fileSize = attributes[.size] as? Int64 {
-            document.fileSize = fileSize
+    func updatePatient(_ patient: Patient) throws {
+        do {
+            patient.updatedAt = Date()
+            try save()
+        } catch {
+            throw PatientError.databaseError
         }
+    }
+    
+    func deletePatient(_ patient: Patient) throws {
+        do {
+            viewContext.delete(patient)
+            try save()
+        } catch {
+            throw PatientError.databaseError
+        }
+    }
+    
+    func searchPatients(query: String) throws -> [Patient] {
+        do {
+            let predicate = NSPredicate(format: "firstName CONTAINS[cd] %@ OR lastName CONTAINS[cd] %@", query, query)
+            return viewContext.fetch(Patient.self, predicate: predicate, sortDescriptors: [
+                NSSortDescriptor(keyPath: \Patient.lastName, ascending: true)
+            ])
+        } catch {
+            throw PatientError.databaseError
+        }
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func checkForDuplicatePatient(firstName: String, lastName: String, dateOfBirth: Date) throws -> Bool {
+        let predicate = NSPredicate(
+            format: "firstName ==[cd] %@ AND lastName ==[cd] %@ AND dateOfBirth == %@",
+            firstName, lastName, dateOfBirth as NSDate
+        )
         
-        save()
-        return document
+        do {
+            let existingPatients = viewContext.fetch(Patient.self, predicate: predicate)
+            return !existingPatients.isEmpty
+        } catch {
+            throw PatientError.databaseError
+        }
     }
     
-    func fetchDocuments(for patient: Patient) -> [Document] {
-        let predicate = NSPredicate(format: "patient == %@", patient)
-        return viewContext.fetch(Document.self, predicate: predicate, sortDescriptors: [
-            NSSortDescriptor(keyPath: \Document.uploadDate, ascending: false)
-        ])
+    private func isValidPhoneNumber(_ phoneNumber: String) -> Bool {
+        let phoneRegex = "^[\\+]?[1-9]?[0-9]{7,12}$"
+        let phoneTest = NSPredicate(format:"SELF MATCHES %@", phoneRegex)
+        return phoneTest.evaluate(with: phoneNumber.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "-", with: ""))
     }
-    
-    func fetchAllDocuments() -> [Document] {
-        return viewContext.fetch(Document.self, sortDescriptors: [
-            NSSortDescriptor(keyPath: \Document.uploadDate, ascending: false)
-        ])
-    }
-    
-    func fetchUnassignedDocuments() -> [Document] {
-        let predicate = NSPredicate(format: "patient == nil")
-        return viewContext.fetch(Document.self, predicate: predicate, sortDescriptors: [
-            NSSortDescriptor(keyPath: \Document.uploadDate, ascending: false)
-        ])
-    }
-    
-    func updateDocument(_ document: Document) {
-        document.updatedAt = Date()
-        save()
-    }
-    
-    func deleteDocument(_ document: Document) {
-        viewContext.delete(document)
-        save()
-    }
-    
-    // MARK: - Medical Record Operations
-    
-    func createMedicalRecord(title: String, for patient: Patient, recordType: String? = nil) -> MedicalRecord {
-        let record = MedicalRecord(context: viewContext)
-        record.id = UUID()
-        record.title = title
-        record.patient = patient
-        record.recordType = recordType
-        record.createdAt = Date()
-        record.updatedAt = Date()
-        save()
-        return record
-    }
-    
-    func fetchMedicalRecords(for patient: Patient) -> [MedicalRecord] {
-        let predicate = NSPredicate(format: "patient == %@", patient)
-        return viewContext.fetch(MedicalRecord.self, predicate: predicate, sortDescriptors: [
-            NSSortDescriptor(keyPath: \MedicalRecord.dateRecorded, ascending: false),
-            NSSortDescriptor(keyPath: \MedicalRecord.createdAt, ascending: false)
-        ])
-    }
-    
-    func fetchMedicalRecords(ofType recordType: String) -> [MedicalRecord] {
-        let predicate = NSPredicate(format: "recordType == %@", recordType)
-        return viewContext.fetch(MedicalRecord.self, predicate: predicate, sortDescriptors: [
-            NSSortDescriptor(keyPath: \MedicalRecord.dateRecorded, ascending: false),
-            NSSortDescriptor(keyPath: \MedicalRecord.createdAt, ascending: false)
-        ])
-    }
-    
-    func updateMedicalRecord(_ record: MedicalRecord) {
-        record.updatedAt = Date()
-        save()
-    }
-    
-    func deleteMedicalRecord(_ record: MedicalRecord) {
-        viewContext.delete(record)
-        save()
-    }
-    
-    // MARK: - Tag Operations
-    
-    func createTag(name: String, color: String = "#007AFF") -> Tag {
-        let tag = Tag(context: viewContext)
-        tag.id = UUID()
-        tag.name = name
-        tag.color = color
-        tag.createdAt = Date()
-        save()
-        return tag
-    }
-    
-    func fetchTags() -> [Tag] {
-        return viewContext.fetch(Tag.self, sortDescriptors: [
-            NSSortDescriptor(keyPath: \Tag.name, ascending: true)
-        ])
-    }
-    
-    func fetchTag(withName name: String) -> Tag? {
-        let predicate = NSPredicate(format: "name == %@", name)
-        return viewContext.fetch(Tag.self, predicate: predicate).first
-    }
-    
-    func deleteTag(_ tag: Tag) {
-        viewContext.delete(tag)
-        save()
-    }
-    
-    func addTag(_ tag: Tag, to document: Document) {
-        document.addToTags(tag)
-        save()
-    }
-    
-    func removeTag(_ tag: Tag, from document: Document) {
-        document.removeFromTags(tag)
-        save()
-    }
-    
-    // MARK: - Search Operations
-    
-    func searchPatients(query: String) -> [Patient] {
-        let predicate = NSPredicate(format: "firstName CONTAINS[cd] %@ OR lastName CONTAINS[cd] %@", query, query)
-        return viewContext.fetch(Patient.self, predicate: predicate, sortDescriptors: [
-            NSSortDescriptor(keyPath: \Patient.lastName, ascending: true)
-        ])
-    }
-    
-    func searchDocuments(query: String) -> [Document] {
-        let predicate = NSPredicate(format: "fileName CONTAINS[cd] %@", query)
-        return viewContext.fetch(Document.self, predicate: predicate, sortDescriptors: [
-            NSSortDescriptor(keyPath: \Document.uploadDate, ascending: false)
-        ])
-    }
-    
-    func searchLabResults(query: String) -> [LabResult] {
-        let predicate = NSPredicate(format: "testName CONTAINS[cd] %@ OR labName CONTAINS[cd] %@", query, query)
-        return viewContext.fetch(LabResult.self, predicate: predicate, sortDescriptors: [
-            NSSortDescriptor(keyPath: \LabResult.resultDate, ascending: false)
-        ])
-    }
-    
-    // MARK: - Analytics Operations
     
     func getPatientCount() -> Int {
         return viewContext.count(Patient.self)
@@ -331,23 +217,6 @@ class CoreDataRepository: DataRepositoryProtocol, ObservableObject {
     func getActivePatientCount() -> Int {
         let predicate = NSPredicate(format: "isActive == %@", NSNumber(value: true))
         return viewContext.count(Patient.self, predicate: predicate)
-    }
-    
-    func getLabResultCount(for patient: Patient) -> Int {
-        let predicate = NSPredicate(format: "patient == %@", patient)
-        return viewContext.count(LabResult.self, predicate: predicate)
-    }
-    
-    func getDocumentCount(for patient: Patient) -> Int {
-        let predicate = NSPredicate(format: "patient == %@", patient)
-        return viewContext.count(Document.self, predicate: predicate)
-    }
-    
-    func getAbnormalLabResults() -> [LabResult] {
-        let predicate = NSPredicate(format: "status == %@ OR status == %@", "abnormal", "critical")
-        return viewContext.fetch(LabResult.self, predicate: predicate, sortDescriptors: [
-            NSSortDescriptor(keyPath: \LabResult.resultDate, ascending: false)
-        ])
     }
     
     // MARK: - Batch Operations
@@ -368,15 +237,21 @@ class CoreDataRepository: DataRepositoryProtocol, ObservableObject {
                 
                 try context.save()
             } catch {
-                throw error
+                throw PatientError.databaseError
             }
         }
     }
     
     // MARK: - Core Data Operations
     
-    func save() {
-        viewContext.saveWithErrorHandling()
+    private func save() throws {
+        do {
+            if viewContext.hasChanges {
+                try viewContext.save()
+            }
+        } catch let error as NSError {
+            throw PatientError.databaseError
+        }
     }
     
     func refresh(_ object: NSManagedObject) {
@@ -394,7 +269,16 @@ class CoreDataRepository: DataRepositoryProtocol, ObservableObject {
     }
 }
 
-// MARK: - Repository Dependency Injection
-extension CoreDataRepository {
-    static let shared = CoreDataRepository()
+// MARK: - Dependency Values
+extension PatientRepository: DependencyKey {
+    public static var liveValue: PatientRepository {
+        PatientRepository()
+    }
+}
+
+extension DependencyValues {
+    var patientRepository: PatientRepository {
+        get { self[PatientRepository.self] }
+        set { self[PatientRepository.self] = newValue }
+    }
 }

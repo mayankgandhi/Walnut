@@ -7,8 +7,9 @@
       "layers" : [
         {
           "blend-mode" : "normal",
-          "fill" : "none",
-          "glass" : false,
+          "fill" : "automatic",
+          "glass" : true,
+          "hidden" : false,
           "image-name" : "walnut-2.png",
           "name" : "walnut-2",
           "opacity" : 1,
@@ -21,7 +22,7 @@
           }
         },
         {
-          "blend-mode" : "lighten",
+          "blend-mode" : "normal",
           "glass" : true,
           "image-name" : "hospital.png",
           "name" : "hospital",
@@ -32,6 +33,15 @@
               -182.6953125
             ]
           }
+        },
+        {
+          "blend-mode" : "darken",
+          "fill" : {
+            "solid" : "extended-srgb:0.00000,0.47843,1.00000,1.00000"
+          },
+          "glass" : true,
+          "image-name" : "rm218batch4-ning-24.jpg",
+          "name" : "rm218batch4-ning-24"
         }
       ],
       "shadow" : {

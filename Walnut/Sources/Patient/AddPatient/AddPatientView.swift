@@ -20,7 +20,6 @@ struct AddPatientView: View {
                     personalInfoSection
                     medicalInfoSection
                     emergencyContactSection
-                    insuranceSection
                     notesSection
                 }
                 .padding(.horizontal, 20)
@@ -31,7 +30,12 @@ struct AddPatientView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
-                        store.send(.dismiss)
+                        // Check if form has been modified before dismissing
+                        if hasFormData {
+                            store.send(.alert(.presented(.confirmDismiss)))
+                        } else {
+                            store.send(.delegate(.dismiss))
+                        }
                     }
                     .foregroundColor(.textSecondary)
                 }
@@ -50,13 +54,7 @@ struct AddPatientView: View {
                     LoadingOverlay()
                 }
             }
-            .alert("Error", isPresented: .constant(store.errorMessage != nil)) {
-                Button("OK") {
-                    store.errorMessage = nil
-                }
-            } message: {
-                Text(store.errorMessage ?? "")
-            }
+            .alert(store: store.scope(state: \.$alert, action: \.alert))
             .sheet(isPresented: $store.isDatePickerPresented) {
                 DatePickerSheet(
                     selectedDate: $store.dateOfBirth,
@@ -64,6 +62,17 @@ struct AddPatientView: View {
                 )
             }
         }
+    }
+    
+    private var hasFormData: Bool {
+        !store.firstName.isEmpty ||
+        !store.lastName.isEmpty ||
+        store.dateOfBirth != nil ||
+        !store.gender.isEmpty ||
+        !store.bloodType.isEmpty ||
+        !store.emergencyContactName.isEmpty ||
+        !store.emergencyContactPhone.isEmpty ||
+        !store.notes.isEmpty
     }
     
     private var headerSection: some View {
@@ -126,12 +135,6 @@ struct AddPatientView: View {
                     options: store.bloodTypeOptions,
                     placeholder: "Select blood type"
                 )
-                
-                WalnutTextField(
-                    title: "Medical Record Number",
-                    text: $store.medicalRecordNumber,
-                    placeholder: "Enter MRN (optional)"
-                )
             }
         }
     }
@@ -155,24 +158,6 @@ struct AddPatientView: View {
         }
     }
     
-    private var insuranceSection: some View {
-        FormSection(title: "Insurance Information", icon: "creditcard.circle") {
-            VStack(spacing: 16) {
-                WalnutTextField(
-                    title: "Insurance Provider",
-                    text: $store.insuranceProvider,
-                    placeholder: "Enter insurance provider"
-                )
-                
-                WalnutTextField(
-                    title: "Policy Number",
-                    text: $store.insurancePolicyNumber,
-                    placeholder: "Enter policy number"
-                )
-            }
-        }
-    }
-    
     private var notesSection: some View {
         FormSection(title: "Additional Notes", icon: "note.text") {
             WalnutTextEditor(
@@ -184,13 +169,6 @@ struct AddPatientView: View {
 }
 
 // MARK: - Supporting Views
-
-
-
-
-
-
-
 struct LoadingOverlay: View {
     var body: some View {
         ZStack {

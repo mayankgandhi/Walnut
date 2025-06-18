@@ -7,14 +7,6 @@
 //
 
 
-//
-//  CloudKitSyncMonitor.swift
-//  Cashew
-//
-//  Created by Mayank Gandhi on 07/05/25.
-//  Copyright © 2025 m. All rights reserved.
-//
-
 import Combine
 import CoreData
 
