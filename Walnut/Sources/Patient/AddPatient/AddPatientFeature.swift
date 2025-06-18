@@ -30,7 +30,8 @@ struct AddPatientFeature {
         var isLoading = false
         
         // TCA Alert State
-        @Presents var alert: AlertState<Action.Alert>?
+        @Presents
+        var alert: AlertState<Action.Alert>?
         
         // Validation
         var isFormValid: Bool {
@@ -55,13 +56,14 @@ struct AddPatientFeature {
         
         case delegate(Delegate)
         
+        case showDismissAlertFormFilled
         enum Alert: Equatable {
             case confirmDismiss
             case retryAction
         }
         
         enum Delegate {
-            case dismiss
+            case dismissAddFlow
             case patientCreated(Patient)
         }
     }
@@ -75,14 +77,14 @@ struct AddPatientFeature {
         Reduce { state, action in
             switch action {
                 
-//            case .dateOfBirthTapped:
-//                state.isDatePickerPresented = true
-//                return .none
-//                
-//            case .dismissDatePicker:
-//                state.isDatePickerPresented = false
-//                return .none
-//                
+            case .dateOfBirthTapped:
+                state.isDatePickerPresented = true
+                return .none
+                
+            case .dismissDatePicker:
+                state.isDatePickerPresented = false
+                return .none
+                
             case .savePatient:
                 guard state.isFormValid else {
                     state.alert = AlertState(
@@ -127,8 +129,23 @@ struct AddPatientFeature {
                 state.alert = alertForError(error)
                 return .none
                 
+            case .showDismissAlertFormFilled:
+                state.alert = AlertState(
+                    title: TextState("Are you sure?"),
+                    message: TextState("Please fill in all required fields (First Name and Last Name)."),
+                    buttons: [
+                        ButtonState(action: .confirmDismiss) {
+                            TextState("Confirm")
+                        },
+                        ButtonState(role: .cancel) {
+                            TextState("OK")
+                        }
+                    ]
+                )
+                return .none
+                
             case .alert(.presented(.confirmDismiss)):
-                return .send(.delegate(.dismiss))
+                return .send(.delegate(.dismissAddFlow))
                 
             case .alert(.presented(.retryAction)):
                 return .send(.savePatient)

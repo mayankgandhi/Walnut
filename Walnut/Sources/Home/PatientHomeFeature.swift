@@ -17,16 +17,16 @@ struct PatientHomeFeature {
     @ObservableState
     struct State: Equatable {
         var patients: [Patient] = []
-        var selectedPatient: Patient?
+        var selectedPatient: PatientReducer.State?
+        
         var isLoading = false
         var showingPatientSelector = false
         var error: String?
         
         var selectedPatientName: String {
-            guard let patient = selectedPatient else { return "Select Patient" }
+            guard let patient = selectedPatient?.patient else { return "Select Patient" }
             return "\(patient.firstName ?? "") \(patient.lastName ?? "")"
         }
-        
         @Presents var addPatient: AddPatientFeature.State?
     }
     
@@ -43,12 +43,12 @@ struct PatientHomeFeature {
         case showAddPatientFlow
         case patientAdded(Patient)
         
+        case selectedPatient(PatientReducer.Action)
         // Presentation
         case addPatient(PresentationAction<AddPatientFeature.Action>)
     }
     
     // Dependency injection for the repository
-    
     var body: some ReducerOf<Self> {
         BindingReducer()
 
@@ -88,7 +88,7 @@ struct PatientHomeFeature {
                 return .none
                 
             case let .patientSelected(patient):
-                state.selectedPatient = patient
+                state.selectedPatient = PatientReducer.State(patient: patient)
                 state.showingPatientSelector = false
                 return .send(.loadPatientData(patient))
                 
@@ -105,15 +105,27 @@ struct PatientHomeFeature {
                 return .send(.patientSelected(patient))
                 
             case .addPatient(.presented(.delegate(.patientCreated(let patient)))):
+                state.addPatient = nil
                 return .send(.patientAdded(patient))
                 
-            case .addPatient(.presented(.delegate(.dismiss))):
+            case .addPatient(.presented(.delegate(.dismissAddFlow))):
                 state.addPatient = nil
                 return .none
+                
+            case .selectedPatient(.delegate(let action)):
+                switch action {
+                case .dismiss:
+                    state.selectedPatient = nil
+                    return .none
+                }
+                
                 
             default:
                 return .none
             }
+        }
+        .ifLet(\.selectedPatient, action: \.selectedPatient) {
+            PatientReducer()
         }
         .ifLet(\.$addPatient, action: \.addPatient) {
             AddPatientFeature()

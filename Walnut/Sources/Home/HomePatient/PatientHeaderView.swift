@@ -6,7 +6,6 @@
 //  Copyright © 2025 m. All rights reserved.
 //
 
-
 import SwiftUI
 
 struct PatientHeaderView: View {
@@ -122,7 +121,7 @@ struct PatientHeaderView: View {
                 .padding(.vertical, 12)
             }
         }
-        .background(Color.white)
+        .background(Color.walnutSecondaryBackground)
         .cornerRadius(16)
         .shadow(color: .shadowColor.opacity(0.08), radius: 8, x: 0, y: 2)
     }

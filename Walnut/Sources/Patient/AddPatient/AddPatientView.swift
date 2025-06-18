@@ -32,9 +32,9 @@ struct AddPatientView: View {
                     Button("Cancel") {
                         // Check if form has been modified before dismissing
                         if hasFormData {
-                            store.send(.alert(.presented(.confirmDismiss)))
+                            store.send(.showDismissAlertFormFilled)
                         } else {
-                            store.send(.delegate(.dismiss))
+                            store.send(.delegate(.dismissAddFlow))
                         }
                     }
                     .foregroundColor(.textSecondary)

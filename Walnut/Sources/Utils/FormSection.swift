@@ -35,7 +35,7 @@ struct FormSection<Content: View>: View {
             content
         }
         .padding(20)
-        .background(Color.white)
+        .background(Color.walnutSecondaryBackground)
         .cornerRadius(16)
         .shadow(color: .shadowColor.opacity(0.08), radius: 8, x: 0, y: 2)
     }

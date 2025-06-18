@@ -9,18 +9,21 @@
 import SwiftUI
 
 struct PatientSelectorMenu: View {
-    @Binding var selectedPatient: Patient?
+    @State var selectedPatient: Patient?
     let patients: [Patient]
     let placeholder: String
+    var selectedAction: (Patient) -> Void
     
     init(
-        selectedPatient: Binding<Patient?>,
+        selectedPatient: Patient?,
         patients: [Patient],
-        placeholder: String = "Select Patient"
+        placeholder: String = "Select Patient",
+        selectedAction: @escaping (Patient) -> Void
     ) {
-        self._selectedPatient = selectedPatient
+        self.selectedPatient = selectedPatient
         self.patients = patients
         self.placeholder = placeholder
+        self.selectedAction = selectedAction
     }
     
     var body: some View {
@@ -31,7 +34,7 @@ struct PatientSelectorMenu: View {
             } else {
                 ForEach(patients, id: \.id) { patient in
                     Button {
-                        selectedPatient = patient
+                        selectedAction(patient)
                     } label: {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {

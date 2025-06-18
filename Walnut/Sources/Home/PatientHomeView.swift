@@ -13,6 +13,17 @@ import SwiftUI
 struct PatientHomeView: View {
     @Bindable var store: StoreOf<PatientHomeFeature>
     
+    private var selectedPatientBinding: Binding<Patient?> {
+        Binding(
+            get: { store.selectedPatient?.patient },
+            set: { newPatient in
+                if let patient = newPatient {
+                    store.send(.patientSelected(patient))
+                }
+            }
+        )
+    }
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -22,22 +33,15 @@ struct PatientHomeView: View {
                 if store.isLoading {
                     ProgressView("Loading patients...")
                         .foregroundColor(.textSecondary)
-                } else if let selectedPatient = store.selectedPatient {
-                    ScrollView {
-                        LazyVStack(spacing: 20) {
-                            
-                            PatientHeaderView(patient: selectedPatient)
-                            
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 20)
-                    }
+                } else if let selectedPatientStore = store.scope(state: \.selectedPatient, action: \.selectedPatient) {
+                    PatientView(store: selectedPatientStore)
                 }
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    PatientSelectorMenu(selectedPatient: $store.selectedPatient,
-                                        patients: store.patients)
+                    PatientSelector(selectedPatient: selectedPatientBinding,
+                                    patients: store.patients,
+                                    placeholder: "Select Patient")
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -49,7 +53,7 @@ struct PatientHomeView: View {
                             Text("Add Patient")
                                 .font(.system(size: 14, weight: .semibold))
                         }
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.textPrimary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
                         .background(
