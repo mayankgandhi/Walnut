@@ -1,0 +1,53 @@
+{
+  "fill" : {
+    "automatic-gradient" : "extended-srgb:0.00000,0.47843,1.00000,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "blend-mode" : "normal",
+          "fill" : "none",
+          "glass" : false,
+          "image-name" : "walnut-2.png",
+          "name" : "walnut-2",
+          "opacity" : 1,
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              302.4523291186116,
+              308.68500824687516
+            ]
+          }
+        },
+        {
+          "blend-mode" : "lighten",
+          "glass" : true,
+          "image-name" : "hospital.png",
+          "name" : "hospital",
+          "position" : {
+            "scale" : 2,
+            "translation-in-points" : [
+              -174.5,
+              -182.6953125
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
