@@ -7,29 +7,26 @@
 //
 
 import SwiftUI
-
+// MARK: - Date Picker Sheet
 struct DatePickerSheet: View {
     @Binding var selectedDate: Date?
     let onDismiss: () -> Void
-    
     @State private var tempDate = Date()
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 24) {
-                DatePicker(
-                    "Date of Birth",
-                    selection: $tempDate,
-                    in: ...Date(),
-                    displayedComponents: .date
-                )
-                .datePickerStyle(.wheel)
-                .labelsHidden()
-                
-                Spacer()
+            Form {
+                Section {
+                    DatePicker(
+                        "Date of Birth",
+                        selection: $tempDate,
+                        in: ...Date(),
+                        displayedComponents: .date
+                    )
+                    .datePickerStyle(GraphicalDatePickerStyle())
+                }
             }
-            .padding()
-            .navigationTitle("Date of Birth")
+            .navigationTitle("Select Date")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -48,7 +45,9 @@ struct DatePickerSheet: View {
             }
         }
         .onAppear {
-            tempDate = selectedDate ?? Date()
+            if let date = selectedDate {
+                tempDate = date
+            }
         }
     }
 }

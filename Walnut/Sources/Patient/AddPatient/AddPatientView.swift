@@ -14,37 +14,30 @@ struct AddPatientView: View {
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 24) {
-                    headerSection
-                    personalInfoSection
-                    medicalInfoSection
-                    emergencyContactSection
-                    notesSection
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
+            Form {
+                headerSection
+                personalInfoSection
+                medicalInfoSection
+                emergencyContactSection
+                notesSection
             }
-            .background(Color.walnutBackground)
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("New Patient")
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
-                        // Check if form has been modified before dismissing
                         if hasFormData {
                             store.send(.showDismissAlertFormFilled)
                         } else {
                             store.send(.delegate(.dismissAddFlow))
                         }
                     }
-                    .foregroundColor(.textSecondary)
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
                         store.send(.savePatient)
                     }
-                    .foregroundColor(store.isFormValid ? .healthBlue : .textSecondary)
                     .fontWeight(.semibold)
                     .disabled(!store.isFormValid || store.isLoading)
                 }
@@ -76,94 +69,88 @@ struct AddPatientView: View {
     }
     
     private var headerSection: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "person.badge.plus")
-                .font(.system(size: 48))
-                .foregroundColor(.healthBlue)
-            
-            Text("Add New Patient")
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.textPrimary)
-            
-            Text("Enter patient information to create a new profile")
-                .font(.subheadline)
-                .foregroundColor(.textSecondary)
-                .multilineTextAlignment(.center)
+        Section {
+            VStack(spacing: 12) {
+                Image(systemName: "person.badge.plus")
+                    .font(.system(size: 56))
+                    .foregroundColor(.accentColor)
+                    .frame(maxWidth: .infinity)
+                
+                Text("Enter patient information to create a new profile")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+            }
+            .padding(.vertical, 20)
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets())
         }
-        .padding(.top, 8)
     }
     
     private var personalInfoSection: some View {
-        FormSection(title: "Personal Information", icon: "person.circle") {
-            VStack(spacing: 16) {
-                HStack(spacing: 12) {
-                    WalnutTextField(
-                        title: "First Name",
-                        text: $store.firstName,
-                        placeholder: "Enter first name"
-                    )
-                    
-                    WalnutTextField(
-                        title: "Last Name",
-                        text: $store.lastName,
-                        placeholder: "Enter last name"
-                    )
+        Section("Personal Information") {
+            HStack {
+                TextField("First Name", text: $store.firstName)
+                Divider()
+                TextField("Last Name", text: $store.lastName)
+            }
+            
+            Button(action: { store.send(.dateOfBirthTapped) }) {
+                HStack {
+                    Text("Date of Birth")
+                        .foregroundColor(.primary)
+                    Spacer()
+                    Text(store.dateOfBirth.map {
+                        DateFormatter.localizedString(from: $0, dateStyle: .medium, timeStyle: .none)
+                    } ?? "Select")
+                    .foregroundColor(store.dateOfBirth != nil ? .primary : .secondary)
                 }
-                
-                DateOfBirthField(
-                    selectedDate: store.dateOfBirth,
-                    onTap: { store.send(.dateOfBirthTapped) }
-                )
-                
-                PickerField(
-                    title: "Gender",
-                    selection: $store.gender,
-                    options: store.genderOptions,
-                    placeholder: "Select gender"
-                )
+            }
+            
+            Picker("Gender", selection: $store.gender) {
+                Text("Select Gender").tag("")
+                ForEach(store.genderOptions, id: \.self) { option in
+                    Text(option).tag(option)
+                }
             }
         }
     }
     
     private var medicalInfoSection: some View {
-        FormSection(title: "Medical Information", icon: "cross.circle") {
-            VStack(spacing: 16) {
-                PickerField(
-                    title: "Blood Type",
-                    selection: $store.bloodType,
-                    options: store.bloodTypeOptions,
-                    placeholder: "Select blood type"
-                )
+        Section("Medical Information") {
+            Picker("Blood Type", selection: $store.bloodType) {
+                Text("Select Blood Type").tag("")
+                ForEach(store.bloodTypeOptions, id: \.self) { option in
+                    Text(option).tag(option)
+                }
             }
         }
     }
     
     private var emergencyContactSection: some View {
-        FormSection(title: "Emergency Contact", icon: "phone.circle") {
-            VStack(spacing: 16) {
-                WalnutTextField(
-                    title: "Contact Name",
-                    text: $store.emergencyContactName,
-                    placeholder: "Enter contact name"
-                )
-                
-                WalnutTextField(
-                    title: "Phone Number",
-                    text: $store.emergencyContactPhone,
-                    placeholder: "Enter phone number",
-                    keyboardType: .phonePad
-                )
-            }
+        Section("Emergency Contact") {
+            TextField("Contact Name", text: $store.emergencyContactName)
+            
+            TextField("Phone Number", text: $store.emergencyContactPhone)
+                .keyboardType(.phonePad)
         }
     }
     
     private var notesSection: some View {
-        FormSection(title: "Additional Notes", icon: "note.text") {
-            WalnutTextEditor(
-                text: $store.notes,
-                placeholder: "Enter any additional notes or medical history..."
-            )
+        Section("Additional Notes") {
+            ZStack(alignment: .topLeading) {
+                if store.notes.isEmpty {
+                    Text("Enter any additional notes or medical history...")
+                        .foregroundColor(.secondary)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 5)
+                }
+                
+                TextEditor(text: $store.notes)
+                    .frame(minHeight: 100)
+                    .padding(.horizontal, -5)
+            }
         }
     }
 }
@@ -177,21 +164,24 @@ struct LoadingOverlay: View {
             
             VStack(spacing: 16) {
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .healthBlue))
+                    .progressViewStyle(CircularProgressViewStyle())
                     .scaleEffect(1.5)
                 
                 Text("Saving Patient...")
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(.textPrimary)
             }
-            .padding(24)
-            .background(Color.white)
-            .cornerRadius(16)
-            .shadow(color: .shadowColor.opacity(0.2), radius: 10, x: 0, y: 4)
+            .padding(32)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 5)
+            )
         }
     }
 }
+
+
 
 // MARK: - Preview
 
