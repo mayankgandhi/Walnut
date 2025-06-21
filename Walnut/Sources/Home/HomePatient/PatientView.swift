@@ -17,7 +17,7 @@ struct PatientView: View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 PatientHeaderView(patient: store.patient)
-                PatientDeleteButton(store: store.scope(state: \.delete, action: \.delete))
+//                PatientDeleteButton(store: store.scope(state: \.delete, action: \.delete))
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 20)

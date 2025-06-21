@@ -47,23 +47,11 @@ struct PatientHomeView: View {
                     Button {
                         store.send(.showAddPatientFlow)
                     } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "plus")
-                                .font(.system(size: 14, weight: .semibold))
-                            Text("Add Patient")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .foregroundStyle(Color.textPrimary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.healthBlue)
-                        )
+                        Image(systemName: "person.badge.plus")
+                            .font(.system(size: 20, weight: .semibold))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.automatic)
                 }
-
             }
             .sheet(item: $store.scope(state: \.addPatient, action: \.addPatient)) { addPatientStore in
                 AddPatientView(store: addPatientStore)

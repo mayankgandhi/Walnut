@@ -1,5 +1,34 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23788.4" systemVersion="24F74" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="CalendarEvent" representedClassName="CalendarEvent" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="startDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="location" optional="YES" attributeType="String"/>
+        <attribute name="notes" optional="YES" attributeType="String"/>
+        <attribute name="eventType" optional="YES" attributeType="String"/> <!-- appointment, test, follow-up, procedure, etc. -->
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="patient" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Patient" inverseName="calendarEvents" inverseEntity="Patient"/>
+        <relationship name="medicalCase" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MedicalCase" inverseName="calendarEvents" inverseEntity="MedicalCase"/>
+        <relationship name="document" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Document" inverseName="calendarEvent" inverseEntity="Document"/>
+        <relationship name="labResult" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="LabResult" inverseName="calendarEvent" inverseEntity="LabResult"/>
+        <relationship name="medicalRecord" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MedicalRecord" inverseName="calendarEvent" inverseEntity="MedicalRecord"/>
+    </entity>
+    <entity name="MedicalCase" representedClassName="MedicalCase" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="notes" optional="YES" attributeType="String"/>
+        <attribute name="treatmentPlan" optional="YES" attributeType="String"/>
+        <attribute name="followUpRequired" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="patient" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Patient" inverseName="medicalCases" inverseEntity="Patient"/>
+        <relationship name="labResults" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="LabResult" inverseName="medicalCase" inverseEntity="LabResult"/>
+        <relationship name="medicalRecords" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="MedicalRecord" inverseName="medicalCase" inverseEntity="MedicalRecord"/>
+        <relationship name="documents" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Document" inverseName="medicalCase" inverseEntity="Document"/>
+        <relationship name="calendarEvents" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="CalendarEvent" inverseName="medicalCase" inverseEntity="CalendarEvent"/>
+    </entity>
     <entity name="Document" representedClassName="Document" syncable="YES" codeGenerationType="class">
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="documentDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
@@ -16,6 +45,8 @@
         <relationship name="medicalRecords" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="MedicalRecord" inverseName="document" inverseEntity="MedicalRecord"/>
         <relationship name="patient" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Patient" inverseName="documents" inverseEntity="Patient"/>
         <relationship name="tags" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Tag" inverseName="documents" inverseEntity="Tag"/>
+        <relationship name="medicalCase" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MedicalCase" inverseName="documents" inverseEntity="MedicalCase"/>
+        <relationship name="calendarEvent" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="CalendarEvent" inverseName="document" inverseEntity="CalendarEvent"/>
     </entity>
     <entity name="LabResult" representedClassName="LabResult" syncable="YES" codeGenerationType="class">
         <attribute name="category" optional="YES" attributeType="String"/>
@@ -30,6 +61,8 @@
         <relationship name="medicalRecord" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MedicalRecord" inverseName="labResults" inverseEntity="MedicalRecord"/>
         <relationship name="patient" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Patient" inverseName="labResults" inverseEntity="Patient"/>
         <relationship name="testResults" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="TestResult" inverseName="labResult" inverseEntity="TestResult"/>
+        <relationship name="medicalCase" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MedicalCase" inverseName="labResults" inverseEntity="MedicalCase"/>
+        <relationship name="calendarEvent" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="CalendarEvent" inverseName="labResult" inverseEntity="CalendarEvent"/>
     </entity>
     <entity name="MedicalRecord" representedClassName="MedicalRecord" syncable="YES" codeGenerationType="class">
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
@@ -44,6 +77,8 @@
         <relationship name="document" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Document" inverseName="medicalRecords" inverseEntity="Document"/>
         <relationship name="labResults" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="LabResult" inverseName="medicalRecord" inverseEntity="LabResult"/>
         <relationship name="patient" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Patient" inverseName="medicalRecords" inverseEntity="Patient"/>
+        <relationship name="medicalCase" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MedicalCase" inverseName="medicalRecords" inverseEntity="MedicalCase"/>
+        <relationship name="calendarEvent" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="CalendarEvent" inverseName="medicalRecord" inverseEntity="CalendarEvent"/>
     </entity>
     <entity name="Patient" representedClassName="Patient" syncable="YES" codeGenerationType="class">
         <attribute name="bloodType" optional="YES" attributeType="String"/>
@@ -60,8 +95,10 @@
         <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="documents" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Document" inverseName="patient" inverseEntity="Document"/>
         <relationship name="labResults" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="LabResult" inverseName="patient" inverseEntity="LabResult"/>
-        <relationship name="medicalRecords" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="MedicalRecord" inverseName="patient" inverseEntity="MedicalRecord"/>
+        <relationship name="medicalRecords" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="MedicalRecord" inverseName="patient" inverseEntity="Patient"/>
         <relationship name="testResults" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="TestResult" inverseName="patient" inverseEntity="TestResult"/>
+        <relationship name="medicalCases" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="MedicalCase" inverseName="patient" inverseEntity="MedicalCase"/>
+        <relationship name="calendarEvents" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="CalendarEvent" inverseName="patient" inverseEntity="CalendarEvent"/>
     </entity>
     <entity name="Tag" representedClassName="Tag" syncable="YES" codeGenerationType="class">
         <attribute name="color" optional="YES" attributeType="String"/>
