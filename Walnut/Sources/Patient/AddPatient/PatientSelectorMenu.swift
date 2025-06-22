@@ -30,7 +30,7 @@ struct PatientSelectorMenu: View {
         Menu {
             if patients.isEmpty {
                 Text("No patients available")
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
             } else {
                 ForEach(patients, id: \.id) { patient in
                     Button {

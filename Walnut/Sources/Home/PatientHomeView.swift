@@ -27,8 +27,7 @@ struct PatientHomeView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color.walnutBackground
-                    .ignoresSafeArea()
+                
                 
                 if store.isLoading {
                     ProgressView("Loading patients...")

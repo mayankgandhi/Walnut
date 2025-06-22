@@ -10,7 +10,6 @@ import SwiftUI
 extension Color {
     // Brand Colors
     static let walnutBrown = Color("WalnutBrown")
-    static let walnutBackground = Color("WalnutBackground")
     static let walnutSecondaryBackground = Color("WalnutSecondaryBackground")
     
     // Health Colors
@@ -22,11 +21,6 @@ extension Color {
     static let labNormal = Color("LabResultNormal")
     static let labWarning = Color("LabResultWarning")
     static let labCritical = Color("LabResultCritical")
-    
-    // Text Colors
-    static let textPrimary = Color("TextPrimary")
-    static let textSecondary = Color("TextSecondary")
-    static let textTertiary = Color("TextTertiary")
     
     // UI Elements
     static let borderColor = Color("BorderColor")

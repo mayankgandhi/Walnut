@@ -17,7 +17,7 @@ struct PatientHomeFeature {
     @ObservableState
     struct State: Equatable {
         var patients: [Patient] = []
-        var selectedPatient: PatientReducer.State?
+        var selectedPatient: PatientFeature.State?
         
         var isLoading = false
         var showingPatientSelector = false
@@ -43,7 +43,7 @@ struct PatientHomeFeature {
         case showAddPatientFlow
         case patientAdded(Patient)
         
-        case selectedPatient(PatientReducer.Action)
+        case selectedPatient(PatientFeature.Action)
         // Presentation
         case addPatient(PresentationAction<AddPatientFeature.Action>)
     }
@@ -88,7 +88,7 @@ struct PatientHomeFeature {
                 return .none
                 
             case let .patientSelected(patient):
-                state.selectedPatient = PatientReducer.State(patient: patient)
+                state.selectedPatient = PatientFeature.State(patient: patient)
                 state.showingPatientSelector = false
                 return .send(.loadPatientData(patient))
                 
@@ -112,12 +112,12 @@ struct PatientHomeFeature {
                 state.addPatient = nil
                 return .none
                 
-            case .selectedPatient(.delegate(let action)):
-                switch action {
-                case .dismiss:
-                    state.selectedPatient = nil
-                    return .none
-                }
+//            case .selectedPatient(.delegate(let action)):
+//                switch action {
+//                case .dismiss:
+//                    state.selectedPatient = nil
+//                    return .none
+//                }
                 
                 
             default:
@@ -125,7 +125,7 @@ struct PatientHomeFeature {
             }
         }
         .ifLet(\.selectedPatient, action: \.selectedPatient) {
-            PatientReducer()
+            PatientFeature()
         }
         .ifLet(\.$addPatient, action: \.addPatient) {
             AddPatientFeature()
