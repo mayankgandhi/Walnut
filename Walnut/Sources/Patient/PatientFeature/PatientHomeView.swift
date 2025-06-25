@@ -26,9 +26,7 @@ struct PatientHomeView: View {
     
     var body: some View {
         NavigationView {
-            ZStack {
-                
-                
+            ZStack {                
                 if store.isLoading {
                     ProgressView("Loading patients...")
                         .foregroundColor(.textSecondary)
