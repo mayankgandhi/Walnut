@@ -48,12 +48,7 @@ struct AddPatientView: View {
                 }
             }
             .alert(store: store.scope(state: \.$alert, action: \.alert))
-            .sheet(isPresented: $store.isDatePickerPresented) {
-                DatePickerSheet(
-                    selectedDate: $store.dateOfBirth,
-                    onDismiss: { store.send(.dismissDatePicker) }
-                )
-            }
+            
         }
     }
     

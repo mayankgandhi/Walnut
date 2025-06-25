@@ -75,6 +75,7 @@ let project = Project(
             ],
             resources: [
                 "Resources/**/**",
+                "Resources/AppIcon.icon/*/**",
                 "Sources/WalnutModels.xcdatamodeld"
             ],
             entitlements: .file(path: .relativeToRoot("Walnut/Walnut.entitlements")),

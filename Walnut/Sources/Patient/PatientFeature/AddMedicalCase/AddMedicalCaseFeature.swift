@@ -58,21 +58,7 @@ struct AddMedicalCaseFeature {
                 state.isLoading = true
                 state.validationError = nil
                 
-                return .run { [state] send in
-                    do {
-                        @Dependency(\.medicalCaseService) var medicalCaseService
-                        let newCase = try await medicalCaseService.createMedicalCase(
-                            patientID: state.patientID,
-                            title: state.title.trimmingCharacters(in: .whitespacesAndNewlines),
-                            notes: state.notes.isEmpty ? nil : state.notes,
-                            treatmentPlan: state.treatmentPlan.isEmpty ? nil : state.treatmentPlan,
-                            followUpRequired: state.followUpRequired
-                        )
-                        await send(.caseSaved(newCase))
-                    } catch {
-                        await send(.saveError(error.localizedDescription))
-                    }
-                }
+                return .none
                 
             case let .caseSaved(medicalCase):
                 state.isLoading = false

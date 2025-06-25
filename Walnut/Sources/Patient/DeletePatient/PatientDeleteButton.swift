@@ -18,7 +18,7 @@ struct PatientDeleteButton: View {
         VStack(spacing: 24) {
             // Visual separator
             Rectangle()
-                .fill(Color.borderColor.opacity(0.3))
+                .fill(Color.gray)
                 .frame(height: 1)
                 .padding(.horizontal, 20)
             
@@ -43,9 +43,9 @@ struct PatientDeleteButton: View {
                 .padding(.vertical, 14)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(store.isDeleting ? Color.textSecondary : Color.labCritical)
+                        .fill(store.isDeleting ? Color.secondary : Color.red)
                         .shadow(
-                            color: Color.shadowColor.opacity(0.15),
+                            color: Color.gray.opacity(0.15),
                             radius: 4,
                             x: 0,
                             y: 2
@@ -59,7 +59,7 @@ struct PatientDeleteButton: View {
             // Warning text
             Text("This action cannot be undone. All patient data including medical records and lab results will be permanently deleted.")
                 .font(.caption)
-                .foregroundColor(.textSecondary)
+                .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
         }

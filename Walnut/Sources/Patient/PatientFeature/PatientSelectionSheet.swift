@@ -43,25 +43,8 @@ struct PatientSelector: View {
                 .tag(patient as Patient?)
             }
         } label: {
-            HStack(spacing: 6) {
-                Image(systemName: selectedPatient != nil ? "person.circle.fill" : "person.circle")
-                    .font(.system(size: 14, weight: .semibold))
-                
-                Text(selectedPatient?.fullName ?? "Patient")
-                    .font(.system(size: 14, weight: .semibold))
-                    .lineLimit(1)
-                
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 10, weight: .semibold))
-            }
-            .foregroundStyle(.white)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(selectedPatient != nil ? Color.healthGreen : Color.healthBlue)
-            )
+            Label(selectedPatient?.fullName ?? "Patient",
+                  systemImage: "chevron.up.chevron.down")
         }
-        .pickerStyle(.menu)
     }
 }

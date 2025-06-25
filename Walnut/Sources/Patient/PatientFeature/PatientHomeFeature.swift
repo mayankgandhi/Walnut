@@ -112,14 +112,6 @@ struct PatientHomeFeature {
                 state.addPatient = nil
                 return .none
                 
-//            case .selectedPatient(.delegate(let action)):
-//                switch action {
-//                case .dismiss:
-//                    state.selectedPatient = nil
-//                    return .none
-//                }
-                
-                
             default:
                 return .none
             }

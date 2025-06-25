@@ -29,13 +29,13 @@ struct PatientHomeView: View {
             ZStack {                
                 if store.isLoading {
                     ProgressView("Loading patients...")
-                        .foregroundColor(.textSecondary)
+                        .foregroundColor(.secondary)
                 } else if let selectedPatientStore = store.scope(state: \.selectedPatient, action: \.selectedPatient) {
                     PatientView(store: selectedPatientStore)
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .principal) {
                     PatientSelector(selectedPatient: selectedPatientBinding,
                                     patients: store.patients,
                                     placeholder: "Select Patient")
