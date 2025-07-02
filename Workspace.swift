@@ -8,8 +8,9 @@
 @preconcurrency import ProjectDescription
 
 let workspace = Workspace(
-    name: "Walnut",
+    name: "WalnutApp",
     projects: [
         "Walnut",
+        "Walnut-Playground"
     ]
 )

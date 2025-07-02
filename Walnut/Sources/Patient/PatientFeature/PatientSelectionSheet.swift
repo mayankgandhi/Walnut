@@ -7,15 +7,6 @@
 //
 
 import SwiftUI
-//
-//  PatientSelectionSheet.swift
-//  Walnut
-//
-//  Created by Mayank Gandhi on 19/06/25.
-//  Copyright © 2025 m. All rights reserved.
-//
-
-import SwiftUI
 
 struct PatientSelector: View {
     @Binding var selectedPatient: Patient?

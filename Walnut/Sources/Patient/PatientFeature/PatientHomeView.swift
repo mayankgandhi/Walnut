@@ -1,5 +1,5 @@
 //
-//  PatientHomeView.swift
+//  PatientView.swift
 //  Walnut
 //
 //  Created by Mayank Gandhi on 07/06/25.
@@ -10,7 +10,7 @@ import ComposableArchitecture
 import SwiftUI
 
 // MARK: - Patient Home View
-struct PatientHomeView: View {
+struct PatientView: View {
     @Bindable var store: StoreOf<PatientHomeFeature>
     
     private var selectedPatientBinding: Binding<Patient?> {
