@@ -35,7 +35,7 @@ struct MedicalCaseListItem: View {
             // Specialty and type tags
             HStack(spacing: 8) {
                 // Specialty tag
-                Text(medicalCase.specialty)
+                Text(medicalCase.specialty.rawValue)
                     .font(.caption)
                     .fontWeight(.medium)
                     .padding(.horizontal, 8)
@@ -45,13 +45,13 @@ struct MedicalCaseListItem: View {
                     .cornerRadius(12)
                 
                 // Case type tag
-                Text(medicalCase.type.capitalized)
+                Text(medicalCase.type.displayName)
                     .font(.caption)
                     .fontWeight(.medium)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(caseTypeColor.opacity(0.1))
-                    .foregroundColor(caseTypeColor)
+                    .background(medicalCase.type.backgroundColor)
+                    .foregroundColor(medicalCase.type.foregroundColor)
                     .cornerRadius(12)
                 
                 Spacer()
@@ -81,27 +81,7 @@ struct MedicalCaseListItem: View {
     }
     
     // MARK: - Computed Properties
-    
-    private var caseTypeColor: Color {
-        switch medicalCase.type.lowercased() {
-        case "surgery":
-            return .red
-        case "immunisation":
-            return .green
-        case "health-checkup":
-            return .blue
-        case "consultation":
-            return .purple
-        case "follow-up":
-            return .orange
-        case "treatment":
-            return .indigo
-        case "diagnosis":
-            return .teal
-        default:
-            return .gray
-        }
-    }
+
     
     // MARK: - Helper Methods
     

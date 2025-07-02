@@ -10,23 +10,30 @@ import SwiftUI
 
 struct MedicalCasesView: View {
     
-    let medicalCases: [String: [MedicalCaseData]]
+    let medicalCases: [MedicalCaseData]
+    @State var medicalCase: MedicalCaseData? = nil
     
     init(medicalCases: [MedicalCaseData]) {
-        self.medicalCases = medicalCases.groupCasesBySpecialty()
+        self.medicalCases = medicalCases
     }
     
     var body: some View {
         List {
-            ForEach(medicalCases.keys.sorted(), id: \.self) { specialty in
-                Section(header: Text(specialty)) {
-                    ForEach(medicalCases[specialty] ?? []) { medicalCase in
-                        MedicalCaseListItem(medicalCase: medicalCase)
-                    }
+            ForEach(medicalCases) { medicalCase in
+                Button {
+                    self.medicalCase = medicalCase
+                } label: {
+                    MedicalCaseListItem(medicalCase: medicalCase)
                 }
             }
         }
         .navigationTitle("Medical Cases")
+        .navigationDestination(item: $medicalCase) { medicalCase in
+            MedicalCaseDetailView(
+                medicalCase: medicalCase,
+                documents: DocumentData.documents
+            )
+        }
     }
     
 }
@@ -35,12 +42,3 @@ struct MedicalCasesView: View {
     MedicalCasesView(medicalCases: MedicalCaseData.sampleCases)
 }
 
-extension Array where Element == MedicalCaseData {
-    func groupCasesBySpecialty() -> [String: [MedicalCaseData]] {
-        let grouped = Dictionary(grouping: self, by: { $0.specialty })
-        
-        return grouped.mapValues { casesInSpecialty in
-            casesInSpecialty.sorted { $0.createdAt > $1.createdAt }
-        }
-    }
-}

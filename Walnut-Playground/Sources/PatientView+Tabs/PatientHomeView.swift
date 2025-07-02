@@ -24,12 +24,9 @@ struct PatientHomeView: View {
             .navigationTitle("Home")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    
                     Button("Edit", systemImage: "ellipsis") {
                         print("Edit Button Tapped")
                     }
-                    
-                    
                 }
             }
         }
