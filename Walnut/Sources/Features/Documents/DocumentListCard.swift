@@ -11,7 +11,7 @@ import PDFKit
 
 // MARK: - Document List Card
 struct DocumentListCard: View {
-    let document: DocumentData
+    let document: Document
     @State private var thumbnailImage: UIImage?
     
     var body: some View {

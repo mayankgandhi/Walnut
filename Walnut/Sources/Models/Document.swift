@@ -1,5 +1,5 @@
 //
-//  DocumentData.swift
+//  Document.swift
 //  Walnut-Playground
 //
 //  Created by Mayank Gandhi on 02/07/25.
@@ -9,7 +9,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-struct DocumentData: Identifiable, Hashable {
+struct Document: Identifiable, Hashable {
     let id: UUID
     let fileName: String
     let fileURL: URL
@@ -19,8 +19,8 @@ struct DocumentData: Identifiable, Hashable {
     let fileSize: Int64
     var extractionError: String?
     
-    static let documents: [DocumentData] = [
-        DocumentData(
+    static let documents: [Document] = [
+        Document(
             id: UUID(),
             fileName: "Blood_Test_Results_2024.pdf",
             fileURL: URL(string: "file://")!,
@@ -29,7 +29,7 @@ struct DocumentData: Identifiable, Hashable {
             uploadDate: Date().addingTimeInterval(-86400 * 2),
             fileSize: 245760
         ),
-        DocumentData(
+        Document(
             id: UUID(),
             fileName: "Prescription_Cardiology.pdf",
             fileURL: URL(string: "file://")!,
@@ -38,7 +38,7 @@ struct DocumentData: Identifiable, Hashable {
             uploadDate: Date().addingTimeInterval(-86400 * 1),
             fileSize: 123456
         ),
-        DocumentData(
+        Document(
             id: UUID(),
             fileName: "Chest_XRay_Report.jpg",
             fileURL: URL(string: "file://")!,

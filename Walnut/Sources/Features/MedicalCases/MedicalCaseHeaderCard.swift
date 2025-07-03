@@ -9,7 +9,8 @@
 import SwiftUI
 
 struct MedicalCaseHeaderCard: View {
-    let medicalCase: MedicalCaseData
+    
+    let medicalCase: MedicalCase
     @State private var isExpanded = false
     
     var body: some View {

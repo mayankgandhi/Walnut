@@ -10,7 +10,7 @@ import SwiftUI
 
 // MARK: - Document Detail View
 struct DocumentDetailView: View {
-    let document: DocumentData
+    let document: Document
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {

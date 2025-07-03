@@ -10,7 +10,7 @@
 import SwiftUI
 
 struct MedicalCaseListItem: View {
-    let medicalCase: MedicalCaseData
+    let medicalCase: MedicalCase
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -102,7 +102,7 @@ struct MedicalCaseListItem: View {
 struct MedicalCaseListItem_Previews: PreviewProvider {
     static var previews: some View {
         List {
-            ForEach(MedicalCaseData.sampleCases.prefix(3), id: \.id) { medicalCase in
+            ForEach(MedicalCase.sampleCases.prefix(3), id: \.id) { medicalCase in
                 MedicalCaseListItem(medicalCase: medicalCase)
             }
         }

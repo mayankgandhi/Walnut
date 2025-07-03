@@ -1,5 +1,5 @@
 //
-//  DocumentData.swift
+//  Document.swift
 //  Walnut-Playground
 //
 //  Created by Mayank Gandhi on 02/07/25.
@@ -13,11 +13,11 @@ import PDFKit
 
 // MARK: - Documents Section
 struct DocumentsSection: View {
-    let documents: [DocumentData]
-    @State private var selectedDocument: DocumentData?
+    let documents: [Document]
+    @State private var selectedDocument: Document?
     @State private var searchText = ""
     
-    private var filteredDocuments: [DocumentData] {
+    private var filteredDocuments: [Document] {
         if searchText.isEmpty {
             return documents
         } else {
@@ -119,19 +119,12 @@ struct DocumentsSectionHeader: View {
     }
 }
 
-
-
-
-
-
-
-
 // MARK: - Preview
 struct DocumentsSection_Previews: PreviewProvider {
     static var previews: some View {
         ScrollView {
             VStack(spacing: 24) {
-                DocumentsSection(documents: DocumentData.documents)
+                DocumentsSection(documents: Document.documents)
                 DocumentsSection(documents: [])
             }
             .padding(.vertical)

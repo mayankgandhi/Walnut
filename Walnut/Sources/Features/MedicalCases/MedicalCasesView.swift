@@ -10,10 +10,10 @@ import SwiftUI
 
 struct MedicalCasesView: View {
     
-    let medicalCases: [MedicalCaseData]
-    @State var medicalCase: MedicalCaseData? = nil
+    let medicalCases: [MedicalCase]
+    @State var medicalCase: MedicalCase? = nil
     
-    init(medicalCases: [MedicalCaseData]) {
+    init(medicalCases: [MedicalCase]) {
         self.medicalCases = medicalCases
     }
     
@@ -31,7 +31,7 @@ struct MedicalCasesView: View {
         .navigationDestination(item: $medicalCase) { medicalCase in
             MedicalCaseDetailView(
                 medicalCase: medicalCase,
-                documents: DocumentData.documents
+                documents: Document.documents
             )
         }
     }
@@ -39,6 +39,6 @@ struct MedicalCasesView: View {
 }
 
 #Preview {
-    MedicalCasesView(medicalCases: MedicalCaseData.sampleCases)
+    MedicalCasesView(medicalCases: MedicalCase.sampleCases)
 }
 

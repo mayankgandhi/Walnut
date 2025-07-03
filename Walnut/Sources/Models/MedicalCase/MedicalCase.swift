@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct MedicalCaseData: Hashable, Identifiable {
+struct MedicalCase: Hashable, Identifiable {
     let id: UUID
     let title: String
     let notes: String
@@ -19,9 +19,9 @@ struct MedicalCaseData: Hashable, Identifiable {
     let createdAt: Date
     let updatedAt: Date
     
-    static let sampleCases: [MedicalCaseData] = [
+    static let sampleCases: [MedicalCase] = [
         // Cardiology Cases
-        MedicalCaseData(
+        MedicalCase(
             id: UUID(),
             title: "Hypertension Management",
             notes: "Patient presents with elevated blood pressure readings over the past 3 months. Family history of cardiovascular disease. Currently experiencing mild headaches and occasional dizziness. Diagnosed with Stage 1 hypertension. Started on ACE inhibitor therapy with good response. Regular follow-ups show gradual improvement.",
@@ -34,7 +34,7 @@ struct MedicalCaseData: Hashable, Identifiable {
         ),
         
         // Endocrinology Cases
-        MedicalCaseData(
+        MedicalCase(
             id: UUID(),
             title: "Type 2 Diabetes Management",
             notes: "Initial diagnosis following elevated HbA1c (8.2%) and fasting glucose (156 mg/dL). Patient reports increased thirst, frequent urination, and fatigue over past 2 months. BMI: 32.4. Started on Metformin with diabetes education. Ongoing monitoring and treatment adjustments as needed.",
@@ -50,7 +50,7 @@ struct MedicalCaseData: Hashable, Identifiable {
         
        
         // Health Check-up
-        MedicalCaseData(
+        MedicalCase(
             id: UUID(),
             title: "Annual Physical Exam",
             notes: "Routine annual physical for 45-year-old male. Overall good health. Mild elevation in cholesterol levels. No acute complaints. Last colonoscopy 3 years ago.",
@@ -65,7 +65,7 @@ struct MedicalCaseData: Hashable, Identifiable {
        
         
         // Surgery - Ophthalmology
-        MedicalCaseData(
+        MedicalCase(
             id: UUID(),
             title: "Cataract Surgery - Right Eye",
             notes: "Progressive visual impairment in right eye due to mature cataract. Visual acuity 20/80 in affected eye. Patient reports difficulty with night driving and reading. No other ocular pathology noted.",
@@ -78,7 +78,7 @@ struct MedicalCaseData: Hashable, Identifiable {
         ),
         
         // Dermatology Surgery
-        MedicalCaseData(
+        MedicalCase(
             id: UUID(),
             title: "Skin Lesion Excision",
             notes: "Suspicious pigmented lesion on upper back noted during skin screening. Dermoscopy shows irregular borders and color variation. Biopsy recommended to rule out melanoma.",
@@ -91,7 +91,7 @@ struct MedicalCaseData: Hashable, Identifiable {
         ),
         
         // Neurology
-        MedicalCaseData(
+        MedicalCase(
             id: UUID(),
             title: "Chronic Migraine Management",
             notes: "Patient diagnosed with chronic migraine 18 months ago, presenting with 15+ headache days per month. Initial treatment with basic preventive medications showed partial response. Recent escalation in frequency and severity prompted treatment intensification. Comprehensive migraine management plan implemented including lifestyle modifications and advanced preventive therapies.",
@@ -107,24 +107,24 @@ struct MedicalCaseData: Hashable, Identifiable {
 }
 
 // MARK: - Extension for easy access
-extension MedicalCaseData {
-    static func randomCase() -> MedicalCaseData {
+extension MedicalCase {
+    static func randomCase() -> MedicalCase {
         return sampleCases.randomElement()!
     }
     
-    static func recentCases(days: Int = 30) -> [MedicalCaseData] {
+    static func recentCases(days: Int = 30) -> [MedicalCase] {
         let cutoffDate = Date().addingTimeInterval(-TimeInterval(days * 24 * 60 * 60))
         return sampleCases.filter { $0.createdAt >= cutoffDate }
     }
 
-    static func activeCases() -> [MedicalCaseData] {
+    static func activeCases() -> [MedicalCase] {
         return sampleCases.filter { $0.isActive }
     }
 }
 
 
-extension Array where Element == MedicalCaseData {
-    func groupCasesBySpecialty() -> [MedicalSpecialty: [MedicalCaseData]] {
+extension Array where Element == MedicalCase {
+    func groupCasesBySpecialty() -> [MedicalSpecialty: [MedicalCase]] {
         let grouped = Dictionary(grouping: self, by: { $0.specialty })
         
         return grouped.mapValues { casesInSpecialty in

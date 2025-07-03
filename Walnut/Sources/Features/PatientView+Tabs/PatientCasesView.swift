@@ -11,7 +11,7 @@ import SwiftUI
 struct PatientCasesView: View {
         
     var body: some View {
-        MedicalCasesView(medicalCases: MedicalCaseData.sampleCases)
+        MedicalCasesView(medicalCases: MedicalCase.sampleCases)
             .navigationTitle(Text("Patient Cases"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

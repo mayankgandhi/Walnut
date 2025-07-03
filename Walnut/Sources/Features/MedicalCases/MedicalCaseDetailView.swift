@@ -9,8 +9,8 @@
 import SwiftUI
 
 struct MedicalCaseDetailView: View {
-    let medicalCase: MedicalCaseData
-    let documents: [DocumentData]
+    let medicalCase: MedicalCase
+    let documents: [Document]
     
     var body: some View {
         ScrollView {
@@ -31,7 +31,7 @@ struct MedicalCaseDetailView: View {
 
 #Preview(body: {
     MedicalCaseDetailView(
-        medicalCase: MedicalCaseData.randomCase(),
-        documents:  DocumentData.documents
+        medicalCase: MedicalCase.randomCase(),
+        documents:  Document.documents
     )
 })
