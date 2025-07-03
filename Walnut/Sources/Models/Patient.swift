@@ -6,22 +6,44 @@
 //  Copyright © 2025 m. All rights reserved.
 //
 
-
 import Foundation
+import SwiftData
 
-struct Patient: Identifiable, Codable, Hashable {
-    let id: UUID
-    let firstName: String
-    let lastName: String
-    let dateOfBirth: Date
-    let gender: String
-    let bloodType: String
-    let emergencyContactName: String
-    let emergencyContactPhone: String
-    let notes: String
-    let isActive: Bool
-    let createdAt: Date
-    let updatedAt: Date
+@Model
+class Patient: Identifiable {
+    
+    @Attribute(.unique)
+    var id: UUID
+    
+    var firstName: String
+    var lastName: String
+    var dateOfBirth: Date
+    var gender: String
+    var bloodType: String
+    
+    var emergencyContactName: String
+    var emergencyContactPhone: String
+    
+    var notes: String
+    var isActive: Bool
+    
+    var createdAt: Date
+    var updatedAt: Date
+    
+    init(id: UUID, firstName: String, lastName: String, dateOfBirth: Date, gender: String, bloodType: String, emergencyContactName: String, emergencyContactPhone: String, notes: String, isActive: Bool, createdAt: Date, updatedAt: Date) {
+        self.id = id
+        self.firstName = firstName
+        self.lastName = lastName
+        self.dateOfBirth = dateOfBirth
+        self.gender = gender
+        self.bloodType = bloodType
+        self.emergencyContactName = emergencyContactName
+        self.emergencyContactPhone = emergencyContactPhone
+        self.notes = notes
+        self.isActive = isActive
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
     
     // Computed property for full name
     var fullName: String {
@@ -36,7 +58,7 @@ struct Patient: Identifiable, Codable, Hashable {
 
 // MARK: - Sample Data
 extension Patient {
-    static let sampleData: [Patient] = [
+    static var sampleData: [Patient] = [
         Patient(
             id: UUID(),
             firstName: "Sarah",

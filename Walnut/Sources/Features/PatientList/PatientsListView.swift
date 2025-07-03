@@ -7,13 +7,15 @@
 //
 
 import SwiftUI
+import SwiftData
 
 public struct PatientsListView: View {
     
     @State var search: String = ""
-    @State var patients: [Patient] = Patient.sampleData
     @State var selectedPatient: Patient? = nil
     
+    @Query var patients: [Patient]
+    @State var showPatientEditor: Bool = false
     public init() {}
     
     public var body: some View {
@@ -32,14 +34,15 @@ public struct PatientsListView: View {
                 .searchable(text: $search)
                 .navigationTitle("Members")
                 .listStyle(.plain)
-                .onChange(of: search) {
-                    if search == "" {
-                        patients = Patient.sampleData
-                    } else {
-                        patients = Patient.sampleData.filter {
-                            $0.fullName.localizedCaseInsensitiveContains(search)
+                .toolbar {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button("Add Patient", systemImage: "plus") {
+                            showPatientEditor = true
                         }
                     }
+                }
+                .sheet(isPresented: $showPatientEditor) {
+                    PatientEditor()
                 }
             }
         }
