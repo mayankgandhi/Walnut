@@ -9,7 +9,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-// Document Data Model
 struct DocumentData: Identifiable, Hashable {
     let id: UUID
     let fileName: String
