@@ -13,14 +13,15 @@ public struct PatientsListView: View {
     
     @State var search: String = ""
     @State var selectedPatient: Patient? = nil
-    
+    @Environment(\.modelContext) private var modelContext
+
     @Query var patients: [Patient]
     @State var showPatientEditor: Bool = false
     public init() {}
     
     public var body: some View {
         if selectedPatient != nil {
-                PatientView(selectedPatient: $selectedPatient)
+            PatientView(selectedPatient: $selectedPatient)
         } else {
             NavigationStack {
                 List(patients) { patient in

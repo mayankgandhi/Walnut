@@ -228,24 +228,6 @@ struct PatientEditor: View {
     }
 }
 
-// MARK: - Preview Helpers
-extension Patient {
-    static let samplePatient = Patient(
-        id: UUID(),
-        firstName: "John",
-        lastName: "Doe",
-        dateOfBirth: Calendar.current.date(byAdding: .year, value: -35, to: Date()) ?? Date(),
-        gender: "Male",
-        bloodType: "A+",
-        emergencyContactName: "Jane Doe",
-        emergencyContactPhone: "(555) 123-4567",
-        notes: "Patient has mild allergies to penicillin.",
-        isActive: true,
-        createdAt: Date(),
-        updatedAt: Date()
-    )
-}
-
 #Preview("Add Patient") {
     PatientEditor(patient: nil)
         .modelContainer(for: Patient.self, inMemory: true)
