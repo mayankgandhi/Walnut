@@ -13,6 +13,7 @@ public struct PatientsListView: View {
     
     @State var search: String = ""
     @State var selectedPatient: Patient? = nil
+    @State var editPatient: Patient? = nil
     @State var showPatientEditor: Bool = false
     @Environment(\.modelContext) private var modelContext
     
@@ -29,6 +30,20 @@ public struct PatientsListView: View {
                     } label: {
                         PatientListItem(patient: patient)
                             .listRowSeparatorTint(.clear)
+                            .contextMenu {
+                                Button(
+                                    action: { edit(patient) },
+                                    label: { Label("Edit", systemImage: "pencil") }
+                                )
+                                
+                                Divider()
+
+                                Button(
+                                    action: { remove(patient) },
+                                    label: { Label("Remove", systemImage: "trash") }
+                                )
+                                .foregroundStyle(Color.red)
+                            }
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
@@ -45,11 +60,22 @@ public struct PatientsListView: View {
                 .sheet(isPresented: $showPatientEditor) {
                     PatientEditor()
                 }
+                .sheet(item: $editPatient) { patient in
+                    PatientEditor(patient: patient)
+                }
                 .refreshable {
                     try? modelContext.save()
                 }
             }
         }
+    }
+    
+    private func remove(_ patient: Patient) {
+        modelContext.delete(patient)
+    }
+    
+    private func edit(_ patient: Patient) {
+        editPatient = patient
     }
 }
 
