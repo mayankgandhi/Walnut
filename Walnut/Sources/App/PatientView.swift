@@ -27,12 +27,13 @@ struct PatientView: View {
                                     }
                                 }
                             }
+                            .navigationTitle("Home")
                     }
                 }
                 
                 Tab("Cases", systemImage: "document.on.document") {
                     NavigationStack {
-                        MedicalCasesView(medicalCases: MedicalCase.sampleCases)
+                        MedicalCasesView(patient: selectedPatient)
                     }
                 }
                 

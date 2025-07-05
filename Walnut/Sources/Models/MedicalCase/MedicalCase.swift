@@ -156,5 +156,14 @@ extension MedicalCase {
     static func activeCases() -> [MedicalCase] {
         return sampleCases.filter { $0.isActive }
     }
+    
+    static func predicate(
+        patientID: UUID,
+    ) -> Predicate<MedicalCase> {
+        return #Predicate<MedicalCase> { medicalCase in
+            medicalCase.patient.id == patientID
+        }
+    }
 }
+
 

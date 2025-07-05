@@ -17,19 +17,10 @@ struct PatientHomeView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            List {
-                PatientHeaderCard(patient: patient)
-            }
-            .navigationTitle("Home")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Edit", systemImage: "ellipsis") {
-                        print("Edit Button Tapped")
-                    }
-                }
-            }
+        List {
+            PatientHeaderCard(patient: patient)
         }
+        
     }
 }
 

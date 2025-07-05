@@ -7,10 +7,16 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MedicalCasesView: View {
     
-    let medicalCases: [MedicalCase]
+    @Environment(\.modelContext) private var modelContext
+
+    @Query
+    private var medicalCases: [MedicalCase]
+    
+    private let patient: Patient
     
     @State private var selectedCase: MedicalCase? = nil
     @State private var searchText = ""
@@ -18,13 +24,16 @@ struct MedicalCasesView: View {
     @State private var filterType: MedicalCaseType? = nil
     @State private var filterSpecialty: MedicalSpecialty? = nil
     @State private var showActiveOnly = false
-    @State private var showEditView = false
+    @State private var showCreateView = false
     @State private var caseToEdit: MedicalCase? = nil
     @State private var showDeleteAlert = false
     @State private var caseToDelete: MedicalCase? = nil
     
-    init(medicalCases: [MedicalCase]) {
-        self.medicalCases = medicalCases
+    init(patient: Patient) {
+        self.patient = patient
+        self._medicalCases = Query(filter: MedicalCase.predicate(patientID: patient.id),
+                                   sort: \.updatedAt,
+                                   order: .reverse)
     }
     
     // MARK: - Computed Properties
@@ -120,6 +129,9 @@ struct MedicalCasesView: View {
                     documents: Document.documents
                 )
             }
+            .sheet(isPresented: $showCreateView, content: {
+                MedicalCaseEditor(patient: patient)
+            })
             .sheet(item: $caseToEdit) { medicalCase in
                 MedicalCaseEditor(medicalCase: medicalCase, patient: medicalCase.patient)
             }
@@ -141,9 +153,14 @@ struct MedicalCasesView: View {
     
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        ToolbarItemGroup(placement: .topBarTrailing) {
+        ToolbarItemGroup(placement: .secondaryAction) {
             filterMenu
             sortMenu
+        }
+        ToolbarItemGroup(placement: .primaryAction) {
+            Button("Add Medical Case", systemImage: "plus") {
+                showCreateView = true
+            }
         }
     }
     
@@ -296,10 +313,5 @@ enum SortOption: String, CaseIterable {
         case .titleZA: return "textformat.abc"
         }
     }
-}
-
-
-#Preview {
-    MedicalCasesView(medicalCases: MedicalCase.sampleCases)
 }
 
