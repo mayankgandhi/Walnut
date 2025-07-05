@@ -173,23 +173,8 @@ struct MedicalInfoItem: View {
 // Preview
 struct PatientHeaderCard_Previews: PreviewProvider {
     static var previews: some View {
-        PatientHeaderCard(patient: samplePatient)
+        PatientHeaderCard(patient: .samplePatient)
             .previewLayout(.sizeThatFits)
             .padding()
     }
-    
-    static let samplePatient = Patient(
-        id: UUID(),
-        firstName: "Sarah",
-        lastName: "Johnson",
-        dateOfBirth: Calendar.current.date(byAdding: .year, value: -34, to: Date()) ?? Date(),
-        gender: "Female",
-        bloodType: "O+",
-        emergencyContactName: "Michael Johnson",
-        emergencyContactPhone: "+1 (555) 123-4567",
-        notes: "Patient has a history of allergies to penicillin. Regular check-ups recommended.",
-        isActive: true,
-        createdAt: Date(),
-        updatedAt: Date()
-    )
 }

@@ -37,7 +37,7 @@ struct PatientHomeView: View {
 struct PatientHomeView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            PatientHomeView(patient: Patient.sampleData.first!)
+            PatientHomeView(patient: Patient.samplePatient)
         }
     }
 }

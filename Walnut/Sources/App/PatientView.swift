@@ -32,7 +32,7 @@ struct PatientView: View {
                 
                 Tab("Cases", systemImage: "document.on.document") {
                     NavigationStack {
-                        PatientCasesView()
+                        MedicalCasesView(medicalCases: MedicalCase.sampleCases)
                     }
                 }
                 
@@ -56,6 +56,6 @@ struct PatientView: View {
 
 struct PatientView_Previews: PreviewProvider {
     static var previews: some View {
-        PatientView(selectedPatient: .constant(Patient.sampleData.first!))
+        PatientView(selectedPatient: .constant(Patient.samplePatient))
     }
 }

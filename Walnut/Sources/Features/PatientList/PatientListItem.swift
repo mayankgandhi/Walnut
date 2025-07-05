@@ -77,7 +77,7 @@ extension Patient {
 #Preview {
     NavigationView {
         List {
-            ForEach(Patient.sampleData) { patient in
+            ForEach([Patient.samplePatient]) { patient in
                 PatientListItem(patient: patient)
             }
         }

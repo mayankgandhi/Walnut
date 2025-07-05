@@ -9,7 +9,7 @@
 import Foundation
 import SwiftUI
 
-enum MedicalSpecialty: String, CaseIterable, Hashable {
+enum MedicalSpecialty: String, CaseIterable, Hashable, Codable {
     
     case generalPractitioner = "General Practitioner"
     case cardiologist = "Cardiologist"

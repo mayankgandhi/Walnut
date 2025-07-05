@@ -6,106 +6,58 @@
 //  Copyright © 2025 m. All rights reserved.
 //
 
-
 import SwiftUI
 
-struct MedicalCaseListItem: View {
+struct EnhancedMedicalCaseListItem: View {
     let medicalCase: MedicalCase
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Header row with title and status
-            HStack {
-                Text(medicalCase.title)
-                    .font(.headline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
-                    .lineLimit(2)
+            // Header Row
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(medicalCase.title)
+                        .font(.headline)
+                        .lineLimit(2)
+                    
+                    Text(medicalCase.patient.fullName)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
                 
                 Spacer()
                 
-                // Active status indicator
-                if medicalCase.isActive {
-                    Circle()
-                        .fill(Color.green)
-                        .frame(width: 8, height: 8)
+                VStack(alignment: .trailing, spacing: 4) {
+                    StatusBadge(isActive: medicalCase.isActive)
+                    
+                    Text(medicalCase.createdAt.formatted(date: .abbreviated, time: .omitted))
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
                 }
             }
             
-            // Specialty and type tags
+            // Tags Row
             HStack(spacing: 8) {
-                // Specialty tag
-                Text(medicalCase.specialty.rawValue)
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.blue.opacity(0.1))
-                    .foregroundColor(.blue)
-                    .cornerRadius(12)
+                CaseTypeBadge(type: medicalCase.type)
                 
-                // Case type tag
-                Text(medicalCase.type.displayName)
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(medicalCase.type.backgroundColor)
-                    .foregroundColor(medicalCase.type.foregroundColor)
-                    .cornerRadius(12)
+                SpecialtyBadge(specialty: medicalCase.specialty)
                 
                 Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
             }
             
-            // Notes preview
-            Text(medicalCase.notes)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .lineLimit(2)
-                .multilineTextAlignment(.leading)
-            
-            // Footer with dates
-            HStack {
-                Text("Created: \(formattedDate(medicalCase.createdAt))")
+            // Notes Preview
+            if !medicalCase.notes.isEmpty {
+                Text(medicalCase.notes)
                     .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Spacer()
-                
-                Text("Updated: \(relativeDate(medicalCase.updatedAt))")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .padding(.top, 4)
             }
         }
         .padding(.vertical, 4)
-    }
-    
-    // MARK: - Computed Properties
-
-    
-    // MARK: - Helper Methods
-    
-    private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        return formatter.string(from: date)
-    }
-    
-    private func relativeDate(_ date: Date) -> String {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.dateTimeStyle = .named
-        return formatter.localizedString(for: date, relativeTo: Date())
-    }
-}
-
-// MARK: - Preview
-struct MedicalCaseListItem_Previews: PreviewProvider {
-    static var previews: some View {
-        List {
-            ForEach(MedicalCase.sampleCases.prefix(3), id: \.id) { medicalCase in
-                MedicalCaseListItem(medicalCase: medicalCase)
-            }
-        }
-        .previewDisplayName("Medical Case List")
     }
 }

@@ -12,9 +12,11 @@ import SwiftData
 public struct PatientsListView: View {
     
     @State var search: String = ""
+    
     @State var selectedPatient: Patient? = nil
     @State var editPatient: Patient? = nil
     @State var showPatientEditor: Bool = false
+    
     @Environment(\.modelContext) private var modelContext
     
     public init() {}

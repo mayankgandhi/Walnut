@@ -221,7 +221,8 @@ struct PatientEditor: View {
                 notes: notes.trimmingCharacters(in: .whitespacesAndNewlines),
                 isActive: isActive,
                 createdAt: now,
-                updatedAt: now
+                updatedAt: now,
+                medicalCases: []
             )
             modelContext.insert(newPatient)
         }

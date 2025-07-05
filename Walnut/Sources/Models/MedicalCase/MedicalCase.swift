@@ -7,17 +7,51 @@
 //
 
 import Foundation
+import SwiftData
 
-struct MedicalCase: Hashable, Identifiable {
-    let id: UUID
-    let title: String
-    let notes: String
-    let treatmentPlan: String
-    let type: MedicalCaseType // immunisation, health-checkup, surgery, follow-up, treatment, diagnosis
-    let specialty: MedicalSpecialty // Cardiologist, Endocrinologist, etc.
-    let isActive: Bool
-    let createdAt: Date
-    let updatedAt: Date
+@Model
+class MedicalCase: Identifiable {
+    
+    @Attribute(.unique)
+    var id: UUID
+    
+    var title: String
+    var notes: String
+    var treatmentPlan: String
+    var type: MedicalCaseType // immunisation, health-checkup, surgery, follow-up, treatment, diagnosis
+    var specialty: MedicalSpecialty // Cardiologist, Endocrinologist, etc.
+    var isActive: Bool
+    var createdAt: Date
+    var updatedAt: Date
+  
+    var patient: Patient
+    
+    init(id: UUID,
+         title: String,
+         notes: String,
+         treatmentPlan: String,
+         type: MedicalCaseType,
+         specialty: MedicalSpecialty,
+         isActive: Bool,
+         createdAt: Date,
+         updatedAt: Date,
+         patient: Patient) {
+        self.id = id
+        self.title = title
+        self.notes = notes
+        self.treatmentPlan = treatmentPlan
+        self.type = type
+        self.specialty = specialty
+        self.isActive = isActive
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.patient = patient
+    }
+    
+}
+
+// MARK: - Extension for easy access
+extension MedicalCase {
     
     static let sampleCases: [MedicalCase] = [
         // Cardiology Cases
@@ -31,6 +65,7 @@ struct MedicalCase: Hashable, Identifiable {
             isActive: true,
             createdAt: Date().addingTimeInterval(-2_592_000), // 30 days ago
             updatedAt: Date().addingTimeInterval(-86_400), // 1 day ago
+            patient: .samplePatient
         ),
         
         // Endocrinology Cases
@@ -44,11 +79,12 @@ struct MedicalCase: Hashable, Identifiable {
             isActive: false,
             createdAt: Date().addingTimeInterval(-1_296_000), // 15 days ago
             updatedAt: Date().addingTimeInterval(-43_200), // 12 hours ago
+            patient: .samplePatient
         ),
         
         
         
-       
+        
         // Health Check-up
         MedicalCase(
             id: UUID(),
@@ -60,9 +96,10 @@ struct MedicalCase: Hashable, Identifiable {
             isActive: false,
             createdAt: Date().addingTimeInterval(-172_800), // 2 days ago
             updatedAt: Date().addingTimeInterval(-7_200), // 2 hours ago
+            patient: .samplePatient
         ),
-       
-       
+        
+        
         
         // Surgery - Ophthalmology
         MedicalCase(
@@ -75,6 +112,7 @@ struct MedicalCase: Hashable, Identifiable {
             isActive: false,
             createdAt: Date().addingTimeInterval(-1_728_000), // 20 days ago
             updatedAt: Date().addingTimeInterval(-14_400), // 4 hours ago
+            patient: .samplePatient
         ),
         
         // Dermatology Surgery
@@ -88,6 +126,7 @@ struct MedicalCase: Hashable, Identifiable {
             isActive: false,
             createdAt: Date().addingTimeInterval(-518_400), // 6 days ago
             updatedAt: Date().addingTimeInterval(-28_800), // 8 hours ago
+            patient: .samplePatient
         ),
         
         // Neurology
@@ -101,13 +140,10 @@ struct MedicalCase: Hashable, Identifiable {
             isActive: false,
             createdAt: Date().addingTimeInterval(-1_036_800), // 12 days ago
             updatedAt: Date().addingTimeInterval(-7_200), // 2 hours ago
+            patient: .samplePatient
         )
     ]
-
-}
-
-// MARK: - Extension for easy access
-extension MedicalCase {
+    
     static func randomCase() -> MedicalCase {
         return sampleCases.randomElement()!
     }
@@ -122,13 +158,3 @@ extension MedicalCase {
     }
 }
 
-
-extension Array where Element == MedicalCase {
-    func groupCasesBySpecialty() -> [MedicalSpecialty: [MedicalCase]] {
-        let grouped = Dictionary(grouping: self, by: { $0.specialty })
-        
-        return grouped.mapValues { casesInSpecialty in
-            casesInSpecialty.sorted { $0.createdAt > $1.createdAt }
-        }
-    }
-}
