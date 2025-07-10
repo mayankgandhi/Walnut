@@ -13,57 +13,31 @@ import PDFKit
 
 // MARK: - Documents Section
 struct DocumentsSection: View {
-    let documents: [Document]
-    @State private var selectedDocument: Document?
-    @State private var searchText = ""
     
-    private var filteredDocuments: [Document] {
-        if searchText.isEmpty {
-            return documents
-        } else {
-            return documents.filter {
-                $0.fileName.localizedCaseInsensitiveContains(searchText) ||
-                $0.documentType.displayName.localizedCaseInsensitiveContains(searchText)
-            }
-        }
-    }
+    @State var selectedPrescription: Prescription?
+    let medicalCase: MedicalCase
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             // Section Header
             DocumentsSectionHeader(
-                documentCount: documents.count
+                medicalCase: medicalCase,
+                documentCount: medicalCase.prescriptions.count
             )
             
-            // Documents Content
-            if filteredDocuments.isEmpty {
-                if documents.isEmpty {
-                    ContentUnavailableView(
-                        "No Documents",
-                        systemImage: "doc.badge.plus",
-                        description: Text("Add medical documents, prescriptions, and lab results")
-                    )
-                } else {
-                    ContentUnavailableView(
-                        "No documents found",
-                        systemImage: "magnifyingglass",
-                        description: Text("Try adjusting your search terms")
-                    )
-                }
-            } else {
-                LazyVStack(spacing: 12) {
-                    ForEach(filteredDocuments) { document in
-                        DocumentListCard(document: document)
-                            .onTapGesture {
-                                selectedDocument = document
-                            }
-                    }
+            // List
+            LazyVStack(spacing: 12) {
+                ForEach(medicalCase.prescriptions) { prescription in
+                    PrescriptionListItem(prescription: prescription)
+                        .onTapGesture {
+                            selectedPrescription = prescription
+                        }
                 }
             }
         }
         .padding(.horizontal, 16)
-        .sheet(item: $selectedDocument) { document in
-            DocumentDetailView(document: document)
+        .navigationDestination(item: $selectedPrescription) { prescription in
+            PrescriptionDetailView(prescription: prescription)
         }
     }
 }
@@ -72,9 +46,18 @@ struct DocumentsSection: View {
 
 // MARK: - Section Header
 struct DocumentsSectionHeader: View {
-    let documentCount: Int
     
+    let medicalCase: MedicalCase
+    let documentCount: Int
     @State private var showAddDocument = false
+    
+    init(medicalCase: MedicalCase,
+         documentCount: Int,
+         showAddDocument: Bool = false) {
+        self.medicalCase = medicalCase
+        self.documentCount = documentCount
+        self.showAddDocument = showAddDocument
+    }
     
     var body: some View {
         HStack {
@@ -84,7 +67,7 @@ struct DocumentsSectionHeader: View {
                         .font(.title2)
                         .foregroundColor(.blue)
 
-                    Text("Documents")
+                    Text("Prescriptions")
                         .font(.title2)
                         .fontWeight(.bold)
                 }
@@ -96,39 +79,15 @@ struct DocumentsSectionHeader: View {
             
             Spacer()
             
-            Menu {
-                Button {
-                    showAddDocument = true
-                } label: {
-                    Label("Add Document", systemImage: "doc.badge.plus")
-                }
-                
-                Button {
-                    // Add lab result
-                } label: {
-                    Label("Add Lab Result", systemImage: "flask")
-                }
+            Button {
+                showAddDocument = true
             } label: {
-                Label("Add", systemImage: "plus")
+                Label("Add Document", systemImage: "doc.badge.plus")
             }
             
         }
         .sheet(isPresented: $showAddDocument) {
-            DocumentPickerView()
+            DocumentPickerView(medicalCase: medicalCase)
         }
-    }
-}
-
-// MARK: - Preview
-struct DocumentsSection_Previews: PreviewProvider {
-    static var previews: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                DocumentsSection(documents: Document.documents)
-                DocumentsSection(documents: [])
-            }
-            .padding(.vertical)
-        }
-        .background(Color(.systemGroupedBackground))
     }
 }

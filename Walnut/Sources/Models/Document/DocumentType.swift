@@ -1,57 +1,15 @@
 //
-//  Document.swift
-//  Walnut-Playground
+//  DocumentType.swift
+//  Walnut
 //
-//  Created by Mayank Gandhi on 02/07/25.
+//  Created by Mayank Gandhi on 08/07/25.
 //  Copyright © 2025 m. All rights reserved.
 //
 
 import SwiftUI
-import UniformTypeIdentifiers
-
-struct Document: Identifiable, Hashable {
-    let id: UUID
-    let fileName: String
-    let fileURL: URL
-    let documentType: DocumentType
-    let documentDate: Date
-    let uploadDate: Date
-    let fileSize: Int64
-    var extractionError: String?
-    
-    static let documents: [Document] = [
-        Document(
-            id: UUID(),
-            fileName: "Blood_Test_Results_2024.pdf",
-            fileURL: URL(string: "file://")!,
-            documentType: .labResult,
-            documentDate: Date().addingTimeInterval(-86400 * 7),
-            uploadDate: Date().addingTimeInterval(-86400 * 2),
-            fileSize: 245760
-        ),
-        Document(
-            id: UUID(),
-            fileName: "Prescription_Cardiology.pdf",
-            fileURL: URL(string: "file://")!,
-            documentType: .prescription,
-            documentDate: Date().addingTimeInterval(-86400 * 3),
-            uploadDate: Date().addingTimeInterval(-86400 * 1),
-            fileSize: 123456
-        ),
-        Document(
-            id: UUID(),
-            fileName: "Chest_XRay_Report.jpg",
-            fileURL: URL(string: "file://")!,
-            documentType: .imaging,
-            documentDate: Date().addingTimeInterval(-86400 * 14),
-            uploadDate: Date().addingTimeInterval(-86400 * 10),
-            fileSize: 2097152
-        )
-    ]
-}
 
 // MARK: - Document Type Enum
-enum DocumentType: String, CaseIterable {
+enum DocumentType: String, CaseIterable, Codable {
     case prescription
     case labResult = "lab result"
     case bloodWork = "blood work"
@@ -140,10 +98,10 @@ enum DocumentType: String, CaseIterable {
     
     // MARK: - Initializers
     init?(from string: String) {
-        let lowercased = string.lowercased()
+        var lowercased = string.lowercased()
         
         // Try direct raw value match first
-        if let type = DocumentType(rawValue: lowercased) {
+        if var type = DocumentType(rawValue: lowercased) {
             self = type
             return
         }

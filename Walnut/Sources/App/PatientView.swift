@@ -37,11 +37,14 @@ struct PatientView: View {
                     }
                 }
                 
-                Tab("Tests", systemImage: "testtube.2") {
-                    NavigationStack {
-                        TestResultListView()
-                    }
-                }
+//                Tab("Tests", systemImage: "testtube.2") {
+//                    NavigationStack {
+//                        TestResultListView()
+//                    }
+//                }
+            }
+            .tabViewBottomAccessory {
+                DocumentParsingStatusView(viewModel: DocumentParsingViewModel(apiKey: claudeKey))
             }
         } else {
             ContentUnavailableView(

@@ -13,8 +13,7 @@ struct MedicalCasesView: View {
     
     @Environment(\.modelContext) private var modelContext
 
-    @Query
-    private var medicalCases: [MedicalCase]
+    @Query private var medicalCases: [MedicalCase]
     
     private let patient: Patient
     
@@ -125,8 +124,7 @@ struct MedicalCasesView: View {
             }
             .navigationDestination(item: $selectedCase) { medicalCase in
                 MedicalCaseDetailView(
-                    medicalCase: medicalCase,
-                    documents: Document.documents
+                    medicalCase: medicalCase
                 )
             }
             .sheet(isPresented: $showCreateView, content: {

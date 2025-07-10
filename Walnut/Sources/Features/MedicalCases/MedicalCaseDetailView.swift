@@ -10,7 +10,6 @@ import SwiftUI
 
 struct MedicalCaseDetailView: View {
     let medicalCase: MedicalCase
-    let documents: [Document]
     
     var body: some View {
         ScrollView {
@@ -19,7 +18,9 @@ struct MedicalCaseDetailView: View {
                 MedicalCaseHeaderCard(medicalCase: medicalCase)
                     .padding(.horizontal)
                 
-                DocumentsSection(documents: documents)
+                DocumentsSection(
+                    medicalCase: medicalCase
+                )
             }
             .padding(.vertical)
         }
@@ -31,7 +32,6 @@ struct MedicalCaseDetailView: View {
 
 #Preview(body: {
     MedicalCaseDetailView(
-        medicalCase: MedicalCase.randomCase(),
-        documents:  Document.documents
+        medicalCase: MedicalCase.sampleCase
     )
 })

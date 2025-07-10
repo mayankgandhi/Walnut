@@ -10,12 +10,15 @@ import Foundation
 
 struct MedicalRecord: Codable, Identifiable, Hashable {
     let id: UUID
-    let createdAt: Date
     let dateRecorded: Date
+    
     let notes: String
     let providerName: String
     let recordType: String
+    
     let summary: String
     let title: String
+    
+    let createdAt: Date
     let updatedAt: Date
 }

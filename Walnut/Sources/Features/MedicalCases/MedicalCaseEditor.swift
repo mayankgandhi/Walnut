@@ -220,6 +220,6 @@ struct MedicalCaseEditor: View {
 }
 
 #Preview("Edit Medical Case") {
-    MedicalCaseEditor(medicalCase: .sampleCases.first!, patient: .samplePatient)
+    MedicalCaseEditor(medicalCase: .sampleCase, patient: .samplePatient)
         .modelContainer(for: MedicalCase.self, inMemory: true)
 }
