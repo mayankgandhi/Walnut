@@ -19,7 +19,53 @@ final class ClaudeFilesService: ObservableObject {
     
     // MARK: - File Upload
     
-    private func uploadDocument(at url: URL) async throws -> ClaudeFileUploadResponse {
+    func uploadFile(data: Data, fileName: String) async throws -> ClaudeFileUploadResponse {
+        guard let uploadURL = URL(string: "\(baseURL)/files") else {
+            throw ClaudeServiceError.invalidURL
+        }
+        
+        let mimeType = self.mimeType(for: fileName)
+        
+        // Create multipart form data
+        let boundary = UUID().uuidString
+        var request = URLRequest(url: uploadURL)
+        request.httpMethod = "POST"
+        request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
+        request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
+        request.setValue("files-api-2025-04-14", forHTTPHeaderField: "anthropic-beta")
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        
+        let body = createMultipartBody(boundary: boundary, 
+                                     filename: fileName, 
+                                     data: data, 
+                                     mimeType: mimeType)
+        request.httpBody = body
+        
+        do {
+            let (data, response) = try await session.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw ClaudeServiceError.invalidResponse
+            }
+            
+            guard httpResponse.statusCode == 200 else {
+                let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
+                throw ClaudeServiceError.uploadFailed(errorMessage)
+            }
+            
+            let uploadResponse = try JSONDecoder().decode(ClaudeFileUploadResponse.self, from: data)
+            return uploadResponse
+            
+        } catch let error as DecodingError {
+            throw ClaudeServiceError.decodingError(error)
+        } catch let error as ClaudeServiceError {
+            throw error
+        } catch {
+            throw ClaudeServiceError.networkError(error)
+        }
+    }
+    
+    func uploadDocument(at url: URL) async throws -> ClaudeFileUploadResponse {
         guard let uploadURL = URL(string: "\(baseURL)/files") else {
             throw ClaudeServiceError.invalidURL
         }
@@ -102,13 +148,13 @@ final class ClaudeFilesService: ObservableObject {
 
     // MARK: - Document Parsing
     
-    private func parseDocument<T: Codable>(fileId: String, as type: T.Type, structDefinition: String? = nil) async throws -> T {
+    func parseDocument<T: Codable>(fileId: String, as type: T.Type) async throws -> T {
         guard let messageURL = URL(string: "\(baseURL)/messages") else {
             throw ClaudeServiceError.invalidURL
         }
         
         // Create parsing prompt
-        let structDef = structDefinition ?? generateStructDefinition(for: type)
+        let structDef = generateStructDefinition(for: type)
         let prompt = """
         Please analyze this document and extract the information into the following JSON structure. 
         Return ONLY JSON and nothing else:
@@ -182,7 +228,7 @@ final class ClaudeFilesService: ObservableObject {
         }
     }
     
-    // MARK: - Convenience Method
+    // MARK: - Convenience Methods
     
     func uploadAndParseDocument<T: Codable>(
         from url: URL, 
@@ -190,11 +236,11 @@ final class ClaudeFilesService: ObservableObject {
         structDefinition: String? = nil
     ) async throws -> T {
         let fileResponse = try await uploadDocument(at: url)
-        let parsedData = try await parseDocument(fileId: fileResponse.id, as: type, structDefinition: structDefinition)
+        let parsedData = try await parseDocument(fileId: fileResponse.id, as: type)
         try await deleteDocument(fileId: fileResponse.id)
         return parsedData
     }
-    
+
     // MARK: - Helper Methods
     
     private func createMultipartBody(boundary: String, filename: String, data: Data, mimeType: String) -> Data {
@@ -211,6 +257,11 @@ final class ClaudeFilesService: ObservableObject {
     
     private func mimeType(for url: URL) -> String {
         let pathExtension = url.pathExtension.lowercased()
+        return mimeType(for: pathExtension)
+    }
+    
+    private func mimeType(for fileName: String) -> String {
+        let pathExtension = (fileName as NSString).pathExtension.lowercased()
         switch pathExtension {
         case "pdf":
             return "application/pdf"
@@ -229,18 +280,32 @@ final class ClaudeFilesService: ObservableObject {
         case "webp":
             return "image/webp"
         default:
-            return "application/octet-stream"
+            return "application/pdf"
         }
     }
     
     private func generateStructDefinition<T: Codable>(for type: T.Type) -> String {
-        """
+        switch type{
+        case is ParsedPrescription.Type:
+            return """
         Swift prescription parsing model: ParsedPrescription
         ParsedPrescription: dateIssued(Date), doctorName(String?), facilityName(String?), followUpDate(Date?), followUpTests([String]), notes(String?), medications([Medication])
         Medication: id(UUID), name(String), frequency([MedicationSchedule]), numberOfDays(Int), dosage(String?), instructions(String?)
         MedicationSchedule: mealTime(MealTime), timing(MedicationTime?), dosage(String?)
         Enums: MealTime(.breakfast/.lunch/.dinner/.bedtime), MedicationTime(.before/.after)
         """
+        case is ParsedBloodReport.Type:
+            return """
+                    Swift blood report parsing model: ParsedBloodReport
+                    ParsedBloodReport: testName(String), labName(String), category(String), resultDate(Date), notes(String), testResults([ParsedBloodTestResult])
+                    ParsedBloodTestResult: testName(String), value(String), unit(String), referenceRange(String), isAbnormal(Bool)
+                    
+                    Please extract all blood test results from the lab report. The resultDate should be the date when the tests were performed or results were available.
+                    """
+        default:
+            fatalError("Unsupported type \(String(describing: type))")
+        }
+        
     }
 }
 

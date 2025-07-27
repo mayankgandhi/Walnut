@@ -92,7 +92,7 @@ struct MedicalCasesView: View {
     
     var body: some View {
         NavigationStack {
-            List {
+            Group {
                 if filteredAndSortedCases.isEmpty {
                     ContentUnavailableView {
                         Label("No Medical Cases", systemImage: "doc.text.magnifyingglass")
@@ -101,21 +101,23 @@ struct MedicalCasesView: View {
                     }
                     .listRowBackground(Color.clear)
                 } else {
-                    ForEach(filteredAndSortedCases) { medicalCase in
-                        Button {
-                            selectedCase = medicalCase
-                        } label: {
-                            EnhancedMedicalCaseListItem(medicalCase: medicalCase)
-                        }
-                        .buttonStyle(.plain)
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                        .contextMenu {
-                            contextMenuItems(for: medicalCase)
+                    List {
+                        ForEach(filteredAndSortedCases) { medicalCase in
+                            Button {
+                                selectedCase = medicalCase
+                            } label: {
+                                EnhancedMedicalCaseListItem(medicalCase: medicalCase)
+                            }
+                            .buttonStyle(.plain)
+                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                            .contextMenu {
+                                contextMenuItems(for: medicalCase)
+                            }
                         }
                     }
+                    .listStyle(.plain)
                 }
             }
-            .listStyle(.plain)
             .navigationTitle("Medical Cases")
             .navigationBarTitleDisplayMode(.large)
             .searchable(text: $searchText, prompt: "Search cases, patients, or notes")

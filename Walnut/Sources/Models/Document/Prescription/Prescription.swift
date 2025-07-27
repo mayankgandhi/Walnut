@@ -21,7 +21,7 @@ class Prescription {
     var facilityName: String?
     
     var followUpDate: Date?
-    var followUpTests: [String]
+    var followUpTests: [String]?
         
     var notes: String?
     

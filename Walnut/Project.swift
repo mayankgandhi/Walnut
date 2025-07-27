@@ -1,7 +1,5 @@
 import ProjectDescription
 
-import ProjectDescription
-
 let infoPlist: InfoPlist = .extendingDefault(with: [
     "UILaunchStoryboardName": "LaunchScreen.storyboard",
     "UILaunchStoryboardName~ipad": "Launch Screen-iPAD.storyboard",
@@ -33,9 +31,7 @@ let infoPlist: InfoPlist = .extendingDefault(with: [
     "ITSAppUsesNonExemptEncryption": .boolean(false),
     "LSApplicationQueriesSchemes": .array([
     ]),
-    "LSEnvironment": .dictionary([:
-                                    
-                                 ]),
+    "LSEnvironment": .dictionary([:]),
     "NSBonjourServices": .array([
         .string("_Proxyman._tcp"),
     ]),
@@ -43,6 +39,12 @@ let infoPlist: InfoPlist = .extendingDefault(with: [
         .string("processing"),
         .string("remote-notification"),
     ]),
+    "NSAppTransportSecurity": .dictionary(
+        [
+            "NSAllowsArbitraryLoads" : Plist.Value.boolean(true),
+        ]
+    ),
+    "NSLocalNetworkUsageDescription": .string("Atlantis would use Bonjour Service to discover Proxyman app from your local network. Atlantis uses it to transfer the data from your iOS app to Proxyman macOS for debugging purposes."),
 ])
 
 let settings: SettingsDictionary = [
@@ -76,12 +78,11 @@ let project = Project(
             resources: [
                 "Resources/**/**",
                 "Resources/AppIcon.icon/*/**",
-                "Sources/WalnutModels.xcdatamodeld"
             ],
             entitlements: .file(path: .relativeToRoot("Walnut/Walnut.entitlements")),
             dependencies: [
-                .external(name: "ComposableArchitecture"),
                 .external(name: "PostHog"),
+                .external(name: "Atlantis"),
             ],
             settings: .settings(base: settings,
                                 configurations: [
@@ -100,7 +101,9 @@ let project = Project(
                 "Tests/**"
             ],
             resources: [],
-            dependencies: [.target(name: "Walnut")]
+            dependencies: [
+                .target(name: "Walnut")
+            ]
         ),
     ]
 )

@@ -24,8 +24,8 @@ struct DocumentTypeBadge: View {
                 .font(.system(size: 8))
             
             Text(documentType.displayName)
-                .font(.system(size: 9))
-                .fontWeight(.bold)
+                .font(.caption)
+                .fontWeight(.semibold)
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 3)
@@ -38,16 +38,9 @@ struct DocumentTypeBadge: View {
 // MARK: - Preview
 #Preview {
     VStack(spacing: 8) {
-        DocumentTypeBadge(documentType: .prescription)
-        DocumentTypeBadge(documentType: .labResult)
-        DocumentTypeBadge(documentType: .diagnosis)
-        DocumentTypeBadge(documentType: .notes)
-        DocumentTypeBadge(documentType: .imaging)
-        DocumentTypeBadge(documentType: .insurance)
-        DocumentTypeBadge(documentType: .billing)
-        
-        // Backwards compatibility
-        DocumentTypeBadge(documentType: .prescription)
+        ForEach(DocumentType.allCases, id: \.hashValue) {
+            DocumentTypeBadge(documentType: $0)
+        }
     }
     .padding()
 }

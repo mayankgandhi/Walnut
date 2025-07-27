@@ -21,6 +21,10 @@ struct MedicalCaseDetailView: View {
                 DocumentsSection(
                     medicalCase: medicalCase
                 )
+                
+                BloodReportsSection(
+                    medicalCase: medicalCase
+                )
             }
             .padding(.vertical)
         }

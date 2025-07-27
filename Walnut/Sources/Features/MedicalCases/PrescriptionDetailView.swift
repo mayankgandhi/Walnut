@@ -23,7 +23,7 @@ struct PrescriptionDetailView: View {
                     medicationsCard
                     
                     // Follow-up Card
-                    if prescription.followUpDate != nil || !prescription.followUpTests.isEmpty {
+                    if prescription.followUpDate != nil || !(prescription.followUpTests?.isEmpty ?? false) {
                         followUpCard
                     }
                     
@@ -258,14 +258,14 @@ struct PrescriptionDetailView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10))
             }
             
-            if !prescription.followUpTests.isEmpty {
+            if let followUpTests = prescription.followUpTests {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Required Tests")
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .textCase(.uppercase)
                     
-                    ForEach(prescription.followUpTests, id: \.self) { test in
+                    ForEach(followUpTests, id: \.self) { test in
                         HStack {
                             Image(systemName: "checkmark.circle")
                                 .font(.caption)

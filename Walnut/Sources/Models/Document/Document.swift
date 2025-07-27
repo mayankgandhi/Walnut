@@ -82,7 +82,7 @@ extension Document {
             id: UUID(),
             fileName: "Chest_XRay_Report.jpg",
             fileURL: URL(string: "file://")!,
-            documentType: .imaging,
+            documentType: .labResult,
             documentDate: Date().addingTimeInterval(-86400 * 14),
             uploadDate: Date().addingTimeInterval(-86400 * 10),
             fileSize: 2097152

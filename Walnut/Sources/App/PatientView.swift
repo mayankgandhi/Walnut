@@ -14,38 +14,27 @@ struct PatientView: View {
     
     var body: some View {
         if let selectedPatient {
+            
             TabView {
                 Tab("Home", systemImage: "person.crop.circle.fill") {
                     NavigationStack {
-                        PatientHomeView(patient: selectedPatient)
-                            .toolbar {
-                                ToolbarItem(placement: .topBarLeading) {
-                                    Button("Menu", systemImage: "person.3.sequence") {
-                                        withAnimation {
-                                            self.selectedPatient = nil
-                                        }
-                                    }
-                                }
-                            }
+                        PatientHomeView(patient: $selectedPatient)
                             .navigationTitle("Home")
                     }
                 }
-                
                 Tab("Cases", systemImage: "document.on.document") {
                     NavigationStack {
                         MedicalCasesView(patient: selectedPatient)
                     }
                 }
-                
-//                Tab("Tests", systemImage: "testtube.2") {
-//                    NavigationStack {
-//                        TestResultListView()
-//                    }
-//                }
+                Tab("Blood Tests", systemImage: "testtube.2") {
+                    NavigationStack {
+                        BloodTestsView(patient: selectedPatient)
+                    }
+                }
             }
-            .tabViewBottomAccessory {
-                DocumentParsingStatusView(viewModel: DocumentParsingViewModel(apiKey: claudeKey))
-            }
+            DocumentParsingStatusView(viewModel: DocumentParsingViewModel(apiKey: claudeKey))
+            
         } else {
             ContentUnavailableView(
                 "Select a Patient",
