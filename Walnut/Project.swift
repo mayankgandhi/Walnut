@@ -76,11 +76,9 @@ let project = Project(
             resources: [
                 "Resources/**/**",
                 "Resources/AppIcon.icon/*/**",
-                "Sources/WalnutModels.xcdatamodeld"
             ],
             entitlements: .file(path: .relativeToRoot("Walnut/Walnut.entitlements")),
             dependencies: [
-                .external(name: "ComposableArchitecture"),
                 .external(name: "PostHog"),
             ],
             settings: .settings(base: settings,
@@ -100,7 +98,9 @@ let project = Project(
                 "Tests/**"
             ],
             resources: [],
-            dependencies: [.target(name: "Walnut")]
+            dependencies: [
+                .target(name: "Walnut")
+            ]
         ),
     ]
 )

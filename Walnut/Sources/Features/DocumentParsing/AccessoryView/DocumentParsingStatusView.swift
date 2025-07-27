@@ -6,7 +6,6 @@
 //  Copyright © 2025 m. All rights reserved.
 //
 
-
 import SwiftUI
 
 struct DocumentParsingStatusView: View {
