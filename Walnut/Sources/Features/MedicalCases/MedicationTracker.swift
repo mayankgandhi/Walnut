@@ -189,14 +189,14 @@ class MedicationTracker {
         let calendar = Calendar.current
         let currentMinute = calendar.component(.minute, from: currentDate)
         
-        var targetDate = calendar.dateBySettingHour(scheduleHour, minute: 0, second: 0, of: currentDate)!
+        var targetDate = calendar.date(bySettingHour: scheduleHour, minute: 0, second: 0, of: currentDate)!
         
         // If the target time has passed today, set it for tomorrow
         if targetDate <= currentDate {
             targetDate = calendar.date(byAdding: .day, value: 1, to: targetDate)!
         }
         
-        let currentDateWithSeconds = calendar.dateBySettingHour(currentHour, minute: currentMinute, second: 0, of: currentDate)!
+        let currentDateWithSeconds = calendar.date(bySettingHour: currentHour, minute: currentMinute, second: 0, of: currentDate)!
         
         return targetDate.timeIntervalSince(currentDateWithSeconds)
     }

@@ -9,6 +9,7 @@
 import SwiftUI
 
 struct PrescriptionDetailView: View {
+    
     let prescription: Prescription
     @Environment(\.dismiss) private var dismiss
     @State private var showingMedicationEditor = false
@@ -19,18 +20,6 @@ struct PrescriptionDetailView: View {
                 LazyVStack(spacing: 20) {
                     // Header Card
                     headerCard
-                    
-                    // Upcoming Medications (only if there are any)
-                    if !prescription.medications.isEmpty {
-                        UpcomingMedicationsView(medications: prescription.medications)
-                    }
-                    
-                    // Active Medications Card
-                    if !prescription.medications.isEmpty {
-                        ActiveMedicationsView(medications: prescription.medications) {
-                            showingMedicationEditor = true
-                        }
-                    }
                     
                     // Follow-up Card
                     if prescription.followUpDate != nil || !(prescription.followUpTests?.isEmpty ?? false) {

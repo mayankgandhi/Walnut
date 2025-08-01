@@ -7,40 +7,23 @@
       "layers" : [
         {
           "blend-mode" : "normal",
-          "fill" : "automatic",
-          "glass" : true,
-          "hidden" : false,
-          "image-name" : "walnut-2.png",
-          "name" : "walnut-2",
-          "opacity" : 1,
+          "fill" : "none",
+          "glass" : false,
+          "image-name" : "2.png",
+          "name" : "2",
           "position" : {
-            "scale" : 1,
+            "scale" : 0.2,
             "translation-in-points" : [
-              302.4523291186116,
-              308.68500824687516
-            ]
-          }
-        },
-        {
-          "hidden" : false,
-          "image-name" : "Untitled design (2).png",
-          "name" : "Untitled design (2)",
-          "position" : {
-            "scale" : 0.8,
-            "translation-in-points" : [
-              -1.515625,
-              2.7890625
+              0,
+              20
             ]
           }
         },
         {
           "blend-mode-specializations" : [
             {
-              "value" : "plus-darker"
-            },
-            {
               "appearance" : "dark",
-              "value" : "plus-darker"
+              "value" : "hard-light"
             }
           ],
           "fill-specializations" : [
@@ -50,16 +33,70 @@
             }
           ],
           "glass" : true,
-          "hidden" : false,
-          "image-name" : "Screenshot 2025-06-25 at 21.05.42.png",
-          "name" : "Screenshot 2025-06-25 at 21.05.42",
+          "image-name" : "3.png",
+          "name" : "3",
+          "opacity-specializations" : [
+            {
+              "appearance" : "tinted",
+              "value" : 0.6
+            }
+          ],
           "position" : {
-            "scale" : 1,
+            "scale" : 0.4,
             "translation-in-points" : [
-              -9.59375,
-              -17.609375
+              0,
+              -20
             ]
           }
+        }
+      ],
+      "position-specializations" : [
+        {
+          "idiom" : "square",
+          "value" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0,
+              20
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
+      "layers" : [
+        {
+          "blend-mode-specializations" : [
+            {
+              "value" : "darken"
+            },
+            {
+              "appearance" : "dark",
+              "value" : "multiply"
+            }
+          ],
+          "fill-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : "none"
+            }
+          ],
+          "image-name" : "1 2.png",
+          "name" : "1 2",
+          "opacity-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : 0.8
+            }
+          ]
         }
       ],
       "shadow" : {
