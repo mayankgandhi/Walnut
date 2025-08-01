@@ -9,7 +9,7 @@
 import SwiftUI
 
 // MARK: - Enums for type safety
-enum MedicalCaseType: String, CaseIterable, Codable, Hashable {
+enum MedicalCaseType: String, CaseIterable, Codable, Hashable, Sendable {
     
     case immunisation = "immunisation"
     case healthCheckup = "health-checkup"

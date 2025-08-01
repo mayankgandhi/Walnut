@@ -16,6 +16,7 @@ public struct PatientsListView: View {
     @State var selectedPatient: Patient? = nil
     @State var editPatient: Patient? = nil
     @State var showPatientEditor: Bool = false
+    @State var showCreatePatient: Bool = false
     
     @Environment(\.modelContext) private var modelContext
     
@@ -55,12 +56,12 @@ public struct PatientsListView: View {
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {
                         Button("Add Patient", systemImage: "plus") {
-                            showPatientEditor = true
+                            showCreatePatient = true
                         }
                     }
                 }
-                .sheet(isPresented: $showPatientEditor) {
-                    PatientEditor()
+                .sheet(isPresented: $showCreatePatient) {
+                    CreatePatientView()
                 }
                 .sheet(item: $editPatient) { patient in
                     PatientEditor(patient: patient)

@@ -33,8 +33,8 @@ struct PrescriptionDocumentPicker: View {
         .task {
             if processingService == nil {
                 let apiKey = claudeKey
-                let claudeService = ClaudeFilesService(apiKey: apiKey)
-                processingService = DocumentProcessingService(
+                let claudeService = ClaudeDocumentService(apiKey: apiKey)
+                processingService = DocumentProcessingService.create(
                     claudeService: claudeService,
                     modelContext: modelContext
                 )
@@ -65,8 +65,8 @@ struct BloodReportDocumentPicker: View {
         .task {
             if processingService == nil {
                 let apiKey = claudeKey
-                let claudeService = ClaudeFilesService(apiKey: apiKey)
-                processingService = DocumentProcessingService(
+                let claudeService = ClaudeDocumentService(apiKey: apiKey)
+                processingService = DocumentProcessingService.create(
                     claudeService: claudeService,
                     modelContext: modelContext
                 )
@@ -109,8 +109,8 @@ struct GeneralDocumentPicker: View {
         .task {
             if processingService == nil {
                 let apiKey = claudeKey
-                let claudeService = ClaudeFilesService(apiKey: apiKey)
-                processingService = DocumentProcessingService(
+                let claudeService = ClaudeDocumentService(apiKey: apiKey)
+                processingService = DocumentProcessingService.create(
                     claudeService: claudeService,
                     modelContext: modelContext
                 )

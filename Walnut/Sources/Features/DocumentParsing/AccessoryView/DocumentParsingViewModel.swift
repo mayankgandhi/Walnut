@@ -24,13 +24,13 @@ class DocumentParsingViewModel: ObservableObject {
         case success
     }
     
-    private let claudeService: ClaudeFilesService
+    private let claudeService: ClaudeDocumentService
     private var cancellables = Set<AnyCancellable>()
 
     init(
         apiKey: String
     ) {
-        self.claudeService = ClaudeFilesService(apiKey: apiKey)
+        self.claudeService = ClaudeDocumentService(apiKey: apiKey)
         
         DocumentParsingViewCoordinator.shared.fileUploadSubject
             .sink { [weak self] medicalCase, file in

@@ -10,7 +10,7 @@ import Foundation
 import SwiftData
 
 @Model
-class MedicalCase: Identifiable {
+class MedicalCase: Identifiable, Sendable {
     
     @Attribute(.unique)
     var id: UUID

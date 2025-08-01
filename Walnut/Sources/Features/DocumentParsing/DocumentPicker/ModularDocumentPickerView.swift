@@ -224,16 +224,3 @@ extension ModularDocumentPickerView {
     }
 }
 
-// MARK: - Preview
-
-#Preview {
-    @Previewable @State var mockService = DocumentProcessingService(
-        claudeService: ClaudeFilesService(apiKey: "mock"),
-        modelContext: ModelContext(try! ModelContainer(for: MedicalCase.self))
-    )
-    
-    ModularDocumentPickerView.forPrescriptions(
-        medicalCase: MedicalCase.sampleCase
-    )
-    .environment(mockService)
-}
