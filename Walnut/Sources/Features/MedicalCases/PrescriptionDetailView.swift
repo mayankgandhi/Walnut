@@ -11,6 +11,7 @@ import SwiftUI
 struct PrescriptionDetailView: View {
     let prescription: Prescription
     @Environment(\.dismiss) private var dismiss
+    @State private var showingMedicationEditor = false
     
     var body: some View {
         NavigationStack {
@@ -19,8 +20,17 @@ struct PrescriptionDetailView: View {
                     // Header Card
                     headerCard
                     
-                    // Medications Card
-                    medicationsCard
+                    // Upcoming Medications (only if there are any)
+                    if !prescription.medications.isEmpty {
+                        UpcomingMedicationsView(medications: prescription.medications)
+                    }
+                    
+                    // Active Medications Card
+                    if !prescription.medications.isEmpty {
+                        ActiveMedicationsView(medications: prescription.medications) {
+                            showingMedicationEditor = true
+                        }
+                    }
                     
                     // Follow-up Card
                     if prescription.followUpDate != nil || !(prescription.followUpTests?.isEmpty ?? false) {
@@ -50,6 +60,9 @@ struct PrescriptionDetailView: View {
                     }
                     .fontWeight(.medium)
                 }
+            }
+            .sheet(isPresented: $showingMedicationEditor) {
+                PrescriptionMedicationEditor(prescription: prescription)
             }
         }
     }
@@ -117,107 +130,6 @@ struct PrescriptionDetailView: View {
         .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
     
-    // MARK: - Medications Card
-    private var medicationsCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Image(systemName: "pills.fill")
-                    .font(.title2)
-                    .foregroundColor(.blue)
-                
-                Text("Medications")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                
-                Spacer()
-            }
-            
-            LazyVStack(spacing: 12) {
-                ForEach(Array(prescription.medications.enumerated()), id: \.element.id) { index, medication in
-                    medicationRow(medication: medication, index: index)
-                }
-            }
-        }
-        .padding(20)
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
-    }
-    
-    private func medicationRow(medication: Medication, index: Int) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                // Medication number badge
-                Text("\(index + 1)")
-                    .font(.caption)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .frame(width: 20, height: 20)
-                    .background(Circle().fill(Color.blue))
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(medication.name)
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                    
-                    if let dosage = medication.dosage {
-                        Text(dosage)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                
-                Spacer()
-                
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("\(medication.numberOfDays) days")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 2)
-                        .background(Color.green.opacity(0.1))
-                        .foregroundColor(.green)
-                        .clipShape(Capsule())
-                }
-            }
-            
-            // Medication Schedule
-            if !medication.frequency.isEmpty {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 8) {
-                    ForEach(Array(medication.frequency.enumerated()), id: \.offset) { _, schedule in
-                        scheduleChip(schedule: schedule)
-                    }
-                }
-            }
-            
-            if let instructions = medication.instructions {
-                Text(instructions)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding(.top, 4)
-            }
-        }
-        .padding(12)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-    
-    private func scheduleChip(schedule: MedicationSchedule) -> some View {
-        HStack(spacing: 4) {
-            Image(systemName: mealTimeIcon(for: schedule.mealTime))
-                .font(.caption2)
-                .foregroundColor(.orange)
-            
-            Text(scheduleText(for: schedule))
-                .font(.caption2)
-                .fontWeight(.medium)
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(Color.orange.opacity(0.1))
-        .foregroundColor(.orange)
-        .clipShape(Capsule())
-    }
     
     // MARK: - Follow-up Card
     private var followUpCard: some View {
@@ -358,21 +270,4 @@ struct PrescriptionDetailView: View {
         .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
     
-    // MARK: - Helper Functions
-    private func mealTimeIcon(for mealTime: MedicationSchedule.MealTime) -> String {
-        switch mealTime {
-        case .breakfast: return "sunrise.fill"
-        case .lunch: return "sun.max.fill"
-        case .dinner: return "sunset.fill"
-        case .bedtime: return "moon.fill"
-        }
-    }
-    
-    private func scheduleText(for schedule: MedicationSchedule) -> String {
-        let mealText = schedule.mealTime.rawValue.capitalized
-        if let timing = schedule.timing {
-            return "\(timing.rawValue.capitalized) \(mealText)"
-        }
-        return mealText
-    }
 }
