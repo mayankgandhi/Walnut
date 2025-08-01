@@ -190,14 +190,13 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
         fileURL: URL
     ) async throws -> PersistentIdentifier {
         let bloodReport = BloodReport(
-            id: UUID(),
             testName: parsedBloodReport.testName,
             labName: parsedBloodReport.labName,
             category: parsedBloodReport.category,
             resultDate: parsedBloodReport.resultDate,
-            reportURL: fileURL.absoluteString,
             notes: parsedBloodReport.notes,
-            medicalCase: medicalCase
+            medicalCase: medicalCase,
+            fileURL: fileURL
         )
         modelContext.insert(bloodReport)
         

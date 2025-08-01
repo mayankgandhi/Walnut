@@ -81,7 +81,6 @@ class Prescription {
                 fileName: "\(parsedPrescription.doctorName)_\(medicalCase.title)_prescription",
                 fileURL: fileURL,
                 documentType: .prescription,
-                documentDate: Date(),
                 fileSize: 12
             ),
             medicalCase: medicalCase,

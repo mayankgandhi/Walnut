@@ -10,7 +10,9 @@ import SwiftUI
 import Charts
 
 struct BloodReportDetailView: View {
+    
     let bloodReport: BloodReport
+    
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -42,8 +44,8 @@ struct BloodReportDetailView: View {
                     }
                     
                     // Document Card
-                    if let reportURL = bloodReport.reportURL {
-                        documentCard(reportURL: reportURL)
+                    if let document = bloodReport.document {
+                        documentCard(document: document)
                     }
                     
                     // Metadata Card
@@ -161,9 +163,6 @@ struct BloodReportDetailView: View {
         .background(Color(UIColor.systemBackground))
         .cornerRadius(20)
         .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
-        .onAppear {
-            dump(bloodReport)
-        }
     }
     
     // MARK: - Summary Statistics Card
@@ -494,12 +493,12 @@ struct BloodReportDetailView: View {
     }
     
     // MARK: - Document Card
-    private func documentCard(reportURL: String) -> some View {
+    private func documentCard(document: Document) -> some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Image(systemName: "doc.richtext.fill")
+                Image(systemName: document.documentType.typeIcon)
                     .font(.title2)
-                    .foregroundColor(.orange)
+                    .foregroundColor(document.documentType.backgroundColor)
                 
                 Text("Lab Report Document")
                     .font(.title2)
@@ -512,21 +511,21 @@ struct BloodReportDetailView: View {
             HStack(spacing: 16) {
                 // Document icon
                 VStack {
-                    Image(systemName: "doc.text.fill")
+                    Image(systemName: document.documentType.typeIcon)
                         .font(.system(size: 32))
-                        .foregroundColor(.orange)
+                        .foregroundColor(document.documentType.backgroundColor)
                     
-                    Text("PDF")
+                    Text(document.documentType.displayName)
                         .font(.caption2)
                         .fontWeight(.medium)
                         .foregroundColor(.secondary)
                 }
                 .frame(width: 60, height: 60)
-                .background(Color.orange.opacity(0.1))
+                .background(document.documentType.backgroundColor.opacity(0.1))
                 .cornerRadius(12)
                 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("\(bloodReport.testName) Report")
+                    Text(document.fileName)
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .lineLimit(2)
@@ -535,9 +534,15 @@ struct BloodReportDetailView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
-                    Text("Generated: \(bloodReport.resultDate, style: .date)")
+                    Text("Uploaded: \(document.uploadDate, style: .date)")
                         .font(.caption)
                         .foregroundColor(.secondary)
+                    
+                    if document.fileSize > 0 {
+                        Text("Size: \(ByteCountFormatter.string(fromByteCount: document.fileSize, countStyle: .file))")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
                 
                 Spacer()
@@ -546,9 +551,7 @@ struct BloodReportDetailView: View {
             // Action buttons
             HStack(spacing: 12) {
                 Button(action: {
-                    if let url = URL(string: reportURL) {
-                        UIApplication.shared.open(url)
-                    }
+                    UIApplication.shared.open(document.fileURL)
                 }) {
                     HStack(spacing: 8) {
                         Image(systemName: "eye.fill")
@@ -560,18 +563,16 @@ struct BloodReportDetailView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-                    .background(Color.orange)
+                    .background(document.documentType.backgroundColor)
                     .cornerRadius(10)
                 }
                 
                 Button(action: {
                     // Handle sharing
-                    if let url = URL(string: reportURL) {
-                        let activityController = UIActivityViewController(activityItems: [url], applicationActivities: nil)
-                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                           let rootViewController = windowScene.windows.first?.rootViewController {
-                            rootViewController.present(activityController, animated: true)
-                        }
+                    let activityController = UIActivityViewController(activityItems: [document.fileURL], applicationActivities: nil)
+                    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                       let rootViewController = windowScene.windows.first?.rootViewController {
+                        rootViewController.present(activityController, animated: true)
                     }
                 }) {
                     HStack(spacing: 8) {
@@ -581,10 +582,10 @@ struct BloodReportDetailView: View {
                             .font(.subheadline)
                             .fontWeight(.medium)
                     }
-                    .foregroundColor(.orange)
+                    .foregroundColor(document.documentType.backgroundColor)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-                    .background(Color.orange.opacity(0.1))
+                    .background(document.documentType.backgroundColor.opacity(0.1))
                     .cornerRadius(10)
                 }
                 
@@ -789,14 +790,21 @@ struct BloodReportDetailView: View {
 #Preview {
     // Create sample data for preview
     let sampleCase = MedicalCase.sampleCase
+    let sampleDocument = Document(
+        fileName: "Complete_Blood_Count_Quest_Diagnostics.pdf",
+        fileURL: URL(string: "https://example.com/report.pdf")!,
+        documentType: .bloodWork,
+        fileSize: 245760
+    )
+    
     let sampleBloodReport = BloodReport(
         testName: "Complete Blood Count with Differential",
         labName: "Quest Diagnostics",
         category: "Hematology",
         resultDate: Date().addingTimeInterval(-86400 * 3),
-        reportURL: "https://example.com/report.pdf",
         notes: "Routine annual physical examination. Patient fasting for 12 hours prior to blood draw. All standard precautions followed.",
-        medicalCase: sampleCase
+        medicalCase: sampleCase,
+        document: sampleDocument
     )
     
     // Add comprehensive test results

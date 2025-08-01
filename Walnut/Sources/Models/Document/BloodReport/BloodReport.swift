@@ -19,13 +19,15 @@ class BloodReport: Identifiable, Sendable {
     var labName: String
     var category: String
     var resultDate: Date
-    var reportURL: String?
     var notes: String
     
     var createdAt: Date
     var updatedAt: Date
     
     var medicalCase: MedicalCase
+    
+    @Relationship(deleteRule: .cascade)
+    var document: Document?
     
     @Relationship(deleteRule: .cascade)
     var testResults: [BloodTestResult] = []
@@ -35,23 +37,50 @@ class BloodReport: Identifiable, Sendable {
          labName: String,
          category: String,
          resultDate: Date,
-         reportURL: String? = nil,
          notes: String = "",
          createdAt: Date = Date(),
          updatedAt: Date = Date(),
          medicalCase: MedicalCase,
+         document: Document? = nil,
          testResults: [BloodTestResult] = []) {
         self.id = id
         self.testName = testName
         self.labName = labName
         self.category = category
         self.resultDate = resultDate
-        self.reportURL = reportURL
         self.notes = notes
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.medicalCase = medicalCase
+        self.document = document
         self.testResults = testResults
+    }
+    
+    convenience init(
+        testName: String,
+        labName: String,
+        category: String,
+        resultDate: Date,
+        notes: String = "",
+        medicalCase: MedicalCase,
+        fileURL: URL,
+        testResults: [BloodTestResult] = []
+    ) {
+        self.init(
+            testName: testName,
+            labName: labName,
+            category: category,
+            resultDate: resultDate,
+            notes: notes,
+            medicalCase: medicalCase,
+            document: Document(
+                fileName: "\(testName)_\(labName)_blood_report",
+                fileURL: fileURL,
+                documentType: .bloodWork,
+                fileSize: 0
+            ),
+            testResults: testResults
+        )
     }
 }
 

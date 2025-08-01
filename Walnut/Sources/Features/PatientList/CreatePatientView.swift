@@ -10,6 +10,7 @@ import SwiftUI
 import SwiftData
 
 struct CreatePatientView: View {
+    
     @State private var firstName = ""
     @State private var lastName = ""
     @State private var dateOfBirth = Date()

@@ -94,14 +94,6 @@ struct UnparsedDocumentListItem: View {
                     .font(.title2)
             }
             
-            // Notes and file info
-            if let notes = document.notes, !notes.isEmpty {
-                Text(notes)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .lineLimit(2)
-            }
-            
             // File info and retry button
             HStack {
                 HStack(spacing: 4) {

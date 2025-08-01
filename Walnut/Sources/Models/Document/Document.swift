@@ -19,11 +19,9 @@ class Document: Identifiable, Hashable {
     var fileURL: URL
     
     var documentType: DocumentType
-    var documentDate: Date
     var uploadDate: Date
     
     var fileSize: Int64
-    var notes: String?
     
     var createdAt: Date
     var updatedAt: Date
@@ -33,10 +31,8 @@ class Document: Identifiable, Hashable {
         fileName: String,
         fileURL: URL,
         documentType: DocumentType,
-        documentDate: Date,
         uploadDate: Date = Date(),
         fileSize: Int64,
-        notes: String? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -44,10 +40,8 @@ class Document: Identifiable, Hashable {
         self.fileName = fileName
         self.fileURL = fileURL
         self.documentType = documentType
-        self.documentDate = documentDate
         self.uploadDate = uploadDate
         self.fileSize = fileSize
-        self.notes = notes
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -61,7 +55,6 @@ extension Document {
         fileName: "Blood_Test_Results_2024.pdf",
         fileURL: URL(string: "file://")!,
         documentType: .labResult,
-        documentDate: Date().addingTimeInterval(-86400 * 7),
         uploadDate: Date().addingTimeInterval(-86400 * 2),
         fileSize: 245760
     )
@@ -74,7 +67,6 @@ extension Document {
             fileName: "Prescription_Cardiology.pdf",
             fileURL: URL(string: "file://")!,
             documentType: .prescription,
-            documentDate: Date().addingTimeInterval(-86400 * 3),
             uploadDate: Date().addingTimeInterval(-86400 * 1),
             fileSize: 123456
         ),
@@ -83,7 +75,6 @@ extension Document {
             fileName: "Chest_XRay_Report.jpg",
             fileURL: URL(string: "file://")!,
             documentType: .labResult,
-            documentDate: Date().addingTimeInterval(-86400 * 14),
             uploadDate: Date().addingTimeInterval(-86400 * 10),
             fileSize: 2097152
         )
