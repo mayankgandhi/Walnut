@@ -33,7 +33,6 @@ struct PatientView: View {
                     }
                 }
             }
-            DocumentParsingStatusView(viewModel: DocumentParsingViewModel(apiKey: claudeKey))
             
         } else {
             ContentUnavailableView(

@@ -33,6 +33,9 @@ class MedicalCase: Identifiable, Sendable {
     @Relationship(deleteRule: .cascade)
     var bloodReports: [BloodReport] = []
     
+    @Relationship(deleteRule: .cascade)
+    var unparsedDocuments: [Document] = []
+    
     init(id: UUID,
          title: String,
          notes: String,
@@ -44,7 +47,8 @@ class MedicalCase: Identifiable, Sendable {
          updatedAt: Date,
          patient: Patient,
          prescriptions: [Prescription] = [],
-         bloodReports: [BloodReport] = []) {
+         bloodReports: [BloodReport] = [],
+         unparsedDocuments: [Document] = []) {
         self.id = id
         self.title = title
         self.notes = notes
@@ -57,6 +61,7 @@ class MedicalCase: Identifiable, Sendable {
         self.patient = patient
         self.prescriptions = prescriptions
         self.bloodReports = bloodReports
+        self.unparsedDocuments = unparsedDocuments
     }
     
 }

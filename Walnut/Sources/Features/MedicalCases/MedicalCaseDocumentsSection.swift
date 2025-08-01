@@ -8,8 +8,6 @@
 
 import SwiftUI
 import PDFKit
-import SwiftUI
-import PDFKit
 
 // MARK: - Documents Section
 struct DocumentsSection: View {
