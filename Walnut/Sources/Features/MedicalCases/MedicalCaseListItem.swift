@@ -28,7 +28,10 @@ struct EnhancedMedicalCaseListItem: View {
                 Spacer()
                 
                 VStack(alignment: .trailing, spacing: 4) {
-                    StatusBadge(isActive: medicalCase.isActive)
+                    StatusBadge(
+                        isActive: medicalCase.isActive,
+                        primaryColor: medicalCase.patient
+                            .primaryColor)
                     
                     Text(medicalCase.createdAt.formatted(date: .abbreviated, time: .omitted))
                         .font(.caption)

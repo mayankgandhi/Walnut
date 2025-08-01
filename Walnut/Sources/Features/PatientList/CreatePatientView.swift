@@ -16,6 +16,7 @@ struct CreatePatientView: View {
     @State private var dateOfBirth = Date()
     @State private var phoneNumber = ""
     @State private var notes = ""
+    @State private var selectedColor = Color(hex: Patient.generateRandomColorHex()) ?? .blue
     
     @State private var showingValidationError = false
     @State private var validationMessage = ""
@@ -117,6 +118,31 @@ struct CreatePatientView: View {
                             TextField("Brief notes (Optional)", text: $notes, axis: .vertical)
                                 .lineLimit(2...4)
                         }
+                        
+                        // Theme Color Selection
+                        HStack {
+                            Image(systemName: "paintpalette.fill")
+                                .foregroundColor(selectedColor)
+                                .font(.title2)
+                            
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Theme Color")
+                                    .font(.subheadline)
+                                    .foregroundColor(.primary)
+                                
+                                HStack {
+                                    ColorPicker("", selection: $selectedColor, supportsOpacity: false)
+                                        .labelsHidden()
+                                        .frame(width: 44, height: 32)
+                                    
+                                    Text("This color will theme the patient's profile")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    
+                                    Spacer()
+                                }
+                            }
+                        }
                     }
                     .padding(.vertical, 4)
                 } header: {
@@ -176,6 +202,7 @@ struct CreatePatientView: View {
             emergencyContactPhone: phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines),
             notes: notes.trimmingCharacters(in: .whitespacesAndNewlines),
             isActive: true, // Default active
+            primaryColorHex: selectedColor.hexString,
             createdAt: now,
             updatedAt: now,
             medicalCases: []
