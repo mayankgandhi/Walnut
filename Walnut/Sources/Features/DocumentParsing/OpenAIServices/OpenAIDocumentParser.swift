@@ -29,13 +29,8 @@ final class OpenAIDocumentParser {
         let mimeType = MimeTypeResolver.mimeType(for: fileName)
         
         // Create parsing prompt
-        let structDef = generateStructDefinition(for: type)
-        let prompt = """
-        Please analyze this document and extract the information into the following JSON structure. 
-        Return ONLY JSON and nothing else:
-        \(structDef)
-        The response is directly decoded by the same model shared.
-        """
+        let prompt = generatePrompt(for: type)
+        let jsonSchema = generateJSONSchema(for: type)
         
         let chatRequest = OpenAIChatRequest(
             model: "gpt-4o",
@@ -51,7 +46,15 @@ final class OpenAIDocumentParser {
                 )
             ],
             maxTokens: 4096,
-            temperature: 0.1
+            temperature: 0.1,
+            responseFormat: OpenAIResponseFormat(
+                type: "json_schema",
+                jsonSchema: OpenAIJSONSchemaWrapper(
+                    name: type == ParsedPrescription.self ? "ParsedPrescription" : "ParsedBloodReport",
+                    strict: true,
+                    schema: jsonSchema
+                )
+            )
         )
         
         do {
@@ -70,11 +73,8 @@ final class OpenAIDocumentParser {
                 throw OpenAIServiceError.parseFailed("No content in response")
             }
             
-            // Clean the JSON response
-            let cleanedContent = cleanJSONResponse(content)
-            
-            // Parse the JSON response
-            guard let jsonData = cleanedContent.data(using: .utf8) else {
+            // With structured outputs, the response should be valid JSON
+            guard let jsonData = content.data(using: .utf8) else {
                 throw OpenAIServiceError.parseFailed("Could not convert response to data")
             }
             
@@ -94,34 +94,180 @@ final class OpenAIDocumentParser {
     
     // MARK: - Private Helpers
     
-    // Helper function to extract JSON from code blocks
-    private func cleanJSONResponse(_ content: String) -> String {
-        var text = content
-            .replacingOccurrences(of: "```", with: "")
-            .replacingOccurrences(of: "json", with: "")
-        text.removeFirst()
-        text.removeLast()
-        return text
-    }
-    
-    private func generateStructDefinition<T: Codable>(for type: T.Type) -> String {
+    private func generatePrompt<T: Codable>(for type: T.Type) -> String {
         switch type {
         case is ParsedPrescription.Type:
             return """
-        Swift prescription parsing model: ParsedPrescription
-        ParsedPrescription: dateIssued(Date), doctorName(String?), facilityName(String?), followUpDate(Date?), followUpTests([String]), notes(String?), medications([Medication])
-        Medication: id(UUID), name(String), frequency([MedicationSchedule]), numberOfDays(Int), dosage(String?), instructions(String?)
-        MedicationSchedule: mealTime(MealTime), timing(MedicationTime?), dosage(String?)
-        Enums: MealTime(.breakfast/.lunch/.dinner/.bedtime), MedicationTime(.before/.after)
-        """
+            Please analyze this prescription document and extract all relevant information. Pay attention to:
+            - Patient demographics and visit details
+            - Doctor and facility information
+            - Prescribed medications with dosages, frequencies, and instructions
+            - Follow-up appointments or tests
+            - Any additional notes
+            """
         case is ParsedBloodReport.Type:
             return """
-                    Swift blood report parsing model: ParsedBloodReport
-                    ParsedBloodReport: testName(String), labName(String), category(String), resultDate(Date), notes(String), testResults([ParsedBloodTestResult])
-                    ParsedBloodTestResult: testName(String), value(String), unit(String), referenceRange(String), isAbnormal(Bool)
-                    
-                    Please extract all blood test results from the lab report. The resultDate should be the date when the tests were performed or results were available.
-                    """
+            Please analyze this blood/lab report document and extract all test results. Pay attention to:
+            - Lab name and test information
+            - Test date and category
+            - Individual test results with values, units, and reference ranges
+            - Any abnormal values or flags
+            - Additional notes or comments
+            """
+        default:
+            fatalError("Unsupported type \(String(describing: type))")
+        }
+    }
+    
+    private func generateJSONSchema<T: Codable>(for type: T.Type) -> OpenAIJSONSchema {
+        switch type {
+        case is ParsedPrescription.Type:
+            return OpenAIJSONSchema(
+                properties: [
+                        "dateIssued": [
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Date when the prescription was issued"
+                        ],
+                        "doctorName": [
+                            "type": ["string", "null"],
+                            "description": "Name of the prescribing doctor"
+                        ],
+                        "facilityName": [
+                            "type": ["string", "null"],
+                            "description": "Name of the medical facility"
+                        ],
+                        "followUpDate": [
+                            "type": ["string", "null"],
+                            "format": "date-time",
+                            "description": "Date for follow-up appointment"
+                        ],
+                        "followUpTests": [
+                            "type": "array",
+                            "items": ["type": "string"],
+                            "description": "List of follow-up tests recommended"
+                        ],
+                        "notes": [
+                            "type": ["string", "null"],
+                            "description": "Additional notes or instructions"
+                        ],
+                        "medications": [
+                            "type": "array",
+                            "items": [
+                                "type": "object",
+                                "properties": [
+                                    "id": [
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "description": "Unique identifier for the medication"
+                                    ],
+                                    "name": [
+                                        "type": "string",
+                                        "description": "Name of the medication"
+                                    ],
+                                    "frequency": [
+                                        "type": "array",
+                                        "items": [
+                                            "type": "object",
+                                            "properties": [
+                                                "mealTime": [
+                                                    "type": "string",
+                                                    "enum": ["breakfast", "lunch", "dinner", "bedtime"],
+                                                    "description": "Meal time for medication"
+                                                ],
+                                                "timing": [
+                                                    "type": ["string", "null"],
+                                                    "enum": ["before", "after", NSNull()],
+                                                    "description": "Before or after meal timing"
+                                                ],
+                                                "dosage": [
+                                                    "type": ["string", "null"],
+                                                    "description": "Dosage for this schedule"
+                                                ]
+                                            ],
+                                            "required": ["mealTime", "timing", "dosage"],
+                                            "additionalProperties": false
+                                        ]
+                                    ],
+                                    "numberOfDays": [
+                                        "type": "integer",
+                                        "description": "Number of days to take the medication"
+                                    ],
+                                    "dosage": [
+                                        "type": ["string", "null"],
+                                        "description": "Overall dosage information"
+                                    ],
+                                    "instructions": [
+                                        "type": ["string", "null"],
+                                        "description": "Special instructions for the medication"
+                                    ]
+                                ],
+                                "required": ["id", "name", "frequency", "numberOfDays", "dosage", "instructions"],
+                                "additionalProperties": false
+                            ]
+                        ]
+                ],
+                required: ["dateIssued", "doctorName", "facilityName", "followUpDate", "followUpTests", "notes", "medications"],
+                additionalProperties: false
+            )
+        case is ParsedBloodReport.Type:
+            return OpenAIJSONSchema(
+                properties: [
+                        "testName": [
+                            "type": "string",
+                            "description": "Name of the blood test or panel"
+                        ],
+                        "labName": [
+                            "type": "string",
+                            "description": "Name of the laboratory"
+                        ],
+                        "category": [
+                            "type": "string",
+                            "description": "Category or type of blood test"
+                        ],
+                        "resultDate": [
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Date when the test results were obtained"
+                        ],
+                        "notes": [
+                            "type": "string",
+                            "description": "Additional notes or comments"
+                        ],
+                        "testResults": [
+                            "type": "array",
+                            "items": [
+                                "type": "object",
+                                "properties": [
+                                    "testName": [
+                                        "type": "string",
+                                        "description": "Name of the individual test"
+                                    ],
+                                    "value": [
+                                        "type": "string",
+                                        "description": "Test result value"
+                                    ],
+                                    "unit": [
+                                        "type": "string",
+                                        "description": "Unit of measurement"
+                                    ],
+                                    "referenceRange": [
+                                        "type": "string",
+                                        "description": "Normal reference range"
+                                    ],
+                                    "isAbnormal": [
+                                        "type": "boolean",
+                                        "description": "Whether the result is abnormal"
+                                    ]
+                                ],
+                                "required": ["testName", "value", "unit", "referenceRange", "isAbnormal"],
+                                "additionalProperties": false
+                            ]
+                        ]
+                ],
+                required: ["testName", "labName", "category", "resultDate", "notes", "testResults"],
+                additionalProperties: false
+            )
         default:
             fatalError("Unsupported type \(String(describing: type))")
         }

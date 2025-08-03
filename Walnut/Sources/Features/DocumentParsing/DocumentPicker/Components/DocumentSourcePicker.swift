@@ -13,26 +13,32 @@ import PhotosUI
 struct DocumentSourcePicker: View {
     
     @Environment(DocumentPickerStore.self) private var store
+    @State private var showingActionSheet = false
     
     var body: some View {
         @Bindable var bindableStore = store
         
-        Menu {
-            Button("Files", systemImage: "folder") {
+        Button {
+            showingActionSheet = true
+        } label: {
+            DocumentUploadArea()
+        }
+        .confirmationDialog("Select Document Source", isPresented: $showingActionSheet, titleVisibility: .visible) {
+            Button("Files") {
                 store.presentDocumentPicker()
             }
             
-            Button("Photo Library", systemImage: "photo") {
+            Button("Photo Library") {
                 store.presentPhotosPicker()
             }
             
             if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                Button("Camera", systemImage: "camera") {
+                Button("Camera") {
                     store.presentCamera()
                 }
             }
-        } label: {
-            DocumentUploadArea()
+            
+            Button("Cancel", role: .cancel) { }
         }
         .fileImporter(
             isPresented: $bindableStore.isDocumentPickerPresented,

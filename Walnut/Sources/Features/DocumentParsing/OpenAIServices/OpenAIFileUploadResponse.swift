@@ -29,10 +29,12 @@ struct OpenAIChatRequest: Codable {
     let messages: [OpenAIMessage]
     let maxTokens: Int?
     let temperature: Double?
+    let responseFormat: OpenAIResponseFormat?
     
     enum CodingKeys: String, CodingKey {
         case model, messages, temperature
         case maxTokens = "max_tokens"
+        case responseFormat = "response_format"
     }
 }
 
@@ -119,6 +121,113 @@ struct OpenAIChoice: Codable {
 struct OpenAIResponseMessage: Codable {
     let role: String
     let content: String?
+}
+
+struct OpenAIResponseFormat: Codable {
+    let type: String
+    let jsonSchema: OpenAIJSONSchemaWrapper?
+    
+    enum CodingKeys: String, CodingKey {
+        case type
+        case jsonSchema = "json_schema"
+    }
+}
+
+struct OpenAIJSONSchemaWrapper: Codable {
+    let name: String
+    let strict: Bool
+    let schema: OpenAIJSONSchema
+}
+
+struct OpenAIJSONSchema: Codable {
+    let type: String = "object"
+    let properties: [String: Any]
+    let required: [String]
+    let additionalProperties: Bool
+    
+    enum CodingKeys: String, CodingKey {
+        case type, properties, required
+        case additionalProperties = "additionalProperties"
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(type, forKey: .type)
+        try container.encode(required, forKey: .required)
+        try container.encode(additionalProperties, forKey: .additionalProperties)
+        
+        let jsonData = try JSONSerialization.data(withJSONObject: properties)
+        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
+        try container.encode(AnyCodable(jsonObject), forKey: .properties)
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        required = try container.decode([String].self, forKey: .required)
+        additionalProperties = try container.decode(Bool.self, forKey: .additionalProperties)
+        let anyCodable = try container.decode(AnyCodable.self, forKey: .properties)
+        properties = anyCodable.value as? [String: Any] ?? [:]
+    }
+    
+    init(properties: [String: Any], required: [String], additionalProperties: Bool = false) {
+        self.properties = properties
+        self.required = required
+        self.additionalProperties = additionalProperties
+    }
+}
+
+struct AnyCodable: Codable {
+    let value: Any
+    
+    init<T>(_ value: T?) {
+        self.value = value ?? ()
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        
+        if container.decodeNil() {
+            value = ()
+        } else if let bool = try? container.decode(Bool.self) {
+            value = bool
+        } else if let int = try? container.decode(Int.self) {
+            value = int
+        } else if let double = try? container.decode(Double.self) {
+            value = double
+        } else if let string = try? container.decode(String.self) {
+            value = string
+        } else if let array = try? container.decode([AnyCodable].self) {
+            value = array.map { $0.value }
+        } else if let dictionary = try? container.decode([String: AnyCodable].self) {
+            value = dictionary.mapValues { $0.value }
+        } else {
+            value = ()
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        
+        switch value {
+        case is Void:
+            try container.encodeNil()
+        case let bool as Bool:
+            try container.encode(bool)
+        case let int as Int:
+            try container.encode(int)
+        case let double as Double:
+            try container.encode(double)
+        case let string as String:
+            try container.encode(string)
+        case let array as [Any]:
+            try container.encode(array.map { AnyCodable($0) })
+        case let dictionary as [String: Any]:
+            try container.encode(dictionary.mapValues { AnyCodable($0) })
+        default:
+            try container.encodeNil()
+
+        }
+    }
 }
 
 // MARK: - Error Types
