@@ -29,9 +29,9 @@ struct MedicalCaseDetailView: View {
                     )
                 }
                 
-                BloodReportsSection(
-                    medicalCase: medicalCase
-                )
+//                BloodReportsSection(
+//                    medicalCase: medicalCase
+//                )
             }
             .padding(.vertical)
         }

@@ -22,9 +22,7 @@ struct PatientHomeView: View {
         List {
             if let patient {
                 PatientHeaderCard(patient: patient)
-                
                 UpcomingMedicationsSection(patient: patient)
-                
                 ActiveMedicationsSection(patient: patient)
             } else {
                 ContentUnavailableView(

@@ -27,11 +27,11 @@ struct PatientView: View {
                         MedicalCasesView(patient: selectedPatient)
                     }
                 }
-                Tab("Blood Tests", systemImage: "testtube.2") {
-                    NavigationStack {
-                        BloodTestsView(patient: selectedPatient)
-                    }
-                }
+//                Tab("Blood Tests", systemImage: "testtube.2") {
+//                    NavigationStack {
+//                        BloodTestsView(patient: selectedPatient)
+//                    }
+//                }
             }
             
         } else {
