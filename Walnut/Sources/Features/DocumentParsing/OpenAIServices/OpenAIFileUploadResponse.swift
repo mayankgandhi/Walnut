@@ -241,6 +241,7 @@ enum OpenAIServiceError: Error, LocalizedError {
     case parseFailed(String)
     case networkError(Error)
     case decodingError(Error)
+    case unsupportedFileType(String)
     
     var errorDescription: String? {
         switch self {
@@ -260,6 +261,8 @@ enum OpenAIServiceError: Error, LocalizedError {
             return "Decoding error: \(error.localizedDescription)"
         case .deleteFailed(let message):
             return "Deletion error: \(message)"
+        case .unsupportedFileType(let message):
+            return "Unsupported file type: \(message)"
         }
     }
 }

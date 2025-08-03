@@ -65,6 +65,30 @@ final class OpenAINetworkClient {
         return request
     }
     
+    func createGetRequest(endpoint: String) throws -> URLRequest {
+        guard let url = URL(string: "\(baseURL)/\(endpoint)") else {
+            throw OpenAIServiceError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        
+        return request
+    }
+    
+    func createRequest(endpoint: String, method: String) throws -> URLRequest {
+        guard let url = URL(string: "\(baseURL)/\(endpoint)") else {
+            throw OpenAIServiceError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        
+        return request
+    }
+    
     func executeRequest(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
         do {
             let (data, response) = try await session.data(for: request)

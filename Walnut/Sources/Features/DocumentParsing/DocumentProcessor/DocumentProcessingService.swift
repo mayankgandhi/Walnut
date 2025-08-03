@@ -226,6 +226,12 @@ extension OpenAIDocumentService: AIDocumentServiceProtocol {
     // The existing OpenAIDocumentService already implements the required methods
 }
 
+extension UnifiedDocumentParsingService: AIDocumentServiceProtocol {
+    func uploadAndParseDocument<T: Codable>(from url: URL, as type: T.Type, structDefinition: String?) async throws -> T {
+        return try await parseDocument(from: url, as: type)
+    }
+}
+
 // MARK: - Supporting Types
 
 struct ProcessingResult {
@@ -260,6 +266,22 @@ extension DocumentProcessingService {
         modelContext: ModelContext
     ) -> DocumentProcessingService {
         let aiService = ClaudeDocumentService(apiKey: apiKey)
+        let fileService = DefaultFilePreparationService()
+        let repository = DefaultDocumentRepository(modelContext: modelContext)
+        
+        return DocumentProcessingService(
+            aiService: aiService,
+            fileService: fileService,
+            repository: repository
+        )
+    }
+    
+    /// Creates a DocumentProcessingService with unified parsing (PDF + Images) using OpenAI
+    static func createWithUnifiedParsing(
+        apiKey: String,
+        modelContext: ModelContext
+    ) -> DocumentProcessingService {
+        let aiService = UnifiedDocumentParsingService(apiKey: apiKey)
         let fileService = DefaultFilePreparationService()
         let repository = DefaultDocumentRepository(modelContext: modelContext)
         

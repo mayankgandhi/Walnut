@@ -39,6 +39,10 @@ struct MimeTypeResolver {
             return "image/gif"
         case "webp":
             return "image/webp"
+        case "heic":
+            return "image/heic"
+        case "heif":
+            return "image/heif"
         default:
             return "application/pdf"
         }

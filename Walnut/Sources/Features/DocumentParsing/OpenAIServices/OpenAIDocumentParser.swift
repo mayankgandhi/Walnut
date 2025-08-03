@@ -24,6 +24,11 @@ final class OpenAIDocumentParser {
     // MARK: - Document Parsing
     
     func parseDocument<T: Codable>(data: Data, fileName: String, as type: T.Type) async throws -> T {
+        // Check if the file is a supported image type for OpenAI vision
+        guard isImageFile(fileName: fileName) else {
+            throw OpenAIServiceError.unsupportedFileType("OpenAI vision only supports image files (JPEG, PNG, GIF, WebP). PDF files require a different parsing approach.")
+        }
+        
         // For OpenAI, we need to encode the document as base64 for vision models
         let base64Data = data.base64EncodedString()
         let mimeType = MimeTypeResolver.mimeType(for: fileName)
@@ -93,6 +98,12 @@ final class OpenAIDocumentParser {
     }
     
     // MARK: - Private Helpers
+    
+    private func isImageFile(fileName: String) -> Bool {
+        let pathExtension = (fileName as NSString).pathExtension.lowercased()
+        let supportedImageTypes = ["jpg", "jpeg", "png", "gif", "webp", "heic", "heif"]
+        return supportedImageTypes.contains(pathExtension)
+    }
     
     private func generatePrompt<T: Codable>(for type: T.Type) -> String {
         switch type {
