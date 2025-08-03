@@ -80,12 +80,3 @@ extension View {
         transform(self)
     }
 }
-
-#Preview {
-    PrescriptionMedicationsCard(medications: [
-        Medication.sampleMedication,
-        Medication.sampleMedication
-    ])
-    .padding()
-    .background(Color(.systemGroupedBackground))
-}

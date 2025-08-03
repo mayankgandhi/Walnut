@@ -33,9 +33,9 @@ struct PrescriptionDocumentCard: View {
     
     private var header: some View {
         HStack {
-            Image(systemName: "doc.fill")
+            Image(systemName: documentIcon)
                 .font(.title2)
-                .foregroundColor(.red)
+                .foregroundColor(documentColor)
             
             Text("Document")
                 .font(.headline)
@@ -48,7 +48,31 @@ struct PrescriptionDocumentCard: View {
             }
             .font(.subheadline)
             .fontWeight(.medium)
-            .foregroundColor(.red)
+            .foregroundColor(documentColor)
+        }
+    }
+    
+    private var documentIcon: String {
+        let fileExtension = document.fileURL.pathExtension.lowercased()
+        switch fileExtension {
+        case "pdf":
+            return "doc.fill"
+        case "jpg", "jpeg", "png", "heic", "heif":
+            return "photo.fill"
+        default:
+            return "doc.questionmark.fill"
+        }
+    }
+    
+    private var documentColor: Color {
+        let fileExtension = document.fileURL.pathExtension.lowercased()
+        switch fileExtension {
+        case "pdf":
+            return .red
+        case "jpg", "jpeg", "png", "heic", "heif":
+            return .blue
+        default:
+            return .gray
         }
     }
     
@@ -60,7 +84,7 @@ struct PrescriptionDocumentCard: View {
                     .fontWeight(.medium)
                     .lineLimit(2)
                 
-                Text("PDF Document • \(document.fileSize) KB")
+                Text("\(documentTypeDescription) • \(formatFileSize(document.fileSize))")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -69,13 +93,33 @@ struct PrescriptionDocumentCard: View {
             
             Image(systemName: "arrow.up.right.square")
                 .font(.title2)
-                .foregroundColor(.red)
+                .foregroundColor(documentColor)
         }
+    }
+    
+    private var documentTypeDescription: String {
+        let fileExtension = document.fileURL.pathExtension.lowercased()
+        switch fileExtension {
+        case "pdf":
+            return "PDF Document"
+        case "jpg", "jpeg":
+            return "JPEG Image"
+        case "png":
+            return "PNG Image"
+        case "heic":
+            return "HEIC Image"
+        case "heif":
+            return "HEIF Image"
+        default:
+            return "\(fileExtension.uppercased()) Document"
+        }
+    }
+    
+    private func formatFileSize(_ bytes: Int64) -> String {
+        let formatter = ByteCountFormatter()
+        formatter.allowedUnits = [.useKB, .useMB]
+        formatter.countStyle = .file
+        return formatter.string(fromByteCount: bytes)
     }
 }
 
-#Preview {
-    PrescriptionDocumentCard(prescription: Prescription.samplePrescription)
-        .padding()
-        .background(Color(.systemGroupedBackground))
-}

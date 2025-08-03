@@ -96,8 +96,3 @@ struct PrescriptionFollowUpCard: View {
     }
 }
 
-#Preview {
-    PrescriptionFollowUpCard(prescription: Prescription.samplePrescription)
-        .padding()
-        .background(Color(.systemGroupedBackground))
-}

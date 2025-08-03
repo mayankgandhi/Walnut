@@ -14,6 +14,8 @@ struct PrescriptionDetailView: View {
     
     @Environment(\.dismiss) private var dismiss
     @State private var showingMedicationEditor = false
+    @State private var showingDocumentViewer = false
+    @State private var documentToView: Document?
     
     var body: some View {
         NavigationStack {
@@ -38,7 +40,12 @@ struct PrescriptionDetailView: View {
                     }
                     
                     // Document Card
-                    if let documentCard = PrescriptionDocumentCard(prescription: prescription, onViewDocument: handleDocumentView) {
+                    if let documentCard = PrescriptionDocumentCard(prescription: prescription, onViewDocument: {
+                        if let document = prescription.document {
+                            documentToView = document
+                            showingDocumentViewer = true
+                        }
+                    }) {
                         documentCard
                     }
                 }
@@ -59,12 +66,12 @@ struct PrescriptionDetailView: View {
             .sheet(isPresented: $showingMedicationEditor) {
                 PrescriptionMedicationEditor(prescription: prescription)
             }
+            .fullScreenCover(isPresented: $showingDocumentViewer) {
+                if let document = documentToView {
+                    DocumentViewerSheet(document: document)
+                }
+            }
         }
     }
     
-    // MARK: - Actions
-    private func handleDocumentView() {
-        // Handle document viewing logic here
-        // This could be showing a document viewer, sharing, etc.
-    }
 }

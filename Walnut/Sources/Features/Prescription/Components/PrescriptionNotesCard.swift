@@ -43,8 +43,3 @@ struct PrescriptionNotesCard: View {
     }
 }
 
-#Preview {
-    PrescriptionNotesCard(prescription: Prescription.samplePrescription)
-        .padding()
-        .background(Color(.systemGroupedBackground))
-}

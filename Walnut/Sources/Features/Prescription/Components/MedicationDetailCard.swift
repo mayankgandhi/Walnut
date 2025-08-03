@@ -147,8 +147,3 @@ struct MedicationDetailCard: View {
     }
 }
 
-#Preview {
-    MedicationDetailCard(medication: Medication.sampleMedication)
-        .padding()
-        .background(Color(.systemGroupedBackground))
-}
