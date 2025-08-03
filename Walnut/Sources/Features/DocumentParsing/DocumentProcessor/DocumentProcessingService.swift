@@ -12,11 +12,9 @@ import Foundation
 
 // MARK: - Protocols
 
-/// Protocol for Claude document operations
-protocol ClaudeDocumentServiceProtocol {
-    func uploadDocument(at url: URL) async throws -> ClaudeFileUploadResponse
-    func parseDocument<T: Codable>(fileId: String, as type: T.Type) async throws -> T
-    func deleteDocument(fileId: String) async throws
+/// Protocol for AI document operations
+protocol AIDocumentServiceProtocol {
+    func uploadAndParseDocument<T: Codable>(from url: URL, as type: T.Type, structDefinition: String?) async throws -> T
 }
 
 /// Protocol for progress tracking
@@ -44,7 +42,7 @@ class DocumentProcessingService {
     
     // MARK: - Dependencies
     
-    private let claudeService: ClaudeDocumentServiceProtocol
+    private let aiService: AIDocumentServiceProtocol
     private let fileService: FilePreparationService
     private let repository: DocumentRepositoryProtocol
     
@@ -62,11 +60,11 @@ class DocumentProcessingService {
     // MARK: - Initialization
     
     init(
-        claudeService: ClaudeDocumentServiceProtocol,
+        aiService: AIDocumentServiceProtocol,
         fileService: FilePreparationService,
         repository: DocumentRepositoryProtocol
     ) {
-        self.claudeService = claudeService
+        self.aiService = aiService
         self.fileService = fileService
         self.repository = repository
     }
@@ -91,7 +89,7 @@ class DocumentProcessingService {
         Task {
             do {
                 let useCase = DocumentProcessingUseCase(
-                    claudeService: claudeService,
+                    aiService: aiService,
                     fileService: fileService,
                     repository: repository,
                     progressDelegate: self
@@ -218,10 +216,14 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
     
 }
 
-// MARK: - ClaudeDocumentService Protocol Extension
+// MARK: - Protocol Extensions
 
-extension ClaudeDocumentService: ClaudeDocumentServiceProtocol {
+extension ClaudeDocumentService: AIDocumentServiceProtocol {
     // The existing ClaudeDocumentService already implements the required methods
+}
+
+extension OpenAIDocumentService: AIDocumentServiceProtocol {
+    // The existing OpenAIDocumentService already implements the required methods
 }
 
 // MARK: - Supporting Types
@@ -236,16 +238,33 @@ struct ProcessingResult {
 
 extension DocumentProcessingService {
     
-    /// Creates a DocumentProcessingService with default implementations
-    static func create(
-        claudeService: ClaudeDocumentService,
+    /// Creates a DocumentProcessingService with default implementations using OpenAI
+    static func createWithOpenAI(
+        apiKey: String,
         modelContext: ModelContext
     ) -> DocumentProcessingService {
+        let aiService = OpenAIDocumentService(apiKey: apiKey)
         let fileService = DefaultFilePreparationService()
         let repository = DefaultDocumentRepository(modelContext: modelContext)
         
         return DocumentProcessingService(
-            claudeService: claudeService,
+            aiService: aiService,
+            fileService: fileService,
+            repository: repository
+        )
+    }
+    
+    /// Creates a DocumentProcessingService with default implementations using Claude
+    static func createWithClaude(
+        apiKey: String,
+        modelContext: ModelContext
+    ) -> DocumentProcessingService {
+        let aiService = ClaudeDocumentService(apiKey: apiKey)
+        let fileService = DefaultFilePreparationService()
+        let repository = DefaultDocumentRepository(modelContext: modelContext)
+        
+        return DocumentProcessingService(
+            aiService: aiService,
             fileService: fileService,
             repository: repository
         )

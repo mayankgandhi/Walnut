@@ -28,15 +28,15 @@ The app follows a feature-based architecture under `Sources/Features/`:
 
 - **PatientList/** - Patient management views and CRUD operations
 - **MedicalCases/** - Medical case tracking, editors, and detail views  
-- **DocumentParsing/** - Claude AI integration for parsing medical documents
+- **DocumentParsing/** - OpenAI integration for parsing medical documents
 - **Documents/** - Document viewing and management
 - **TestResults/** - Lab results and charts
 
 ### AI Integration
-- **ClaudeFilesService** (`Sources/Features/DocumentParsing/ClaudeFilesService.swift`) - Handles document upload, parsing, and deletion via Claude API
-- Uses Claude Sonnet 4 model for prescription parsing
-- Supports PDF, image, and text document parsing
-- Implements multipart form uploads and structured JSON responses
+- **OpenAIDocumentService** (`Sources/Features/DocumentParsing/OpenAIServices/OpenAIDocumentService.swift`) - Handles document parsing via OpenAI API
+- Uses GPT-4o with vision model for prescription and lab report parsing
+- Supports PDF, image, and text document parsing through base64 encoding
+- Implements direct document analysis without file upload/storage
 
 ### Key Components
 - **ContentView** - App entry point, displays PatientsListView

@@ -32,10 +32,9 @@ struct PrescriptionDocumentPicker: View {
         }
         .task {
             if processingService == nil {
-                let apiKey = claudeKey
-                let claudeService = ClaudeDocumentService(apiKey: apiKey)
-                processingService = DocumentProcessingService.create(
-                    claudeService: claudeService,
+                let apiKey = openAIKey
+                processingService = DocumentProcessingService.createWithOpenAI(
+                    apiKey: apiKey,
                     modelContext: modelContext
                 )
             }
@@ -64,10 +63,9 @@ struct BloodReportDocumentPicker: View {
         }
         .task {
             if processingService == nil {
-                let apiKey = claudeKey
-                let claudeService = ClaudeDocumentService(apiKey: apiKey)
-                processingService = DocumentProcessingService.create(
-                    claudeService: claudeService,
+                let apiKey = openAIKey
+                processingService = DocumentProcessingService.createWithOpenAI(
+                    apiKey: apiKey,
                     modelContext: modelContext
                 )
             }
@@ -108,10 +106,9 @@ struct GeneralDocumentPicker: View {
         }
         .task {
             if processingService == nil {
-                let apiKey = claudeKey
-                let claudeService = ClaudeDocumentService(apiKey: apiKey)
-                processingService = DocumentProcessingService.create(
-                    claudeService: claudeService,
+                let apiKey = openAIKey
+                processingService = DocumentProcessingService.createWithOpenAI(
+                    apiKey: apiKey,
                     modelContext: modelContext
                 )
             }

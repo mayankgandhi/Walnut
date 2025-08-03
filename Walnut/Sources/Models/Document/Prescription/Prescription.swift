@@ -89,7 +89,9 @@ class Prescription {
                     id: medication.id,
                     name: medication.name,
                     frequency: medication.frequency,
-                    numberOfDays: medication.numberOfDays
+                    numberOfDays: medication.numberOfDays,
+                    dosage: medication.dosage,
+                    instructions: medication.instructions
                 )
             })
         )

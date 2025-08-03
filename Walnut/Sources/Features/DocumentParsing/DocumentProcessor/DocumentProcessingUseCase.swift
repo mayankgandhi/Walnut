@@ -14,18 +14,18 @@ import SwiftData
 /// Encapsulates the business logic for document processing
 struct DocumentProcessingUseCase {
     
-    private let claudeService: ClaudeDocumentServiceProtocol
+    private let aiService: AIDocumentServiceProtocol
     private let fileService: FilePreparationService
     private let repository: DocumentRepositoryProtocol
     private weak var progressDelegate: DocumentProcessingProgressDelegate?
     
     init(
-        claudeService: ClaudeDocumentServiceProtocol,
+        aiService: AIDocumentServiceProtocol,
         fileService: FilePreparationService,
         repository: DocumentRepositoryProtocol,
         progressDelegate: DocumentProcessingProgressDelegate?
     ) {
-        self.claudeService = claudeService
+        self.aiService = aiService
         self.fileService = fileService
         self.repository = repository
         self.progressDelegate = progressDelegate
@@ -37,35 +37,22 @@ struct DocumentProcessingUseCase {
     ) async throws -> ProcessingResult {
         
         var fileURL: URL?
-        var uploadResponse: ClaudeFileUploadResponse?
         
         do {
-            // Step 1: Prepare file for upload
-            await updateProgress(0.1, "Preparing file for upload...")
+            // Step 1: Prepare file for processing
+            await updateProgress(0.2, "Preparing file...")
             fileURL = try await fileService.prepareFile(from: store)
             
-            // Step 2: Upload to Claude
-            await updateProgress(0.3, "Uploading document...")
-            uploadResponse = try await claudeService.uploadDocument(at: fileURL!)
-            
-            // Step 3: Parse and save document based on type
-            await updateProgress(0.6, "Parsing document...")
+            // Step 2: Parse document directly using AI service
+            await updateProgress(0.5, "Parsing document...")
             let modelId = try await parseAndSaveDocument(
-                fileId: uploadResponse!.id,
+                fileURL: fileURL!,
                 documentType: store.selectedDocumentType,
-                medicalCase: medicalCase,
-                fileURL: fileURL!
+                medicalCase: medicalCase
             )
             
-            // Step 4: Cleanup
+            // Step 3: Cleanup
             await updateProgress(0.9, "Cleaning up...")
-            do {
-                try await claudeService.deleteDocument(fileId: uploadResponse!.id)
-            } catch {
-                // Log cleanup error but don't fail the entire operation
-                print("Warning: Failed to cleanup remote file: \(error)")
-            }
-            
             if let fileURL = fileURL {
                 fileService.cleanupTemporaryFile(at: fileURL)
             }
@@ -80,9 +67,6 @@ struct DocumentProcessingUseCase {
             
         } catch {
             // Cleanup on error
-            if let uploadResponse = uploadResponse {
-                try? await claudeService.deleteDocument(fileId: uploadResponse.id)
-            }
             if let fileURL = fileURL {
                 fileService.cleanupTemporaryFile(at: fileURL)
             }
@@ -107,16 +91,16 @@ struct DocumentProcessingUseCase {
     // MARK: - Private Methods
     
     private func parseAndSaveDocument(
-        fileId: String,
+        fileURL: URL,
         documentType: DocumentType,
-        medicalCase: MedicalCase,
-        fileURL: URL
+        medicalCase: MedicalCase
     ) async throws -> PersistentIdentifier {
         switch documentType {
         case .prescription:
-            let parsedPrescription = try await claudeService.parseDocument(
-                fileId: fileId,
-                as: ParsedPrescription.self
+            let parsedPrescription = try await aiService.uploadAndParseDocument(
+                from: fileURL,
+                as: ParsedPrescription.self,
+                structDefinition: nil
             )
             return try await repository.savePrescription(
                 parsedPrescription,
@@ -125,9 +109,10 @@ struct DocumentProcessingUseCase {
             )
             
         case .labResult, .bloodWork:
-            let parsedBloodReport = try await claudeService.parseDocument(
-                fileId: fileId,
-                as: ParsedBloodReport.self
+            let parsedBloodReport = try await aiService.uploadAndParseDocument(
+                from: fileURL,
+                as: ParsedBloodReport.self,
+                structDefinition: nil
             )
             return try await repository.saveBloodReport(
                 parsedBloodReport,

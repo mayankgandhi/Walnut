@@ -1,5 +1,5 @@
 //
-//  ClaudeDocumentParser.swift
+//  OpenAIDocumentParser.swift
 //  Walnut
 //
 //  Created by Mayank Gandhi on 08/07/25.
@@ -8,59 +8,66 @@
 
 import Foundation
 
-/// Handles document parsing and AI communication with Claude API
-final class ClaudeDocumentParser {
+/// Handles document parsing and AI communication with OpenAI API
+final class OpenAIDocumentParser {
     
     // MARK: - Dependencies
     
-    private let networkClient: ClaudeNetworkClient
+    private let networkClient: OpenAINetworkClient
     
     // MARK: - Initialization
     
-    init(networkClient: ClaudeNetworkClient) {
+    init(networkClient: OpenAINetworkClient) {
         self.networkClient = networkClient
     }
     
     // MARK: - Document Parsing
     
-    func parseDocument<T: Codable>(fileId: String, as type: T.Type) async throws -> T {
+    func parseDocument<T: Codable>(data: Data, fileName: String, as type: T.Type) async throws -> T {
+        // For OpenAI, we need to encode the document as base64 for vision models
+        let base64Data = data.base64EncodedString()
+        let mimeType = MimeTypeResolver.mimeType(for: fileName)
+        
         // Create parsing prompt
         let structDef = generateStructDefinition(for: type)
         let prompt = """
         Please analyze this document and extract the information into the following JSON structure. 
         Return ONLY JSON and nothing else:
         \(structDef)
-        The response is directly decoded by the same model shared. 
+        The response is directly decoded by the same model shared.
         """
         
-        let messageRequest = ClaudeMessageRequest(
-            model: "claude-sonnet-4-20250514",
-            maxTokens: 4096,
+        let chatRequest = OpenAIChatRequest(
+            model: "gpt-4o",
             messages: [
-                ClaudeMessage(
+                OpenAIMessage(
                     role: "user",
                     content: [
-                        .text(ClaudeTextContent(text: prompt)),
-                        .document(ClaudeDocumentContent(fileId: fileId, citations: ClaudeCitations(enabled: true)))
+                        .text(OpenAITextContent(text: prompt)),
+                        .imageUrl(OpenAIImageContent(
+                            imageUrl: OpenAIImageUrl(url: "data:\(mimeType);base64,\(base64Data)")
+                        ))
                     ]
                 )
-            ]
+            ],
+            maxTokens: 4096,
+            temperature: 0.1
         )
         
         do {
-            let requestData = try JSONEncoder().encode(messageRequest)
-            let request = try networkClient.createMessageRequest(endpoint: "messages", body: requestData)
+            let requestData = try JSONEncoder().encode(chatRequest)
+            let request = try networkClient.createChatRequest(endpoint: "chat/completions", body: requestData)
             let (data, httpResponse) = try await networkClient.executeRequest(request)
             
             guard httpResponse.statusCode == 200 else {
                 let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
-                throw ClaudeServiceError.parseFailed(errorMessage)
+                throw OpenAIServiceError.parseFailed(errorMessage)
             }
             
-            let messageResponse = try JSONDecoder().decode(ClaudeMessageResponse.self, from: data)
+            let chatResponse = try JSONDecoder().decode(OpenAIChatResponse.self, from: data)
             
-            guard let content = messageResponse.content.first?.text else {
-                throw ClaudeServiceError.parseFailed("No content in response")
+            guard let content = chatResponse.choices.first?.message.content else {
+                throw OpenAIServiceError.parseFailed("No content in response")
             }
             
             // Clean the JSON response
@@ -68,7 +75,7 @@ final class ClaudeDocumentParser {
             
             // Parse the JSON response
             guard let jsonData = cleanedContent.data(using: .utf8) else {
-                throw ClaudeServiceError.parseFailed("Could not convert response to data")
+                throw OpenAIServiceError.parseFailed("Could not convert response to data")
             }
             
             let decoder = JSONDecoder()
@@ -77,11 +84,11 @@ final class ClaudeDocumentParser {
             return parsedObject
             
         } catch let error as DecodingError {
-            throw ClaudeServiceError.decodingError(error)
-        } catch let error as ClaudeServiceError {
+            throw OpenAIServiceError.decodingError(error)
+        } catch let error as OpenAIServiceError {
             throw error
         } catch {
-            throw ClaudeServiceError.networkError(error)
+            throw OpenAIServiceError.networkError(error)
         }
     }
     
