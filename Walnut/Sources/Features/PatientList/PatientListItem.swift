@@ -8,197 +8,191 @@
 
 import SwiftUI
 
+struct ModernPatientCard: View {
+    let patient: Patient
+    @State private var isPressed = false
+    
+    var hasRecentActivity: Bool {
+        !patient.medicalCases.isEmpty && 
+        patient.medicalCases.contains { 
+            Calendar.current.isDate($0.createdAt, inSameDayAs: Date()) ||
+            Calendar.current.dateComponents([.day], from: $0.createdAt, to: Date()).day! <= 7
+        }
+    }
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            // Modern Avatar
+            ZStack {
+                Circle()
+                    .fill(patient.primaryColor.opacity(0.15))
+                    .frame(width: 56, height: 56)
+                
+                Text(patient.initials)
+                    .font(.system(size: 20, weight: .semibold, design: .rounded))
+                    .foregroundStyle(patient.primaryColor)
+            }
+            .overlay(
+                Circle()
+                    .stroke(patient.primaryColor.opacity(0.3), lineWidth: 1.5)
+            )
+            
+            // Patient Information
+            VStack(alignment: .leading, spacing: 8) {
+                // Header with name and status
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(patient.fullName)
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(.primary)
+                        
+                        Text("\(patient.age) years old • \(patient.gender)")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    Spacer()
+                    
+                    VStack(alignment: .trailing, spacing: 4) {
+                        // Status indicator
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(patient.isActive ? .green : .orange)
+                                .frame(width: 8, height: 8)
+                            
+                            Text(patient.isActive ? "Active" : "Inactive")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(patient.isActive ? .green : .orange)
+                        }
+                        
+                        // Recent activity indicator
+                        if hasRecentActivity {
+                            HStack(spacing: 4) {
+                                Image(systemName: "clock.fill")
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(.blue)
+                                
+                                Text("Recent")
+                                    .font(.system(size: 10, weight: .medium))
+                                    .foregroundStyle(.blue)
+                            }
+                        }
+                    }
+                }
+                
+                // Medical details
+                HStack(spacing: 20) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "drop.circle.fill")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.red)
+                        
+                        Text(patient.bloodType.isEmpty ? "Unknown" : patient.bloodType)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(.primary)
+                    }
+                    
+                    if !patient.medicalCases.isEmpty {
+                        HStack(spacing: 6) {
+                            Image(systemName: "folder.circle.fill")
+                                .font(.system(size: 14))
+                                .foregroundStyle(.blue)
+                            
+                            Text("\(patient.medicalCases.count) case\(patient.medicalCases.count == 1 ? "" : "s")")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundStyle(.primary)
+                        }
+                    }
+                    
+                    Spacer()
+                }
+                
+                // Notes preview
+                if !patient.notes.isEmpty {
+                    Text(patient.notes)
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
+                }
+            }
+            
+            // Arrow indicator
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.tertiary)
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.regularMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(.quaternary, lineWidth: 0.5)
+                )
+        )
+        .scaleEffect(isPressed ? 0.98 : 1.0)
+        .animation(.easeInOut(duration: 0.15), value: isPressed)
+    }
+}
+
+// Legacy struct for compatibility
 struct PatientListItem: View {
     let patient: Patient
     
     var body: some View {
-        HStack(spacing: 0) {
-            // Leading accent bar
-            Rectangle()
-                .fill(
-                    LinearGradient(
-                        colors: patient.isActive ? 
-                        [patient.primaryColor, patient.primaryColor.opacity(0.7)] :
-                        [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .frame(width: 4)
-                .clipShape(RoundedRectangle(cornerRadius: 2))
-            
-            HStack(alignment: .center, spacing: 16) {
-                // Enhanced avatar with modern design
-                ZStack {
-                    // Soft shadow background
-                    Circle()
-                        .fill(patient.primaryColor.opacity(0.1))
-                        .frame(width: 56, height: 56)
-                        .blur(radius: 4)
-                    
-                    // Main avatar circle with enhanced gradient
-                    Circle()
-                        .fill(
-                            patient.isActive ? 
-                            LinearGradient(
-                                colors: [
-                                    patient.primaryColor,
-                                    patient.primaryColor.opacity(0.8),
-                                    patient.primaryColor.opacity(0.6)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ) :
-                            LinearGradient(
-                                colors: [Color.gray.opacity(0.6), Color.gray.opacity(0.4)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 52, height: 52)
-                        .overlay(
-                            Circle()
-                                .stroke(
-                                    LinearGradient(
-                                        colors: [
-                                            Color.white.opacity(patient.isActive ? 0.3 : 0.1),
-                                            Color.clear
-                                        ],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                    lineWidth: 1
-                                )
-                        )
-                    
-                    Text(patient.initials)
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                        .shadow(color: .black.opacity(0.2), radius: 1, x: 0, y: 1)
-                }
-                .shadow(
-                    color: patient.isActive ? patient.primaryColor.opacity(0.25) : Color.clear,
-                    radius: 8,
-                    x: 0,
-                    y: 4
-                )
-                
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack {
-                        Text(patient.fullName)
-                            .font(.system(size: 17, weight: .semibold, design: .default))
-                            .foregroundColor(.primary)
-                        
-                        Spacer()
-                        
-                        if !patient.isActive {
-                            Text("Archived")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(
-                                    Capsule()
-                                        .fill(Color.gray.opacity(0.15))
-                                        .overlay(
-                                            Capsule()
-                                                .stroke(Color.gray.opacity(0.3), lineWidth: 0.5)
-                                        )
-                                )
-                                .foregroundColor(.secondary)
-                        } else {
-                            // Enhanced active indicator
-                            HStack(spacing: 4) {
-                                Circle()
-                                    .fill(patient.primaryColor)
-                                    .frame(width: 6, height: 6)
-                                    .shadow(color: patient.primaryColor.opacity(0.4), radius: 2, x: 0, y: 1)
-                                
-                                Text("Active")
-                                    .font(.caption2)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(patient.primaryColor)
-                            }
-                        }
-                    }
-                    
-                    HStack(spacing: 16) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "calendar")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Text("\(patient.age) years")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        HStack(spacing: 4) {
-                            Image(systemName: "drop.fill")
-                                .font(.caption)
-                                .foregroundColor(.red)
-                            Text(patient.bloodType.isEmpty ? "Unknown" : patient.bloodType)
-                                .font(.subheadline)
-                                .foregroundColor(.red)
-                        }
-                    }
-                    
-                    if !patient.notes.isEmpty {
-                        Text(patient.notes)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .lineLimit(2)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(patient.primaryColor.opacity(0.06))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(patient.primaryColor.opacity(0.15), lineWidth: 0.5)
-                                    )
-                            )
-                            .padding(.top, 2)
-                    }
-                }
-                
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-        }
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(
-                    patient.isActive ? 
-                    patient.primaryColor.opacity(0.1) : 
-                    Color.gray.opacity(0.05),
-                    lineWidth: 1
-                )
-        )
-        .shadow(
-            color: patient.isActive ? 
-            patient.primaryColor.opacity(0.08) : 
-            Color.black.opacity(0.02),
-            radius: patient.isActive ? 6 : 2,
-            x: 0,
-            y: patient.isActive ? 3 : 1
-        )
-        .padding(.horizontal, 16)
-        .padding(.vertical, 4)
+        ModernPatientCard(patient: patient)
     }
 }
 
 
 // Preview
 #Preview {
-    NavigationView {
-        List {
-            ForEach([Patient.samplePatient]) { patient in
-                PatientListItem(patient: patient)
+    ScrollView {
+        LazyVStack(spacing: 16) {
+            ForEach([
+                Patient.samplePatient,
+                Patient(
+                    id: UUID(),
+                    firstName: "Sarah",
+                    lastName: "Johnson",
+                    dateOfBirth: Calendar.current.date(byAdding: .year, value: -28, to: Date()) ?? Date(),
+                    gender: "Female",
+                    bloodType: "O-",
+                    emergencyContactName: "Mike Johnson",
+                    emergencyContactPhone: "(555) 987-6543",
+                    notes: "Allergic to shellfish and has a history of migraines. Regular checkups recommended.",
+                    isActive: true,
+                    primaryColorHex: "#45B7D1",
+                    createdAt: Date(),
+                    updatedAt: Date(),
+                    medicalCases: []
+                ),
+                Patient(
+                    id: UUID(),
+                    firstName: "Robert",
+                    lastName: "Williams",
+                    dateOfBirth: Calendar.current.date(byAdding: .year, value: -65, to: Date()) ?? Date(),
+                    gender: "Male",
+                    bloodType: "B+",
+                    emergencyContactName: "Linda Williams",
+                    emergencyContactPhone: "(555) 456-7890",
+                    notes: "",
+                    isActive: false,
+                    primaryColorHex: "#96CEB4",
+                    createdAt: Date(),
+                    updatedAt: Date(),
+                    medicalCases: []
+                )
+            ]) { patient in
+                ModernPatientCard(patient: patient)
+                    .padding(.horizontal, 20)
             }
         }
-        .navigationTitle("Patients")
+        .padding(.vertical, 20)
     }
+    .background(.regularMaterial)
 }
