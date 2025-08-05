@@ -10,7 +10,11 @@ import SwiftUI
 
 /// Main orchestrator service that coordinates file operations and document parsing
 /// Maintains the same interface as the original ClaudeFilesService for backward compatibility
-final class ClaudeDocumentService: ObservableObject {
+final class ClaudeDocumentService: ObservableObject, AIDocumentServiceProtocol, FileUploadServiceProtocol {
+    
+    // MARK: - Type Aliases
+    
+    typealias UploadResponse = ClaudeFileUploadResponse
     
     // MARK: - Dependencies
     
@@ -44,16 +48,22 @@ final class ClaudeDocumentService: ObservableObject {
     
     // MARK: - Document Parsing
     
-    func parseDocument<T: Codable>(fileId: String, as type: T.Type) async throws -> T {
+    func parseDocument<T: ParseableModel>(data: Data, fileName: String, as type: T.Type) async throws -> T {
+        let fileResponse = try await uploadFile(data: data, fileName: fileName)
+        let parsedData = try await documentParser.parseDocument(fileId: fileResponse.id, as: type)
+        try await deleteDocument(fileId: fileResponse.id)
+        return parsedData
+    }
+    
+    func parseDocument<T: ParseableModel>(fileId: String, as type: T.Type) async throws -> T {
         return try await documentParser.parseDocument(fileId: fileId, as: type)
     }
     
     // MARK: - Convenience Methods
     
-    func uploadAndParseDocument<T: Codable>(
+    func uploadAndParseDocument<T: ParseableModel>(
         from url: URL, 
-        as type: T.Type, 
-        structDefinition: String? = nil
+        as type: T.Type
     ) async throws -> T {
         let fileResponse = try await uploadDocument(at: url)
         let parsedData = try await parseDocument(fileId: fileResponse.id, as: type)

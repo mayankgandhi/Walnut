@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftData
+import AIKit
 
 // MARK: - Use Case Implementation
 
@@ -99,8 +100,7 @@ struct DocumentProcessingUseCase {
         case .prescription:
             let parsedPrescription = try await aiService.uploadAndParseDocument(
                 from: fileURL,
-                as: ParsedPrescription.self,
-                structDefinition: nil
+                as: ParsedPrescription.self
             )
             return try await repository.savePrescription(
                 parsedPrescription,
@@ -111,8 +111,7 @@ struct DocumentProcessingUseCase {
         case .labResult, .bloodWork:
             let parsedBloodReport = try await aiService.uploadAndParseDocument(
                 from: fileURL,
-                as: ParsedBloodReport.self,
-                structDefinition: nil
+                as: ParsedBloodReport.self
             )
             return try await repository.saveBloodReport(
                 parsedBloodReport,

@@ -23,7 +23,16 @@ public final class OpenAIDocumentParser: DocumentParserProtocol {
     
     // MARK: - DocumentParserProtocol
     
-    public func parseDocument<T: Codable>(data: Data, fileName: String, as type: T.Type) async throws -> T {
+    public func parseDocument<T: ParseableModel>(data: Data, fileName: String, as type: T.Type) async throws -> T {
+        guard let openAIType = type as? (ParseableModel & OpenAISchemaDefinable).Type else {
+            throw OpenAIServiceError.unsupportedFileType("Type \(T.self) does not support OpenAI schema definition")
+        }
+        return try await parseOpenAIDocument(data: data, fileName: fileName, as: openAIType) as! T
+    }
+    
+    // MARK: - OpenAI-specific parsing
+    
+    public func parseOpenAIDocument<T: ParseableModel & OpenAISchemaDefinable>(data: Data, fileName: String, as type: T.Type) async throws -> T {
         // Check if the file is a supported image type for OpenAI vision
         guard isImageFile(fileName: fileName) else {
             throw OpenAIServiceError.unsupportedFileType("OpenAI vision only supports image files (JPEG, PNG, GIF, WebP). PDF files require a different parsing approach.")
@@ -33,9 +42,15 @@ public final class OpenAIDocumentParser: DocumentParserProtocol {
         let base64Data = data.base64EncodedString()
         let mimeType = MimeTypeResolver.mimeType(for: fileName)
         
-        // Create parsing prompt
-        let prompt = generatePrompt(for: type)
-        let jsonSchema = generateJSONSchema(for: type)
+        // Create parsing prompt using the model's parseDefinition
+        let prompt = """
+        Please analyze this document and extract the information according to the following structure:
+        
+        \(type.parseDefinition)
+        
+        Return the information as structured JSON matching the schema provided.
+        """
+        let jsonSchema = type.jsonSchema
         
         let chatRequest = OpenAIChatRequest(
             model: "gpt-4o",
@@ -55,7 +70,7 @@ public final class OpenAIDocumentParser: DocumentParserProtocol {
             responseFormat: OpenAIResponseFormat(
                 type: "json_schema",
                 jsonSchema: OpenAIJSONSchemaWrapper(
-                    name: type == ParsedPrescription.self ? "ParsedPrescription" : "ParsedBloodReport",
+                    name: String(describing: type),
                     strict: true,
                     schema: jsonSchema
                 )
@@ -104,187 +119,5 @@ public final class OpenAIDocumentParser: DocumentParserProtocol {
         let supportedImageTypes = ["jpg", "jpeg", "png", "gif", "webp", "heic", "heif"]
         return supportedImageTypes.contains(pathExtension)
     }
-    
-    private func generatePrompt<T: Codable>(for type: T.Type) -> String {
-        switch type {
-        case is ParsedPrescription.Type:
-            return """
-            Please analyze this prescription document and extract all relevant information. Pay attention to:
-            - Patient demographics and visit details
-            - Doctor and facility information
-            - Prescribed medications with dosages, frequencies, and instructions
-            - Follow-up appointments or tests
-            - Any additional notes
-            """
-        case is ParsedBloodReport.Type:
-            return """
-            Please analyze this blood/lab report document and extract all test results. Pay attention to:
-            - Lab name and test information
-            - Test date and category
-            - Individual test results with values, units, and reference ranges
-            - Any abnormal values or flags
-            - Additional notes or comments
-            """
-        default:
-            return "Please analyze this document and extract the relevant information according to the provided schema."
-        }
-    }
-    
-    private func generateJSONSchema<T: Codable>(for type: T.Type) -> OpenAIJSONSchema {
-        switch type {
-        case is ParsedPrescription.Type:
-            return OpenAIJSONSchema(
-                properties: [
-                    "dateIssued": [
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "Date when the prescription was issued"
-                    ],
-                    "doctorName": [
-                        "type": ["string", "null"],
-                        "description": "Name of the prescribing doctor"
-                    ],
-                    "facilityName": [
-                        "type": ["string", "null"],
-                        "description": "Name of the medical facility"
-                    ],
-                    "followUpDate": [
-                        "type": ["string", "null"],
-                        "format": "date-time",
-                        "description": "Date for follow-up appointment"
-                    ],
-                    "followUpTests": [
-                        "type": "array",
-                        "items": ["type": "string"],
-                        "description": "List of follow-up tests recommended"
-                    ],
-                    "notes": [
-                        "type": ["string", "null"],
-                        "description": "Additional notes or instructions"
-                    ],
-                    "medications": [
-                        "type": "array",
-                        "items": [
-                            "type": "object",
-                            "properties": [
-                                "id": [
-                                    "type": "string",
-                                    "format": "uuid",
-                                    "description": "Unique identifier for the medication"
-                                ],
-                                "name": [
-                                    "type": "string",
-                                    "description": "Name of the medication"
-                                ],
-                                "frequency": [
-                                    "type": "array",
-                                    "items": [
-                                        "type": "object",
-                                        "properties": [
-                                            "mealTime": [
-                                                "type": "string",
-                                                "enum": ["breakfast", "lunch", "dinner", "bedtime"],
-                                                "description": "Meal time for medication"
-                                            ],
-                                            "timing": [
-                                                "type": ["string", "null"],
-                                                "enum": ["before", "after", NSNull()],
-                                                "description": "Before or after meal timing"
-                                            ],
-                                            "dosage": [
-                                                "type": ["string", "null"],
-                                                "description": "Dosage for this schedule"
-                                            ]
-                                        ],
-                                        "required": ["mealTime", "timing", "dosage"],
-                                        "additionalProperties": false
-                                    ]
-                                ],
-                                "numberOfDays": [
-                                    "type": "integer",
-                                    "description": "Number of days to take the medication"
-                                ],
-                                "dosage": [
-                                    "type": ["string", "null"],
-                                    "description": "Overall dosage information"
-                                ],
-                                "instructions": [
-                                    "type": ["string", "null"],
-                                    "description": "Special instructions for the medication"
-                                ]
-                            ],
-                            "required": ["id", "name", "frequency", "numberOfDays", "dosage", "instructions"],
-                            "additionalProperties": false
-                        ]
-                    ]
-                ],
-                required: ["dateIssued", "doctorName", "facilityName", "followUpDate", "followUpTests", "notes", "medications"],
-                additionalProperties: false
-            )
-        case is ParsedBloodReport.Type:
-            return OpenAIJSONSchema(
-                properties: [
-                    "testName": [
-                        "type": "string",
-                        "description": "Name of the blood test or panel"
-                    ],
-                    "labName": [
-                        "type": "string",
-                        "description": "Name of the laboratory"
-                    ],
-                    "category": [
-                        "type": "string",
-                        "description": "Category or type of blood test"
-                    ],
-                    "resultDate": [
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "Date when the test results were obtained"
-                    ],
-                    "notes": [
-                        "type": "string",
-                        "description": "Additional notes or comments"
-                    ],
-                    "testResults": [
-                        "type": "array",
-                        "items": [
-                            "type": "object",
-                            "properties": [
-                                "testName": [
-                                    "type": "string",
-                                    "description": "Name of the individual test"
-                                ],
-                                "value": [
-                                    "type": "string",
-                                    "description": "Test result value"
-                                ],
-                                "unit": [
-                                    "type": "string",
-                                    "description": "Unit of measurement"
-                                ],
-                                "referenceRange": [
-                                    "type": "string",
-                                    "description": "Normal reference range"
-                                ],
-                                "isAbnormal": [
-                                    "type": "boolean",
-                                    "description": "Whether the result is abnormal"
-                                ]
-                            ],
-                            "required": ["testName", "value", "unit", "referenceRange", "isAbnormal"],
-                            "additionalProperties": false
-                        ]
-                    ]
-                ],
-                required: ["testName", "labName", "category", "resultDate", "notes", "testResults"],
-                additionalProperties: false
-            )
-        default:
-            return OpenAIJSONSchema(
-                properties: [:],
-                required: [],
-                additionalProperties: true
-            )
-        }
-    }
+
 }

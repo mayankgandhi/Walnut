@@ -8,6 +8,22 @@
 
 import Foundation
 
+// MARK: - OpenAI-specific Protocol Extension
+
+/// Protocol extension for OpenAI JSON Schema support
+public protocol OpenAISchemaDefinable: ParseDefinable {
+    static var jsonSchema: OpenAIJSONSchema { get }
+}
+
+/// Protocol for AI document parsing services that require OpenAI schema support
+public protocol OpenAIDocumentServiceProtocol {
+    /// Parse a document using direct data and filename
+    func parseDocument<T: ParseableModel & OpenAISchemaDefinable>(data: Data, fileName: String, as type: T.Type) async throws -> T
+    
+    /// Upload and parse a document from URL (for services that require file upload)
+    func uploadAndParseDocument<T: ParseableModel & OpenAISchemaDefinable>(from url: URL, as type: T.Type) async throws -> T
+}
+
 // MARK: - File Upload Models
 
 public struct OpenAIFileUploadResponse: Codable {

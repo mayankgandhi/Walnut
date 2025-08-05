@@ -9,32 +9,35 @@
 import Foundation
 
 /// Unified service that routes document parsing to the appropriate service based on file type
-public final class UnifiedDocumentParsingService: UnifiedParsingServiceProtocol, ObservableObject {
-    
+public final class UnifiedDocumentParsingService: AIDocumentServiceProtocol, ObservableObject {
+
     // MARK: - Dependencies
     
     private let openAIService: OpenAIDocumentService
     
     // MARK: - Initialization
     
-    public init(openAIAPIKey: String) {
-        self.openAIService = OpenAIDocumentService(apiKey: openAIAPIKey)
+    public init() {
+        self.openAIService = OpenAIDocumentService(apiKey: openAIKey)
     }
     
     // MARK: - AIDocumentServiceProtocol
     
-    public func parseDocument<T: Codable>(data: Data, fileName: String, as type: T.Type) async throws -> T {
-        return try await openAIService.parseDocument(data: data, fileName: fileName, as: type)
+    public func parseDocument<T: ParseableModel>(data: Data, fileName: String, as type: T.Type) async throws -> T {
+        guard let openAIType = type as? (ParseableModel & OpenAISchemaDefinable).Type else {
+            throw AIKitError.unsupportedFileType("Type \(T.self) does not support OpenAI schema definition")
+        }
+        return try await openAIService.parseDocument(data: data, fileName: fileName, as: openAIType) as! T
     }
     
-    public func uploadAndParseDocument<T: Codable>(from url: URL, as type: T.Type, structDefinition: String?) async throws -> T {
+    public func uploadAndParseDocument<T: ParseableModel>(from url: URL, as type: T.Type) async throws -> T {
         return try await parseDocument(from: url, as: type)
     }
     
     // MARK: - UnifiedParsingServiceProtocol
     
     /// Parse any supported document type by routing to the appropriate service
-    public func parseDocument<T: Codable>(
+    public func parseDocument<T: ParseableModel>(
         from url: URL,
         as type: T.Type
     ) async throws -> T {
@@ -52,25 +55,13 @@ public final class UnifiedDocumentParsingService: UnifiedParsingServiceProtocol,
     }
     
     /// Parse image documents using OpenAI vision
-    private func parseImageDocument<T: Codable>(
+    private func parseImageDocument<T: ParseableModel>(
         from url: URL,
         as type: T.Type
     ) async throws -> T {
         let fileData = try Data(contentsOf: url)
         let fileName = url.lastPathComponent
-        return try await openAIService.parseDocument(data: fileData, fileName: fileName, as: type)
-    }
-    
-    // MARK: - Convenience Methods
-    
-    /// Parse a prescription document (supports image formats)
-    public func parsePrescription(from url: URL) async throws -> ParsedPrescription {
-        return try await parseDocument(from: url, as: ParsedPrescription.self)
-    }
-    
-    /// Parse a blood report document (supports image formats)
-    public func parseBloodReport(from url: URL) async throws -> ParsedBloodReport {
-        return try await parseDocument(from: url, as: ParsedBloodReport.self)
+        return try await parseDocument(data: fileData, fileName: fileName, as: type)
     }
     
     // MARK: - File Type Support

@@ -20,18 +20,5 @@ final class AIKitTests: XCTestCase {
         XCTAssertEqual(MimeTypeResolver.mimeType(for: "test.jpg"), "image/jpeg")
         XCTAssertEqual(MimeTypeResolver.mimeType(for: "test.png"), "image/png")
     }
-    
-    func testConfiguration() {
-        let config = AIKitConfiguration(openAIAPIKey: "test-key")
-        XCTAssertEqual(config.openAIAPIKey, "test-key")
-        XCTAssertNil(config.claudeAPIKey)
-    }
-    
-    func testFactoryMethods() {
-        let unified = AIKitFactory.createUnifiedService(openAIAPIKey: "test-key")
-        XCTAssertNotNil(unified)
-        
-        let openAI = AIKitFactory.createOpenAIService(apiKey: "test-key")
-        XCTAssertNotNil(openAI)
-    }
+  
 }

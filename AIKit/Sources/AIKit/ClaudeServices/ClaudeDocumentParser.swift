@@ -9,7 +9,7 @@
 import Foundation
 
 /// Handles document parsing and AI communication with Claude API
-final class ClaudeDocumentParser {
+final class ClaudeDocumentParser: DocumentParserProtocol {
     
     // MARK: - Dependencies
     
@@ -23,9 +23,13 @@ final class ClaudeDocumentParser {
     
     // MARK: - Document Parsing
     
-    func parseDocument<T: Codable>(fileId: String, as type: T.Type) async throws -> T {
-        // Create parsing prompt
-        let structDef = generateStructDefinition(for: type)
+    func parseDocument<T: ParseableModel>(data: Data, fileName: String, as type: T.Type) async throws -> T {
+        fatalError("Direct data parsing not supported - use ClaudeDocumentService instead")
+    }
+    
+    func parseDocument<T: ParseableModel>(fileId: String, as type: T.Type) async throws -> T {
+        // Create parsing prompt using the model's parseDefinition
+        let structDef = type.parseDefinition
         let prompt = """
         Please analyze this document and extract the information into the following JSON structure. 
         Return ONLY JSON and nothing else:
@@ -97,26 +101,4 @@ final class ClaudeDocumentParser {
         return text
     }
     
-    private func generateStructDefinition<T: Codable>(for type: T.Type) -> String {
-        switch type {
-        case is ParsedPrescription.Type:
-            return """
-        Swift prescription parsing model: ParsedPrescription
-        ParsedPrescription: dateIssued(Date), doctorName(String?), facilityName(String?), followUpDate(Date?), followUpTests([String]), notes(String?), medications([Medication])
-        Medication: id(UUID), name(String), frequency([MedicationSchedule]), numberOfDays(Int), dosage(String?), instructions(String?)
-        MedicationSchedule: mealTime(MealTime), timing(MedicationTime?), dosage(String?)
-        Enums: MealTime(.breakfast/.lunch/.dinner/.bedtime), MedicationTime(.before/.after)
-        """
-        case is ParsedBloodReport.Type:
-            return """
-                    Swift blood report parsing model: ParsedBloodReport
-                    ParsedBloodReport: testName(String), labName(String), category(String), resultDate(Date), notes(String), testResults([ParsedBloodTestResult])
-                    ParsedBloodTestResult: testName(String), value(String), unit(String), referenceRange(String), isAbnormal(Bool)
-                    
-                    Please extract all blood test results from the lab report. The resultDate should be the date when the tests were performed or results were available.
-                    """
-        default:
-            fatalError("Unsupported type \(String(describing: type))")
-        }
-    }
 }

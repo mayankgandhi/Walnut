@@ -211,21 +211,6 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
     
 }
 
-// MARK: - Protocol Extensions
-
-extension ClaudeDocumentService: AIDocumentServiceProtocol {
-    // The existing ClaudeDocumentService already implements the required methods
-}
-
-extension OpenAIDocumentService: AIDocumentServiceProtocol {
-    // The existing OpenAIDocumentService already implements the required methods
-}
-
-extension UnifiedDocumentParsingService: AIDocumentServiceProtocol {
-    func uploadAndParseDocument<T: Codable>(from url: URL, as type: T.Type, structDefinition: String?) async throws -> T {
-        return try await parseDocument(from: url, as: type)
-    }
-}
 
 // MARK: - Supporting Types
 
@@ -239,60 +224,12 @@ struct ProcessingResult {
 
 extension DocumentProcessingService {
     
-    /// Creates a DocumentProcessingService with default implementations using OpenAI
-    static func createWithOpenAI(
-        apiKey: String,
-        modelContext: ModelContext
-    ) -> DocumentProcessingService {
-        let aiService = OpenAIDocumentService(apiKey: apiKey)
-        let fileService = DefaultFilePreparationService()
-        let repository = DefaultDocumentRepository(modelContext: modelContext)
-        
-        return DocumentProcessingService(
-            aiService: aiService,
-            fileService: fileService,
-            repository: repository
-        )
-    }
-    
-    /// Creates a DocumentProcessingService with default implementations using Claude
-    static func createWithClaude(
-        apiKey: String,
-        modelContext: ModelContext
-    ) -> DocumentProcessingService {
-        let aiService = ClaudeDocumentService(apiKey: apiKey)
-        let fileService = DefaultFilePreparationService()
-        let repository = DefaultDocumentRepository(modelContext: modelContext)
-        
-        return DocumentProcessingService(
-            aiService: aiService,
-            fileService: fileService,
-            repository: repository
-        )
-    }
-    
-    /// Creates a DocumentProcessingService with unified parsing (PDF + Images) using OpenAI
-    static func createWithUnifiedParsing(
-        apiKey: String,
-        modelContext: ModelContext
-    ) -> DocumentProcessingService {
-        let aiService = UnifiedDocumentParsingService(apiKey: apiKey)
-        let fileService = DefaultFilePreparationService()
-        let repository = DefaultDocumentRepository(modelContext: modelContext)
-        
-        return DocumentProcessingService(
-            aiService: aiService,
-            fileService: fileService,
-            repository: repository
-        )
-    }
-    
+   
     /// Creates a DocumentProcessingService using AIKit's unified parsing
     static func createWithAIKit(
-        openAIAPIKey: String,
         modelContext: ModelContext
     ) -> DocumentProcessingService {
-        let aiService = AIKitFactory.createUnifiedService(openAIAPIKey: openAIAPIKey)
+        let aiService = AIKitFactory.createUnifiedService()
         let fileService = DefaultFilePreparationService()
         let repository = DefaultDocumentRepository(modelContext: modelContext)
         
@@ -302,6 +239,7 @@ extension DocumentProcessingService {
             repository: repository
         )
     }
+    
 }
 
 // MARK: - Environment Extension

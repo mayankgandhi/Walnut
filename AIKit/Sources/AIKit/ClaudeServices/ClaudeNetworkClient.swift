@@ -9,7 +9,7 @@
 import Foundation
 
 /// Handles HTTP communication with Claude API
-final class ClaudeNetworkClient {
+final class ClaudeNetworkClient: NetworkClientProtocol {
     
     // MARK: - Properties
     
@@ -86,5 +86,12 @@ final class ClaudeNetworkClient {
         } catch {
             throw ClaudeServiceError.networkError(error)
         }
+    }
+    
+    // MARK: - NetworkClientProtocol
+    
+    func performNetworkRequest(for request: URLRequest) async throws -> Data {
+        let (data, _) = try await executeRequest(request)
+        return data
     }
 }

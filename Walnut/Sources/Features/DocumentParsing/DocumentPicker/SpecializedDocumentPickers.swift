@@ -33,7 +33,6 @@ struct PrescriptionDocumentPicker: View {
         .task {
             if processingService == nil {
                 processingService = DocumentProcessingService.createWithAIKit(
-                    openAIAPIKey: openAIKey,
                     modelContext: modelContext
                 )
             }
@@ -63,7 +62,6 @@ struct BloodReportDocumentPicker: View {
         .task {
             if processingService == nil {
                 processingService = DocumentProcessingService.createWithAIKit(
-                    openAIAPIKey: openAIKey,
                     modelContext: modelContext
                 )
             }
@@ -105,7 +103,6 @@ struct GeneralDocumentPicker: View {
         .task {
             if processingService == nil {
                 processingService = DocumentProcessingService.createWithAIKit(
-                    openAIAPIKey: openAIKey,
                     modelContext: modelContext
                 )
             }

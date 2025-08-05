@@ -9,7 +9,11 @@
 import Foundation
 
 /// Handles file upload and deletion operations with Claude API
-final class ClaudeFileManager {
+final class ClaudeFileManager: FileUploadServiceProtocol {
+    
+    // MARK: - Type Aliases
+    
+    typealias UploadResponse = ClaudeFileUploadResponse
     
     // MARK: - Dependencies
     

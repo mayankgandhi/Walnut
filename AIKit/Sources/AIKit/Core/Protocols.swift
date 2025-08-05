@@ -10,13 +10,19 @@ import Foundation
 
 // MARK: - Core AI Service Protocol
 
+public protocol ParseDefinable {
+    static var parseDefinition: String { get }
+}
+
+public typealias ParseableModel = Codable & ParseDefinable
+
 /// Protocol for AI document parsing services
 public protocol AIDocumentServiceProtocol {
     /// Parse a document using direct data and filename
-    func parseDocument<T: Codable>(data: Data, fileName: String, as type: T.Type) async throws -> T
+    func parseDocument<T: ParseableModel>(data: Data, fileName: String, as type: T.Type) async throws -> T
     
     /// Upload and parse a document from URL (for services that require file upload)
-    func uploadAndParseDocument<T: Codable>(from url: URL, as type: T.Type, structDefinition: String?) async throws -> T
+    func uploadAndParseDocument<T: ParseableModel>(from url: URL, as type: T.Type) async throws -> T
 }
 
 // MARK: - File Upload Protocol
@@ -41,13 +47,16 @@ public protocol NetworkClientProtocol {
 
 /// Protocol for document parsing operations
 public protocol DocumentParserProtocol {
-    func parseDocument<T: Codable>(data: Data, fileName: String, as type: T.Type) async throws -> T
+    func parseDocument<T: ParseableModel>(data: Data, fileName: String, as type: T.Type) async throws -> T
 }
 
 // MARK: - Unified Parsing Service Protocol
 
 /// Protocol for services that can handle multiple file types
 public protocol UnifiedParsingServiceProtocol: AIDocumentServiceProtocol {
+    
+    associatedtype ParseOutput: Codable
+    
     /// Check if a file type is supported
     func isFileTypeSupported(_ url: URL) -> Bool
     
@@ -55,8 +64,6 @@ public protocol UnifiedParsingServiceProtocol: AIDocumentServiceProtocol {
     func getParsingMethod(for url: URL) -> ParsingMethod?
     
     /// Parse a prescription from any supported format
-    func parsePrescription(from url: URL) async throws -> ParsedPrescription
+    func parse(from url: URL) async throws -> ParseOutput
     
-    /// Parse a blood report from any supported format
-    func parseBloodReport(from url: URL) async throws -> ParsedBloodReport
 }
