@@ -120,39 +120,6 @@ struct ClaudeResponseContent: Codable {
 }
 
 
-// MARK: - Error Types
-
-enum ClaudeServiceError: Error, LocalizedError {
-    case invalidURL
-    case invalidResponse
-    case missingAPIKey
-    case uploadFailed(String)
-    case deleteFailed(String)
-    case parseFailed(String)
-    case networkError(Error)
-    case decodingError(Error)
-    
-    var errorDescription: String? {
-        switch self {
-        case .invalidURL:
-            return "Invalid URL"
-        case .invalidResponse:
-            return "Invalid response from server"
-        case .missingAPIKey:
-            return "API key is missing"
-        case .uploadFailed(let message):
-            return "Upload failed: \(message)"
-        case .parseFailed(let message):
-            return "Parse failed: \(message)"
-        case .networkError(let error):
-            return "Network error: \(error.localizedDescription)"
-        case .decodingError(let error):
-            return "Decoding error: \(error.localizedDescription)"
-        case .deleteFailed(let message):
-            return "Deletion error: \(message)"
-        }
-    }
-}
 
 // MARK: - Service
 

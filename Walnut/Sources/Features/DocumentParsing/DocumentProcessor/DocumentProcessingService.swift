@@ -37,7 +37,7 @@ class DocumentProcessingService {
     
     // MARK: - Dependencies
     
-    private let aiService: AIDocumentServiceProtocol
+    private let aiService: UnifiedDocumentParsingService
     private let fileService: FilePreparationService
     private let repository: DocumentRepositoryProtocol
     
@@ -55,7 +55,7 @@ class DocumentProcessingService {
     // MARK: - Initialization
     
     init(
-        aiService: AIDocumentServiceProtocol,
+        aiService: UnifiedDocumentParsingService,
         fileService: FilePreparationService,
         repository: DocumentRepositoryProtocol
     ) {

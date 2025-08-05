@@ -9,7 +9,7 @@
 import Foundation
 
 /// Handles document parsing and AI communication with OpenAI API
-public final class OpenAIDocumentParser: DocumentParserProtocol {
+public final class OpenAIDocumentParser {
     
     // MARK: - Dependencies
     
@@ -21,11 +21,11 @@ public final class OpenAIDocumentParser: DocumentParserProtocol {
         self.networkClient = networkClient
     }
     
-    // MARK: - DocumentParserProtocol
+    // MARK: - Public Interface
     
     public func parseDocument<T: ParseableModel>(data: Data, fileName: String, as type: T.Type) async throws -> T {
         guard let openAIType = type as? (ParseableModel & OpenAISchemaDefinable).Type else {
-            throw OpenAIServiceError.unsupportedFileType("Type \(T.self) does not support OpenAI schema definition")
+            throw AIKitError.unsupportedFileType("Type \(T.self) does not support OpenAI schema definition")
         }
         return try await parseOpenAIDocument(data: data, fileName: fileName, as: openAIType) as! T
     }
@@ -35,7 +35,7 @@ public final class OpenAIDocumentParser: DocumentParserProtocol {
     public func parseOpenAIDocument<T: ParseableModel & OpenAISchemaDefinable>(data: Data, fileName: String, as type: T.Type) async throws -> T {
         // Check if the file is a supported image type for OpenAI vision
         guard isImageFile(fileName: fileName) else {
-            throw OpenAIServiceError.unsupportedFileType("OpenAI vision only supports image files (JPEG, PNG, GIF, WebP). PDF files require a different parsing approach.")
+            throw AIKitError.unsupportedFileType("OpenAI vision only supports image files (JPEG, PNG, GIF, WebP). PDF files require a different parsing approach.")
         }
         
         // For OpenAI, we need to encode the document as base64 for vision models
@@ -84,18 +84,18 @@ public final class OpenAIDocumentParser: DocumentParserProtocol {
             
             guard httpResponse.statusCode == 200 else {
                 let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
-                throw OpenAIServiceError.parseFailed(errorMessage)
+                throw AIKitError.parsingError(errorMessage)
             }
             
             let chatResponse = try JSONDecoder().decode(OpenAIChatResponse.self, from: data)
             
             guard let content = chatResponse.choices.first?.message.content else {
-                throw OpenAIServiceError.parseFailed("No content in response")
+                throw AIKitError.parsingError("No content in response")
             }
             
             // With structured outputs, the response should be valid JSON
             guard let jsonData = content.data(using: .utf8) else {
-                throw OpenAIServiceError.parseFailed("Could not convert response to data")
+                throw AIKitError.parsingError("Could not convert response to data")
             }
             
             let decoder = JSONDecoder()
@@ -104,11 +104,11 @@ public final class OpenAIDocumentParser: DocumentParserProtocol {
             return parsedObject
             
         } catch let error as DecodingError {
-            throw OpenAIServiceError.decodingError(error)
-        } catch let error as OpenAIServiceError {
+            throw AIKitError.decodingError(error)
+        } catch let error as AIKitError {
             throw error
         } catch {
-            throw OpenAIServiceError.networkError(error)
+            throw AIKitError.networkError(error)
         }
     }
     

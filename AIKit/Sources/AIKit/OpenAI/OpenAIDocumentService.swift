@@ -10,7 +10,7 @@ import Foundation
 
 /// Main orchestrator service that coordinates file operations and document parsing
 /// Maintains compatibility with the original ClaudeFilesService interface
-public final class OpenAIDocumentService: OpenAIDocumentServiceProtocol, ObservableObject {
+public final class OpenAIDocumentService: ObservableObject {
     
     // MARK: - Dependencies
     
@@ -24,7 +24,7 @@ public final class OpenAIDocumentService: OpenAIDocumentServiceProtocol, Observa
         self.documentParser = OpenAIDocumentParser(networkClient: networkClient)
     }
     
-    // MARK: - AIDocumentServiceProtocol
+    // MARK: - Public Interface
     
     public func parseDocument<T: ParseableModel & OpenAISchemaDefinable>(data: Data, fileName: String, as type: T.Type) async throws -> T {
         return try await documentParser.parseOpenAIDocument(data: data, fileName: fileName, as: type)

@@ -9,7 +9,7 @@
 import Foundation
 
 /// Handles document parsing and AI communication with Claude API
-final class ClaudeDocumentParser: DocumentParserProtocol {
+final class ClaudeDocumentParser {
     
     // MARK: - Dependencies
     
@@ -58,13 +58,13 @@ final class ClaudeDocumentParser: DocumentParserProtocol {
             
             guard httpResponse.statusCode == 200 else {
                 let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
-                throw ClaudeServiceError.parseFailed(errorMessage)
+                throw AIKitError.parsingError(errorMessage)
             }
             
             let messageResponse = try JSONDecoder().decode(ClaudeMessageResponse.self, from: data)
             
             guard let content = messageResponse.content.first?.text else {
-                throw ClaudeServiceError.parseFailed("No content in response")
+                throw AIKitError.parsingError("No content in response")
             }
             
             // Clean the JSON response
@@ -72,7 +72,7 @@ final class ClaudeDocumentParser: DocumentParserProtocol {
             
             // Parse the JSON response
             guard let jsonData = cleanedContent.data(using: .utf8) else {
-                throw ClaudeServiceError.parseFailed("Could not convert response to data")
+                throw AIKitError.parsingError("Could not convert response to data")
             }
             
             let decoder = JSONDecoder()
@@ -81,11 +81,11 @@ final class ClaudeDocumentParser: DocumentParserProtocol {
             return parsedObject
             
         } catch let error as DecodingError {
-            throw ClaudeServiceError.decodingError(error)
-        } catch let error as ClaudeServiceError {
+            throw AIKitError.decodingError(error)
+        } catch let error as AIKitError {
             throw error
         } catch {
-            throw ClaudeServiceError.networkError(error)
+            throw AIKitError.networkError(error)
         }
     }
     

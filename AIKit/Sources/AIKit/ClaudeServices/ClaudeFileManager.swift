@@ -9,7 +9,7 @@
 import Foundation
 
 /// Handles file upload and deletion operations with Claude API
-final class ClaudeFileManager: FileUploadServiceProtocol {
+final class ClaudeFileManager {
     
     // MARK: - Type Aliases
     
@@ -50,14 +50,14 @@ final class ClaudeFileManager: FileUploadServiceProtocol {
         
         guard httpResponse.statusCode == 200 else {
             let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
-            throw ClaudeServiceError.uploadFailed(errorMessage)
+            throw AIKitError.uploadError(errorMessage)
         }
         
         do {
             let uploadResponse = try JSONDecoder().decode(ClaudeFileUploadResponse.self, from: data)
             return uploadResponse
         } catch let error as DecodingError {
-            throw ClaudeServiceError.decodingError(error)
+            throw AIKitError.decodingError(error)
         }
     }
     
@@ -77,7 +77,7 @@ final class ClaudeFileManager: FileUploadServiceProtocol {
         
         guard httpResponse.statusCode == 200 || httpResponse.statusCode == 204 else {
             let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
-            throw ClaudeServiceError.deleteFailed(errorMessage)
+            throw AIKitError.deleteError(errorMessage)
         }
         
         // Success - file deleted

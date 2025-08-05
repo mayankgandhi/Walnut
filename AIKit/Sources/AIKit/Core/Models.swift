@@ -10,26 +10,38 @@ import Foundation
 
 public enum AIKitError: Error, LocalizedError {
     case invalidAPIKey
+    case invalidURL
+    case invalidResponse
+    case invalidFileData
     case networkError(Error)
     case parsingError(String)
-    case unsupportedFileType(String)
     case uploadError(String)
-    case invalidFileData
+    case deleteError(String)
+    case unsupportedFileType(String)
+    case decodingError(Error)
     
     public var errorDescription: String? {
         switch self {
         case .invalidAPIKey:
             return "Invalid API key provided"
+        case .invalidURL:
+            return "Invalid URL"
+        case .invalidResponse:
+            return "Invalid response from server"
+        case .invalidFileData:
+            return "Invalid file data provided"
         case .networkError(let error):
             return "Network error: \(error.localizedDescription)"
         case .parsingError(let message):
             return "Parsing error: \(message)"
-        case .unsupportedFileType(let message):
-            return message
         case .uploadError(let message):
             return "Upload error: \(message)"
-        case .invalidFileData:
-            return "Invalid file data provided"
+        case .deleteError(let message):
+            return "Delete error: \(message)"
+        case .unsupportedFileType(let message):
+            return "Unsupported file type: \(message)"
+        case .decodingError(let error):
+            return "Decoding error: \(error.localizedDescription)"
         }
     }
 }

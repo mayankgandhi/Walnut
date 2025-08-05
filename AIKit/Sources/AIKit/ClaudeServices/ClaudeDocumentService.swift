@@ -10,7 +10,7 @@ import SwiftUI
 
 /// Main orchestrator service that coordinates file operations and document parsing
 /// Maintains the same interface as the original ClaudeFilesService for backward compatibility
-final class ClaudeDocumentService: ObservableObject, AIDocumentServiceProtocol, FileUploadServiceProtocol {
+final class ClaudeDocumentService: ObservableObject {
     
     // MARK: - Type Aliases
     

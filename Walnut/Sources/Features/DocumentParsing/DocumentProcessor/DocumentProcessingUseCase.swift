@@ -15,13 +15,13 @@ import AIKit
 /// Encapsulates the business logic for document processing
 struct DocumentProcessingUseCase {
     
-    private let aiService: AIDocumentServiceProtocol
+    private let aiService: UnifiedDocumentParsingService
     private let fileService: FilePreparationService
     private let repository: DocumentRepositoryProtocol
     private weak var progressDelegate: DocumentProcessingProgressDelegate?
     
     init(
-        aiService: AIDocumentServiceProtocol,
+        aiService: UnifiedDocumentParsingService,
         fileService: FilePreparationService,
         repository: DocumentRepositoryProtocol,
         progressDelegate: DocumentProcessingProgressDelegate?
@@ -98,10 +98,7 @@ struct DocumentProcessingUseCase {
     ) async throws -> PersistentIdentifier {
         switch documentType {
         case .prescription:
-            let parsedPrescription = try await aiService.uploadAndParseDocument(
-                from: fileURL,
-                as: ParsedPrescription.self
-            )
+            let parsedPrescription = try await aiService.parseDocument(from: fileURL, as: ParsedPrescription.self)
             return try await repository.savePrescription(
                 parsedPrescription,
                 to: medicalCase,
@@ -109,10 +106,7 @@ struct DocumentProcessingUseCase {
             )
             
         case .labResult, .bloodWork:
-            let parsedBloodReport = try await aiService.uploadAndParseDocument(
-                from: fileURL,
-                as: ParsedBloodReport.self
-            )
+            let parsedBloodReport = try await aiService.parseDocument(from: fileURL, as: ParsedBloodReport.self)
             return try await repository.saveBloodReport(
                 parsedBloodReport,
                 to: medicalCase,

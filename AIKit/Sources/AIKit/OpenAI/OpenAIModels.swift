@@ -15,15 +15,6 @@ public protocol OpenAISchemaDefinable: ParseDefinable {
     static var jsonSchema: OpenAIJSONSchema { get }
 }
 
-/// Protocol for AI document parsing services that require OpenAI schema support
-public protocol OpenAIDocumentServiceProtocol {
-    /// Parse a document using direct data and filename
-    func parseDocument<T: ParseableModel & OpenAISchemaDefinable>(data: Data, fileName: String, as type: T.Type) async throws -> T
-    
-    /// Upload and parse a document from URL (for services that require file upload)
-    func uploadAndParseDocument<T: ParseableModel & OpenAISchemaDefinable>(from url: URL, as type: T.Type) async throws -> T
-}
-
 // MARK: - File Upload Models
 
 public struct OpenAIFileUploadResponse: Codable {
@@ -310,39 +301,3 @@ public struct OpenAIUsage: Codable {
     }
 }
 
-// MARK: - Error Types
-
-public enum OpenAIServiceError: Error, LocalizedError {
-    case invalidURL
-    case invalidResponse
-    case missingAPIKey
-    case uploadFailed(String)
-    case deleteFailed(String)
-    case parseFailed(String)
-    case networkError(Error)
-    case decodingError(Error)
-    case unsupportedFileType(String)
-    
-    public var errorDescription: String? {
-        switch self {
-        case .invalidURL:
-            return "Invalid URL"
-        case .invalidResponse:
-            return "Invalid response from server"
-        case .missingAPIKey:
-            return "API key is missing"
-        case .uploadFailed(let message):
-            return "Upload failed: \(message)"
-        case .parseFailed(let message):
-            return "Parse failed: \(message)"
-        case .networkError(let error):
-            return "Network error: \(error.localizedDescription)"
-        case .decodingError(let error):
-            return "Decoding error: \(error.localizedDescription)"
-        case .deleteFailed(let message):
-            return "Deletion error: \(message)"
-        case .unsupportedFileType(let message):
-            return "Unsupported file type: \(message)"
-        }
-    }
-}
