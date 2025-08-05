@@ -118,8 +118,3 @@ struct ClaudeResponseContent: Codable {
     let type: String
     let text: String?
 }
-
-
-
-// MARK: - Service
-
