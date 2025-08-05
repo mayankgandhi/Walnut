@@ -1,32 +1,40 @@
 //
 //  UnifiedDocumentParsingService.swift
-//  Walnut
+//  AIKit
 //
-//  Created by Mayank Gandhi on 03/08/25.
+//  Created by Mayank Gandhi on 05/08/25.
 //  Copyright © 2025 m. All rights reserved.
 //
 
 import Foundation
 
 /// Unified service that routes document parsing to the appropriate service based on file type
-final class UnifiedDocumentParsingService: ObservableObject {
+public final class UnifiedDocumentParsingService: UnifiedParsingServiceProtocol, ObservableObject {
     
     // MARK: - Dependencies
     
     private let openAIService: OpenAIDocumentService
-    private let pdfParsingService: OpenAIPDFParsingService
     
     // MARK: - Initialization
     
-    init(apiKey: String) {
-        self.openAIService = OpenAIDocumentService(apiKey: apiKey)
-        self.pdfParsingService = OpenAIPDFParsingService(apiKey: apiKey)
+    public init(openAIAPIKey: String) {
+        self.openAIService = OpenAIDocumentService(apiKey: openAIAPIKey)
     }
     
-    // MARK: - Document Parsing
+    // MARK: - AIDocumentServiceProtocol
+    
+    public func parseDocument<T: Codable>(data: Data, fileName: String, as type: T.Type) async throws -> T {
+        return try await openAIService.parseDocument(data: data, fileName: fileName, as: type)
+    }
+    
+    public func uploadAndParseDocument<T: Codable>(from url: URL, as type: T.Type, structDefinition: String?) async throws -> T {
+        return try await parseDocument(from: url, as: type)
+    }
+    
+    // MARK: - UnifiedParsingServiceProtocol
     
     /// Parse any supported document type by routing to the appropriate service
-    func parseDocument<T: Codable>(
+    public func parseDocument<T: Codable>(
         from url: URL,
         as type: T.Type
     ) async throws -> T {
@@ -35,11 +43,11 @@ final class UnifiedDocumentParsingService: ObservableObject {
         
         switch fileExtension {
         case "pdf":
-            return try await pdfParsingService.parsePDFDocument(from: url, as: type)
+            throw AIKitError.unsupportedFileType("PDF parsing requires specialized handling. Use a dedicated PDF parsing service.")
         case "jpg", "jpeg", "png", "gif", "webp", "heic", "heif":
             return try await parseImageDocument(from: url, as: type)
         default:
-            throw UnifiedParsingError.unsupportedFileType("File type '\(fileExtension)' is not supported. Supported types: PDF, JPEG, PNG, GIF, WebP, HEIC, HEIF")
+            throw AIKitError.unsupportedFileType("File type '\(fileExtension)' is not supported. Supported types: JPEG, PNG, GIF, WebP, HEIC, HEIF")
         }
     }
     
@@ -55,27 +63,27 @@ final class UnifiedDocumentParsingService: ObservableObject {
     
     // MARK: - Convenience Methods
     
-    /// Parse a prescription document (supports both PDF and image formats)
-    func parsePrescription(from url: URL) async throws -> ParsedPrescription {
+    /// Parse a prescription document (supports image formats)
+    public func parsePrescription(from url: URL) async throws -> ParsedPrescription {
         return try await parseDocument(from: url, as: ParsedPrescription.self)
     }
     
-    /// Parse a blood report document (supports both PDF and image formats)
-    func parseBloodReport(from url: URL) async throws -> ParsedBloodReport {
+    /// Parse a blood report document (supports image formats)
+    public func parseBloodReport(from url: URL) async throws -> ParsedBloodReport {
         return try await parseDocument(from: url, as: ParsedBloodReport.self)
     }
     
     // MARK: - File Type Support
     
     /// Check if a file type is supported for parsing
-    func isFileTypeSupported(_ url: URL) -> Bool {
+    public func isFileTypeSupported(_ url: URL) -> Bool {
         let fileExtension = url.pathExtension.lowercased()
-        let supportedTypes = ["pdf", "jpg", "jpeg", "png", "gif", "webp", "heic", "heif"]
+        let supportedTypes = ["jpg", "jpeg", "png", "gif", "webp", "heic", "heif"]
         return supportedTypes.contains(fileExtension)
     }
     
     /// Get the parsing method that will be used for a file
-    func getParsingMethod(for url: URL) -> ParsingMethod? {
+    public func getParsingMethod(for url: URL) -> ParsingMethod? {
         let fileExtension = url.pathExtension.lowercased()
         
         switch fileExtension {
@@ -85,33 +93,6 @@ final class UnifiedDocumentParsingService: ObservableObject {
             return .directVision
         default:
             return nil
-        }
-    }
-}
-
-// MARK: - Supporting Types
-
-enum ParsingMethod {
-    case directVision
-    case pdfFileUpload
-    
-    var description: String {
-        switch self {
-        case .directVision:
-            return "Direct OpenAI Vision analysis"
-        case .pdfFileUpload:
-            return "PDF uploaded to OpenAI with file search and structured parsing"
-        }
-    }
-}
-
-enum UnifiedParsingError: Error, LocalizedError {
-    case unsupportedFileType(String)
-    
-    var errorDescription: String? {
-        switch self {
-        case .unsupportedFileType(let message):
-            return message
         }
     }
 }

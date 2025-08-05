@@ -9,14 +9,9 @@
 import SwiftUI
 import SwiftData
 import Foundation
+import AIKit
 
 // MARK: - Protocols
-
-/// Protocol for AI document operations
-protocol AIDocumentServiceProtocol {
-    func uploadAndParseDocument<T: Codable>(from url: URL, as type: T.Type, structDefinition: String?) async throws -> T
-}
-
 /// Protocol for progress tracking
 protocol DocumentProcessingProgressDelegate: AnyObject {
     @MainActor func didUpdateProgress(_ progress: Double, status: String)
@@ -282,6 +277,22 @@ extension DocumentProcessingService {
         modelContext: ModelContext
     ) -> DocumentProcessingService {
         let aiService = UnifiedDocumentParsingService(apiKey: apiKey)
+        let fileService = DefaultFilePreparationService()
+        let repository = DefaultDocumentRepository(modelContext: modelContext)
+        
+        return DocumentProcessingService(
+            aiService: aiService,
+            fileService: fileService,
+            repository: repository
+        )
+    }
+    
+    /// Creates a DocumentProcessingService using AIKit's unified parsing
+    static func createWithAIKit(
+        openAIAPIKey: String,
+        modelContext: ModelContext
+    ) -> DocumentProcessingService {
+        let aiService = AIKitFactory.createUnifiedService(openAIAPIKey: openAIAPIKey)
         let fileService = DefaultFilePreparationService()
         let repository = DefaultDocumentRepository(modelContext: modelContext)
         

@@ -83,6 +83,7 @@ let project = Project(
             dependencies: [
                 .external(name: "PostHog"),
                 .external(name: "Atlantis"),
+                .project(target: "AIKit", path: "../AIKit"),
             ],
             settings: .settings(base: settings,
                                 configurations: [

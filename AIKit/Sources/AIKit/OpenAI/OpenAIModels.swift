@@ -1,22 +1,22 @@
 //
-//  OpenAIFileUploadResponse.swift
-//  Walnut
+//  OpenAIModels.swift
+//  AIKit
 //
-//  Created by Mayank Gandhi on 08/07/25.
+//  Created by Mayank Gandhi on 05/08/25.
 //  Copyright © 2025 m. All rights reserved.
 //
 
 import Foundation
 
-// MARK: - Models
+// MARK: - File Upload Models
 
-struct OpenAIFileUploadResponse: Codable {
-    let id: String
-    let object: String
-    let bytes: Int
-    let createdAt: Int
-    let filename: String
-    let purpose: String
+public struct OpenAIFileUploadResponse: Codable {
+    public let id: String
+    public let object: String
+    public let bytes: Int
+    public let createdAt: Int
+    public let filename: String
+    public let purpose: String
     
     enum CodingKeys: String, CodingKey {
         case id, object, bytes, filename, purpose
@@ -24,26 +24,41 @@ struct OpenAIFileUploadResponse: Codable {
     }
 }
 
-struct OpenAIChatRequest: Codable {
-    let model: String
-    let messages: [OpenAIMessage]
-    let maxTokens: Int?
-    let temperature: Double?
-    let responseFormat: OpenAIResponseFormat?
+// MARK: - Chat API Models
+
+public struct OpenAIChatRequest: Codable {
+    public let model: String
+    public let messages: [OpenAIMessage]
+    public let maxTokens: Int?
+    public let temperature: Double?
+    public let responseFormat: OpenAIResponseFormat?
     
     enum CodingKeys: String, CodingKey {
         case model, messages, temperature
         case maxTokens = "max_tokens"
         case responseFormat = "response_format"
     }
+    
+    public init(model: String, messages: [OpenAIMessage], maxTokens: Int? = nil, temperature: Double? = nil, responseFormat: OpenAIResponseFormat? = nil) {
+        self.model = model
+        self.messages = messages
+        self.maxTokens = maxTokens
+        self.temperature = temperature
+        self.responseFormat = responseFormat
+    }
 }
 
-struct OpenAIMessage: Codable {
-    let role: String
-    let content: [OpenAIMessageContent]
+public struct OpenAIMessage: Codable {
+    public let role: String
+    public let content: [OpenAIMessageContent]
+    
+    public init(role: String, content: [OpenAIMessageContent]) {
+        self.role = role
+        self.content = content
+    }
 }
 
-enum OpenAIMessageContent: Codable {
+public enum OpenAIMessageContent: Codable {
     case text(OpenAITextContent)
     case imageUrl(OpenAIImageContent)
     
@@ -52,105 +67,108 @@ enum OpenAIMessageContent: Codable {
     }
     
     private enum ContentType: String, Codable {
-        case text = "text"
+        case text
         case imageUrl = "image_url"
     }
     
-    func encode(to encoder: Encoder) throws {
-        switch self {
-        case .text(let content):
-            try content.encode(to: encoder)
-        case .imageUrl(let content):
-            try content.encode(to: encoder)
-        }
-    }
-    
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let type = try container.decode(ContentType.self, forKey: .type)
         
         switch type {
         case .text:
-            let content = try OpenAITextContent(from: decoder)
-            self = .text(content)
+            let textContent = try OpenAITextContent(from: decoder)
+            self = .text(textContent)
         case .imageUrl:
-            let content = try OpenAIImageContent(from: decoder)
-            self = .imageUrl(content)
+            let imageContent = try OpenAIImageContent(from: decoder)
+            self = .imageUrl(imageContent)
+        }
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case .text(let textContent):
+            try textContent.encode(to: encoder)
+        case .imageUrl(let imageContent):
+            try imageContent.encode(to: encoder)
         }
     }
 }
 
-struct OpenAITextContent: Codable {
-    let type: String = "text"
-    let text: String
+public struct OpenAITextContent: Codable {
+    public let type: String
+    public let text: String
+    
+    public init(text: String) {
+        self.type = "text"
+        self.text = text
+    }
 }
 
-struct OpenAIImageContent: Codable {
-    let type: String = "image_url"
-    let imageUrl: OpenAIImageUrl
+public struct OpenAIImageContent: Codable {
+    public let type: String
+    public let imageUrl: OpenAIImageUrl
     
     enum CodingKeys: String, CodingKey {
         case type
         case imageUrl = "image_url"
     }
-}
-
-struct OpenAIImageUrl: Codable {
-    let url: String
-}
-
-struct OpenAIChatResponse: Codable {
-    let id: String
-    let object: String
-    let created: Int
-    let model: String
-    let choices: [OpenAIChoice]
-}
-
-struct OpenAIChoice: Codable {
-    let index: Int
-    let message: OpenAIResponseMessage
-    let finishReason: String?
     
-    enum CodingKeys: String, CodingKey {
-        case index, message
-        case finishReason = "finish_reason"
+    public init(imageUrl: OpenAIImageUrl) {
+        self.type = "image_url"
+        self.imageUrl = imageUrl
     }
 }
 
-struct OpenAIResponseMessage: Codable {
-    let role: String
-    let content: String?
+public struct OpenAIImageUrl: Codable {
+    public let url: String
+    public let detail: String?
+    
+    public init(url: String, detail: String? = "high") {
+        self.url = url
+        self.detail = detail
+    }
 }
 
-struct OpenAIResponseFormat: Codable {
-    let type: String
-    let jsonSchema: OpenAIJSONSchemaWrapper?
+public struct OpenAIResponseFormat: Codable {
+    public let type: String
+    public let jsonSchema: OpenAIJSONSchemaWrapper?
     
     enum CodingKeys: String, CodingKey {
         case type
         case jsonSchema = "json_schema"
     }
+    
+    public init(type: String = "json_object", jsonSchema: OpenAIJSONSchemaWrapper? = nil) {
+        self.type = type
+        self.jsonSchema = jsonSchema
+    }
 }
 
-struct OpenAIJSONSchemaWrapper: Codable {
-    let name: String
-    let strict: Bool
-    let schema: OpenAIJSONSchema
+public struct OpenAIJSONSchemaWrapper: Codable {
+    public let name: String
+    public let strict: Bool
+    public let schema: OpenAIJSONSchema
+    
+    public init(name: String, strict: Bool = true, schema: OpenAIJSONSchema) {
+        self.name = name
+        self.strict = strict
+        self.schema = schema
+    }
 }
 
-struct OpenAIJSONSchema: Codable {
-    let type: String = "object"
-    let properties: [String: Any]
-    let required: [String]
-    let additionalProperties: Bool
+public struct OpenAIJSONSchema: Codable {
+    public let type: String = "object"
+    public let properties: [String: Any]
+    public let required: [String]
+    public let additionalProperties: Bool
     
     enum CodingKeys: String, CodingKey {
         case type, properties, required
         case additionalProperties = "additionalProperties"
     }
     
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(type, forKey: .type)
         try container.encode(required, forKey: .required)
@@ -161,7 +179,7 @@ struct OpenAIJSONSchema: Codable {
         try container.encode(AnyCodable(jsonObject), forKey: .properties)
     }
     
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         required = try container.decode([String].self, forKey: .required)
         additionalProperties = try container.decode(Bool.self, forKey: .additionalProperties)
@@ -169,21 +187,21 @@ struct OpenAIJSONSchema: Codable {
         properties = anyCodable.value as? [String: Any] ?? [:]
     }
     
-    init(properties: [String: Any], required: [String], additionalProperties: Bool = false) {
+    public init(properties: [String: Any], required: [String], additionalProperties: Bool = false) {
         self.properties = properties
         self.required = required
         self.additionalProperties = additionalProperties
     }
 }
 
-struct AnyCodable: Codable {
-    let value: Any
+public struct AnyCodable: Codable {
+    public let value: Any
     
-    init<T>(_ value: T?) {
+    public init<T>(_ value: T?) {
         self.value = value ?? ()
     }
     
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         
         if container.decodeNil() {
@@ -205,7 +223,7 @@ struct AnyCodable: Codable {
         }
     }
     
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         
         switch value {
@@ -225,14 +243,60 @@ struct AnyCodable: Codable {
             try container.encode(dictionary.mapValues { AnyCodable($0) })
         default:
             try container.encodeNil()
-
         }
+    }
+}
+
+// MARK: - Response Models
+
+public struct OpenAIChatResponse: Codable {
+    public let id: String
+    public let object: String
+    public let created: Int
+    public let model: String
+    public let choices: [OpenAIChoice]
+    public let usage: OpenAIUsage
+    public let systemFingerprint: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case id, object, created, model, choices, usage
+        case systemFingerprint = "system_fingerprint"
+    }
+}
+
+public struct OpenAIChoice: Codable {
+    public let index: Int
+    public let message: OpenAIResponseMessage
+    public let logprobs: String?
+    public let finishReason: String
+    
+    enum CodingKeys: String, CodingKey {
+        case index, message, logprobs
+        case finishReason = "finish_reason"
+    }
+}
+
+public struct OpenAIResponseMessage: Codable {
+    public let role: String
+    public let content: String
+    public let refusal: String?
+}
+
+public struct OpenAIUsage: Codable {
+    public let promptTokens: Int
+    public let completionTokens: Int
+    public let totalTokens: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case promptTokens = "prompt_tokens"
+        case completionTokens = "completion_tokens"
+        case totalTokens = "total_tokens"
     }
 }
 
 // MARK: - Error Types
 
-enum OpenAIServiceError: Error, LocalizedError {
+public enum OpenAIServiceError: Error, LocalizedError {
     case invalidURL
     case invalidResponse
     case missingAPIKey
@@ -243,7 +307,7 @@ enum OpenAIServiceError: Error, LocalizedError {
     case decodingError(Error)
     case unsupportedFileType(String)
     
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .invalidURL:
             return "Invalid URL"

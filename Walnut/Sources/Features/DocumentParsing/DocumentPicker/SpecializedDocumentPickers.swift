@@ -8,13 +8,13 @@
 
 import SwiftUI
 import SwiftData
-
-// MARK: - Specialized Document Picker Views
+import AIKit
 
 /// Specialized document picker for prescription documents only
 struct PrescriptionDocumentPicker: View {
     
     let medicalCase: MedicalCase
+    
     @State private var store = DocumentPickerStore.forPrescriptions()
     @State private var processingService: DocumentProcessingService?
     
@@ -32,9 +32,8 @@ struct PrescriptionDocumentPicker: View {
         }
         .task {
             if processingService == nil {
-                let apiKey = openAIKey
-                processingService = DocumentProcessingService.createWithUnifiedParsing(
-                    apiKey: apiKey,
+                processingService = DocumentProcessingService.createWithAIKit(
+                    openAIAPIKey: openAIKey,
                     modelContext: modelContext
                 )
             }
@@ -63,9 +62,8 @@ struct BloodReportDocumentPicker: View {
         }
         .task {
             if processingService == nil {
-                let apiKey = openAIKey
-                processingService = DocumentProcessingService.createWithUnifiedParsing(
-                    apiKey: apiKey,
+                processingService = DocumentProcessingService.createWithAIKit(
+                    openAIAPIKey: openAIKey,
                     modelContext: modelContext
                 )
             }
@@ -106,9 +104,8 @@ struct GeneralDocumentPicker: View {
         }
         .task {
             if processingService == nil {
-                let apiKey = openAIKey
-                processingService = DocumentProcessingService.createWithUnifiedParsing(
-                    apiKey: apiKey,
+                processingService = DocumentProcessingService.createWithAIKit(
+                    openAIAPIKey: openAIKey,
                     modelContext: modelContext
                 )
             }

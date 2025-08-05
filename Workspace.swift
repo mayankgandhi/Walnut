@@ -11,6 +11,7 @@ let workspace = Workspace(
     name: "WalnutApp",
     projects: [
         "Walnut",
-        "Walnut-Playground"
+        "Walnut-Playground",
+        "AIKit"
     ]
 )

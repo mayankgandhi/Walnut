@@ -1,22 +1,22 @@
 //
 //  MimeTypeResolver.swift
-//  Walnut
+//  AIKit
 //
-//  Created by Mayank Gandhi on 08/07/25.
+//  Created by Mayank Gandhi on 05/08/25.
 //  Copyright © 2025 m. All rights reserved.
 //
 
 import Foundation
 
 /// Utility for determining MIME types from file extensions
-struct MimeTypeResolver {
+public struct MimeTypeResolver {
     
-    static func mimeType(for url: URL) -> String {
+    public static func mimeType(for url: URL) -> String {
         let pathExtension = url.pathExtension.lowercased()
         return mimeType(for: pathExtension)
     }
     
-    static func mimeType(for fileName: String) -> String {
+    public static func mimeType(for fileName: String) -> String {
         let pathExtension = (fileName as NSString).pathExtension.lowercased()
         return mimeType(pathExtension: pathExtension)
     }

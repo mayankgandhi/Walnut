@@ -1,15 +1,15 @@
 //
 //  OpenAINetworkClient.swift
-//  Walnut
+//  AIKit
 //
-//  Created by Mayank Gandhi on 08/07/25.
+//  Created by Mayank Gandhi on 05/08/25.
 //  Copyright © 2025 m. All rights reserved.
 //
 
 import Foundation
 
 /// Handles HTTP communication with OpenAI API
-final class OpenAINetworkClient {
+public final class OpenAINetworkClient: NetworkClientProtocol {
     
     // MARK: - Properties
     
@@ -19,13 +19,25 @@ final class OpenAINetworkClient {
     
     // MARK: - Initialization
     
-    init(apiKey: String) {
+    public init(apiKey: String) {
         self.apiKey = apiKey
+    }
+    
+    // MARK: - NetworkClientProtocol
+    
+    public func performNetworkRequest(for request: URLRequest) async throws -> Data {
+        let (data, response) = try await executeRequest(request)
+        
+        guard response.statusCode == 200 else {
+            throw OpenAIServiceError.invalidResponse
+        }
+        
+        return data
     }
     
     // MARK: - Public Interface
     
-    func createFileUploadRequest(endpoint: String, body: Data, contentType: String) throws -> URLRequest {
+    public func createFileUploadRequest(endpoint: String, body: Data, contentType: String) throws -> URLRequest {
         guard let url = URL(string: "\(baseURL)/\(endpoint)") else {
             throw OpenAIServiceError.invalidURL
         }
@@ -39,7 +51,7 @@ final class OpenAINetworkClient {
         return request
     }
     
-    func createChatRequest(endpoint: String, body: Data) throws -> URLRequest {
+    public func createChatRequest(endpoint: String, body: Data) throws -> URLRequest {
         guard let url = URL(string: "\(baseURL)/\(endpoint)") else {
             throw OpenAIServiceError.invalidURL
         }
@@ -53,7 +65,7 @@ final class OpenAINetworkClient {
         return request
     }
     
-    func createDeleteRequest(endpoint: String) throws -> URLRequest {
+    public func createDeleteRequest(endpoint: String) throws -> URLRequest {
         guard let url = URL(string: "\(baseURL)/\(endpoint)") else {
             throw OpenAIServiceError.invalidURL
         }
@@ -65,7 +77,7 @@ final class OpenAINetworkClient {
         return request
     }
     
-    func createGetRequest(endpoint: String) throws -> URLRequest {
+    public func createGetRequest(endpoint: String) throws -> URLRequest {
         guard let url = URL(string: "\(baseURL)/\(endpoint)") else {
             throw OpenAIServiceError.invalidURL
         }
@@ -77,7 +89,7 @@ final class OpenAINetworkClient {
         return request
     }
     
-    func createRequest(endpoint: String, method: String) throws -> URLRequest {
+    public func createRequest(endpoint: String, method: String) throws -> URLRequest {
         guard let url = URL(string: "\(baseURL)/\(endpoint)") else {
             throw OpenAIServiceError.invalidURL
         }
@@ -89,7 +101,7 @@ final class OpenAINetworkClient {
         return request
     }
     
-    func executeRequest(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
+    public func executeRequest(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
         do {
             let (data, response) = try await session.data(for: request)
             

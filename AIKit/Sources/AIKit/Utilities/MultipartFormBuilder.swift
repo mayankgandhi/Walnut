@@ -1,17 +1,17 @@
 //
 //  MultipartFormBuilder.swift
-//  Walnut
+//  AIKit
 //
-//  Created by Mayank Gandhi on 08/07/25.
+//  Created by Mayank Gandhi on 05/08/25.
 //  Copyright © 2025 m. All rights reserved.
 //
 
 import Foundation
 
 /// Utility for creating multipart form data
-struct MultipartFormBuilder {
+public struct MultipartFormBuilder {
     
-    static func createMultipartBody(
+    public static func createMultipartBody(
         boundary: String, 
         filename: String, 
         data: Data, 
@@ -28,11 +28,11 @@ struct MultipartFormBuilder {
         return body
     }
     
-    static func generateBoundary() -> String {
+    public static func generateBoundary() -> String {
         return UUID().uuidString
     }
     
-    static func contentType(with boundary: String) -> String {
+    public static func contentType(with boundary: String) -> String {
         return "multipart/form-data; boundary=\(boundary)"
     }
 }
