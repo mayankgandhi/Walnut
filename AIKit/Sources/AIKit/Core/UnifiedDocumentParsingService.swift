@@ -14,20 +14,29 @@ public final class UnifiedDocumentParsingService: AIDocumentServiceProtocol, Obs
     // MARK: - Dependencies
     
     private let openAIService: OpenAIDocumentService
+    private let claudeService: ClaudeDocumentService
     
     // MARK: - Initialization
     
     public init() {
         self.openAIService = OpenAIDocumentService(apiKey: openAIKey)
+        self.claudeService = ClaudeDocumentService(apiKey: claudeKey)
     }
     
     // MARK: - AIDocumentServiceProtocol
     
     public func parseDocument<T: ParseableModel>(data: Data, fileName: String, as type: T.Type) async throws -> T {
-        guard let openAIType = type as? (ParseableModel & OpenAISchemaDefinable).Type else {
-            throw AIKitError.unsupportedFileType("Type \(T.self) does not support OpenAI schema definition")
+        let fileExtension = URL(fileURLWithPath: fileName).pathExtension.lowercased()
+        
+        switch fileExtension {
+        case "pdf":
+            return try await claudeService.parseDocument(data: data, fileName: fileName, as: type)
+        default:
+            guard let openAIType = type as? (ParseableModel & OpenAISchemaDefinable).Type else {
+                throw AIKitError.unsupportedFileType("Type \(T.self) does not support OpenAI schema definition")
+            }
+            return try await openAIService.parseDocument(data: data, fileName: fileName, as: openAIType) as! T
         }
-        return try await openAIService.parseDocument(data: data, fileName: fileName, as: openAIType) as! T
     }
     
     public func uploadAndParseDocument<T: ParseableModel>(from url: URL, as type: T.Type) async throws -> T {
@@ -46,12 +55,20 @@ public final class UnifiedDocumentParsingService: AIDocumentServiceProtocol, Obs
         
         switch fileExtension {
         case "pdf":
-            throw AIKitError.unsupportedFileType("PDF parsing requires specialized handling. Use a dedicated PDF parsing service.")
+            return try await parsePDFDocument(from: url, as: type)
         case "jpg", "jpeg", "png", "gif", "webp", "heic", "heif":
             return try await parseImageDocument(from: url, as: type)
         default:
-            throw AIKitError.unsupportedFileType("File type '\(fileExtension)' is not supported. Supported types: JPEG, PNG, GIF, WebP, HEIC, HEIF")
+            throw AIKitError.unsupportedFileType("File type '\(fileExtension)' is not supported. Supported types: PDF, JPEG, PNG, GIF, WebP, HEIC, HEIF")
         }
+    }
+    
+    /// Parse PDF documents using Claude
+    private func parsePDFDocument<T: ParseableModel>(
+        from url: URL,
+        as type: T.Type
+    ) async throws -> T {
+        return try await claudeService.uploadAndParseDocument(from: url, as: type)
     }
     
     /// Parse image documents using OpenAI vision
@@ -69,7 +86,7 @@ public final class UnifiedDocumentParsingService: AIDocumentServiceProtocol, Obs
     /// Check if a file type is supported for parsing
     public func isFileTypeSupported(_ url: URL) -> Bool {
         let fileExtension = url.pathExtension.lowercased()
-        let supportedTypes = ["jpg", "jpeg", "png", "gif", "webp", "heic", "heif"]
+        let supportedTypes = ["pdf", "jpg", "jpeg", "png", "gif", "webp", "heic", "heif"]
         return supportedTypes.contains(fileExtension)
     }
     
