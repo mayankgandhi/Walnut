@@ -1,0 +1,106 @@
+//
+//  HealthCard.swift
+//  WalnutDesignSystem
+//
+//  Created by Mayank Gandhi on 06/08/25.
+//  Copyright © 2025 m. All rights reserved.
+//
+
+import SwiftUI
+
+/// Simple healthcare card with native materials
+public struct HealthCard<Content: View>: View {
+    private let content: Content
+    private let padding: CGFloat
+    
+    public init(
+        padding: CGFloat = Spacing.medium,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.content = content()
+        self.padding = padding
+    }
+    
+    public var body: some View {
+        content
+            .padding(padding)
+            .cardStyle()
+    }
+}
+
+/// Patient avatar component
+public struct PatientAvatar: View {
+    private let initials: String
+    private let color: Color
+    private let size: CGFloat
+    
+    public init(
+        initials: String,
+        color: Color = .healthPrimary,
+        size: CGFloat = Size.avatarMedium
+    ) {
+        self.initials = initials
+        self.color = color
+        self.size = size
+    }
+    
+    public var body: some View {
+        Circle()
+            .fill(color.opacity(0.2))
+            .overlay(
+                Text(initials)
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(color)
+            )
+            .frame(width: size, height: size)
+    }
+}
+
+// MARK: - Preview
+
+#Preview("Health Cards") {
+    ScrollView {
+        VStack(spacing: Spacing.large) {
+            HealthCard {
+                VStack(alignment: .leading, spacing: Spacing.small) {
+                    HStack {
+                        PatientAvatar(initials: "JD")
+                        
+                        VStack(alignment: .leading) {
+                            Text("John Doe")
+                                .font(.headline)
+                            Text("35 years old")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        
+                        Spacer()
+                        
+                        StatusIndicator(status: .good)
+                    }
+                    
+                    Divider()
+                    
+                    HealthMetric(
+                        value: "120/80",
+                        unit: "mmHg",
+                        label: "Blood Pressure"
+                    )
+                }
+            }
+            
+            HealthCard {
+                VStack(spacing: Spacing.medium) {
+                    Text("Daily Progress")
+                        .font(.headline)
+                    
+                    HStack(spacing: Spacing.large) {
+                        HealthProgressRing(progress: 0.8)
+                        HealthProgressRing(progress: 0.6, color: .healthSuccess)
+                    }
+                }
+            }
+        }
+        .padding(Spacing.large)
+    }
+}
