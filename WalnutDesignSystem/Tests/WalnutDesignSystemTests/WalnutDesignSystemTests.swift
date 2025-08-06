@@ -48,9 +48,9 @@ final class WalnutDesignSystemTests: XCTestCase {
     }
     
     func testButtonStyles() {
-        let primaryStyle = HealthButtonStyle.primary
-        let secondaryStyle = HealthButtonStyle.secondary
-        let destructiveStyle = HealthButtonStyle.destructive
+        let primaryStyle = DSButtonStyle.primary
+        let secondaryStyle = DSButtonStyle.secondary
+        let destructiveStyle = DSButtonStyle.destructive
         
         XCTAssertEqual(primaryStyle.backgroundColor, .healthPrimary)
         XCTAssertEqual(secondaryStyle.backgroundColor, .clear)

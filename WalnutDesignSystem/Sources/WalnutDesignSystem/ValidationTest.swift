@@ -14,7 +14,7 @@ struct ValidationTest: View {
         ScrollView {
             VStack(spacing: Spacing.medium) {
                 // Test all atomic components
-                HealthButton("Test Button", style: .primary) {}
+                DSButton("Test Button", style: .primary) {}
                 
                 PatientAvatar(initials: "JD", size: Size.avatarMedium)
                 
@@ -39,7 +39,7 @@ struct ValidationTest: View {
                     rdc: "25%"
                 )
                 
-                FoodItemCard(
+                DSItemCard(
                     name: "Test Food",
                     calories: "250",
                     details: "Test details",

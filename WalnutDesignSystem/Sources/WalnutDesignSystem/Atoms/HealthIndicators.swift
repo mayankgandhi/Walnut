@@ -108,34 +108,6 @@ public struct HealthMetric: View {
 
 // MARK: - Progress Ring
 
-/// Simple circular progress using native API
-public struct HealthProgressRing: View {
-    private let progress: Double
-    private let color: Color
-    
-    public init(progress: Double, color: Color = .healthPrimary) {
-        self.progress = max(0, min(1, progress))
-        self.color = color
-    }
-    
-    public var body: some View {
-        ZStack {
-            Circle()
-                .stroke(.quaternary, lineWidth: 8)
-            
-            Circle()
-                .trim(from: 0, to: progress)
-                .stroke(color, style: StrokeStyle(lineWidth: 8, lineCap: .round))
-                .rotationEffect(.degrees(-90))
-                .animation(.easeOut(duration: 1), value: progress)
-            
-            Text("\(Int(progress * 100))%")
-                .healthMetricSecondary()
-        }
-        .frame(width: 80, height: 80)
-    }
-}
-
 // MARK: - Preview
 
 #Preview("Health Indicators") {
@@ -178,11 +150,7 @@ public struct HealthProgressRing: View {
             Text("Progress Rings")
                 .font(.headline)
             
-            HStack(spacing: Spacing.medium) {
-                HealthProgressRing(progress: 0.85)
-                HealthProgressRing(progress: 0.65, color: .healthSuccess)
-                HealthProgressRing(progress: 0.35, color: .healthWarning)
-            }
+            
         }
     }
     .padding(Spacing.large)

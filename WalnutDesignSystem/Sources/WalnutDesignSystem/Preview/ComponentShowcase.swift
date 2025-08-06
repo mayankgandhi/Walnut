@@ -73,21 +73,21 @@ public struct ComponentShowcase: View {
                                 
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: Spacing.medium) {
-                                        FoodItemCard(
+                                        DSItemCard(
                                             name: "Taco",
                                             calories: "745",
                                             details: "Big nice meal",
                                             color: .cyan
                                         )
                                         
-                                        FoodItemCard(
+                                        DSItemCard(
                                             name: "Donut",
                                             calories: "341",
                                             details: "Sweet treat",
                                             color: .pink
                                         )
                                         
-                                        FoodItemCard(
+                                        DSItemCard(
                                             name: "Salad",
                                             calories: "125",
                                             details: "Healthy choice",
@@ -141,7 +141,7 @@ public struct ComponentShowcase: View {
 //                                        .foregroundStyle(.primary)
 //                                    
 //                                    VStack(spacing: Spacing.small) {
-//                                        NutritionListItem(
+//                                        DSListItem(
 //                                            icon: "cup.and.saucer.fill",
 //                                            title: "Juice candy",
 //                                            subtitle: "Our natural juice",
@@ -150,7 +150,7 @@ public struct ComponentShowcase: View {
 //                                            iconColor: .red
 //                                        )
 //                                        
-//                                        NutritionListItem(
+//                                        DSListItem(
 //                                            icon: "snowflake",
 //                                            title: "Ice cream",
 //                                            subtitle: "50g / big or 6g carbs",
@@ -312,9 +312,9 @@ public struct ComponentShowcase: View {
                                     .font(.headline.weight(.semibold))
                                 
 //                                HStack(spacing: Spacing.medium) {
-//                                    HealthButton("Primary", style: .primary) {}
-//                                    HealthButton("Secondary", style: .secondary) {}
-//                                    HealthButton("Danger", style: .danger) {}
+//                                    DSButton("Primary", style: .primary) {}
+//                                    DSButton("Secondary", style: .secondary) {}
+//                                    DSButton("Danger", style: .danger) {}
 //                                }
                             }
                             

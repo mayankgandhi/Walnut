@@ -35,7 +35,7 @@ import SwiftUI
 /// 
 /// // Use individual components
 /// GlucoseCard(value: "3.2", unit: "mmol/L", status: "Normal")
-/// HealthButton("Save", style: .primary) { /* action */ }
+/// DSButton("Save", style: .primary) { /* action */ }
 /// 
 /// // Or use complete dashboard
 /// HealthDashboard()

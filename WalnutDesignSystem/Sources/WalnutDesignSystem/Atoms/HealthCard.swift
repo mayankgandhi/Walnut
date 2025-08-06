@@ -89,17 +89,7 @@ public struct PatientAvatar: View {
                 }
             }
             
-            HealthCard {
-                VStack(spacing: Spacing.medium) {
-                    Text("Daily Progress")
-                        .font(.headline)
-                    
-                    HStack(spacing: Spacing.large) {
-                        HealthProgressRing(progress: 0.8)
-                        HealthProgressRing(progress: 0.6, color: .healthSuccess)
-                    }
-                }
-            }
+            
         }
         .padding(Spacing.large)
     }

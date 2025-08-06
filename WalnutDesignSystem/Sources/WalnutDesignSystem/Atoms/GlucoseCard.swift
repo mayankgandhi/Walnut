@@ -131,3 +131,13 @@ public struct GlucoseCard: View {
         .cardStyle()
     }
 }
+
+#Preview {
+    GlucoseCard(
+        currentValue: "100",
+        lastValue: "80",
+        status: "stable",
+        statusColor: .green,
+        timestamp: "12:11pm"
+    )
+}

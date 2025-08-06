@@ -88,21 +88,21 @@ public struct HealthDashboard: View {
                         
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: Spacing.medium) {
-                                FoodItemCard(
+                                DSItemCard(
                                     name: "Taco",
                                     calories: "745",
                                     details: "Big nice meal",
                                     color: .cyan
                                 )
                                 
-                                FoodItemCard(
+                                DSItemCard(
                                     name: "Donut",
                                     calories: "341",
                                     details: "Sweet treat",
                                     color: .pink
                                 )
                                 
-                                FoodItemCard(
+                                DSItemCard(
                                     name: "Salad",
                                     calories: "125",
                                     details: "Healthy choice",

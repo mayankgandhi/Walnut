@@ -9,7 +9,7 @@
 import SwiftUI
 
 /// Simple healthcare button styles
-public enum HealthButtonStyle {
+public enum DSButtonStyle {
     case primary
     case secondary
     case destructive
@@ -38,16 +38,16 @@ public enum HealthButtonStyle {
 }
 
 /// Healthcare-focused button component
-public struct HealthButton: View {
+public struct DSButton: View {
     private let title: String
-    private let style: HealthButtonStyle
+    private let style: DSButtonStyle
     private let icon: String?
     private let action: () -> Void
     @State private var isPressed = false
     
     public init(
         _ title: String,
-        style: HealthButtonStyle = .primary,
+        style: DSButtonStyle = .primary,
         icon: String? = nil,
         action: @escaping () -> Void
     ) {
@@ -90,13 +90,13 @@ public struct HealthButton: View {
 /// Icon-only button
 public struct HealthIconButton: View {
     private let icon: String
-    private let style: HealthButtonStyle
+    private let style: DSButtonStyle
     private let action: () -> Void
     @State private var isPressed = false
     
     public init(
         icon: String,
-        style: HealthButtonStyle = .secondary,
+        style: DSButtonStyle = .secondary,
         action: @escaping () -> Void
     ) {
         self.icon = icon
@@ -133,9 +133,9 @@ public struct HealthIconButton: View {
             Text("Button Styles")
                 .font(.headline)
             
-            HealthButton("Primary Action", style: .primary) { }
-            HealthButton("Secondary Action", style: .secondary) { }
-            HealthButton("Delete", style: .destructive, icon: "trash") { }
+            DSButton("Primary Action", style: .primary) { }
+            DSButton("Secondary Action", style: .secondary) { }
+            DSButton("Delete", style: .destructive, icon: "trash") { }
         }
         
         VStack(spacing: Spacing.medium) {

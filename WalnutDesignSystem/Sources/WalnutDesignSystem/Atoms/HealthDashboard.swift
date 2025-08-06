@@ -269,7 +269,7 @@ public struct InfoCard: View {
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.leading)
                 
-                HealthButton(buttonText, style: .secondary) { }
+                DSButton(buttonText, style: .secondary) { }
             }
         }
         .padding(Spacing.medium)
