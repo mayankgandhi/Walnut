@@ -17,11 +17,7 @@ public struct HealthDashboard: View {
             ScrollView {
                 LazyVStack(spacing: Spacing.medium) {
                     // Profile header
-                    ProfileHeader(
-                        name: "Jason Bean",
-                        subtitle: "Type 1 diabetes"
-                    )
-                    .padding(.horizontal)
+                   
                     
                     // Glucose monitoring section
                     VStack(alignment: .leading, spacing: Spacing.small) {
@@ -33,43 +29,7 @@ public struct HealthDashboard: View {
                        
                     }
                     
-                    // Heart condition card
-                    HeartConditionCard(
-                        bloodPressure: "170/80",
-                        heartRate: "72",
-                        chartData: [0.3, 0.8, 0.5, 0.9, 0.4, 0.7, 0.6, 0.8, 0.3]
-                    )
-                    .padding(.horizontal)
-                    
-                    // Nutrition tracking
-                    VStack(alignment: .leading, spacing: Spacing.small) {
-                        Text("Nutrition")
-                            .font(.headline.weight(.semibold))
-                            .foregroundStyle(.primary)
-                            .padding(.horizontal)
-                        
-                        HStack(spacing: Spacing.medium) {
-                            ProgressCard(
-                                title: "Calories",
-                                progress: 0.91,
-                                currentValue: "1950",
-                                maxValue: "2140",
-                                unit: "kcal",
-                                date: "10 December",
-                                color: .cyan
-                            )
-                            
-                            NutritionCard(
-                                title: "Breakfast",
-                                calories: "62.0",
-                                protein: "78.5",
-                                fats: "Today's 1278",
-                                carbs: "23.0",
-                                rdc: "14%"
-                            )
-                        }
-                        .padding(.horizontal)
-                    }
+                  
                     
                     // Food items
                     VStack(alignment: .leading, spacing: Spacing.small) {
@@ -113,13 +73,7 @@ public struct HealthDashboard: View {
                         }
                     }
                     
-                    // Quick info card
-                    InfoCard(
-                        title: "Do you know that doctors are available to you at all times?",
-                        subtitle: "Get consultation",
-                        buttonText: "Get started"
-                    )
-                    .padding(.horizontal)
+                    
                     
                     // Menu items
                     VStack(spacing: Spacing.small) {
@@ -175,44 +129,6 @@ public struct HealthDashboard: View {
     }
 }
 
-/// Medical dashboard preview
-public struct MedicalDashboardPreview: View {
-    public init() {}
-    
-    public var body: some View {
-        VStack(spacing: Spacing.large) {
-            // Success notification example
-            SuccessNotification(
-                timestamp: "5:05 pm",
-                value: "3,2",
-                unit: "mmol/L",
-                status: "Hypos level!"
-            )
-            
-            Spacer()
-            
-            // Chart example
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-                Text("Monitoring")
-                    .font(.headline.weight(.semibold))
-                    .foregroundStyle(.primary)
-                
-                Text("All glucose measurements.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                
-                LineChart(
-                    data: [3, 8, 5, 12, 7, 15, 9, 11, 6, 13, 8],
-                    color: .healthPrimary
-                )
-                
-                Text("Negative growth")
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.orange)
-            }
-            .padding()
-            .cardStyle()
-        }
-        .padding()
-    }
+#Preview {
+    HealthDashboard()
 }

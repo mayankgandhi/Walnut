@@ -133,6 +133,7 @@ public struct HealthMetric: View {
                 label: "Blood Pressure",
                 status: .good
             )
+            .padding(Spacing.medium)
             .cardStyle()
             .padding(Spacing.medium)
             
@@ -142,6 +143,7 @@ public struct HealthMetric: View {
                 label: "Temperature",
                 status: .good
             )
+            .padding(Spacing.medium)
             .cardStyle()
             .padding(Spacing.medium)
         }

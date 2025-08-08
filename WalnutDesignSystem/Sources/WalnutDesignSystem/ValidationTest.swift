@@ -20,24 +20,6 @@ struct ValidationTest: View {
                 
                 StatusIndicator(status: .good)
                
-                ProgressCard(
-                    title: "Test Progress",
-                    progress: 0.75,
-                    currentValue: "75",
-                    maxValue: "100",
-                    unit: "%",
-                    date: "Today",
-                    color: .healthPrimary
-                )
-                
-                NutritionCard(
-                    title: "Test Nutrition",
-                    calories: "500",
-                    protein: "20g",
-                    fats: "15g",
-                    carbs: "30g",
-                    rdc: "25%"
-                )
                 
                 DSItemCard(
                     name: "Test Food",
@@ -52,17 +34,7 @@ struct ValidationTest: View {
                     iconColor: .healthPrimary
                 )
                 
-                ProfileHeader(
-                    name: "Test User",
-                    subtitle: "Test subtitle"
-                )
-                
-                HeartConditionCard(
-                    bloodPressure: "120/80",
-                    heartRate: "70",
-                    chartData: [0.5, 0.7, 0.6, 0.8, 0.4]
-                )
-                
+              
                 SuccessNotification(
                     timestamp: "Now",
                     value: "5.0",
@@ -70,10 +42,6 @@ struct ValidationTest: View {
                     status: "Perfect!"
                 )
                 
-                LineChart(
-                    data: [1, 3, 2, 5, 4, 6, 3],
-                    color: .healthPrimary
-                )
                 
                 // Test molecules
                 HealthDashboard()
