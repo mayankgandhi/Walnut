@@ -10,6 +10,7 @@ import SwiftUI
 import WalnutDesignSystem
 
 struct ContentView: View {
+    
     @State private var fullName = ""
     @State private var selectedBloodType: String? = nil
     @State private var selectedDate: Date? = nil
@@ -22,14 +23,7 @@ struct ContentView: View {
             ScrollView {
                 VStack(spacing: Spacing.large) {
                     // Header with ProfileHeader component
-                    VStack(spacing: Spacing.medium) {
-                        ProfileHeader(
-                            name: "Atlas User",
-                            subtitle: "Healthcare Management App",
-                            healthStatus: .good,
-                            notificationBadge: 3
-                        )
-                    }
+                
                     
                     // Input Fields Demo Section
                     VStack(alignment: .leading, spacing: Spacing.small) {

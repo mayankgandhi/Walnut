@@ -12,7 +12,6 @@ let project = Project(
             deploymentTargets: .iOS("17.0"),
             infoPlist: .extendingDefault(
                 with: [
-                    "UILaunchStoryboardName": "LaunchScreen",
                     "UISupportedInterfaceOrientations": [
                         "UIInterfaceOrientationPortrait",
                         "UIInterfaceOrientationLandscapeLeft",

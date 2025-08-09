@@ -33,7 +33,6 @@ struct ValidationTest: View {
                     title: "Test Menu Item",
                     iconColor: .healthPrimary
                 )
-                
               
                 SuccessNotification(
                     timestamp: "Now",
