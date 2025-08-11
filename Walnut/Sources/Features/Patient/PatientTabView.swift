@@ -15,7 +15,7 @@ struct PatientTabView: View {
         TabView {
             Tab("Medications", systemImage: "pills.fill") {
                 NavigationStack {
-                    PatientHomeView(patient: patient)
+                    MedicationsTrackerView(patient: patient)
                         .navigationTitle("Medications")
                 }
             }
@@ -26,18 +26,18 @@ struct PatientTabView: View {
                 }
             }
             
+            Tab("Blood Tests", systemImage: "testtube.2") {
+                NavigationStack {
+                    BloodTestsView(patient: patient)
+                }
+            }
+            
             Tab("Settings", systemImage: "gearshape.fill") {
                 NavigationStack {
                     PatientSettingsView(patient: patient)
                         .navigationTitle("Settings")
                 }
             }
-            
-//            Tab("Blood Tests", systemImage: "testtube.2") {
-//                NavigationStack {
-//                    BloodTestsView(patient: patient)
-//                }
-//            }
         }
         .navigationTitle(patient.fullName)
         .navigationBarTitleDisplayMode(.inline)

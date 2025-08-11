@@ -11,21 +11,24 @@ import SwiftData
 import WalnutDesignSystem
 
 struct AllMedicationsView: View {
+    
     let patient: Patient
     @State private var medicationTracker = MedicationTracker()
     @State private var showAddMedication = false
     
     private var activeMedications: [Medication] {
-        patient.medicalCases.flatMap { $0.prescriptions.flatMap { $0.medications } }
+        patient.medicalCases
             .filter { $0.isActive }
+            .flatMap { $0.prescriptions.flatMap { $0.medications } }
     }
     
     private var inactiveMedications: [Medication] {
-        patient.medicalCases.flatMap { $0.prescriptions.flatMap { $0.medications } }
+        patient.medicalCases
             .filter { !$0.isActive }
+            .flatMap { $0.prescriptions.flatMap { $0.medications } }
     }
     
-    private var groupedActiveMedications: [MedicationTracker.TimePeriod: [MedicationTracker.MedicationScheduleInfo]] {
+    private func groupedActiveMedications() -> [MedicationTracker.TimePeriod: [MedicationTracker.MedicationScheduleInfo]] {
         medicationTracker.groupMedicationsByTimePeriod(activeMedications)
     }
     
@@ -35,14 +38,14 @@ struct AllMedicationsView: View {
             if !activeMedications.isEmpty {
                 Section {
                     ForEach(MedicationTracker.TimePeriod.allCases, id: \.self) { timePeriod in
-                        if let medications = groupedActiveMedications[timePeriod], !medications.isEmpty {
+                        if let medications = groupedActiveMedications()[timePeriod], !medications.isEmpty {
                             timePeriodSection(timePeriod: timePeriod, medications: medications)
                         }
                     }
                 } header: {
                     HStack {
                         Image(systemName: "pills.fill")
-                            .foregroundStyle(.healthSuccess)
+                            .foregroundStyle(Color.healthSuccess)
                         Text("Active Medications")
                             .font(.headline)
                     }
@@ -159,7 +162,7 @@ struct AllMedicationsView: View {
             
             // Status Indicator
             Circle()
-                .fill(.healthSuccess)
+                .fill(Color.healthSuccess)
                 .frame(width: 8, height: 8)
         }
         .padding(.horizontal, Spacing.small)
@@ -178,7 +181,7 @@ struct AllMedicationsView: View {
                 .overlay {
                     Text(String(medication.name.prefix(1).uppercased()))
                         .font(.system(.caption, design: .rounded, weight: .bold))
-                        .foregroundStyle(isActive ? .healthSuccess : .secondary)
+                        .foregroundStyle(isActive ? Color.healthSuccess : .secondary)
                 }
             
             // Medication Details
@@ -198,7 +201,7 @@ struct AllMedicationsView: View {
             
             // Status Indicator
             Circle()
-                .fill(isActive ? .healthSuccess : .secondary)
+                .fill(isActive ? Color.healthSuccess : .secondary)
                 .frame(width: 8, height: 8)
         }
         .padding(.vertical, Spacing.xs)

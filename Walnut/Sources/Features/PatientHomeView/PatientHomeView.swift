@@ -1,5 +1,5 @@
 //
-//  PatientHomeView.swift
+//  MedicationsTrackerView.swift
 //  Walnut-Playground
 //
 //  Created by Mayank Gandhi on 30/06/25.
@@ -9,7 +9,7 @@
 import SwiftUI
 import SwiftData
 
-struct PatientHomeView: View {
+struct MedicationsTrackerView: View {
     
     let patient: Patient
     @Environment(\.modelContext) private var modelContext
@@ -41,10 +41,10 @@ struct PatientHomeView: View {
 
 
 
-struct PatientHomeView_Previews: PreviewProvider {
+struct MedicationsTrackerView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            PatientHomeView(patient: Patient.samplePatient)
+            MedicationsTrackerView(patient: Patient.samplePatient)
         }
     }
 }

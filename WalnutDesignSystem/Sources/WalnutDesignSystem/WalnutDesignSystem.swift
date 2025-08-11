@@ -40,11 +40,11 @@ import SwiftUI
 /// // Or use complete dashboard
 /// HealthDashboard()
 /// ```
-public struct WalnutDesignSystem {
-    public static let version = "1.0.0"
-    
-    /// Initialize the design system (currently no setup needed)
-    public static func initialize() {
-        // Reserved for future global configurations
-    }
-}
+//public struct WalnutDesignSystem {
+//    public static let version = "1.0.0"
+//    
+//    /// Initialize the design system (currently no setup needed)
+//    public static func initialize() {
+//        // Reserved for future global configurations
+//    }
+//}

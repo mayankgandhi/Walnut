@@ -18,7 +18,7 @@ struct PatientSettingsView: View {
         ScrollView {
             VStack(spacing: Spacing.large) {
                 // Patient Header Section
-                VStack(spacing: Spacing.medium) {
+                VStack(alignment: .leading, spacing: Spacing.medium) {
                     Text("Patient Profile")
                         .font(.headline)
                         .foregroundStyle(.secondary)
@@ -28,7 +28,7 @@ struct PatientSettingsView: View {
                 }
                 
                 // Settings Menu Section
-                VStack(spacing: Spacing.medium) {
+                VStack(alignment: .leading, spacing: Spacing.medium) {
                     Text("Settings")
                         .font(.headline)
                         .foregroundStyle(.secondary)
@@ -74,7 +74,7 @@ struct PatientSettingsView: View {
                 }
                 
                 // App Settings Section
-                VStack(spacing: Spacing.medium) {
+                VStack(alignment: .leading, spacing: Spacing.medium) {
                     Text("App Settings")
                         .font(.headline)
                         .foregroundStyle(.secondary)
