@@ -15,7 +15,6 @@ struct PatientsList<Content: View>: View {
     let searchText: String
     @Binding var showCreatePatient: Bool
     let content: (Patient) -> Content
-    let onPatientsChanged: (([Patient]) -> Void)?
     
     // Dynamic query based on search text and sort option
     @Query private var patients: [Patient]
@@ -23,12 +22,10 @@ struct PatientsList<Content: View>: View {
     init(
         searchText: String,
         showCreatePatient: Binding<Bool>,
-        onPatientsChanged: (([Patient]) -> Void)? = nil,
         @ViewBuilder content: @escaping (Patient) -> Content
     ) {
         self.searchText = searchText
         self._showCreatePatient = showCreatePatient
-        self.onPatientsChanged = onPatientsChanged
         self.content = content
         
         // Configure query based on search text and sort option
@@ -61,12 +58,7 @@ struct PatientsList<Content: View>: View {
             .scrollContentBackground(.hidden)
             .listStyle(.plain)
         }
-        .onAppear {
-            onPatientsChanged?(patients)
-        }
-        .onChange(of: patients) { _, newPatients in
-            onPatientsChanged?(newPatients)
-        }
+        
     }
     
     private var emptyStateView: some View {

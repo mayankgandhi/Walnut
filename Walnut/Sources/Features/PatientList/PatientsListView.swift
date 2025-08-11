@@ -55,8 +55,7 @@ public struct PatientsListView: View {
     private var patientsList: some View {
         PatientsList(
             searchText: search,
-            showCreatePatient: $showCreatePatient,
-            onPatientsChanged: handlePatientsChanged
+            showCreatePatient: $showCreatePatient
         ) { patient in
             NavigationLink(value: patient) {
                 ModernPatientCard(patient: patient)
@@ -88,24 +87,12 @@ public struct PatientsListView: View {
         editPatient = patient
     }
     
-    private func handlePatientsChanged(_ patients: [Patient]) {
-        // Only auto-navigate if there's exactly 1 patient and no search is active and navigation path is empty
-        if patients.count == 1 && search.isEmpty && navigationPath.isEmpty {
-            navigationPath.append(patients[0])
-        }
-        // Clear navigation if we have multiple patients or are searching
-        else if (patients.count != 1 || !search.isEmpty) && !navigationPath.isEmpty {
-            navigationPath.removeLast(navigationPath.count)
-        }
-    }
 }
 
 struct PatientsListView_Previews: PreviewProvider {
     static var previews: some View {
-        TabView {
-            NavigationView {
-                PatientsListView()
-            }
+        NavigationView {
+            PatientsListView()
         }
     }
 }
