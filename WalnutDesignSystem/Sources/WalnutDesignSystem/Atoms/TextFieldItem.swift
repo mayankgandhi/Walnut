@@ -19,6 +19,8 @@ public struct TextFieldItem: View {
     private let isRequired: Bool
     private let keyboardType: UIKeyboardType
     private let contentType: UITextContentType?
+    private let submitLabel: SubmitLabel
+    private let onSubmit: (() -> Void)?
     
     @Binding private var text: String
     @FocusState private var isFocused: Bool
@@ -68,7 +70,9 @@ public struct TextFieldItem: View {
         iconColor: Color = .healthPrimary,
         isRequired: Bool = false,
         keyboardType: UIKeyboardType = .default,
-        contentType: UITextContentType? = nil
+        contentType: UITextContentType? = nil,
+        submitLabel: SubmitLabel = .done,
+        onSubmit: (() -> Void)? = nil
     ) {
         self.icon = icon
         self.title = title
@@ -80,6 +84,8 @@ public struct TextFieldItem: View {
         self.isRequired = isRequired
         self.keyboardType = keyboardType
         self.contentType = contentType
+        self.submitLabel = submitLabel
+        self.onSubmit = onSubmit
     }
     
     public var body: some View {
@@ -122,7 +128,10 @@ public struct TextFieldItem: View {
                         .focused($isFocused)
                         .keyboardType(keyboardType)
                         .textContentType(contentType)
-                        .submitLabel(.done)
+                        .submitLabel(submitLabel)
+                        .onSubmit {
+                            onSubmit?()
+                        }
                 }
             }
             .padding(.horizontal, Spacing.medium)

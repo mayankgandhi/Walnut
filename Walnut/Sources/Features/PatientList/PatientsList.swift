@@ -8,9 +8,10 @@
 
 import SwiftUI
 import SwiftData
+import WalnutDesignSystem
 
 // Separate view to handle the dynamic query
-private struct PatientsList<Content: View>: View {
+struct PatientsList<Content: View>: View {
     let searchText: String
     let sortOption: PatientsListView.SortOption
     @Binding var showCreatePatient: Bool
@@ -19,7 +20,12 @@ private struct PatientsList<Content: View>: View {
     // Dynamic query based on search text and sort option
     @Query private var patients: [Patient]
     
-    init(searchText: String, sortOption: PatientsListView.SortOption, showCreatePatient: Binding<Bool>, @ViewBuilder content: @escaping (Patient) -> Content) {
+    init(
+        searchText: String,
+        sortOption: PatientsListView.SortOption,
+        showCreatePatient: Binding<Bool>,
+        @ViewBuilder content: @escaping (Patient) -> Content
+    ) {
         self.searchText = searchText
         self.sortOption = sortOption
         self._showCreatePatient = showCreatePatient
@@ -68,6 +74,8 @@ private struct PatientsList<Content: View>: View {
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.medium, bottom: Spacing.xs, trailing: Spacing.medium))
             }
+            .scrollContentBackground(.hidden)
+            .listStyle(.plain)
         }
     }
     

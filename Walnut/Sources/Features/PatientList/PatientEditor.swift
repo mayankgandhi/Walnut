@@ -9,8 +9,10 @@
 
 import SwiftUI
 import SwiftData
+import WalnutDesignSystem
 
 struct PatientEditor: View {
+    
     let patient: Patient?
     
     init(patient: Patient? = nil) {
@@ -24,140 +26,270 @@ struct PatientEditor: View {
     @State private var firstName = ""
     @State private var lastName = ""
     @State private var dateOfBirth = Date()
-    @State private var selectedGender = "Not Specified"
-    @State private var selectedBloodType = "Unknown"
+    @State private var selectedGender: String? = nil
+    @State private var selectedBloodType: String? = nil
     @State private var emergencyContactName = ""
     @State private var emergencyContactPhone = ""
     @State private var notes = ""
     @State private var isActive = true
+    @State private var selectedColorHex = Patient.generateRandomColorHex()
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
+    // Focus management for keyboard navigation
+    @FocusState private var focusedField: FormField?
+    
+    private enum FormField: Hashable, CaseIterable {
+        case firstName
+        case lastName
+        case emergencyContactName
+        case emergencyContactPhone
+        case notes
+        
+        // Define what type of field comes next in the UI order
+        private enum NextFieldType {
+            case textField(FormField)
+            case nonTextFieldOrEnd
+        }
+        
+        private var nextFieldInUI: NextFieldType {
+            switch self {
+            case .firstName:
+                return .textField(.lastName)  // Next: Last Name
+            case .lastName:
+                return .nonTextFieldOrEnd  // Next: Gender Menu
+            case .emergencyContactName:
+                return .textField(.emergencyContactPhone)  // Next: Phone text field
+            case .emergencyContactPhone:
+                return .textField(.notes)  // Next: Notes text field
+            case .notes:
+                return .nonTextFieldOrEnd  // Next: Toggle (last field)
+            }
+        }
+        
+        var shouldDismissKeyboard: Bool {
+            switch nextFieldInUI {
+            case .nonTextFieldOrEnd:
+                return true
+            case .textField:
+                return false
+            }
+        }
+        
+        var nextTextField: FormField? {
+            switch nextFieldInUI {
+            case .textField(let field):
+                return field
+            case .nonTextFieldOrEnd:
+                return nil
+            }
+        }
+        
+        var appropriateSubmitLabel: SubmitLabel {
+            return shouldDismissKeyboard ? .done : .next
+        }
+    }
+    
     private let genderOptions = ["Male", "Female", "Not Specified"]
     private let bloodTypeOptions = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Unknown"]
     
+    @State private var selectedDateOfBirth: Date? = nil
+    
     private var isFormValid: Bool {
         !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        selectedDateOfBirth != nil
+    }
+    
+    // Focus navigation helpers
+    private func focusNextField(after currentField: FormField) {
+        if currentField.shouldDismissKeyboard {
+            // Next field is non-text field or it's the last field
+            if currentField == .notes && isFormValid {
+                // Special case: notes is the last text field, submit if form is valid
+                submitForm()
+            } else {
+                // Dismiss keyboard
+                focusedField = nil
+            }
+        } else if let nextField = currentField.nextTextField {
+            // Move to next text field
+            focusedField = nextField
+        } else {
+            // Fallback: dismiss keyboard
+            focusedField = nil
+        }
+    }
+    
+    private func submitForm() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            save()
+            dismiss()
+        }
     }
     
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Personal Information") {
-                    HStack {
-                        Image(systemName: "person.circle.fill")
-                            .foregroundColor(.blue)
-                            .font(.title2)
+            ScrollView {
+                VStack(spacing: Spacing.large) {
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        Text("Personal Information")
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, Spacing.medium)
                         
-                        VStack(alignment: .leading, spacing: 4) {
-                            TextField("First Name", text: $firstName)
-                                .textContentType(.givenName)
-                                .autocorrectionDisabled()
+                        VStack(spacing: Spacing.medium) {
+                            TextFieldItem(
+                                icon: "person.fill",
+                                title: "First Name",
+                                text: $firstName,
+                                placeholder: "Enter first name",
+                                iconColor: .healthPrimary,
+                                isRequired: true,
+                                contentType: .givenName,
+                                submitLabel: FormField.firstName.appropriateSubmitLabel,
+                                onSubmit: {
+                                    focusNextField(after: .firstName)
+                                }
+                            )
+                            .focused($focusedField, equals: .firstName)
                             
-                            TextField("Last Name", text: $lastName)
-                                .textContentType(.familyName)
-                                .autocorrectionDisabled()
+                            TextFieldItem(
+                                icon: "person.fill",
+                                title: "Last Name",
+                                text: $lastName,
+                                placeholder: "Enter last name",
+                                iconColor: .healthPrimary,
+                                isRequired: true,
+                                contentType: .familyName,
+                                submitLabel: FormField.lastName.appropriateSubmitLabel,
+                                onSubmit: {
+                                    focusNextField(after: .lastName)
+                                }
+                            )
+                            .focused($focusedField, equals: .lastName)
+                            
+                            DatePickerItem(
+                                icon: "calendar",
+                                title: "Date of Birth",
+                                selectedDate: $selectedDateOfBirth,
+                                helperText: "Used for age calculations",
+                                iconColor: .orange,
+                                isRequired: true
+                            )
+                            
+                            MenuPickerItem(
+                                icon: "person.2.fill",
+                                title: "Gender",
+                                selectedOption: $selectedGender,
+                                options: genderOptions,
+                                placeholder: "Select gender",
+                                iconColor: .purple
+                            )
+                            
+                            MenuPickerItem(
+                                icon: "drop.fill",
+                                title: "Blood Type",
+                                selectedOption: $selectedBloodType,
+                                options: bloodTypeOptions,
+                                placeholder: "Select blood type",
+                                helperText: "Medical reference information",
+                                iconColor: .red
+                            )
                         }
                     }
-                    .padding(.vertical, 4)
                     
-                    HStack {
-                        Image(systemName: "calendar")
-                            .foregroundColor(.orange)
-                            .font(.title2)
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        Text("Emergency Contact")
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, Spacing.medium)
                         
-                        DatePicker("Date of Birth", 
-                                 selection: $dateOfBirth,
-                                 in: ...Date(),
-                                 displayedComponents: .date)
-                    }
-                    .padding(.vertical, 4)
-                    
-                    HStack {
-                        Image(systemName: "person.2")
-                            .foregroundColor(.purple)
-                            .font(.title2)
-                        
-                        Picker("Gender", selection: $selectedGender) {
-                            ForEach(genderOptions, id: \.self) { gender in
-                                Text(gender).tag(gender)
-                            }
+                        VStack(spacing: Spacing.medium) {
+                            TextFieldItem(
+                                icon: "person.crop.circle.badge.exclamationmark",
+                                title: "Emergency Contact Name",
+                                text: $emergencyContactName,
+                                placeholder: "Enter contact name",
+                                helperText: "Person to contact in case of emergency",
+                                iconColor: .healthError,
+                                contentType: .name,
+                                submitLabel: FormField.emergencyContactName.appropriateSubmitLabel,
+                                onSubmit: {
+                                    focusNextField(after: .emergencyContactName)
+                                }
+                            )
+                            .focused($focusedField, equals: .emergencyContactName)
+                            
+                            TextFieldItem(
+                                icon: "phone.fill",
+                                title: "Emergency Contact Phone",
+                                text: $emergencyContactPhone,
+                                placeholder: "Enter phone number",
+                                iconColor: .green,
+                                keyboardType: .phonePad,
+                                contentType: .telephoneNumber,
+                                submitLabel: FormField.emergencyContactPhone.appropriateSubmitLabel,
+                                onSubmit: {
+                                    focusNextField(after: .emergencyContactPhone)
+                                }
+                            )
+                            .focused($focusedField, equals: .emergencyContactPhone)
                         }
-                        .pickerStyle(.menu)
                     }
-                    .padding(.vertical, 4)
                     
-                    HStack {
-                        Image(systemName: "drop.fill")
-                            .foregroundColor(.red)
-                            .font(.title2)
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        Text("Additional Information")
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, Spacing.medium)
                         
-                        Picker("Blood Type", selection: $selectedBloodType) {
-                            ForEach(bloodTypeOptions, id: \.self) { bloodType in
-                                Text(bloodType).tag(bloodType)
-                            }
+                        VStack(spacing: Spacing.medium) {
+                            TextFieldItem(
+                                icon: "note.text",
+                                title: "Notes",
+                                text: $notes,
+                                placeholder: "Additional notes about the patient",
+                                helperText: "Optional medical notes or special considerations",
+                                iconColor: .gray,
+                                submitLabel: FormField.notes.appropriateSubmitLabel,
+                                onSubmit: {
+                                    focusNextField(after: .notes)
+                                }
+                            )
+                            .focused($focusedField, equals: .notes)
+                            
+                            ColorPickerItem(
+                                icon: "paintpalette.fill",
+                                title: "Theme Color",
+                                selectedColorHex: $selectedColorHex,
+                                helperText: "This color will theme the patient's profile",
+                                iconColor: Color(hex: selectedColorHex) ?? .healthPrimary
+                            )
+                            
+                            ToggleItem(
+                                icon: "heart.fill",
+                                title: "Active Patient",
+                                subtitle: "Currently receiving care",
+                                isOn: $isActive,
+                                helperText: "Inactive patients are archived",
+                                iconColor: isActive ? .healthSuccess : .gray
+                            )
                         }
-                        .pickerStyle(.menu)
                     }
-                    .padding(.vertical, 4)
-                }
-                
-                Section("Emergency Contact") {
-                    HStack {
-                        Image(systemName: "person.crop.circle.badge.exclamationmark")
-                            .foregroundColor(.red)
-                            .font(.title2)
-                        
-                        TextField("Emergency Contact Name", text: $emergencyContactName)
-                            .textContentType(.name)
-                            .autocorrectionDisabled()
-                    }
-                    .padding(.vertical, 4)
                     
-                    HStack {
-                        Image(systemName: "phone.circle.fill")
-                            .foregroundColor(.green)
-                            .font(.title2)
-                        
-                        TextField("Emergency Contact Phone", text: $emergencyContactPhone)
-                            .textContentType(.telephoneNumber)
-                            .keyboardType(.phonePad)
-                    }
-                    .padding(.vertical, 4)
+                    Spacer(minLength: Spacing.xl)
                 }
-                
-                Section("Additional Information") {
-                    HStack {
-                        Image(systemName: "note.text")
-                            .foregroundColor(.gray)
-                            .font(.title2)
-                        
-                        TextField("Notes", text: $notes, axis: .vertical)
-                            .lineLimit(3...6)
-                    }
-                    .padding(.vertical, 4)
-                    
-                    HStack {
-                        Image(systemName: isActive ? "checkmark.circle.fill" : "xmark.circle.fill")
-                            .foregroundColor(isActive ? .green : .red)
-                            .font(.title2)
-                        
-                        Toggle("Active Patient", isOn: $isActive)
-                    }
-                    .padding(.vertical, 4)
-                }
+                .padding(.horizontal, Spacing.medium)
+                .padding(.top, Spacing.medium)
             }
             .navigationTitle(editorTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            save()
-                            dismiss()
-                        }
+                        submitForm()
                     }
                     .disabled(!isFormValid)
                     .font(.system(size: 16, weight: .semibold))
@@ -173,6 +305,9 @@ struct PatientEditor: View {
             .onAppear {
                 if let patient {
                     loadPatientData(patient)
+                } else {
+                    // Set default date for new patients
+                    selectedDateOfBirth = dateOfBirth
                 }
             }
         }
@@ -184,28 +319,33 @@ struct PatientEditor: View {
         firstName = patient.firstName
         lastName = patient.lastName
         dateOfBirth = patient.dateOfBirth
+        selectedDateOfBirth = patient.dateOfBirth
         selectedGender = patient.gender
         selectedBloodType = patient.bloodType
         emergencyContactName = patient.emergencyContactName
         emergencyContactPhone = patient.emergencyContactPhone
         notes = patient.notes
         isActive = patient.isActive
+        selectedColorHex = patient.primaryColorHex ?? Patient.generateRandomColorHex()
     }
     
     private func save() {
         let now = Date()
         
+        let finalDateOfBirth = selectedDateOfBirth ?? dateOfBirth
+        
         if let patient {
             // Edit existing patient
             patient.firstName = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
             patient.lastName = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
-            patient.dateOfBirth = dateOfBirth
-            patient.gender = selectedGender
-            patient.bloodType = selectedBloodType
+            patient.dateOfBirth = finalDateOfBirth
+            patient.gender = selectedGender ?? "Not Specified"
+            patient.bloodType = selectedBloodType ?? "Unknown"
             patient.emergencyContactName = emergencyContactName.trimmingCharacters(in: .whitespacesAndNewlines)
             patient.emergencyContactPhone = emergencyContactPhone.trimmingCharacters(in: .whitespacesAndNewlines)
             patient.notes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
             patient.isActive = isActive
+            patient.primaryColorHex = selectedColorHex
             patient.updatedAt = now
         } else {
             // Create new patient
@@ -213,13 +353,14 @@ struct PatientEditor: View {
                 id: UUID(),
                 firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
                 lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines),
-                dateOfBirth: dateOfBirth,
-                gender: selectedGender,
-                bloodType: selectedBloodType,
+                dateOfBirth: finalDateOfBirth,
+                gender: selectedGender ?? "Not Specified",
+                bloodType: selectedBloodType ?? "Unknown",
                 emergencyContactName: emergencyContactName.trimmingCharacters(in: .whitespacesAndNewlines),
                 emergencyContactPhone: emergencyContactPhone.trimmingCharacters(in: .whitespacesAndNewlines),
                 notes: notes.trimmingCharacters(in: .whitespacesAndNewlines),
                 isActive: isActive,
+                primaryColorHex: selectedColorHex,
                 createdAt: now,
                 updatedAt: now,
                 medicalCases: []

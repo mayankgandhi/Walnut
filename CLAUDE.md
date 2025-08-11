@@ -8,8 +8,10 @@ Walnut is an iOS healthcare management application built with SwiftUI and SwiftD
 
 The workspace contains:
 - **Walnut** - Main iOS app target
-- **Walnut-Playground** - Development playground/testing target
+- **Walnut-Playground** - Development playground/testing target  
 - **WalnutTests** - Unit tests
+- **AIKit** - AI services framework for document parsing (Claude AI and OpenAI integration)
+- **WalnutDesignSystem** - Design system framework with reusable UI components
 
 ## Architecture & Code Structure
 
@@ -33,15 +35,24 @@ The app follows a feature-based architecture under `Sources/Features/`:
 - **TestResults/** - Lab results and charts
 
 ### AI Integration
-- **OpenAIDocumentService** (`Sources/Features/DocumentParsing/OpenAIServices/OpenAIDocumentService.swift`) - Handles document parsing via OpenAI API
-- Uses GPT-4o with vision model for prescription and lab report parsing
-- Supports PDF, image, and text document parsing through base64 encoding
-- Implements direct document analysis without file upload/storage
+- **AIKit Framework** (`AIKit/Sources/AIKit/`) - Unified AI services framework
+  - **UnifiedDocumentParsingService** - Main service handling both Claude AI and OpenAI document parsing
+  - **ClaudeServices** - Claude AI integration with file upload and processing capabilities
+  - **OpenAI** - OpenAI GPT models integration for document analysis
+  - **Core** - Base networking clients, protocols, and shared models
+- Uses both Claude AI (primary) and OpenAI GPT-4o with vision for document parsing
+- Supports PDF, image, and text document parsing with flexible routing between services
+- Implements direct document analysis with file upload support for Claude AI
 
 ### Key Components
 - **ContentView** - App entry point, displays PatientsListView
 - **WalnutApp** - Main app with SwiftData model container for Patient
 - **ViewComponents/** - Reusable UI components like PDFKitView, StatusIndicator
+- **WalnutDesignSystem** - Design system framework with atoms, molecules, and organisms
+  - **Atoms** - Basic UI components (DSButton, DSCard, InputFieldItems, etc.)
+  - **Molecules** - Composite components (BioMarkerInfoView, MetricView, etc.)
+  - **Organisms** - Complex UI patterns (BiomarkerDetailView, LineChart, etc.)
+  - **Theme** - Colors, spacing, and typography definitions
 
 ### Development Notes
 - Uses SwiftData for local persistence with automatic model containers
@@ -49,9 +60,13 @@ The app follows a feature-based architecture under `Sources/Features/`:
 - Sample data extensions provided for development and testing
 - PostHog dependency for analytics/telemetry
 - Bundle ID: m.walnut, team: Q7HVAVTGUP
+- Modular architecture with separate frameworks (AIKit, WalnutDesignSystem)
+- Tuist-based project generation and workspace management
 
 ### Project Configuration
 - **Tuist.swift** - Tuist cloud configuration
-- **Workspace.swift** - Defines workspace with Walnut and Walnut-Playground projects
+- **Workspace.swift** - Defines workspace with Walnut, Walnut-Playground, AIKit, and WalnutDesignSystem projects
 - **Walnut/Project.swift** - Main app target configuration with dependencies and settings
+- **AIKit/Project.swift** - AI services framework configuration
+- **WalnutDesignSystem/Project.swift** - Design system framework configuration  
 - Uses automatic code signing for development team Q7HVAVTGUP

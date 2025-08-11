@@ -67,7 +67,7 @@ public struct PatientsListView: View {
                     }
                 }
                 .sheet(isPresented: $showCreatePatient) {
-                    CreatePatientView()
+                    PatientEditor(patient: nil)
                 }
                 .sheet(item: $editPatient) { patient in
                     PatientEditor(patient: patient)
@@ -125,7 +125,11 @@ public struct PatientsListView: View {
     }
     
     private var patientsList: some View {
-        PatientsList(searchText: search, sortOption: selectedSortOption, showCreatePatient: $showCreatePatient) { patient in
+        PatientsList(
+            searchText: search,
+            sortOption: selectedSortOption,
+            showCreatePatient: $showCreatePatient
+        ) { patient in
             Button {
                 withAnimation(.easeInOut(duration: 0.2)) {
                     selectedPatient = patient
@@ -150,8 +154,7 @@ public struct PatientsListView: View {
                 }
             }
         }
-        .scrollContentBackground(.hidden)
-        .listStyle(.plain)
+        
     }
     
     private func remove(_ patient: Patient) {
