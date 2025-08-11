@@ -34,7 +34,7 @@ struct PatientHomeView: View {
             }
         }
         .navigationDestination(isPresented: $showAllMedications) {
-            AllMedicationsView(patient: patient)
+            ActiveMedicationsSection(patient: patient)
         }
     }
 }
