@@ -11,7 +11,7 @@ import SwiftData
 import SwiftUI
 
 @Model
-class Patient: Identifiable, Sendable {
+class Patient: Identifiable, Sendable, Hashable {
     
     @Attribute(.unique)
     var id: UUID
@@ -93,6 +93,14 @@ class Patient: Identifiable, Sendable {
         self.updatedAt = Date()
     }
     
+    // MARK: - Hashable Conformance
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: Patient, rhs: Patient) -> Bool {
+        lhs.id == rhs.id
+    }
 }
 
 

@@ -13,44 +13,26 @@ import WalnutDesignSystem
 // Separate view to handle the dynamic query
 struct PatientsList<Content: View>: View {
     let searchText: String
-    let sortOption: PatientsListView.SortOption
     @Binding var showCreatePatient: Bool
     let content: (Patient) -> Content
+    let onPatientsChanged: (([Patient]) -> Void)?
     
     // Dynamic query based on search text and sort option
     @Query private var patients: [Patient]
     
     init(
         searchText: String,
-        sortOption: PatientsListView.SortOption,
         showCreatePatient: Binding<Bool>,
+        onPatientsChanged: (([Patient]) -> Void)? = nil,
         @ViewBuilder content: @escaping (Patient) -> Content
     ) {
         self.searchText = searchText
-        self.sortOption = sortOption
         self._showCreatePatient = showCreatePatient
+        self.onPatientsChanged = onPatientsChanged
         self.content = content
         
         // Configure query based on search text and sort option
         let predicate: Predicate<Patient>
-        let sortDescriptors: [SortDescriptor<Patient>]
-        
-        // Set up sort descriptors based on option
-        switch sortOption {
-        case .name:
-            sortDescriptors = [
-                SortDescriptor(\Patient.lastName),
-                SortDescriptor(\Patient.firstName)
-            ]
-        case .recent:
-            sortDescriptors = [
-                SortDescriptor(\Patient.updatedAt, order: .reverse)
-            ]
-        case .age:
-            sortDescriptors = [
-                SortDescriptor(\Patient.dateOfBirth)
-            ]
-        }
         
         if searchText.isEmpty {
             predicate = #Predicate<Patient> { _ in true }
@@ -61,7 +43,9 @@ struct PatientsList<Content: View>: View {
             }
         }
         
-        _patients = Query(filter: predicate, sort: sortDescriptors)
+        _patients = Query(filter: predicate, sort: [
+            SortDescriptor(\Patient.updatedAt, order: .reverse)
+        ])
     }
     
     var body: some View {
@@ -76,6 +60,12 @@ struct PatientsList<Content: View>: View {
             }
             .scrollContentBackground(.hidden)
             .listStyle(.plain)
+        }
+        .onAppear {
+            onPatientsChanged?(patients)
+        }
+        .onChange(of: patients) { _, newPatients in
+            onPatientsChanged?(newPatients)
         }
     }
     
@@ -116,12 +106,3 @@ struct PatientsList<Content: View>: View {
     }
 }
 
-struct PatientsListView_Previews: PreviewProvider {
-    static var previews: some View {
-        TabView {
-            NavigationView {
-                PatientsListView()
-            }
-        }
-    }
-}

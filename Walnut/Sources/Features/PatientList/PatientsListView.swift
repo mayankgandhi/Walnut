@@ -13,51 +13,26 @@ import WalnutDesignSystem
 public struct PatientsListView: View {
     
     @State private var search: String = ""
-    @State private var selectedPatient: Patient? = nil
     @State private var editPatient: Patient? = nil
     @State private var showPatientEditor: Bool = false
     @State private var showCreatePatient: Bool = false
-    @State private var selectedSortOption: SortOption = .name
-    @State private var showSortOptions: Bool = false
+    @State private var navigationPath = NavigationPath()
     
     @Environment(\.modelContext) private var modelContext
     
     public init() {}
-    
-    enum SortOption: String, CaseIterable {
-        case name = "Name"
-        case recent = "Recent"
-        case age = "Age"
         
-        var systemImage: String {
-            switch self {
-            case .name: return "textformat.abc"
-            case .recent: return "clock"
-            case .age: return "calendar"
-            }
-        }
-    }
-    
     public var body: some View {
-        if selectedPatient != nil {
-            PatientView(selectedPatient: $selectedPatient)
-        } else {
-            NavigationStack {
-                VStack(spacing: 0) {
-                    headerView
-                    patientsList
-                }
+        NavigationStack(path: $navigationPath) {
+            patientsList
                 .navigationTitle("Patients")
                 .navigationBarTitleDisplayMode(.large)
+                .navigationDestination(for: Patient.self) { patient in
+                    PatientTabView(patient: patient)
+                }
+                .searchable(text: $search, prompt: "Search patients")
                 .toolbar {
-                    ToolbarItemGroup(placement: .topBarTrailing) {
-                        HealthIconButton(
-                            icon: selectedSortOption.systemImage,
-                            style: .secondary
-                        ) {
-                            showSortOptions = true
-                        }
-                        
+                    ToolbarItem(placement: .topBarTrailing) {
                         HealthIconButton(
                             icon: "plus",
                             style: .primary
@@ -72,72 +47,20 @@ public struct PatientsListView: View {
                 .sheet(item: $editPatient) { patient in
                     PatientEditor(patient: patient)
                 }
-                .confirmationDialog("Sort by", isPresented: $showSortOptions) {
-                    ForEach(SortOption.allCases, id: \.self) { option in
-                        Button(option.rawValue) {
-                            selectedSortOption = option
-                        }
-                    }
-                }
                 .refreshable {
                     try? modelContext.save()
                 }
-            }
         }
     }
-    
-    private var headerView: some View {
-        VStack(spacing: 16) {
-            HStack {
-                Text("Healthcare Members")
-                    .font(.title2.weight(.semibold))
-                    .foregroundStyle(Color.healthPrimary)
-                
-                Spacer()
-            }
-            .padding(.horizontal, Spacing.medium)
-            
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(.secondary)
-                    .font(.system(size: 16))
-                
-                TextField("Search by name", text: $search)
-                    .textFieldStyle(.plain)
-                    .font(.system(size: 16))
-                
-                if !search.isEmpty {
-                    HealthIconButton(
-                        icon: "xmark.circle.fill",
-                        style: .secondary
-                    ) {
-                        search = ""
-                    }
-                }
-            }
-            .padding(.horizontal, Spacing.medium)
-            .padding(.vertical, Spacing.small + 4)
-            .subtleCardStyle()
-            .padding(.horizontal, Spacing.medium)
-        }
-        .padding(.vertical, Spacing.medium)
-        .cardStyle()
-    }
-    
     private var patientsList: some View {
         PatientsList(
             searchText: search,
-            sortOption: selectedSortOption,
-            showCreatePatient: $showCreatePatient
+            showCreatePatient: $showCreatePatient,
+            onPatientsChanged: handlePatientsChanged
         ) { patient in
-            Button {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    selectedPatient = patient
-                }
-            } label: {
+            NavigationLink(value: patient) {
                 ModernPatientCard(patient: patient)
             }
-            .buttonStyle(.plain)
             .contextMenu {
                 Button {
                     edit(patient)
@@ -164,5 +87,25 @@ public struct PatientsListView: View {
     private func edit(_ patient: Patient) {
         editPatient = patient
     }
+    
+    private func handlePatientsChanged(_ patients: [Patient]) {
+        // Only auto-navigate if there's exactly 1 patient and no search is active and navigation path is empty
+        if patients.count == 1 && search.isEmpty && navigationPath.isEmpty {
+            navigationPath.append(patients[0])
+        }
+        // Clear navigation if we have multiple patients or are searching
+        else if (patients.count != 1 || !search.isEmpty) && !navigationPath.isEmpty {
+            navigationPath.removeLast(navigationPath.count)
+        }
+    }
 }
 
+struct PatientsListView_Previews: PreviewProvider {
+    static var previews: some View {
+        TabView {
+            NavigationView {
+                PatientsListView()
+            }
+        }
+    }
+}

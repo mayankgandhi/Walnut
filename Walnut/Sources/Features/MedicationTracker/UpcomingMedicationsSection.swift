@@ -9,6 +9,7 @@
 import SwiftUI
 
 struct UpcomingMedicationsSection: View {
+    
     let patient: Patient
     @Environment(\.modelContext) private var modelContext
     @State private var activeMedications: [Medication] = []

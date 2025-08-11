@@ -49,10 +49,20 @@ The app follows a feature-based architecture under `Sources/Features/`:
 - **WalnutApp** - Main app with SwiftData model container for Patient
 - **ViewComponents/** - Reusable UI components like PDFKitView, StatusIndicator
 - **WalnutDesignSystem** - Design system framework with atoms, molecules, and organisms
-  - **Atoms** - Basic UI components (DSButton, DSCard, InputFieldItems, etc.)
+  - **Atoms** - Basic UI components (DSButton, DSCard, HealthCard, PatientAvatar, StatusIndicator, HealthMetric, InputFieldItems, etc.)
   - **Molecules** - Composite components (BioMarkerInfoView, MetricView, etc.)
   - **Organisms** - Complex UI patterns (BiomarkerDetailView, LineChart, etc.)
-  - **Theme** - Colors, spacing, and typography definitions
+  - **Theme** - Colors (.healthPrimary, .healthSuccess, .healthError), Spacing (Spacing.medium, Spacing.large), Typography (.healthMetricLarge)
+  
+  **Integration Guidelines:**
+  - Always import `WalnutDesignSystem` when working with UI components
+  - Use `HealthCard` wrapper for consistent card styling instead of custom backgrounds
+  - Replace hardcoded spacing with design system constants (Spacing.xs, .small, .medium, .large, .xl)
+  - Use health-specific colors (.healthPrimary, .healthSuccess, .healthWarning, .healthError)
+  - Apply health typography for metrics (.healthMetricLarge, .healthMetricMedium, .healthMetricSmall)
+  - Use `PatientAvatar` for patient initials instead of custom circles
+  - Use `StatusIndicator` and `HealthMetric` for health data display
+  - Apply `.cardStyle()` modifier for consistent card appearance
 
 ### Development Notes
 - Uses SwiftData for local persistence with automatic model containers
