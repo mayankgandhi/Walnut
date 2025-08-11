@@ -14,7 +14,8 @@ struct AllMedicationsView: View {
     
     let patient: Patient
     @State private var medicationTracker = MedicationTracker()
-    @State private var showAddMedication = false
+    @State private var showMedicationEditor = false
+    @State private var medicationToEdit: Medication? = nil
     
     private var activeMedications: [Medication] {
         patient.medicalCases
@@ -83,16 +84,19 @@ struct AllMedicationsView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    showAddMedication = true
+                    medicationToEdit = nil
+                    showMedicationEditor = true
                 } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 16, weight: .semibold))
                 }
             }
         }
-        .sheet(isPresented: $showAddMedication) {
-            // TODO: Add MedicationEditor sheet
-            Text("Add Medication")
+        .sheet(isPresented: $showMedicationEditor) {
+            MedicationEditor(
+                medication: medicationToEdit,
+                onSave: handleMedicationSave
+            )
         }
     }
     
@@ -160,10 +164,16 @@ struct AllMedicationsView: View {
             
             Spacer()
             
-            // Status Indicator
-            Circle()
-                .fill(Color.healthSuccess)
-                .frame(width: 8, height: 8)
+            // Edit button
+            Button {
+                medicationToEdit = medicationInfo.medication
+                showMedicationEditor = true
+            } label: {
+                Image(systemName: "pencil.circle.fill")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(Color.healthPrimary)
+            }
+            .buttonStyle(.borderless)
         }
         .padding(.horizontal, Spacing.small)
         .padding(.vertical, Spacing.xs)
@@ -199,12 +209,32 @@ struct AllMedicationsView: View {
             
             Spacer()
             
-            // Status Indicator
-            Circle()
-                .fill(isActive ? Color.healthSuccess : .secondary)
-                .frame(width: 8, height: 8)
+            // Edit button
+            Button {
+                medicationToEdit = medication
+                showMedicationEditor = true
+            } label: {
+                Image(systemName: "pencil.circle.fill")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(isActive ? Color.healthPrimary : .secondary)
+            }
+            .buttonStyle(.borderless)
         }
         .padding(.vertical, Spacing.xs)
+    }
+    
+    private func handleMedicationSave(_ medication: Medication) {
+        // Find the prescription that contains this medication and update it
+        for medicalCase in patient.medicalCases {
+            for prescription in medicalCase.prescriptions {
+                if let medicationIndex = prescription.medications.firstIndex(where: { $0.id == medication.id }) {
+                    // Update the medication in the prescription
+                    prescription.medications[medicationIndex] = medication
+                    prescription.updatedAt = Date()
+                    return
+                }
+            }
+        }
     }
 }
 

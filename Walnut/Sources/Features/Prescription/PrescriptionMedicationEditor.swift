@@ -79,7 +79,7 @@ struct PrescriptionMedicationEditor: View {
             .sheet(isPresented: $showingMedicationEditor) {
                 MedicationEditor(
                     medication: selectedMedication,
-                    prescription: selectedMedication == nil ? prescription : nil
+                    onSave: { _ in },
                 )
             }
         }

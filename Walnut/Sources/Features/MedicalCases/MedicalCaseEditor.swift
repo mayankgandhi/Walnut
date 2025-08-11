@@ -11,6 +11,7 @@ import SwiftData
 import WalnutDesignSystem
 
 struct MedicalCaseEditor: View {
+    
     let medicalCase: MedicalCase?
     let patient: Patient
     
