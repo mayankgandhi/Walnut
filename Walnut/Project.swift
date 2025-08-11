@@ -84,6 +84,7 @@ let project = Project(
                 .external(name: "PostHog"),
                 .external(name: "Atlantis"),
                 .project(target: "AIKit", path: "../AIKit"),
+                .project(target: "WalnutDesignSystem", path: "../WalnutDesignSystem"),
             ],
             settings: .settings(base: settings,
                                 configurations: [

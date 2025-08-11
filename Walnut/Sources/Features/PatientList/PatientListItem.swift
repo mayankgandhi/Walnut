@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import WalnutDesignSystem
 
 struct ModernPatientCard: View {
     let patient: Patient
@@ -21,85 +22,89 @@ struct ModernPatientCard: View {
     }
     
     var body: some View {
-        HStack(spacing: 16) {
-            // Modern Avatar
+        HStack(spacing: Spacing.medium) {
+            // Enhanced Avatar with MenuListItem-style design
             ZStack {
+                // Gradient background
                 Circle()
-                    .fill(patient.primaryColor.opacity(0.15))
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                patient.primaryColor.opacity(0.1),
+                                patient.primaryColor.opacity(0.2)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 56, height: 56)
+                
+                // Subtle ring
+                Circle()
+                    .stroke(patient.primaryColor.opacity(0.15), lineWidth: 1)
                     .frame(width: 56, height: 56)
                 
                 Text(patient.initials)
                     .font(.system(size: 20, weight: .semibold, design: .rounded))
-                    .foregroundStyle(patient.primaryColor)
+                    .foregroundStyle(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                patient.primaryColor,
+                                patient.primaryColor.opacity(0.8)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
             }
-            .overlay(
-                Circle()
-                    .stroke(patient.primaryColor.opacity(0.3), lineWidth: 1.5)
-            )
             
             // Patient Information
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 // Header with name and status
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(patient.fullName)
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(.system(.body, design: .rounded, weight: .semibold))
                             .foregroundStyle(.primary)
                         
                         Text("\(patient.age) years old • \(patient.gender)")
-                            .font(.system(size: 14))
+                            .font(.system(.caption, design: .rounded))
                             .foregroundStyle(.secondary)
                     }
                     
                     Spacer()
                     
                     VStack(alignment: .trailing, spacing: 4) {
-                        // Status indicator
-                        HStack(spacing: 6) {
-                            Circle()
-                                .fill(patient.isActive ? .green : .orange)
-                                .frame(width: 8, height: 8)
-                            
-                            Text(patient.isActive ? "Active" : "Inactive")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundStyle(patient.isActive ? .green : .orange)
-                        }
+                        // Status indicator with badge-style design
+                        statusBadge
                         
                         // Recent activity indicator
                         if hasRecentActivity {
-                            HStack(spacing: 4) {
-                                Image(systemName: "clock.fill")
-                                    .font(.system(size: 10))
-                                    .foregroundStyle(.blue)
-                                
-                                Text("Recent")
-                                    .font(.system(size: 10, weight: .medium))
-                                    .foregroundStyle(.blue)
-                            }
+                            recentActivityBadge
                         }
                     }
                 }
                 
-                // Medical details
-                HStack(spacing: 20) {
-                    HStack(spacing: 6) {
+                // Medical details with enhanced styling
+                HStack(spacing: Spacing.medium) {
+                    HStack(spacing: Spacing.xs) {
                         Image(systemName: "drop.circle.fill")
-                            .font(.system(size: 14))
+                            .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(.red)
                         
                         Text(patient.bloodType.isEmpty ? "Unknown" : patient.bloodType)
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.system(.caption, design: .rounded, weight: .medium))
                             .foregroundStyle(.primary)
                     }
                     
                     if !patient.medicalCases.isEmpty {
-                        HStack(spacing: 6) {
+                        HStack(spacing: Spacing.xs) {
                             Image(systemName: "folder.circle.fill")
-                                .font(.system(size: 14))
+                                .font(.system(size: 14, weight: .semibold))
                                 .foregroundStyle(.blue)
                             
                             Text("\(patient.medicalCases.count) case\(patient.medicalCases.count == 1 ? "" : "s")")
-                                .font(.system(size: 14, weight: .medium))
+                                .font(.system(.caption, design: .rounded, weight: .medium))
                                 .foregroundStyle(.primary)
                         }
                     }
@@ -107,35 +112,89 @@ struct ModernPatientCard: View {
                     Spacer()
                 }
                 
-                // Notes preview
+                // Notes preview with enhanced styling
                 if !patient.notes.isEmpty {
                     Text(patient.notes)
-                        .font(.system(size: 13))
+                        .font(.system(.caption, design: .rounded))
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
+                        .padding(.horizontal, Spacing.small)
+                        .padding(.vertical, Spacing.xs)
+                        .background(Color(.systemGray6), in: RoundedRectangle(cornerRadius: 8))
                 }
             }
             
-            // Arrow indicator
+            // Enhanced chevron with MenuListItem styling
             Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .medium))
+                .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(.tertiary)
+                .scaleEffect(isPressed ? 1.1 : 1.0)
+                .animation(.easeInOut(duration: 0.1), value: isPressed)
         }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(.regularMaterial)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(.quaternary, lineWidth: 0.5)
-                )
+        .padding(.horizontal, Spacing.medium)
+        .padding(.vertical, Spacing.small + 2)
+        .background(backgroundView)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.clear, lineWidth: 1)
         )
         .scaleEffect(isPressed ? 0.98 : 1.0)
-        .animation(.easeInOut(duration: 0.15), value: isPressed)
+        .animation(.easeInOut(duration: 0.1), value: isPressed)
+        .shadow(
+            color: Color.black.opacity(0.05),
+            radius: 2,
+            x: 0,
+            y: 1
+        )
+    }
+    
+    // MARK: - Helper Views
+    
+    private var statusBadge: some View {
+        Text(patient.isActive ? "Active" : "Inactive")
+            .font(.system(.caption2, design: .rounded, weight: .bold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(
+                Capsule()
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                patient.isActive ? .green : .orange,
+                                (patient.isActive ? Color.green : .orange).opacity(0.8)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            )
+            .shadow(color: (patient.isActive ? Color.green : .orange).opacity(0.3), radius: 2, x: 0, y: 1)
+    }
+    
+    private var recentActivityBadge: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "clock.fill")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(.blue)
+            
+            Text("Recent")
+                .font(.system(.caption2, design: .rounded, weight: .medium))
+                .foregroundStyle(.blue)
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .background(
+            Capsule()
+                .fill(Color.blue.opacity(0.1))
+        )
+    }
+    
+    private var backgroundView: some View {
+        RoundedRectangle(cornerRadius: 12)
+            .fill(isPressed ? Color(.systemGray6) : .clear)
     }
 }
 
@@ -152,7 +211,7 @@ struct PatientListItem: View {
 // Preview
 #Preview {
     ScrollView {
-        LazyVStack(spacing: 16) {
+        LazyVStack(spacing: Spacing.medium) {
             ForEach([
                 Patient.samplePatient,
                 Patient(
@@ -189,10 +248,30 @@ struct PatientListItem: View {
                 )
             ]) { patient in
                 ModernPatientCard(patient: patient)
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, Spacing.medium)
             }
         }
-        .padding(.vertical, 20)
+        .padding(.vertical, Spacing.medium)
     }
-    .background(.regularMaterial)
+    .background(Color(.systemGroupedBackground))
+}
+
+#Preview {
+    ModernPatientCard(
+        patient: Patient(
+            id: UUID(),
+            firstName: "Mayank",
+            lastName: "Gandhi",
+            dateOfBirth: Date(),
+            gender: "Male",
+            bloodType: "AB+",
+            emergencyContactName: "Vidhi",
+            emergencyContactPhone: "1233456789",
+            notes: "12",
+            isActive: true,
+            createdAt: Date(),
+            updatedAt: Date(),
+            medicalCases: []
+        )
+    )
 }
