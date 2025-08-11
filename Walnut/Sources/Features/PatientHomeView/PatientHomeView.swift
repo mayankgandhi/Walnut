@@ -13,6 +13,7 @@ struct PatientHomeView: View {
     
     let patient: Patient
     @Environment(\.modelContext) private var modelContext
+    @State private var showAllMedications = false
     
     init(patient: Patient) {
         self.patient = patient
@@ -20,9 +21,20 @@ struct PatientHomeView: View {
     
     var body: some View {
         List {
-            PatientHeaderCard(patient: patient)
             UpcomingMedicationsSection(patient: patient)
-            ActiveMedicationsSection(patient: patient)
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showAllMedications = true
+                } label: {
+                    Text("View All")
+                        .font(.system(size: 16, weight: .medium))
+                }
+            }
+        }
+        .navigationDestination(isPresented: $showAllMedications) {
+            AllMedicationsView(patient: patient)
         }
     }
 }

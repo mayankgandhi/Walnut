@@ -13,16 +13,23 @@ struct PatientTabView: View {
     
     var body: some View {
         TabView {
-            Tab("Home", systemImage: "person.crop.circle.fill") {
+            Tab("Medications", systemImage: "pills.fill") {
                 NavigationStack {
                     PatientHomeView(patient: patient)
-                        .navigationTitle("Home")
+                        .navigationTitle("Medications")
                 }
             }
             
             Tab("Cases", systemImage: "document.on.document") {
                 NavigationStack {
                     MedicalCasesView(patient: patient)
+                }
+            }
+            
+            Tab("Settings", systemImage: "gearshape.fill") {
+                NavigationStack {
+                    PatientSettingsView(patient: patient)
+                        .navigationTitle("Settings")
                 }
             }
             
