@@ -14,6 +14,5 @@ let workspace = Workspace(
         "Walnut-Playground",
         "AIKit",
         "WalnutDesignSystem",
-        "Atlas"
     ]
 )
