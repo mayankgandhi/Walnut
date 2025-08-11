@@ -8,6 +8,7 @@
 
 import SwiftUI
 import SwiftData
+import WalnutDesignSystem
 
 struct MedicalCaseEditor: View {
     let medicalCase: MedicalCase?
@@ -32,123 +33,238 @@ struct MedicalCaseEditor: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
+    // Focus management for keyboard navigation
+    @FocusState private var focusedField: FormField?
+    
+    private enum FormField: Hashable, CaseIterable {
+        case title
+        case notes
+        case treatmentPlan
+        
+        private enum NextFieldType {
+            case textField(FormField)
+            case nonTextFieldOrEnd
+        }
+        
+        private var nextFieldInUI: NextFieldType {
+            switch self {
+            case .title:
+                return .nonTextFieldOrEnd  // Next: Type picker
+            case .notes:
+                return .textField(.treatmentPlan)
+            case .treatmentPlan:
+                return .nonTextFieldOrEnd  // Next: Toggle (last field)
+            }
+        }
+        
+        var shouldDismissKeyboard: Bool {
+            switch nextFieldInUI {
+            case .nonTextFieldOrEnd:
+                return true
+            case .textField:
+                return false
+            }
+        }
+        
+        var nextTextField: FormField? {
+            switch nextFieldInUI {
+            case .textField(let field):
+                return field
+            case .nonTextFieldOrEnd:
+                return nil
+            }
+        }
+        
+        var appropriateSubmitLabel: SubmitLabel {
+            return shouldDismissKeyboard ? .done : .next
+        }
+    }
+    
     private var isFormValid: Bool {
         !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
         !treatmentPlan.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
+    // Focus navigation helpers
+    private func focusNextField(after currentField: FormField) {
+        if currentField.shouldDismissKeyboard {
+            if currentField == .treatmentPlan && isFormValid {
+                submitForm()
+            } else {
+                focusedField = nil
+            }
+        } else if let nextField = currentField.nextTextField {
+            focusedField = nextField
+        } else {
+            focusedField = nil
+        }
+    }
+    
+    private func submitForm() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            save()
+            dismiss()
+        }
+    }
+    
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Case Information") {
-                    HStack {
-                        Image(systemName: "doc.text.fill")
-                            .foregroundColor(.blue)
-                            .font(.title2)
+            ScrollView {
+                VStack(spacing: Spacing.large) {
+                    // Case Information Section
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        Text("Case Information")
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, Spacing.medium)
                         
-                        TextField("Case Title", text: $title)
-                            .autocorrectionDisabled()
+                        VStack(spacing: Spacing.medium) {
+                            TextFieldItem(
+                                icon: "doc.text.fill",
+                                title: "Case Title",
+                                text: $title,
+                                placeholder: "Enter case title",
+                                iconColor: .healthPrimary,
+                                isRequired: true,
+                                contentType: .none,
+                                submitLabel: FormField.title.appropriateSubmitLabel,
+                                onSubmit: {
+                                    focusNextField(after: .title)
+                                }
+                            )
+                            .focused($focusedField, equals: .title)
+                            
+                            MenuPickerItem(
+                                icon: "medical.thermometer",
+                                title: "Case Type",
+                                selectedOption: Binding(
+                                    get: { selectedType.displayName },
+                                    set: { newValue in
+                                        if let type = MedicalCaseType.allCases.first(where: { $0.displayName == newValue }) {
+                                            selectedType = type
+                                        }
+                                    }
+                                ),
+                                options: MedicalCaseType.allCases.map { $0.displayName },
+                                placeholder: "Select case type",
+                                iconColor: .healthSuccess
+                            )
+                            
+                            MenuPickerItem(
+                                icon: "stethoscope",
+                                title: "Medical Specialty",
+                                selectedOption: Binding(
+                                    get: { selectedSpecialty.rawValue },
+                                    set: { newValue in
+                                        if let specialty = MedicalSpecialty.allCases.first(where: { $0.rawValue == newValue }) {
+                                            selectedSpecialty = specialty
+                                        }
+                                    }
+                                ),
+                                options: MedicalSpecialty.allCases.map { $0.rawValue },
+                                placeholder: "Select specialty",
+                                iconColor: .purple
+                            )
+                        }
                     }
                     
-                    HStack {
-                        Image(systemName: "medical.thermometer")
-                            .foregroundColor(.green)
-                            .font(.title2)
+                    // Patient Information Section
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        Text("Patient Information")
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, Spacing.medium)
                         
-                        Picker("Case Type", selection: $selectedType) {
-                            ForEach(MedicalCaseType.allCases, id: \.self) { type in
-                                Text(type.displayName)
-                                    .tag(type)
+                        HealthCard {
+                            HStack(spacing: Spacing.medium) {
+                                PatientAvatar(
+                                    initials: patient.initials,
+                                    color: patient.primaryColor,
+                                    size: Size.avatarLarge
+                                )
+                                
+                                VStack(alignment: .leading, spacing: Spacing.xs) {
+                                    Text(patient.fullName)
+                                        .font(.headline.weight(.semibold))
+                                        .foregroundStyle(.primary)
+                                    
+                                    Text("\(patient.age) years old • \(patient.gender)")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                
+                                Spacer()
                             }
                         }
-                        .pickerStyle(.menu)
                     }
                     
-                    HStack {
-                        Image(systemName: "stethoscope")
-                            .foregroundColor(.purple)
-                            .font(.title2)
+                    // Clinical Details Section
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        Text("Clinical Details")
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, Spacing.medium)
                         
-                        Picker("Specialty", selection: $selectedSpecialty) {
-                            ForEach(MedicalSpecialty.allCases, id: \.self) { specialty in
-                                Text(specialty.rawValue)
-                                    .tag(specialty)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                    }
-                }
-                
-                Section("Patient Information") {
-                    HStack {
-                        Image(systemName: "person.circle.fill")
-                            .foregroundColor(.blue)
-                            .font(.title2)
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("\(patient.firstName) \(patient.lastName)")
-                                .font(.system(size: 16, weight: .medium))
-                            Text("Patient")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        Spacer()
-                    }
-                }
-                
-                Section("Clinical Details") {
-                    HStack {
-                        Image(systemName: "note.text")
-                            .foregroundColor(.orange)
-                            .font(.title2)
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Notes")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            TextField("Clinical notes and observations", text: $notes, axis: .vertical)
-                                .lineLimit(3...6)
+                        VStack(spacing: Spacing.medium) {
+                            TextFieldItem(
+                                icon: "note.text",
+                                title: "Clinical Notes",
+                                text: $notes,
+                                placeholder: "Clinical notes and observations",
+                                helperText: "Record symptoms, observations, and findings",
+                                iconColor: .orange,
+                                submitLabel: FormField.notes.appropriateSubmitLabel,
+                                onSubmit: {
+                                    focusNextField(after: .notes)
+                                }
+                            )
+                            .focused($focusedField, equals: .notes)
+                            
+                            TextFieldItem(
+                                icon: "cross.case.fill",
+                                title: "Treatment Plan",
+                                text: $treatmentPlan,
+                                placeholder: "Treatment plan and recommendations",
+                                helperText: "Detailed treatment steps and recommendations",
+                                iconColor: .healthError,
+                                isRequired: true,
+                                submitLabel: FormField.treatmentPlan.appropriateSubmitLabel,
+                                onSubmit: {
+                                    focusNextField(after: .treatmentPlan)
+                                }
+                            )
+                            .focused($focusedField, equals: .treatmentPlan)
                         }
                     }
-                    .padding(.vertical, 4)
                     
-                    HStack {
-                        Image(systemName: "cross.case.fill")
-                            .foregroundColor(.red)
-                            .font(.title2)
+                    // Status Section
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        Text("Case Status")
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, Spacing.medium)
                         
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Treatment Plan")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            TextField("Treatment plan and recommendations", text: $treatmentPlan, axis: .vertical)
-                                .lineLimit(3...6)
-                        }
+                        ToggleItem(
+                            icon: isActive ? "checkmark.circle.fill" : "xmark.circle.fill",
+                            title: "Active Case",
+                            subtitle: "Currently being treated",
+                            isOn: $isActive,
+                            helperText: "Inactive cases are archived",
+                            iconColor: isActive ? .healthSuccess : .healthError
+                        )
                     }
-                    .padding(.vertical, 4)
+                    
+                    Spacer(minLength: Spacing.xl)
                 }
-                
-                Section("Status") {
-                    HStack {
-                        Image(systemName: isActive ? "checkmark.circle.fill" : "xmark.circle.fill")
-                            .foregroundColor(isActive ? .green : .red)
-                            .font(.title2)
-                        
-                        Toggle("Active Case", isOn: $isActive)
-                    }
-                    .padding(.vertical, 4)
-                }
+                .padding(.horizontal, Spacing.medium)
+                .padding(.top, Spacing.medium)
             }
             .navigationTitle(editorTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            save()
-                            dismiss()
-                        }
+                        submitForm()
                     }
                     .disabled(!isFormValid)
                     .font(.system(size: 16, weight: .semibold))
