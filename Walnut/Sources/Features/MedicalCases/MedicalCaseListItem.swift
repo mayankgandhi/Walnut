@@ -10,6 +10,7 @@ import SwiftUI
 import WalnutDesignSystem
 
 struct EnhancedMedicalCaseListItem: View {
+    
     let medicalCase: MedicalCase
     
     var body: some View {
