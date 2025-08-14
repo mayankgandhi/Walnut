@@ -39,6 +39,7 @@ struct ParsedPrescription: ParseableModel, OpenAISchemaDefinable {
         Medication: id(UUID), name(String), frequency([MedicationSchedule]), numberOfDays(Int), dosage(String?), instructions(String?)
         MedicationSchedule: mealTime(MealTime), timing(MedicationTime?), dosage(String?)
         Enums: MealTime(.breakfast/.lunch/.dinner/.bedtime), MedicationTime(.before/.after)
+        Expected date string to be ISO8601-format.
         """
     }
     

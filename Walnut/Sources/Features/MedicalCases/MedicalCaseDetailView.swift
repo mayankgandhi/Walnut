@@ -22,6 +22,10 @@ struct MedicalCaseDetailView: View {
                     medicalCase: medicalCase
                 )
                 
+                BloodReportsSection(
+                    medicalCase: medicalCase
+                )
+                
                 // Show unparsed documents only if there are any
                 if !medicalCase.unparsedDocuments.isEmpty {
                     UnparsedDocumentsSection(

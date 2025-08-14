@@ -1,10 +1,11 @@
 //
 //  ParsedBloodReport.swift
-//  Walnut
+//  AIKit
 //
-//  Created by Mayank Gandhi on 28/07/25.
+//  Created by Mayank Gandhi on 11/08/25.
 //  Copyright © 2025 m. All rights reserved.
 //
+
 
 import Foundation
 import AIKit
@@ -25,7 +26,6 @@ struct ParsedBloodReport: ParseableModel, OpenAISchemaDefinable {
         ParsedBloodTestResult: testName(String), value(String), unit(String), referenceRange(String), isAbnormal(Bool)
         
         Please extract all blood test results from the lab report. The resultDate should be the date when the tests were performed or results were available.
-        Expected date string to be ISO8601-format.
         """
     }
     
@@ -88,7 +88,7 @@ struct ParsedBloodReport: ParseableModel, OpenAISchemaDefinable {
             additionalProperties: false
         )
     }()
-
+    
 }
 
 struct ParsedBloodTestResult: Codable {

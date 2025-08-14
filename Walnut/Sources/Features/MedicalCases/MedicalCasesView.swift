@@ -8,6 +8,7 @@
 
 import SwiftUI
 import SwiftData
+import WalnutDesignSystem
 
 struct MedicalCasesView: View {
     
@@ -88,18 +89,55 @@ struct MedicalCasesView: View {
         return count
     }
     
+    // MARK: - Subviews
+    
+    private var emptyStateView: some View {
+        HealthCard(padding: Spacing.xl) {
+            VStack(spacing: Spacing.large) {
+                Circle()
+                    .fill(Color.healthPrimary.opacity(0.15))
+                    .frame(width: 80, height: 80)
+                    .overlay {
+                        Image(systemName: "doc.text.magnifyingglass")
+                            .font(.system(size: 32, weight: .semibold))
+                            .foregroundStyle(Color.healthPrimary)
+                    }
+                
+                VStack(spacing: Spacing.small) {
+                    Text("No Medical Cases")
+                        .font(.title2.weight(.semibold))
+                        .foregroundStyle(.primary)
+                    
+                    Text(medicalCases.isEmpty ? 
+                         "Create your first medical case to get started" :
+                         "No cases match your search or filter criteria")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                
+                if medicalCases.isEmpty {
+                    Button("Create Medical Case") {
+                        showCreateView = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                }
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .padding(.horizontal, Spacing.medium)
+    }
+
     // MARK: - Body
     
     var body: some View {
         NavigationStack {
             Group {
                 if filteredAndSortedCases.isEmpty {
-                    ContentUnavailableView {
-                        Label("No Medical Cases", systemImage: "doc.text.magnifyingglass")
-                    } description: {
-                        Text("No cases match your search or filter criteria")
-                    }
-                    .listRowBackground(Color.clear)
+                    emptyStateView
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
                 } else {
                     List {
                         ForEach(filteredAndSortedCases) { medicalCase in
@@ -109,7 +147,9 @@ struct MedicalCasesView: View {
                                 EnhancedMedicalCaseListItem(medicalCase: medicalCase)
                             }
                             .buttonStyle(.plain)
-                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                            .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.medium, bottom: Spacing.xs, trailing: Spacing.medium))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
                             .contextMenu {
                                 contextMenuItems(for: medicalCase)
                             }
@@ -280,17 +320,17 @@ struct SpecialtyBadge: View {
     let specialty: MedicalSpecialty
     
     var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: Spacing.xs) {
             Image(systemName: specialty.icon)
                 .font(.caption2)
             Text(specialty.rawValue)
-                .font(.caption)
+                .font(.caption.weight(.medium))
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(Color.blue.opacity(0.1))
-        .foregroundStyle(.blue)
-        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .padding(.horizontal, Spacing.small)
+        .padding(.vertical, Spacing.xs)
+        .background(specialty.color.opacity(0.1))
+        .foregroundStyle(specialty.color)
+        .clipShape(Capsule())
     }
 }
 

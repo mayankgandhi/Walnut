@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import WalnutDesignSystem
 
 // Case Type Badge Component
 struct CaseTypeBadge: View {
@@ -14,13 +15,12 @@ struct CaseTypeBadge: View {
     
     var body: some View {
         Text(type.displayName)
-            .font(.caption)
-            .fontWeight(.semibold)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
+            .font(.caption.weight(.semibold))
+            .padding(.horizontal, Spacing.medium)
+            .padding(.vertical, Spacing.xs)
             .background(type.backgroundColor)
             .foregroundColor(type.foregroundColor)
-            .cornerRadius(12)
+            .clipShape(Capsule())
     }
     
    

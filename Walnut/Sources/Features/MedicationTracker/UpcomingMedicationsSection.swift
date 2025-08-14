@@ -29,10 +29,19 @@ struct UpcomingMedicationsSection: View {
                     .listRowSeparator(.hidden)
             } else {
                 ForEach(Array(upcomingMedications.enumerated()), id: \.element.medication.id) { index, medicationInfo in
-                    medicationCardView(medicationInfo: medicationInfo)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: Spacing.xs, leading: 0, bottom: Spacing.xs, trailing: 0))
+                    MedicationCard.upcoming(
+                        medicationName: medicationInfo.medication.name,
+                        dosage: medicationInfo.dosageText,
+                        timing: medicationInfo.displayTime,
+                        instructions: medicationInfo.medication.instructions,
+                        timePeriod: mapToDesignSystemTimePeriod(medicationInfo.timePeriod),
+                        timeUntilDue: medicationInfo.timeUntilDue.map { medicationTracker.formatTimeUntilDue($0) } ?? ""
+                    ) {
+                        markMedicationTaken(medicationInfo)
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: Spacing.xs, leading: 0, bottom: Spacing.xs, trailing: 0))
                 }
             }
         } header: {
@@ -96,100 +105,19 @@ struct UpcomingMedicationsSection: View {
         self.activeMedications = medications
     }
     
-    private func medicationCardView(medicationInfo: MedicationTracker.MedicationScheduleInfo) -> some View {
-        HealthCard {
-            HStack(spacing: Spacing.medium) {
-                // Time Period Indicator
-                timePeriodIndicator(for: medicationInfo)
-                
-                // Medication Details
-                medicationDetails(for: medicationInfo)
-                
-                Spacer()
-                
-                // Action Button
-                actionButton(for: medicationInfo)
-            }
-        }
-        .overlay(alignment: .leading) {
-            // Time period accent
-            Rectangle()
-                .fill(medicationInfo.timePeriod.color)
-                .frame(width: 4)
-                .clipShape(RoundedRectangle(cornerRadius: 2))
+    private func mapToDesignSystemTimePeriod(_ timePeriod: MedicationTracker.TimePeriod) -> MedicationTimePeriod {
+        switch timePeriod {
+        case .morning:
+            return .morning
+        case .afternoon:
+            return .afternoon
+        case .evening:
+            return .evening
+        case .night:
+            return .night
         }
     }
     
-    @ViewBuilder
-    private func timePeriodIndicator(for medicationInfo: MedicationTracker.MedicationScheduleInfo) -> some View {
-        VStack(spacing: Spacing.xs) {
-            // Time period icon with background
-            Circle()
-                .fill(medicationInfo.timePeriod.color.opacity(0.15))
-                .frame(width: Size.avatarMedium, height: Size.avatarMedium)
-                .overlay {
-                    Image(systemName: medicationInfo.timePeriod.icon)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(medicationInfo.timePeriod.color)
-                }
-            
-            // Time until due badge
-            if let timeUntilDue = medicationInfo.timeUntilDue {
-                Text(medicationTracker.formatTimeUntilDue(timeUntilDue))
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, Spacing.small)
-                    .padding(.vertical, 2)
-                    .background(Color.healthWarning, in: Capsule())
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private func medicationDetails(for medicationInfo: MedicationTracker.MedicationScheduleInfo) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            // Medication name
-            Text(medicationInfo.medication.name)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.primary)
-            
-            // Dosage and timing
-            HStack(spacing: Spacing.xs) {
-                Text(medicationInfo.dosageText)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                
-                Text("•")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                
-                Text(medicationInfo.displayTime)
-                    .font(.caption)
-                    .foregroundStyle(medicationInfo.timePeriod.color)
-            }
-            
-            // Instructions if available
-            if let instructions = medicationInfo.medication.instructions, !instructions.isEmpty {
-                Text(instructions)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private func actionButton(for medicationInfo: MedicationTracker.MedicationScheduleInfo) -> some View {
-        Button {
-            markMedicationTaken(medicationInfo)
-        } label: {
-            WalnutDesignSystem.StatusIndicator(status: HealthStatus.good, showIcon: true)
-                .scaleEffect(1.5)
-        }
-        .buttonStyle(.borderless)
-        .touchTarget()
-        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: currentTime)
-    }
     
     private func startTimer() {
         Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in

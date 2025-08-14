@@ -78,15 +78,7 @@ public final class DocumentParser {
         }
         
         let chatResponse = try JSONDecoder().decode(OpenAIChatResponse.self, from: data)
-        
-        guard let content = chatResponse.choices.first?.message.content,
-              let jsonData = content.data(using: .utf8) else {
-            throw AIKitError.parsingError("No content in response")
-        }
-        
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(type, from: jsonData)
+        return try JSONResponseParser.parseOpenAIResponse(chatResponse, as: type)
     }
     
     // MARK: - PDF Parsing (Claude with file upload)
@@ -152,29 +144,7 @@ public final class DocumentParser {
         }
         
         let messageResponse = try JSONDecoder().decode(ClaudeMessageResponse.self, from: data)
-        
-        guard let content = messageResponse.content.first?.text else {
-            throw AIKitError.parsingError("No content in response")
-        }
-        
-        let cleanedContent = cleanJSONResponse(content)
-        
-        guard let jsonData = cleanedContent.data(using: .utf8) else {
-            throw AIKitError.parsingError("Could not convert response to data")
-        }
-        
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(type, from: jsonData)
-    }
-    
-    private func cleanJSONResponse(_ content: String) -> String {
-        var text = content
-            .replacingOccurrences(of: "```", with: "")
-            .replacingOccurrences(of: "json", with: "")
-        text.removeFirst()
-        text.removeLast()
-        return text
+        return try JSONResponseParser.parseClaudeResponse(messageResponse, as: type)
     }
     
     // MARK: - File Type Support
