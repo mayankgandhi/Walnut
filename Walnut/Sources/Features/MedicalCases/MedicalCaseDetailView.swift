@@ -473,12 +473,7 @@ struct EnhancedPrescriptionListItem: View {
         )
         .scaleEffect(isPressed ? 0.98 : 1.0)
         .animation(.easeInOut(duration: 0.1), value: isPressed)
-        .onTapGesture {
-            isPressed = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                isPressed = false
-            }
-        }
+        
     }
 }
 
@@ -670,12 +665,7 @@ struct EnhancedBloodReportListItem: View {
         )
         .scaleEffect(isPressed ? 0.98 : 1.0)
         .animation(.easeInOut(duration: 0.1), value: isPressed)
-        .onTapGesture {
-            isPressed = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                isPressed = false
-            }
-        }
+        
     }
 }
 

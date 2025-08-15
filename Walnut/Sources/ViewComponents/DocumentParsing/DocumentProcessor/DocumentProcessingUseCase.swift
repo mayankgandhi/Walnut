@@ -105,7 +105,7 @@ struct DocumentProcessingUseCase {
                 fileURL: fileURL
             )
             
-        case .labResult, .bloodWork:
+        case .labResult:
             let parsedBloodReport = try await aiService.parseDocument(from: fileURL, as: ParsedBloodReport.self)
             return try await repository.saveBloodReport(
                 parsedBloodReport,

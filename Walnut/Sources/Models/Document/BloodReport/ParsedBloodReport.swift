@@ -21,11 +21,11 @@ struct ParsedBloodReport: ParseableModel, OpenAISchemaDefinable {
     static var parseDefinition: String {
         """
         Swift blood report parsing model: ParsedBloodReport
-        ParsedBloodReport: testName(String), labName(String), category(String), resultDate(Date), notes(String), testResults([ParsedBloodTestResult])
+        ParsedBloodReport: testName(String), labName(String), category(String), resultDate(Date:ISO8601-format), notes(String), testResults([ParsedBloodTestResult])
         ParsedBloodTestResult: testName(String), value(String), unit(String), referenceRange(String), isAbnormal(Bool)
         
         Please extract all blood test results from the lab report. The resultDate should be the date when the tests were performed or results were available.
-        Expected date string to be ISO8601-format.
+        Strictly Follow this rule: Expected all date strings to be ISO8601-format.
         """
     }
     

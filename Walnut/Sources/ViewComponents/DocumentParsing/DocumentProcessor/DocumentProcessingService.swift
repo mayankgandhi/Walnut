@@ -204,7 +204,18 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
                 bloodReport: bloodReport
             )
         }
+        
+        // Insert test results into model context
         testResults.forEach { modelContext.insert($0) }
+        
+        // IMPORTANT: Add test results to the blood report's testResults array
+        // This establishes the bidirectional relationship properly
+        bloodReport.testResults.append(contentsOf: testResults)
+        
+        // CRUCIAL: Add blood report to the medical case's bloodReports array
+        // This establishes the bidirectional relationship between MedicalCase and BloodReport
+        medicalCase.bloodReports.append(bloodReport)
+        
         try modelContext.save()
         return bloodReport.persistentModelID
     }

@@ -76,7 +76,7 @@ class BloodReport: Identifiable, Sendable {
             document: Document(
                 fileName: "\(testName)_\(labName)_blood_report",
                 fileURL: fileURL,
-                documentType: .bloodWork,
+                documentType: .labResult,
                 fileSize: 0
             ),
             testResults: testResults

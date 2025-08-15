@@ -202,7 +202,7 @@ extension DocumentPickerStore {
     
     static func forBloodReports() -> DocumentPickerStore {
         DocumentPickerStore(
-            documentTypes: [.labResult, .bloodWork],
+            documentTypes: [.labResult],
             defaultDocumentType: .labResult
         )
     }

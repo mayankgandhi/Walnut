@@ -11,54 +11,47 @@ import Charts
 import WalnutDesignSystem
 
 struct BloodReportDetailView: View {
-    
     let bloodReport: BloodReport
-    
     @Environment(\.dismiss) private var dismiss
+    @State private var headerScale: CGFloat = 1.0
+    @State private var selectedCategory: String?
+    @State private var showAllTests = false
+    @Namespace private var heroTransition
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: Spacing.large) {
-                    // Header Card
-                    headerCard
+                    // Enhanced Hero Header
+                    enhancedHeaderCard
                     
-                    // Summary Statistics Card
+                    // Test Results Grid
                     if !bloodReport.testResults.isEmpty {
-                        summaryStatsCard
+                        enhancedTestResultsGrid
+                    } else {
+                        // Show empty state if no test results
+                        emptyTestResultsCard
                     }
                     
-                    // Abnormal Results Alert Card (if any)
-                    let abnormalResults = bloodReport.testResults.filter { $0.isAbnormal }
-                    if !abnormalResults.isEmpty {
-                        abnormalResultsCard(abnormalResults: abnormalResults)
+                    // Enhanced Document & Metadata Section
+                    VStack(spacing: Spacing.medium) {
+                        if !bloodReport.notes.isEmpty {
+                            enhancedNotesCard
+                        }
+                        
+                        if bloodReport.document != nil {
+                            enhancedDocumentCard
+                        }
+                        
+                        enhancedMetadataCard
                     }
-                    
-                    // Test Results by Category
-                    if !bloodReport.testResults.isEmpty {
-                        categorizedTestResultsCard
-                    }
-                    
-                    // Notes Card
-                    if !bloodReport.notes.isEmpty {
-                        notesCard
-                    }
-                    
-                    // Document Card
-                    if let document = bloodReport.document {
-                        documentCard(document: document)
-                    }
-                    
-                    // Metadata Card
-                    metadataCard
                 }
                 .padding(.horizontal, Spacing.medium)
                 .padding(.top, Spacing.medium)
                 .padding(.bottom, Spacing.xl)
             }
-            .background(Color(UIColor.systemGroupedBackground))
-            .navigationTitle("Blood Report Details")
-            .navigationBarTitleDisplayMode(.large)
+            .background(Color(UIColor.systemBackground))
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -70,142 +63,144 @@ struct BloodReportDetailView: View {
         }
     }
     
-    // MARK: - Header Card
-    private var headerCard: some View {
-        HealthCard {
-            VStack(spacing: Spacing.medium) {
-                // Test Name and Lab Info
-                HStack(spacing: Spacing.medium) {
-                    Circle()
-                        .fill(Color.healthError.opacity(0.15))
-                        .frame(width: Size.avatarLarge, height: Size.avatarLarge)
-                        .overlay {
-                            Image(systemName: "testtube.2")
-                                .font(.system(size: 24, weight: .semibold))
-                                .foregroundStyle(Color.healthError)
-                        }
+    // MARK: - Enhanced Header Card
+    private var enhancedHeaderCard: some View {
+        HealthCard(padding: Spacing.large) {
+            VStack(spacing: Spacing.large) {
+                // Hero Section with enhanced specialty visualization
+                HStack(spacing: Spacing.large) {
+                    // Enhanced Lab Icon with animated background
+                    ZStack {
+                        // Animated background gradient
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color.red.opacity(0.2),
+                                        Color.red.opacity(0.05)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 80, height: 80)
+                            .shadow(color: Color.red.opacity(0.3), radius: 8, x: 0, y: 4)
+                        
+                        // Subtle pulse ring
+                        Circle()
+                            .stroke(Color.red.opacity(0.2), lineWidth: 2)
+                            .frame(width: 88, height: 88)
+                            .scaleEffect(headerScale)
+                            .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: headerScale)
+                            .onAppear { headerScale = 1.1 }
+                        
+                        // Main icon with enhanced styling
+                        Image(systemName: "drop.fill")
+                            .font(.system(size: 32, weight: .semibold, design: .rounded))
+                            .foregroundStyle(Color.red)
+                            .scaleEffect(1.0)
+                            .animation(.spring(response: 0.6, dampingFraction: 0.8), value: bloodReport.testName)
+                    }
+                    .matchedGeometryEffect(id: "lab-icon", in: heroTransition)
                     
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                    // Enhanced content with better hierarchy
+                    VStack(alignment: .leading, spacing: Spacing.small) {
                         Text(bloodReport.testName)
-                            .font(.title2.weight(.semibold))
+                            .font(.title.weight(.bold))
                             .foregroundStyle(.primary)
+                            .lineLimit(3)
+                            .multilineTextAlignment(.leading)
                         
                         if !bloodReport.labName.isEmpty {
-                            Text(bloodReport.labName)
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                            HStack(spacing: Spacing.xs) {
+                                Circle()
+                                    .fill(Color.blue.opacity(0.2))
+                                    .frame(width: 20, height: 20)
+                                    .overlay {
+                                        Image(systemName: "building.2")
+                                            .font(.caption2.weight(.medium))
+                                            .foregroundStyle(.blue)
+                                    }
+                                
+                                Text(bloodReport.labName)
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        
+                        // Enhanced status with overall health indicator
+                        let abnormalCount = bloodReport.testResults.filter(\.isAbnormal).count
+                        HStack(spacing: Spacing.xs) {
+                            Circle()
+                                .fill(abnormalCount == 0 ? Color.healthSuccess : Color.healthWarning)
+                                .frame(width: 8, height: 8)
+                                .scaleEffect(abnormalCount > 0 ? 1.0 : 0.8)
+                                .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: abnormalCount > 0)
+                            
+                            Text(abnormalCount == 0 ? "All Results Normal" : "\(abnormalCount) Abnormal Results")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(abnormalCount == 0 ? Color.healthSuccess : Color.healthWarning)
                         }
                     }
                     
                     Spacer()
                 }
                 
-                // Metrics Row
-                HStack(spacing: Spacing.large) {
-                    HealthMetric(
-                        value: bloodReport.resultDate.formatted(.dateTime.day().month().year()),
-                        label: "Test Date",
-                        status: .good
-                    )
+                // Enhanced metadata section with modern card grid
+                LazyVGrid(columns: [
+                    GridItem(.flexible(), spacing: Spacing.small),
+                    GridItem(.flexible(), spacing: Spacing.small)
+                ], spacing: Spacing.medium) {
                     
-                    if !bloodReport.category.isEmpty {
-                        HealthMetric(
-                            value: bloodReport.category,
-                            label: "Category",
-                            status: .good
-                        )
-                    }
-                    
-                    Spacer()
-                }
-                
-                if !bloodReport.testResults.isEmpty {
-                    let abnormalResults = bloodReport.testResults.filter { $0.isAbnormal }
-                    
-                    HStack(spacing: Spacing.large) {
-                        HealthMetric(
-                            value: "\(bloodReport.testResults.count)",
-                            label: "Total Results",
-                            status: .good
-                        )
-                        
-                        if !abnormalResults.isEmpty {
-                            HealthMetric(
-                                value: "\(abnormalResults.count)",
-                                label: "Abnormal",
-                                status: .warning
-                            )
+                    // Test Date Card
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        HStack {
+                            Image(systemName: "calendar")
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(.blue)
+                            
+                            Text("Test Date")
+                                .font(.caption2.weight(.medium))
+                                .foregroundStyle(.tertiary)
+                            
+                            Spacer()
                         }
                         
-                        Spacer()
+                        Text(bloodReport.resultDate.formatted(date: .abbreviated, time: .omitted))
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
                     }
+                    .padding(Spacing.small)
+                    .background(Color(UIColor.secondarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    
+                    // Category Card
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        HStack {
+                            Image(systemName: "tag")
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(.green)
+                            
+                            Text("Category")
+                                .font(.caption2.weight(.medium))
+                                .foregroundStyle(.tertiary)
+                            
+                            Spacer()
+                        }
+                        
+                        Text(bloodReport.category.isEmpty ? "General" : bloodReport.category)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(Spacing.small)
+                    .background(Color(UIColor.secondarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
             }
         }
     }
     
-    // MARK: - Summary Statistics Card
-    private var summaryStatsCard: some View {
-        HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-                HStack(spacing: Spacing.small) {
-                    Image(systemName: "chart.pie.fill")
-                        .font(.headline)
-                        .foregroundStyle(Color.healthPrimary)
-                    
-                    Text("Summary Statistics")
-                        .font(.headline.weight(.semibold))
-                    
-                    Spacer()
-                }
-                
-                let abnormalCount = bloodReport.testResults.filter { $0.isAbnormal }.count
-                let normalCount = bloodReport.testResults.count - abnormalCount
-                let abnormalPercentage = bloodReport.testResults.isEmpty ? 0 : Double(abnormalCount) / Double(bloodReport.testResults.count) * 100
-                
-                HStack(spacing: Spacing.xl) {
-                    // Normal Results
-                    VStack(alignment: .leading, spacing: Spacing.small) {
-                        HStack(spacing: Spacing.xs) {
-                            WalnutDesignSystem.StatusIndicator(status: .good, showIcon: false)
-                            Text("Normal")
-                                .font(.subheadline.weight(.medium))
-                        }
-                        
-                        Text("\(normalCount)")
-                            .font(.healthMetricLarge)
-                            .foregroundStyle(Color.healthSuccess)
-                        
-                        Text("\(String(format: "%.0f", 100 - abnormalPercentage))% of tests")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    
-                    Spacer()
-                    
-                    // Abnormal Results
-                    VStack(alignment: .trailing, spacing: Spacing.small) {
-                        HStack(spacing: Spacing.xs) {
-                            WalnutDesignSystem.StatusIndicator(
-                                status: abnormalCount > 0 ? .warning : .good, 
-                                showIcon: false
-                            )
-                            Text("Abnormal")
-                                .font(.subheadline.weight(.medium))
-                        }
-                        
-                        Text("\(abnormalCount)")
-                            .font(.healthMetricLarge)
-                            .foregroundStyle(abnormalCount > 0 ? Color.healthError : .secondary)
-                        
-                        Text("\(String(format: "%.0f", abnormalPercentage))% of tests")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-        }
-    }
+    // MARK: - Quick Stats Overview
     
     // MARK: - Abnormal Results Alert Card
     private func abnormalResultsCard(abnormalResults: [BloodTestResult]) -> some View {
@@ -274,142 +269,335 @@ struct BloodReportDetailView: View {
             }
         }
     }
-    
-    // MARK: - Categorized Test Results Card
-    private var categorizedTestResultsCard: some View {
-        HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-                HStack(spacing: Spacing.small) {
-                    Image(systemName: "chart.bar.fill")
-                        .font(.headline)
-                        .foregroundStyle(Color.healthPrimary)
-                    
-                    Text("Detailed Results")
-                        .font(.headline.weight(.semibold))
-                    
-                    Spacer()
-                    
-                    Text("\(bloodReport.testResults.count) tests")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, Spacing.small)
-                        .padding(.vertical, Spacing.xs)
-                        .background(Color.healthPrimary.opacity(0.1))
-                        .clipShape(Capsule())
-                }
-                
-                // Group results by category if we can infer categories, otherwise show all results
-                let groupedResults = Dictionary(grouping: bloodReport.testResults) { result in
-                    inferCategory(for: result.testName)
-                }
-                
-                VStack(spacing: Spacing.medium) {
-                    ForEach(Array(groupedResults.keys.sorted()), id: \.self) { category in
-                        if let results = groupedResults[category] {
-                            categorySection(category: category, results: results)
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    private func categorySection(category: String, results: [BloodTestResult]) -> some View {
-        HealthCard(padding: Spacing.medium) {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-                HStack(spacing: Spacing.small) {
-                    Text(category)
-                        .font(.subheadline.weight(.semibold))
+
+    // Enhanced Test Results Grid using BioMarkerGridItemView
+    private var enhancedTestResultsGrid: some View {
+        VStack(alignment: .leading, spacing: Spacing.medium) {
+            // Section Header
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Test Results")
+                        .font(.title2.weight(.bold))
                         .foregroundStyle(.primary)
                     
-                    Spacer()
-                    
-                    let abnormalInCategory = results.filter { $0.isAbnormal }.count
-                    if abnormalInCategory > 0 {
-                        HStack(spacing: Spacing.xs) {
-                            WalnutDesignSystem.StatusIndicator(status: .critical, showIcon: true)
-                            Text("\(abnormalInCategory) abnormal")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(Color.healthError)
-                        }
-                    }
+                    Text("\(bloodReport.testResults.count) biomarkers measured")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
                 
-                VStack(spacing: Spacing.small) {
-                    ForEach(results, id: \.id) { testResult in
-                        enhancedTestResultRow(testResult: testResult)
-                    }
-                }
-            }
-        }
-    }
-    
-    private func enhancedTestResultRow(testResult: BloodTestResult) -> some View {
-        HStack(spacing: Spacing.medium) {
-            VStack(alignment: .leading, spacing: Spacing.xs) {
-                Text(testResult.testName)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(testResult.isAbnormal ? Color.healthError : .primary)
+                Spacer()
                 
-                Text("Ref: \(testResult.referenceRange)")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
-            
-            Spacer()
-            
-            HStack(spacing: Spacing.small) {
-                VStack(alignment: .trailing, spacing: Spacing.xs) {
+                let abnormalCount = bloodReport.testResults.filter(\.isAbnormal).count
+                if abnormalCount > 0 {
                     HStack(spacing: Spacing.xs) {
-                        Text(testResult.value)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(testResult.isAbnormal ? Color.healthError : .primary)
+                        Circle()
+                            .fill(Color.healthError)
+                            .frame(width: 8, height: 8)
                         
-                        Text(testResult.unit)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        Text("\(abnormalCount) need attention")
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(Color.healthError)
                     }
-                    
-                    WalnutDesignSystem.StatusIndicator(
-                        status: testResult.isAbnormal ? .critical : .good, 
-                        showIcon: true
-                    )
+                    .padding(.horizontal, Spacing.small)
+                    .padding(.vertical, 4)
+                    .background(Color.healthError.opacity(0.1))
+                    .clipShape(Capsule())
                 }
-                
-                // Visual indicator bar
-                Rectangle()
-                    .fill(testResult.isAbnormal ? Color.healthError : Color.healthSuccess)
-                    .frame(width: 3, height: 40)
-                    .cornerRadius(1.5)
             }
+            .padding(.horizontal, Spacing.medium)
+            
+            // Grid of BioMarker Items
+            LazyVGrid(columns: [
+                GridItem(.flexible(), spacing: Spacing.medium),
+                GridItem(.flexible(), spacing: Spacing.medium)
+            ], spacing: Spacing.medium) {
+                ForEach(convertToBioMarkers(), id: \.id) { biomarker in
+                    BioMarkerGridItemView(
+                        biomarker: biomarker,
+                        isSelected: false,
+                        onTap: {
+                            // Handle biomarker selection if needed
+                            print("Selected: \(biomarker.name)")
+                        }
+                    )
+                    .frame(height: 180)
+                }
+            }
+            .padding(.horizontal, Spacing.medium)
         }
-        .padding(.vertical, Spacing.small)
     }
     
-    // Helper function to infer category from test name
-    private func inferCategory(for testName: String) -> String {
+    // Convert BloodTestResult to BioMarker
+    private func convertToBioMarkers() -> [BioMarker] {
+        return bloodReport.testResults.map { testResult in
+            let healthStatus: HealthStatus = {
+                if !testResult.isAbnormal {
+                    return .optimal
+                } else {
+                    // For abnormal results, we could add more logic here
+                    // to determine if it's warning or critical based on severity
+                    return .warning
+                }
+            }()
+            
+            return BioMarker(
+                name: testResult.testName,
+                currentValue: testResult.value,
+                unit: testResult.unit,
+                referenceRange: testResult.referenceRange,
+                healthStatus: healthStatus,
+                iconName: iconForTestName(testResult.testName),
+                trend: nil, // BloodTestResult doesn't have trend info
+                lastUpdated: bloodReport.resultDate
+            )
+        }
+    }
+    
+    // Helper function to get appropriate icon for test name
+    private func iconForTestName(_ testName: String) -> String {
         let name = testName.lowercased()
         
         if name.contains("hemoglobin") || name.contains("hematocrit") || name.contains("rbc") || name.contains("red blood") {
-            return "Red Blood Cells"
+            return "drop.fill"
         } else if name.contains("wbc") || name.contains("white blood") || name.contains("neutrophil") || name.contains("lymphocyte") {
-            return "White Blood Cells"
+            return "shield.fill"
         } else if name.contains("platelet") || name.contains("plt") {
-            return "Platelets"
+            return "circle.dotted"
         } else if name.contains("glucose") || name.contains("sugar") {
-            return "Glucose"
+            return "cube.fill"
         } else if name.contains("cholesterol") || name.contains("hdl") || name.contains("ldl") || name.contains("triglyceride") {
-            return "Lipid Profile"
+            return "heart.fill"
         } else if name.contains("liver") || name.contains("alt") || name.contains("ast") || name.contains("bilirubin") {
-            return "Liver Function"
+            return "rectangle.fill"
         } else if name.contains("kidney") || name.contains("creatinine") || name.contains("urea") || name.contains("bun") {
-            return "Kidney Function"
+            return "oval.fill"
         } else if name.contains("thyroid") || name.contains("tsh") || name.contains("t3") || name.contains("t4") {
-            return "Thyroid Function"
+            return "bolt.fill"
+        } else if name.contains("pressure") || name.contains("bp") {
+            return "waveform.path.ecg"
         } else {
-            return "Other Tests"
+            return "testtube.2"
         }
     }
+    
+    // Empty Test Results Card
+    private var emptyTestResultsCard: some View {
+        HealthCard {
+            VStack(spacing: Spacing.medium) {
+                Image(systemName: "testtube.2")
+                    .font(.system(size: 48))
+                    .foregroundStyle(.quaternary)
+                
+                VStack(spacing: Spacing.xs) {
+                    Text("No Test Results Found")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    
+                    Text("The blood report was created but no test results were saved. This might be a data parsing issue.")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                        .multilineTextAlignment(.center)
+                }
+            }
+            .padding(.vertical, Spacing.large)
+        }
+    }
+    
+    
+    
+    // Enhanced Notes Card
+    private var enhancedNotesCard: some View {
+        HealthCard {
+            VStack(alignment: .leading, spacing: Spacing.medium) {
+                HStack(spacing: Spacing.small) {
+                    Circle()
+                        .fill(Color.healthSuccess.opacity(0.2))
+                        .frame(width: 36, height: 36)
+                        .overlay {
+                            Image(systemName: "note.text")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundStyle(Color.healthSuccess)
+                        }
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Clinical Notes")
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(.primary)
+                        
+                        Text("\(bloodReport.notes.count) characters")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    Spacer()
+                }
+                
+                Text(bloodReport.notes)
+                    .font(.subheadline)
+                    .lineSpacing(4)
+                    .foregroundStyle(.primary)
+                    .padding(Spacing.small)
+                    .background(Color.healthSuccess.opacity(0.05))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.healthSuccess.opacity(0.1), lineWidth: 1)
+                    )
+            }
+        }
+    }
+    
+    // Enhanced Document Card
+    private var enhancedDocumentCard: some View {
+        HealthCard {
+            VStack(alignment: .leading, spacing: Spacing.medium) {
+                HStack(spacing: Spacing.small) {
+                    Circle()
+                        .fill(Color.blue.opacity(0.2))
+                        .frame(width: 36, height: 36)
+                        .overlay {
+                            Image(systemName: "doc.text.fill")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundStyle(.blue)
+                        }
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Lab Report Document")
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(.primary)
+                        
+                        if let document = bloodReport.document {
+                            Text(document.fileName)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
+                    
+                    Spacer()
+                }
+                
+                if let document = bloodReport.document {
+                    HStack(spacing: Spacing.medium) {
+                        Button(action: {
+                            UIApplication.shared.open(document.fileURL)
+                        }) {
+                            HStack(spacing: Spacing.xs) {
+                                Image(systemName: "eye.fill")
+                                    .font(.caption)
+                                Text("View Report")
+                                    .font(.caption.weight(.medium))
+                            }
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, Spacing.medium)
+                            .padding(.vertical, Spacing.small)
+                            .background(.blue)
+                            .clipShape(Capsule())
+                        }
+                        
+                        Button(action: {
+                            // Handle sharing
+                            let activityController = UIActivityViewController(activityItems: [document.fileURL], applicationActivities: nil)
+                            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                               let rootViewController = windowScene.windows.first?.rootViewController {
+                                rootViewController.present(activityController, animated: true)
+                            }
+                        }) {
+                            HStack(spacing: Spacing.xs) {
+                                Image(systemName: "square.and.arrow.up")
+                                    .font(.caption)
+                                Text("Share")
+                                    .font(.caption.weight(.medium))
+                            }
+                            .foregroundStyle(.blue)
+                            .padding(.horizontal, Spacing.medium)
+                            .padding(.vertical, Spacing.small)
+                            .background(Color.blue.opacity(0.1))
+                            .clipShape(Capsule())
+                        }
+                        
+                        Spacer()
+                    }
+                }
+            }
+        }
+    }
+    
+    // Enhanced Metadata Card
+    private var enhancedMetadataCard: some View {
+        HealthCard {
+            VStack(alignment: .leading, spacing: Spacing.medium) {
+                HStack(spacing: Spacing.small) {
+                    Circle()
+                        .fill(Color.purple.opacity(0.2))
+                        .frame(width: 36, height: 36)
+                        .overlay {
+                            Image(systemName: "info.circle.fill")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundStyle(.purple)
+                        }
+                    
+                    Text("Report Information")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(.primary)
+                    
+                    Spacer()
+                }
+                
+                LazyVGrid(columns: [
+                    GridItem(.flexible(), spacing: Spacing.small),
+                    GridItem(.flexible(), spacing: Spacing.small)
+                ], spacing: Spacing.medium) {
+                    
+                    // Days since test
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        HStack {
+                            Image(systemName: "clock")
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(.orange)
+                            
+                            Text("Days Ago")
+                                .font(.caption2.weight(.medium))
+                                .foregroundStyle(.tertiary)
+                            
+                            Spacer()
+                        }
+                        
+                        let daysAgo = Calendar.current.dateComponents([.day], from: bloodReport.resultDate, to: Date()).day ?? 0
+                        Text("\(daysAgo)")
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(.orange)
+                    }
+                    .padding(Spacing.small)
+                    .background(Color(UIColor.secondarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    
+                    // Total tests
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        HStack {
+                            Image(systemName: "list.number")
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(.cyan)
+                            
+                            Text("Total Tests")
+                                .font(.caption2.weight(.medium))
+                                .foregroundStyle(.tertiary)
+                            
+                            Spacer()
+                        }
+                        
+                        Text("\(bloodReport.testResults.count)")
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(.cyan)
+                    }
+                    .padding(Spacing.small)
+                    .background(Color(UIColor.secondarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+            }
+        }
+    }
+    
     
     // MARK: - Notes Card
     private var notesCard: some View {
@@ -703,7 +891,7 @@ struct BloodReportDetailView: View {
     let sampleDocument = Document(
         fileName: "Complete_Blood_Count_Quest_Diagnostics.pdf",
         fileURL: URL(string: "https://example.com/report.pdf")!,
-        documentType: .bloodWork,
+        documentType: .labResult,
         fileSize: 245760
     )
     

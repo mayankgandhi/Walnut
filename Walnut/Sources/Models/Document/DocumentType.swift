@@ -13,7 +13,6 @@ enum DocumentType: String, CaseIterable, Codable {
     
     case prescription
     case labResult = "lab result"
-    case bloodWork = "blood work"
    
     
     // MARK: - Computed Properties
@@ -21,7 +20,7 @@ enum DocumentType: String, CaseIterable, Codable {
         switch self {
         case .prescription:
             return "Rx"
-        case .labResult, .bloodWork:
+        case .labResult:
             return "Lab"
         }
     }
@@ -30,7 +29,7 @@ enum DocumentType: String, CaseIterable, Codable {
         switch self {
         case .prescription:
             return "pills.fill"
-        case .labResult, .bloodWork:
+        case .labResult:
             return "flask.fill"
         }
     }
@@ -39,7 +38,7 @@ enum DocumentType: String, CaseIterable, Codable {
         switch self {
         case .prescription:
             return .blue
-        case .labResult, .bloodWork:
+        case .labResult:
             return .red
         }
     }
@@ -68,7 +67,7 @@ enum DocumentType: String, CaseIterable, Codable {
         // Try alternative matches
         switch lowercased {
         case "lab result", "blood work":
-            self = lowercased == "lab result" ? .labResult : .bloodWork
+            self = .labResult
         default:
             return nil
         }
