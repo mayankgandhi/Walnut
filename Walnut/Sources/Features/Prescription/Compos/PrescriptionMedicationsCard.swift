@@ -7,76 +7,310 @@
 //
 
 import SwiftUI
+import WalnutDesignSystem
 
 struct PrescriptionMedicationsCard: View {
     let medications: [Medication]
+    @State private var isExpanded = true
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            medicationsHeader
-            
-            LazyVStack(spacing: 12) {
-                ForEach(medications, id: \.id) { medication in
-                    MedicationDetailCard(medication: medication)
+        HealthCard {
+            VStack(alignment: .leading, spacing: Spacing.medium) {
+                // Enhanced Header with Walnut Design System
+                Button(action: {
+                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                        isExpanded.toggle()
+                    }
+                }) {
+                    HStack(spacing: Spacing.small) {
+                        // Icon with design system styling
+                        Circle()
+                            .fill(Color.healthPrimary.opacity(0.15))
+                            .frame(width: 44, height: 44)
+                            .overlay {
+                                Image(systemName: "pills.fill")
+                                    .font(.title3.weight(.semibold))
+                                    .foregroundStyle(Color.healthPrimary)
+                            }
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Medications")
+                                .font(.headline.weight(.bold))
+                                .foregroundStyle(.primary)
+                            
+                            Text("\(medications.count) prescribed")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        
+                        Spacer()
+                        
+                        // Medication count badge using design system
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(Color.healthSuccess)
+                                .frame(width: 6, height: 6)
+                            
+                            Text("\(medications.count)")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(Color.healthSuccess)
+                        }
+                        .padding(.horizontal, Spacing.small)
+                        .padding(.vertical, 4)
+                        .background(Color.healthSuccess.opacity(0.1))
+                        .clipShape(Capsule())
+                        
+                        // Expand/collapse indicator
+                        Image(systemName: isExpanded ? "chevron.up.circle" : "chevron.down.circle")
+                            .font(.title3)
+                            .foregroundStyle(.secondary)
+                            .rotationEffect(.degrees(isExpanded ? 0 : 180))
+                    }
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                // Medications List with animation
+                if isExpanded {
+                    if medications.isEmpty {
+                        // Empty state with design system styling
+                        VStack(spacing: Spacing.medium) {
+                            Image(systemName: "pills")
+                                .font(.system(size: 48))
+                                .foregroundStyle(.quaternary)
+                            
+                            VStack(spacing: Spacing.xs) {
+                                Text("No medications")
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundStyle(.secondary)
+                                
+                                Text("Prescription medications will appear here")
+                                    .font(.caption)
+                                    .foregroundStyle(.tertiary)
+                                    .multilineTextAlignment(.center)
+                            }
+                        }
+                        .padding(.vertical, Spacing.large)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    } else {
+                        LazyVStack(spacing: Spacing.small) {
+                            ForEach(medications, id: \.id) { medication in
+                                EnhancedMedicationCard(medication: medication)
+                            }
+                        }
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
                 }
             }
         }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(.thinMaterial)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(.linearGradient(colors: [.blue.opacity(0.05), .purple.opacity(0.02)], startPoint: .topLeading, endPoint: .bottomTrailing))
-                )
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(.linearGradient(colors: [.blue.opacity(0.3), .purple.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
-        )
-        .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 4)
     }
     
-    private var medicationsHeader: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "pills.fill")
-                .font(.title2)
-                .foregroundStyle(.linearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing))
-                .apply { image in
-                    if #available(iOS 17.0, *) {
-                        image
-                            .symbolRenderingMode(.multicolor)
-                            .symbolEffect(.variableColor.iterative.dimInactiveLayers.nonReversing)
-                    } else {
-                        image
-                    }
-                }
+}
+
+// MARK: - Enhanced Medication Card Component
+
+struct EnhancedMedicationCard: View {
+    let medication: Medication
+    @State private var isPressed = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.small) {
+            medicationHeaderSection
             
-            Text("Medications")
-                .font(.headline)
-                .fontWeight(.semibold)
-                .foregroundColor(.primary)
+            if !medication.frequency.isEmpty {
+                frequencySection
+            }
+            
+            if let instructions = medication.instructions, !instructions.isEmpty {
+                instructionsSection(instructions)
+            }
+        }
+        .padding(Spacing.small)
+        .background(cardBackground)
+        .scaleEffect(isPressed ? 0.98 : 1.0)
+        .animation(.easeInOut(duration: 0.1), value: isPressed)
+    }
+    
+    // MARK: - Subviews
+    
+    private var medicationHeaderSection: some View {
+        HStack(spacing: Spacing.medium) {
+            medicationStatusIcon
+            medicationInfoSection
+            Spacer()
+            durationBadge
+        }
+    }
+    
+    private var medicationStatusIcon: some View {
+        Circle()
+            .fill(medicationStatusColor)
+            .frame(width: 32, height: 32)
+            .overlay {
+                Image(systemName: medicationIcon)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(.white)
+            }
+    }
+    
+    private var medicationInfoSection: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(medication.name)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.primary)
+                .lineLimit(2)
+            
+            if let dosage = medication.dosage, !dosage.isEmpty {
+                dosageInfo(dosage)
+            }
+        }
+    }
+    
+    private func dosageInfo(_ dosage: String) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: "scalemass")
+                .font(.caption2)
+                .foregroundStyle(Color.healthPrimary)
+            
+            Text(dosage)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+        }
+    }
+    
+    private var durationBadge: some View {
+        VStack(spacing: 2) {
+            Text("\(medication.numberOfDays)")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(Color.healthSuccess)
+            
+            Text(medication.numberOfDays == 1 ? "day" : "days")
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, Spacing.small)
+        .padding(.vertical, 4)
+        .background(Color.healthSuccess.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 6))
+    }
+    
+    private var frequencySection: some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            frequencyHeader
+            frequencyGrid
+        }
+        .padding(Spacing.small)
+        .background(Color.healthWarning.opacity(0.05))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.healthWarning.opacity(0.1), lineWidth: 1)
+        )
+    }
+    
+    private var frequencyHeader: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "clock")
+                .font(.caption)
+                .foregroundStyle(Color.healthWarning)
+            
+            Text("Schedule")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.primary)
             
             Spacer()
             
-            Text("\(medications.count)")
-                .font(.subheadline)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-                .frame(width: 28, height: 20)
-                .background(
-                    Capsule()
-                        .fill(.linearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing))
-                )
-                .shadow(color: .blue.opacity(0.3), radius: 2, x: 0, y: 1)
+            Text("\(medication.frequency.count)x daily")
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(Color.healthWarning)
+        }
+    }
+    
+    private var frequencyGrid: some View {
+        LazyVGrid(columns: [
+            GridItem(.flexible(), spacing: Spacing.xs),
+            GridItem(.flexible(), spacing: Spacing.xs)
+        ], spacing: Spacing.xs) {
+            ForEach(medication.frequency.indices, id: \.self) { index in
+                frequencyChip(at: index)
+            }
+        }
+    }
+    
+    private func frequencyChip(at index: Int) -> some View {
+        VStack(spacing: 2) {
+            Text(medication.frequency[index].mealTime.rawValue)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(Color.healthWarning)
+            
+            Text("Time \(index + 1)")
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(.tertiary)
+        }
+        .padding(.horizontal, Spacing.xs)
+        .padding(.vertical, 4)
+        .background(Color.healthWarning.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 6))
+    }
+    
+    private func instructionsSection(_ instructions: String) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            instructionsHeader
+            instructionsContent(instructions)
+        }
+    }
+    
+    private var instructionsHeader: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "doc.text")
+                .font(.caption)
+                .foregroundStyle(Color.healthPrimary)
+            
+            Text("Instructions")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.primary)
+        }
+    }
+    
+    private func instructionsContent(_ instructions: String) -> some View {
+        Text(instructions)
+            .font(.caption)
+            .foregroundStyle(.primary)
+            .lineSpacing(2)
+            .padding(Spacing.small)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.healthPrimary.opacity(0.05))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.healthPrimary.opacity(0.1), lineWidth: 1)
+            )
+    }
+    
+    private var cardBackground: some View {
+        RoundedRectangle(cornerRadius: 12)
+            .fill(Color(UIColor.secondarySystemGroupedBackground))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(medicationStatusColor.opacity(0.1), lineWidth: 1)
+            )
+    }
+    
+    // MARK: - Helper Properties
+    
+    private var medicationStatusColor: Color {
+        // You can add logic here based on medication type or status
+        return Color.healthSuccess
+    }
+    
+    private var medicationIcon: String {
+        // You can customize icons based on medication type
+        if medication.name.lowercased().contains("antibiotic") {
+            return "shield.fill"
+        } else if medication.name.lowercased().contains("pain") {
+            return "bolt.fill"
+        } else {
+            return "pills.fill"
         }
     }
 }
 
-// MARK: - View Extension for Conditional Modifiers
-extension View {
-    @ViewBuilder
-    func apply<T: View>(@ViewBuilder _ transform: (Self) -> T) -> some View {
-        transform(self)
-    }
-}
