@@ -372,10 +372,17 @@ struct PrescriptionEditor: View {
                 }
             }
             .sheet(isPresented: $showMedicationEditor) {
-                MedicationEditor(
-                    medication: medicationToEdit,
-                    onSave: handleMedicationSave
-                )
+                if let medicationToEdit = medicationToEdit {
+                    MedicationEditor(
+                        medication: medicationToEdit,
+                        onSave: handleMedicationSave
+                    )
+                } else {
+                    MedicationEditor(
+                        medication: nil,
+                        onSave: handleMedicationSave
+                    )
+                }
             }
         }
         .presentationDetents([.large])

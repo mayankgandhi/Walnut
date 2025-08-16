@@ -305,7 +305,6 @@ struct EnhancedDocumentsSection: View {
     @State private var selectedPrescription: Prescription?
     @State private var editingPrescription: Prescription?
     @State private var showAddDocument = false
-    @State private var showPrescriptionEditor = false
     @State private var isExpanded = true
     
     var body: some View {
@@ -406,13 +405,8 @@ struct EnhancedDocumentsSection: View {
         .navigationDestination(item: $selectedPrescription) { prescription in
             PrescriptionDetailView(prescription: prescription)
         }
-        .sheet(isPresented: $showPrescriptionEditor) {
-            if let prescription = editingPrescription {
-                PrescriptionEditor(prescription: prescription, medicalCase: medicalCase)
-                    .onDisappear {
-                        editingPrescription = nil
-                    }
-            }
+        .sheet(item: $editingPrescription) { prescription in
+            PrescriptionEditor(prescription: prescription, medicalCase: medicalCase)
         }
         .prescriptionDocumentPicker(for: medicalCase, isPresented: $showAddDocument)
     }
@@ -423,7 +417,6 @@ struct EnhancedDocumentsSection: View {
     private func prescriptionContextMenu(for prescription: Prescription) -> some View {
         Button {
             editingPrescription = prescription
-            showPrescriptionEditor = true
         } label: {
             Label("Edit Prescription", systemImage: "pencil")
         }

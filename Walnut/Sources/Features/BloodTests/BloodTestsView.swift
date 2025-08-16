@@ -19,35 +19,11 @@ struct BloodTestsView: View {
     @State private var selectedBloodReport: BloodReport?
     @State private var selectedBiomarker: AggregatedBiomarker?
     @State private var searchText = ""
-    @State private var selectedCategory: String? = nil
-    @State private var sortOrder: SortOrder = .date
-    @State private var showingFilters = false
     
     // Computed property for aggregated biomarkers with performance optimization
     @State private var aggregatedBiomarkers: [AggregatedBiomarker] = []
     @State private var isProcessingData = false
     
-    enum SortOrder: CaseIterable {
-        case date, name, status, category
-        
-        var displayName: String {
-            switch self {
-            case .date: return "Date"
-            case .name: return "Test Name"
-            case .status: return "Health Status"
-            case .category: return "Category"
-            }
-        }
-        
-        var iconName: String {
-            switch self {
-            case .date: return "calendar"
-            case .name: return "textformat.abc"
-            case .status: return "heart.fill"
-            case .category: return "tag"
-            }
-        }
-    }
     
     init(patient: Patient) {
         self.patient = patient
@@ -63,125 +39,29 @@ struct BloodTestsView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                // Simple Modern Header
-                modernHeaderSection
-                
-                // Filter and Sort Controls
-                if !bloodReports.isEmpty {
-                    filterAndSortSection
-                        .background(Color(UIColor.systemBackground))
-                }
-                
-                // Main Content
-                if isProcessingData {
-                    loadingView
-                } else if filteredBiomarkers.isEmpty && !bloodReports.isEmpty {
-                    emptyFilteredResultsView
-                } else if bloodReports.isEmpty {
-                    emptyStateView
-                } else {
-                    biomarkersList
-                }
+            // Main Content - Clean BioMarker List
+            if isProcessingData {
+                loadingView
+            } else if filteredBiomarkers.isEmpty && !bloodReports.isEmpty {
+                emptyFilteredResultsView
+            } else if bloodReports.isEmpty {
+                emptyStateView
+            } else {
+                biomarkersList
             }
-            .background(Color(UIColor.systemGroupedBackground))
-            .navigationTitle("Blood Tests")
-            .navigationBarTitleDisplayMode(.large)
-            .searchable(text: $searchText, prompt: "Search biomarkers...")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showingFilters.toggle() }) {
-                        Image(systemName: "line.3.horizontal.decrease.circle")
-                            .foregroundStyle(showingFilters ? Color.healthPrimary : .secondary)
-                    }
-                }
-            }
-            .sheet(isPresented: $showingFilters) {
-                filtersSheet
-            }
-            .onAppear {
-                processBloodTestData()
-            }
-            .onChange(of: bloodReports) {
-                processBloodTestData()
-            }
+        }
+        .background(Color(UIColor.systemGroupedBackground))
+        .navigationTitle("Blood Tests")
+        .navigationBarTitleDisplayMode(.large)
+        .searchable(text: $searchText, prompt: "Search biomarkers...")
+        .onAppear {
+            processBloodTestData()
+        }
+        .onChange(of: bloodReports) {
+            processBloodTestData()
         }
     }
     
-    // MARK: - Modern Header Section
-    private var modernHeaderSection: some View {
-        VStack(spacing: Spacing.medium) {
-            // Clean stats row with subtle animations
-            HStack(spacing: Spacing.xl) {
-                // Total biomarkers with pulse animation
-                VStack(spacing: 4) {
-                    Text("\(filteredBiomarkers.count)")
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color.healthPrimary)
-                        .contentTransition(.numericText())
-                    
-                    Text("Biomarkers")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                }
-                
-                Spacer()
-                
-                // Health status indicator with dynamic color
-                VStack(spacing: 4) {
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(healthStatusGradient)
-                            .frame(width: 12, height: 12)
-                            .scaleEffect(abnormalTestsCount > 0 ? 1.2 : 1.0)
-                            .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: abnormalTestsCount > 0)
-                        
-                        Text(healthStatusText)
-                            .font(.system(size: 20, weight: .semibold, design: .rounded))
-                            .foregroundStyle(abnormalTestsCount > 0 ? Color.healthWarning : Color.healthSuccess)
-                    }
-                    
-                    Text(abnormalTestsCount > 0 ? "\(abnormalTestsCount) need attention" : "All looking good")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                }
-                
-                Spacer()
-                
-                // Latest update with relative time
-                VStack(spacing: 4) {
-                    Text(latestTestRelativeTime)
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundStyle(Color.healthPrimary)
-                    
-                    Text("Last updated")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .padding(.horizontal, Spacing.large)
-            .padding(.vertical, Spacing.medium)
-            
-            // Subtle divider
-            if !bloodReports.isEmpty {
-                Rectangle()
-                    .fill(.quaternary)
-                    .frame(height: 1)
-                    .padding(.horizontal, Spacing.large)
-            }
-        }
-        .background(
-            // Subtle gradient background
-            LinearGradient(
-                colors: [
-                    Color(UIColor.systemBackground),
-                    Color(UIColor.systemBackground).opacity(0.8)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
-    }
     
     private func categoryColor(for category: String) -> Color {
         switch category.lowercased() {
@@ -195,167 +75,12 @@ struct BloodTestsView: View {
         }
     }
     
-    // MARK: - Computed Properties for Modern Header
     
-    private var healthStatusGradient: some ShapeStyle {
-        if abnormalTestsCount > 0 {
-            return LinearGradient(
-                colors: [Color.healthWarning, Color.healthWarning.opacity(0.7)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        } else {
-            return LinearGradient(
-                colors: [Color.healthSuccess, Color.healthSuccess.opacity(0.7)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        }
-    }
-    
-    private var healthStatusText: String {
-        if abnormalTestsCount == 0 {
-            return "Healthy"
-        } else if abnormalTestsCount <= 2 {
-            return "Monitor"
-        } else {
-            return "Review"
-        }
-    }
-    
-    private var latestTestRelativeTime: String {
-        guard let latestDate = bloodReports.first?.resultDate else { return "No data" }
-        
-        let days = Calendar.current.dateComponents([.day], from: latestDate, to: Date()).day ?? 0
-        
-        if days == 0 {
-            return "Today"
-        } else if days == 1 {
-            return "Yesterday"
-        } else if days < 7 {
-            return "\(days) days ago"
-        } else if days < 30 {
-            let weeks = days / 7
-            return weeks == 1 ? "1 week ago" : "\(weeks) weeks ago"
-        } else {
-            let months = days / 30
-            return months == 1 ? "1 month ago" : "\(months) months ago"
-        }
-    }
-    
-    // MARK: - Filter and Sort Section
-    private var filterAndSortSection: some View {
-        VStack(spacing: Spacing.small) {
-            HStack(spacing: Spacing.medium) {
-                // Sort Picker
-                Menu {
-                    ForEach(SortOrder.allCases, id: \.self) { order in
-                        Button(action: { sortOrder = order }) {
-                            HStack {
-                                Image(systemName: order.iconName)
-                                Text(order.displayName)
-                                if sortOrder == order {
-                                    Spacer()
-                                    Image(systemName: "checkmark")
-                                }
-                            }
-                        }
-                    }
-                } label: {
-                    HStack(spacing: Spacing.xs) {
-                        Image(systemName: sortOrder.iconName)
-                            .font(.caption)
-                        Text(sortOrder.displayName)
-                            .font(.caption.weight(.medium))
-                        Image(systemName: "chevron.down")
-                            .font(.caption2)
-                    }
-                    .foregroundStyle(Color.healthPrimary)
-                    .padding(.horizontal, Spacing.small)
-                    .padding(.vertical, 6)
-                    .background(Color.healthPrimary.opacity(0.1))
-                    .clipShape(Capsule())
-                }
-                
-                Spacer()
-                
-                // Category Filter
-                if !availableCategories.isEmpty {
-                    Menu {
-                        Button("All Categories") {
-                            selectedCategory = nil
-                        }
-                        
-                        ForEach(availableCategories, id: \.self) { category in
-                            Button(category.isEmpty ? "General" : category) {
-                                selectedCategory = category
-                            }
-                        }
-                    } label: {
-                        HStack(spacing: Spacing.xs) {
-                            Image(systemName: "tag")
-                                .font(.caption)
-                            Text(selectedCategory?.isEmpty == false ? selectedCategory! : "All")
-                                .font(.caption.weight(.medium))
-                                .lineLimit(1)
-                            Image(systemName: "chevron.down")
-                                .font(.caption2)
-                        }
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, Spacing.small)
-                        .padding(.vertical, 6)
-                        .background(Color(UIColor.secondarySystemGroupedBackground))
-                        .clipShape(Capsule())
-                    }
-                }
-            }
-            .padding(.horizontal, Spacing.medium)
-            
-            // Active Filters Indicator
-            if selectedCategory != nil || !searchText.isEmpty {
-                HStack {
-                    Text("Active filters:")
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                    
-                    if !searchText.isEmpty {
-                        filterTag(text: "Search: \(searchText)", onRemove: { searchText = "" })
-                    }
-                    
-                    if let category = selectedCategory {
-                        filterTag(text: category.isEmpty ? "General" : category, onRemove: { selectedCategory = nil })
-                    }
-                    
-                    Spacer()
-                }
-                .padding(.horizontal, Spacing.medium)
-                .padding(.bottom, Spacing.xs)
-            }
-        }
-        .padding(.vertical, Spacing.small)
-    }
-    
-    private func filterTag(text: String, onRemove: @escaping () -> Void) -> some View {
-        HStack(spacing: 4) {
-            Text(text)
-                .font(.caption2.weight(.medium))
-            
-            Button(action: onRemove) {
-                Image(systemName: "xmark")
-                    .font(.caption2.weight(.bold))
-            }
-        }
-        .foregroundStyle(.white)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(Color.healthPrimary)
-        .clipShape(Capsule())
-    }
     
     // MARK: - Main Content Views
     private var biomarkersList: some View {
         ScrollView {
-            LazyVStack(spacing: Spacing.medium) {
+            LazyVStack(spacing: Spacing.small) {
                 ForEach(filteredBiomarkers, id: \.id) { biomarker in
                     BiomarkerListItemView(
                         data: biomarker.historicalValues,
@@ -376,13 +101,13 @@ struct BloodTestsView: View {
                         )
                     )
                     .onTapGesture {
-                        // Navigate to detailed biomarker view
                         selectedBiomarker = biomarker
                     }
                 }
             }
             .padding(.horizontal, Spacing.medium)
-            .padding(.bottom, Spacing.xl)
+            .padding(.top, Spacing.small)
+            .padding(.bottom, Spacing.large)
         }
         .navigationDestination(item: $selectedBiomarker) { biomarker in
             BiomarkerDetailView(
@@ -449,7 +174,6 @@ struct BloodTestsView: View {
         } actions: {
             Button("Clear Filters") {
                 searchText = ""
-                selectedCategory = nil
             }
             .buttonStyle(.bordered)
         }
@@ -457,97 +181,8 @@ struct BloodTestsView: View {
         .background(Color(UIColor.systemGroupedBackground))
     }
     
-    // MARK: - Filters Sheet
-    private var filtersSheet: some View {
-        NavigationStack {
-            List {
-                Section("Sort Order") {
-                    ForEach(SortOrder.allCases, id: \.self) { order in
-                        HStack {
-                            Image(systemName: order.iconName)
-                                .foregroundStyle(Color.healthPrimary)
-                                .frame(width: 20)
-                            
-                            Text(order.displayName)
-                            
-                            Spacer()
-                            
-                            if sortOrder == order {
-                                Image(systemName: "checkmark")
-                                    .foregroundStyle(Color.healthPrimary)
-                            }
-                        }
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            sortOrder = order
-                        }
-                    }
-                }
-                
-                Section("Categories") {
-                    HStack {
-                        Text("All Categories")
-                        Spacer()
-                        if selectedCategory == nil {
-                            Image(systemName: "checkmark")
-                                .foregroundStyle(Color.healthPrimary)
-                        }
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        selectedCategory = nil
-                    }
-                    
-                    ForEach(availableCategories, id: \.self) { category in
-                        HStack {
-                            Circle()
-                                .fill(categoryColor(for: category))
-                                .frame(width: 12, height: 12)
-                            
-                            Text(category.isEmpty ? "General" : category)
-                            
-                            Spacer()
-                            
-                            if selectedCategory == category {
-                                Image(systemName: "checkmark")
-                                    .foregroundStyle(Color.healthPrimary)
-                            }
-                        }
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            selectedCategory = category
-                        }
-                    }
-                }
-            }
-            .navigationTitle("Filters")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        showingFilters = false
-                    }
-                }
-            }
-        }
-        .presentationDetents([.medium])
-    }
     
     // MARK: - Computed Properties
-    
-    private var totalTests: Int {
-        bloodReports.reduce(0) { $0 + $1.testResults.count }
-    }
-    
-    private var abnormalTestsCount: Int {
-        bloodReports.reduce(0) { total, report in
-            total + report.testResults.filter(\.isAbnormal).count
-        }
-    }
-    
-    private var availableCategories: [String] {
-        Array(Set(bloodReports.map { $0.category })).sorted()
-    }
     
     private var filteredBiomarkers: [AggregatedBiomarker] {
         var filtered = aggregatedBiomarkers
@@ -560,22 +195,8 @@ struct BloodTestsView: View {
             }
         }
         
-        // Apply category filter
-        if let selectedCategory = selectedCategory {
-            filtered = filtered.filter { $0.category.lowercased() == selectedCategory.lowercased() }
-        }
-        
-        // Apply sort order
-        switch sortOrder {
-        case .date:
-            filtered.sort { $0.latestDate > $1.latestDate }
-        case .name:
-            filtered.sort { $0.testName < $1.testName }
-        case .status:
-            filtered.sort { $0.healthStatus.rawValue < $1.healthStatus.rawValue }
-        case .category:
-            filtered.sort { $0.category < $1.category }
-        }
+        // Sort by date (latest first)
+        filtered.sort { $0.latestDate > $1.latestDate }
         
         return filtered
     }
