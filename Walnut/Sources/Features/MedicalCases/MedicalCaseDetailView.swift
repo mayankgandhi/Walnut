@@ -303,7 +303,9 @@ struct MedicalCaseDetailView: View {
 struct EnhancedDocumentsSection: View {
     let medicalCase: MedicalCase
     @State private var selectedPrescription: Prescription?
+    @State private var editingPrescription: Prescription?
     @State private var showAddDocument = false
+    @State private var showPrescriptionEditor = false
     @State private var isExpanded = true
     
     var body: some View {
@@ -391,6 +393,9 @@ struct EnhancedDocumentsSection: View {
                                     .onTapGesture {
                                         selectedPrescription = prescription
                                     }
+                                    .contextMenu {
+                                        prescriptionContextMenu(for: prescription)
+                                    }
                             }
                         }
                         .transition(.opacity.combined(with: .move(edge: .top)))
@@ -401,7 +406,52 @@ struct EnhancedDocumentsSection: View {
         .navigationDestination(item: $selectedPrescription) { prescription in
             PrescriptionDetailView(prescription: prescription)
         }
+        .sheet(isPresented: $showPrescriptionEditor) {
+            if let prescription = editingPrescription {
+                PrescriptionEditor(prescription: prescription, medicalCase: medicalCase)
+                    .onDisappear {
+                        editingPrescription = nil
+                    }
+            }
+        }
         .prescriptionDocumentPicker(for: medicalCase, isPresented: $showAddDocument)
+    }
+    
+    // MARK: - Context Menu
+    
+    @ViewBuilder
+    private func prescriptionContextMenu(for prescription: Prescription) -> some View {
+        Button {
+            editingPrescription = prescription
+            showPrescriptionEditor = true
+        } label: {
+            Label("Edit Prescription", systemImage: "pencil")
+        }
+        
+        Button {
+            selectedPrescription = prescription
+        } label: {
+            Label("View Details", systemImage: "eye")
+        }
+        
+        Divider()
+        
+        Button {
+            // Add sharing functionality if needed
+            if let document = prescription.document {
+                let activityController = UIActivityViewController(
+                    activityItems: [document.fileURL],
+                    applicationActivities: nil
+                )
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let rootViewController = windowScene.windows.first?.rootViewController {
+                    rootViewController.present(activityController, animated: true)
+                }
+            }
+        } label: {
+            Label("Share Document", systemImage: "square.and.arrow.up")
+        }
+        .disabled(prescription.document == nil)
     }
 }
 

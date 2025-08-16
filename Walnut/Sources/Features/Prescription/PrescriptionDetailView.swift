@@ -508,7 +508,71 @@ struct PrescriptionDetailView: View {
                 return "Overdue"
             }
         } else {
-            return "Completed"
+            return "No follow-up"
+        }
+    }
+    
+    // MARK: - Additional Computed Properties
+    
+    private var hasFollowUpContent: Bool {
+        prescription.followUpDate != nil || !(prescription.followUpTests?.isEmpty ?? true)
+    }
+    
+    private var hasNotesContent: Bool {
+        if let notes = prescription.notes {
+            return !notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+        return false
+    }
+    
+    private var medicationCountColor: Color {
+        if prescription.medications.isEmpty {
+            return .healthError
+        } else if prescription.medications.count >= 3 {
+            return .healthWarning
+        } else {
+            return .healthSuccess
+        }
+    }
+    
+    private var medicationCountText: String {
+        let count = prescription.medications.count
+        if count == 0 {
+            return "No medications"
+        } else if count == 1 {
+            return "1 medication"
+        } else {
+            return "\(count) medications"
+        }
+    }
+    
+    private var prescriptionStatusColor: Color {
+        if let followUpDate = prescription.followUpDate {
+            let daysUntil = Calendar.current.dateComponents([.day], from: Date(), to: followUpDate).day ?? 0
+            if daysUntil < 0 {
+                return .healthError
+            } else if daysUntil <= 7 {
+                return .healthWarning
+            } else {
+                return .healthSuccess
+            }
+        } else {
+            return .healthPrimary
+        }
+    }
+    
+    private var prescriptionStatusText: String {
+        if let followUpDate = prescription.followUpDate {
+            let daysUntil = Calendar.current.dateComponents([.day], from: Date(), to: followUpDate).day ?? 0
+            if daysUntil < 0 {
+                return "Overdue"
+            } else if daysUntil <= 7 {
+                return "Due Soon"
+            } else {
+                return "Active"
+            }
+        } else {
+            return "Complete"
         }
     }
 }
