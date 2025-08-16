@@ -23,12 +23,12 @@ struct PrescriptionDetailView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: Spacing.large) {
+                VStack(spacing: Spacing.xl) {
                     // Enhanced Hero Header with Prescription Focus
                     enhancedHeaderCard
                     
                     // Enhanced Content Sections
-                    VStack(spacing: Spacing.large) {
+                    VStack(spacing: Spacing.xl) {
                         // Medications Section - Most Important
                         if !prescription.medications.isEmpty {
                             PrescriptionMedicationsCard(medications: prescription.medications)
@@ -54,7 +54,7 @@ struct PrescriptionDetailView: View {
                     }
                 }
                 .padding(.horizontal, Spacing.medium)
-                .padding(.top, Spacing.small)
+                .padding(.top, Spacing.xl)
                 .padding(.bottom, Spacing.xl)
             }
             .background(Color(UIColor.systemGroupedBackground))

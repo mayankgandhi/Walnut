@@ -21,7 +21,7 @@ struct BloodReportDetailView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: Spacing.large) {
+                VStack(spacing: Spacing.xl) {
                     // Enhanced Hero Header
                     enhancedHeaderCard
                     
@@ -34,7 +34,7 @@ struct BloodReportDetailView: View {
                     }
                     
                     // Enhanced Document & Metadata Section
-                    VStack(spacing: Spacing.medium) {
+                    VStack(spacing: Spacing.large) {
                         if !bloodReport.notes.isEmpty {
                             enhancedNotesCard
                         }
@@ -47,10 +47,10 @@ struct BloodReportDetailView: View {
                     }
                 }
                 .padding(.horizontal, Spacing.medium)
-                .padding(.top, Spacing.medium)
+                .padding(.top, Spacing.xl)
                 .padding(.bottom, Spacing.xl)
             }
-            .background(Color(UIColor.systemBackground))
+            .background(Color(UIColor.systemGroupedBackground))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

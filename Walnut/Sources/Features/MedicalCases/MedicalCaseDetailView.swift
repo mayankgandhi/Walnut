@@ -18,9 +18,9 @@ struct MedicalCaseDetailView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: Spacing.large) {
+            VStack(spacing: Spacing.xl) {
                 // Enhanced Hero Header with dynamic visuals
-                HealthCard(padding: Spacing.large) {
+                HealthCard(padding: Spacing.xl) {
                     VStack(spacing: Spacing.large) {
                         // Hero Section with enhanced specialty visualization
                         HStack(spacing: Spacing.large) {
@@ -123,9 +123,12 @@ struct MedicalCaseDetailView: View {
                                     .background(medicalCase.type.backgroundColor)
                                     .clipShape(Capsule())
                             }
-                            .padding(Spacing.small)
-                            .background(Color(UIColor.secondarySystemGroupedBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .padding(Spacing.medium)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(UIColor.secondarySystemGroupedBackground))
+                                    .stroke(Color(UIColor.separator).opacity(0.3), lineWidth: 0.5)
+                            )
                             
                             // Date Card
                             VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -145,9 +148,12 @@ struct MedicalCaseDetailView: View {
                                     .font(.caption.weight(.semibold))
                                     .foregroundStyle(.secondary)
                             }
-                            .padding(Spacing.small)
-                            .background(Color(UIColor.secondarySystemGroupedBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .padding(Spacing.medium)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(UIColor.secondarySystemGroupedBackground))
+                                    .stroke(Color(UIColor.separator).opacity(0.3), lineWidth: 0.5)
+                            )
                         }
                         
                         // Enhanced Treatment Plan & Notes Section
@@ -316,11 +322,11 @@ struct EnhancedDocumentsSection: View {
                         isExpanded.toggle()
                     }
                 }) {
-                    HStack(spacing: Spacing.small) {
+                    HStack(spacing: Spacing.medium) {
                         // Icon with dynamic background
                         Circle()
                             .fill(Color.healthPrimary.opacity(0.15))
-                            .frame(width: 44, height: 44)
+                            .frame(width: 48, height: 48)
                             .overlay {
                                 Image(systemName: "doc.text.fill")
                                     .font(.title3.weight(.semibold))
@@ -456,12 +462,12 @@ struct EnhancedPrescriptionListItem: View {
         HStack(spacing: Spacing.medium) {
             // Enhanced icon with background
             Circle()
-                .fill(Color.blue.opacity(0.15))
-                .frame(width: 40, height: 40)
+                .fill(Color.healthPrimary.opacity(0.15))
+                .frame(width: 44, height: 44)
                 .overlay {
                     Image(systemName: "pills.fill")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(.blue)
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundStyle(Color.healthPrimary)
                 }
             
             // Content with enhanced typography
@@ -476,12 +482,12 @@ struct EnhancedPrescriptionListItem: View {
                     if prescription.followUpDate != nil {
                         HStack(spacing: 2) {
                             Circle()
-                                .fill(Color.green)
+                                .fill(Color.healthSuccess)
                                 .frame(width: 4, height: 4)
                             
                             Text("Follow-up")
                                 .font(.caption2.weight(.medium))
-                                .foregroundStyle(.green)
+                                .foregroundStyle(Color.healthSuccess)
                         }
                     }
                 }
@@ -505,14 +511,12 @@ struct EnhancedPrescriptionListItem: View {
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.quaternary)
         }
-        .padding(Spacing.small)
+        .padding(Spacing.medium)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: 12)
                 .fill(Color(UIColor.secondarySystemGroupedBackground))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.blue.opacity(0.1), lineWidth: 0.5)
-                )
+                .stroke(Color.healthPrimary.opacity(0.2), lineWidth: 0.5)
+                .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
         )
         .scaleEffect(isPressed ? 0.98 : 1.0)
         .animation(.easeInOut(duration: 0.1), value: isPressed)
@@ -535,14 +539,14 @@ struct EnhancedBloodReportsSection: View {
                         isExpanded.toggle()
                     }
                 }) {
-                    HStack(spacing: Spacing.small) {
+                    HStack(spacing: Spacing.medium) {
                         Circle()
-                            .fill(Color.red.opacity(0.15))
-                            .frame(width: 44, height: 44)
+                            .fill(Color.healthError.opacity(0.15))
+                            .frame(width: 48, height: 48)
                             .overlay {
                                 Image(systemName: "testtube.2")
                                     .font(.title3.weight(.semibold))
-                                    .foregroundStyle(.red)
+                                    .foregroundStyle(Color.healthError)
                             }
                         
                         VStack(alignment: .leading, spacing: 2) {
@@ -563,7 +567,7 @@ struct EnhancedBloodReportsSection: View {
                                     
                                     Text("\(abnormalCount) abnormal")
                                         .font(.subheadline.weight(.medium))
-                                        .foregroundStyle(.red)
+                                        .foregroundStyle(Color.healthError)
                                 }
                             }
                         }
@@ -573,7 +577,7 @@ struct EnhancedBloodReportsSection: View {
                         Button(action: { showAddBloodReport = true }) {
                             Image(systemName: "plus.circle.fill")
                                 .font(.title2)
-                                .foregroundStyle(.red)
+                                .foregroundStyle(Color.healthError)
                         }
                         
                         Image(systemName: isExpanded ? "chevron.up.circle" : "chevron.down.circle")
@@ -606,7 +610,7 @@ struct EnhancedBloodReportsSection: View {
                                 showAddBloodReport = true
                             }
                             .buttonStyle(.borderedProminent)
-                            .tint(.red)
+                            .tint(Color.healthError)
                         }
                         .padding(.vertical, Spacing.large)
                         .transition(.opacity.combined(with: .move(edge: .top)))
@@ -638,12 +642,12 @@ struct EnhancedBloodReportListItem: View {
     var body: some View {
         HStack(spacing: Spacing.medium) {
             Circle()
-                .fill(Color.red.opacity(0.15))
-                .frame(width: 40, height: 40)
+                .fill(Color.healthError.opacity(0.15))
+                .frame(width: 44, height: 44)
                 .overlay {
                     Image(systemName: "drop.fill")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(.red)
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundStyle(Color.healthError)
                 }
             
             VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -659,12 +663,12 @@ struct EnhancedBloodReportListItem: View {
                     if abnormalCount > 0 {
                         HStack(spacing: 2) {
                             Circle()
-                                .fill(Color.red)
+                                .fill(Color.healthError)
                                 .frame(width: 4, height: 4)
                             
                             Text("\(abnormalCount) abnormal")
                                 .font(.caption2.weight(.medium))
-                                .foregroundStyle(.red)
+                                .foregroundStyle(Color.healthError)
                         }
                     }
                 }
@@ -697,14 +701,12 @@ struct EnhancedBloodReportListItem: View {
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.quaternary)
         }
-        .padding(Spacing.small)
+        .padding(Spacing.medium)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: 12)
                 .fill(Color(UIColor.secondarySystemGroupedBackground))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.red.opacity(0.1), lineWidth: 0.5)
-                )
+                .stroke(Color.healthError.opacity(0.2), lineWidth: 0.5)
+                .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
         )
         .scaleEffect(isPressed ? 0.98 : 1.0)
         .animation(.easeInOut(duration: 0.1), value: isPressed)
