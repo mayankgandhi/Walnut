@@ -12,109 +12,74 @@ import Charts
 /// Enhanced interactive chart for biomarker data visualization
 public struct EnhancedBiomarkerChart: View {
     
+    // MARK: - Data Point Model
+    public struct BiomarkerDataPoint: Identifiable {
+        public let id = UUID()
+        public let date: Date
+        public let value: Double
+        public let isAbnormal: Bool
+        public let bloodReport: String
+        
+        public init(date: Date, value: Double, isAbnormal: Bool, bloodReport: String) {
+            self.date = date
+            self.value = value
+            self.isAbnormal = isAbnormal
+            self.bloodReport = bloodReport
+        }
+    }
+    
     // MARK: - Properties
     
-    let data: [Double]
+    let dataPoints: [BiomarkerDataPoint]
     let color: Color
     let normalRange: String
-    @Binding var selectedDataPoint: Int?
+    @Binding var selectedDataPoint: BiomarkerDataPoint?
     let animateChart: Bool
-    let onPointSelected: ((Int) -> Void)?
+    let onPointSelected: ((BiomarkerDataPoint) -> Void)?
     
-    // MARK: - Initializer
+    // MARK: - Initializers
     
     public init(
-        data: [Double],
+        dataPoints: [BiomarkerDataPoint],
         color: Color = .healthPrimary,
         normalRange: String,
-        selectedDataPoint: Binding<Int?>,
+        selectedDataPoint: Binding<BiomarkerDataPoint?>,
         animateChart: Bool = true,
-        onPointSelected: ((Int) -> Void)? = nil
+        onPointSelected: ((BiomarkerDataPoint) -> Void)? = nil
     ) {
-        self.data = data
+        self.dataPoints = dataPoints.sorted { $0.date < $1.date }
         self.color = color
         self.normalRange = normalRange
         self._selectedDataPoint = selectedDataPoint
         self.animateChart = animateChart
         self.onPointSelected = onPointSelected
     }
-    
+
     // MARK: - Body
     
     public var body: some View {
-        chartView(
-            data: data,
-            color: color,
-            parsedNormalRange: parseNormalRange(normalRange)
-        )
+        chartView
     }
     
     // MARK: - Chart View
     
     @ViewBuilder
-    private func chartView(
-        data: [Double],
-        color: Color = .healthPrimary,
-        parsedNormalRange: (min: Double, max: Double)?
-    ) -> some View {
+    private var chartView: some View {
+        let parsedNormalRange = parseNormalRange(normalRange)
+        
         Chart {
-            // Normal range background area
-            if let range = parsedNormalRange {
-                RectangleMark(
-                    xStart: .value("Start", 0),
-                    xEnd: .value("End", data.count - 1),
-                    yStart: .value("Min", range.min),
-                    yEnd: .value("Max", range.max)
-                )
-                .foregroundStyle(Color.healthSuccess.opacity(0.15))
-            }
-            
-            // Area chart under the line for visual appeal
-            ForEach(Array(data.enumerated()), id: \.offset) { index, value in
-                AreaMark(
-                    x: .value("Index", index),
-                    y: .value("Value", value)
-                )
-                .foregroundStyle(
-                    Color.clear
-                )
-                .opacity(animateChart ? 1.0 : 0.0)
-            }
-            
-            // Connecting line
-            ForEach(Array(data.enumerated()), id: \.offset) { index, value in
-                LineMark(
-                    x: .value("Index", index),
-                    y: .value("Value", value)
-                )
-                .foregroundStyle(color)
-                .lineStyle(StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
-                .opacity(animateChart ? 1.0 : 0.0)
-            }
-            
-            // Data points with enhanced styling
-            ForEach(Array(data.enumerated()), id: \.offset) { index, value in
-                let isInRange = isValueInNormalRange(value, normalRange: parsedNormalRange)
-                let isLatest = index == data.count - 1
-                let isSelected = selectedDataPoint == index
-                
-                PointMark(
-                    x: .value("Index", index),
-                    y: .value("Value", value)
-                )
-                .foregroundStyle(isInRange ? Color.healthSuccess : Color.healthError)
-                .symbolSize(isSelected ? 120 : (isLatest ? 80 : 50))
-                .opacity(animateChart ? 1.0 : 0.0)
-
-            }
+            chartBackgroundRangeMarks(parsedNormalRange)
+            chartAreaMarks
+            chartLineMarks  
+            chartPointMarks(parsedNormalRange)
         }
         .chartXAxis {
-            AxisMarks(values: .automatic(desiredCount: 5)) { _ in
+            AxisMarks(values: .automatic(desiredCount: 5)) { value in
                 AxisGridLine()
                     .foregroundStyle(.tertiary)
                 AxisTick()
                     .foregroundStyle(.secondary)
-                AxisValueLabel()
+                AxisValueLabel(format: .dateTime.month(.abbreviated).day())
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -147,16 +112,84 @@ public struct EnhancedBiomarkerChart: View {
         )
     }
     
+    // MARK: - Chart Component Views
+    
+    @ChartContentBuilder
+    private func chartBackgroundRangeMarks(_ parsedNormalRange: (min: Double, max: Double)?) -> some ChartContent {
+        if let range = parsedNormalRange,
+           let startDate = dataPoints.first?.date,
+           let endDate = dataPoints.last?.date {
+            RectangleMark(
+                xStart: .value("Start", startDate),
+                xEnd: .value("End", endDate),
+                yStart: .value("Min", range.min),
+                yEnd: .value("Max", range.max)
+            )
+            .foregroundStyle(Color.healthSuccess.opacity(0.15))
+        }
+    }
+    
+    @ChartContentBuilder
+    private var chartAreaMarks: some ChartContent {
+        ForEach(dataPoints) { point in
+            AreaMark(
+                x: .value("Date", point.date),
+                y: .value("Value", point.value)
+            )
+            .foregroundStyle(
+                LinearGradient(
+                    colors: [color.opacity(0.3), color.opacity(0.1)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            .opacity(animateChart ? 1.0 : 0.0)
+        }
+    }
+    
+    @ChartContentBuilder
+    private var chartLineMarks: some ChartContent {
+        ForEach(dataPoints) { point in
+            LineMark(
+                x: .value("Date", point.date),
+                y: .value("Value", point.value)
+            )
+            .foregroundStyle(color)
+            .lineStyle(StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+            .opacity(animateChart ? 1.0 : 0.0)
+        }
+    }
+    
+    @ChartContentBuilder
+    private func chartPointMarks(_ parsedNormalRange: (min: Double, max: Double)?) -> some ChartContent {
+        ForEach(dataPoints) { point in
+            let isInRange = isValueInNormalRange(point.value, normalRange: parsedNormalRange)
+            let isLatest = point.id == dataPoints.last?.id
+            let isSelected = selectedDataPoint?.id == point.id
+            
+            PointMark(
+                x: .value("Date", point.date),
+                y: .value("Value", point.value)
+            )
+            .foregroundStyle(isInRange ? Color.healthSuccess : Color.healthError)
+            .symbolSize(isSelected ? 120 : (isLatest ? 80 : 50))
+            .opacity(animateChart ? 1.0 : 0.0)
+        }
+    }
+    
     // MARK: - Helper Methods
     
     private func handleChartTap(at location: CGPoint) {
+        guard !dataPoints.isEmpty else { return }
+        
         let chartWidth = 280.0 // Approximate chart width
-        let pointSpacing = chartWidth / Double(max(1, data.count - 1))
+        let pointSpacing = chartWidth / Double(max(1, dataPoints.count - 1))
         let selectedIndex = Int(round(location.x / pointSpacing))
         
-        if selectedIndex >= 0 && selectedIndex < data.count {
-            selectedDataPoint = selectedIndex
-            onPointSelected?(selectedIndex)
+        if selectedIndex >= 0 && selectedIndex < dataPoints.count {
+            let point = dataPoints[selectedIndex]
+            selectedDataPoint = point
+            onPointSelected?(point)
         }
     }
     
@@ -194,36 +227,3 @@ public struct EnhancedBiomarkerChart: View {
     }
 }
 
-// MARK: - Preview
-
-#Preview {
-    VStack(spacing: Spacing.large) {
-        // Normal values chart
-        EnhancedBiomarkerChart(
-            data: [13.8, 12.5, 14.5, 14.1, 14.3, 13.8, 14.2],
-            color: .healthPrimary,
-            normalRange: "12.0-15.5",
-            selectedDataPoint: .constant(nil),
-            animateChart: true
-        )
-        .frame(height: 280)
-        .padding()
-        .background(Color(UIColor.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        
-        // Abnormal values chart
-        EnhancedBiomarkerChart(
-            data: [180, 195, 220, 188, 192, 210, 185],
-            color: .red,
-            normalRange: "< 200",
-            selectedDataPoint: .constant(2),
-            animateChart: true
-        )
-        .frame(height: 280)
-        .padding()
-        .background(Color(UIColor.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-    .padding()
-    .background(Color(UIColor.systemGroupedBackground))
-}

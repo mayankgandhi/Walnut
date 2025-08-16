@@ -111,22 +111,12 @@ struct BloodTestsView: View {
         }
         .navigationDestination(item: $selectedBiomarker) { biomarker in
             BiomarkerDetailView(
-                data: biomarker.historicalValues,
-                color: biomarker.healthStatusColor,
-                biomarkerInfo: BiomarkerInfo(
-                    name: biomarker.testName,
-                    description: biomarker.description,
-                    normalRange: biomarker.referenceRange,
-                    unit: biomarker.unit
-                ),
-                biomarkerTrends: BiomarkerTrends(
-                    currentValue: biomarker.currentNumericValue,
-                    currentValueText: biomarker.currentValue,
-                    comparisonText: biomarker.trendText,
-                    comparisonPercentage: biomarker.trendPercentage,
-                    trendDirection: biomarker.trendDirection,
-                    normalRange: biomarker.referenceRange
-                )
+                biomarkerName: biomarker.testName,
+                unit: biomarker.unit,
+                normalRange: biomarker.referenceRange,
+                description: biomarker.description,
+                dataPoints: createDataPoints(for: biomarker),
+                color: biomarker.healthStatusColor
             )
         }
         .navigationDestination(item: $selectedBloodReport) { bloodReport in
@@ -199,6 +189,34 @@ struct BloodTestsView: View {
         filtered.sort { $0.latestDate > $1.latestDate }
         
         return filtered
+    }
+    
+    // MARK: - Helper Functions
+    
+    private func createDataPoints(for biomarker: AggregatedBiomarker) -> [BiomarkerDetailView.BiomarkerDataPoint] {
+        // Get all blood test results for this biomarker
+        var dataPoints: [BiomarkerDetailView.BiomarkerDataPoint] = []
+        
+        // Collect all test results for this biomarker from all blood reports
+        for report in bloodReports {
+            for testResult in report.testResults {
+                if testResult.testName.lowercased() == biomarker.testName.lowercased() {
+                    if let value = Double(testResult.value) {
+                        dataPoints.append(
+                            BiomarkerDetailView.BiomarkerDataPoint(
+                                date: report.resultDate,
+                                value: value,
+                                isAbnormal: testResult.isAbnormal,
+                                bloodReport: report.labName
+                            )
+                        )
+                    }
+                }
+            }
+        }
+        
+        // Sort by date
+        return dataPoints.sorted { $0.date < $1.date }
     }
     
     // MARK: - Data Processing

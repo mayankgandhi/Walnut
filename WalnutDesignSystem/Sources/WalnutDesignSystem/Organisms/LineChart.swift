@@ -47,10 +47,12 @@ public struct LineChart: View {
         switch displayMode {
         case .fullScreen:
             BiomarkerDetailView(
-                data: data,
-                color: color,
-                biomarkerInfo: biomarkerInfo,
-                biomarkerTrends: biomarkerTrends
+                biomarkerName: biomarkerInfo.name,
+                unit: biomarkerInfo.unit,
+                normalRange: biomarkerInfo.normalRange,
+                description: biomarkerInfo.description,
+                dataPoints: createDataPointsFromArray(data),
+                color: color
             )
             
         case .listItem:
@@ -62,6 +64,21 @@ public struct LineChart: View {
             )
         }
         
+    }
+    
+    // MARK: - Helper Functions
+    
+    private func createDataPointsFromArray(_ values: [Double]) -> [BiomarkerDetailView.BiomarkerDataPoint] {
+        let today = Date()
+        return values.enumerated().map { index, value in
+            let date = Calendar.current.date(byAdding: .day, value: index - values.count + 1, to: today) ?? today
+            return BiomarkerDetailView.BiomarkerDataPoint(
+                date: date,
+                value: value,
+                isAbnormal: false, // Cannot determine from simple array
+                bloodReport: "Lab Result"
+            )
+        }
     }
 }
 
