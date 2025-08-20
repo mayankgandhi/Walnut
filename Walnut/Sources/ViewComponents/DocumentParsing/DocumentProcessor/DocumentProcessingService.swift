@@ -28,6 +28,7 @@ protocol FilePreparationService {
 protocol DocumentRepositoryProtocol {
     func savePrescription(_ parsedPrescription: ParsedPrescription, to medicalCase: MedicalCase, fileURL: URL) async throws -> PersistentIdentifier
     func saveBloodReport(_ parsedBloodReport: ParsedBloodReport, to medicalCase: MedicalCase, fileURL: URL) async throws -> PersistentIdentifier
+    func saveUnparsedDocument(_ document: Document, to medicalCase: MedicalCase) async throws -> PersistentIdentifier
 }
 
 // MARK: - Main Service
@@ -218,6 +219,20 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
         
         try modelContext.save()
         return bloodReport.persistentModelID
+    }
+    
+    @MainActor
+    func saveUnparsedDocument(
+        _ document: Document,
+        to medicalCase: MedicalCase
+    ) async throws -> PersistentIdentifier {
+        modelContext.insert(document)
+        
+        // Add document to medical case's unparsed documents array
+        medicalCase.unparsedDocuments.append(document)
+        
+        try modelContext.save()
+        return document.persistentModelID
     }
     
 }

@@ -66,6 +66,9 @@ class BloodReport: Identifiable, Sendable {
         fileURL: URL,
         testResults: [BloodTestResult] = []
     ) {
+        // Calculate actual file size
+        let fileSize = (try? FileManager.default.attributesOfItem(atPath: fileURL.path)[.size] as? Int64) ?? 0
+        
         self.init(
             testName: testName,
             labName: labName,
@@ -77,7 +80,7 @@ class BloodReport: Identifiable, Sendable {
                 fileName: "\(testName)_\(labName)_blood_report",
                 fileURL: fileURL,
                 documentType: .labResult,
-                fileSize: 0
+                fileSize: fileSize
             ),
             testResults: testResults
         )

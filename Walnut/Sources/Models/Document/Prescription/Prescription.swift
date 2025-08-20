@@ -69,6 +69,9 @@ class Prescription {
         medicalCase: MedicalCase,
         fileURL: URL
     ) {
+        // Calculate actual file size
+        let fileSize = (try? FileManager.default.attributesOfItem(atPath: fileURL.path)[.size] as? Int64) ?? 0
+        
         self.init(
             id: UUID(),
             followUpDate: parsedPrescription.followUpDate,
@@ -78,10 +81,10 @@ class Prescription {
             facilityName: parsedPrescription.facilityName,
             notes: parsedPrescription.notes,
             document: Document(
-                fileName: "\(parsedPrescription.doctorName)_\(medicalCase.title)_prescription",
+                fileName: "\(parsedPrescription.doctorName ?? "Unknown")_\(medicalCase.title)_prescription",
                 fileURL: fileURL,
                 documentType: .prescription,
-                fileSize: 12
+                fileSize: fileSize
             ),
             medicalCase: medicalCase,
             medications: parsedPrescription.medications.map({ medication in

@@ -18,6 +18,8 @@ struct PrescriptionDetailView: View {
     @State private var showingDocumentViewer = false
     @State private var documentToView: Document?
     @State private var headerScale: CGFloat = 1.0
+    @State private var showingErrorAlert = false
+    @State private var errorMessage = ""
     @Namespace private var heroTransition
     
     var body: some View {
@@ -75,6 +77,11 @@ struct PrescriptionDetailView: View {
                 if let document = documentToView {
                     DocumentViewerSheet(document: document)
                 }
+            }
+            .alert("Document Error", isPresented: $showingErrorAlert) {
+                Button("OK") { }
+            } message: {
+                Text(errorMessage)
             }
         }
     }
@@ -361,8 +368,7 @@ struct PrescriptionDetailView: View {
                 if let document = prescription.document {
                     HStack(spacing: Spacing.medium) {
                         Button(action: {
-                            documentToView = document
-                            showingDocumentViewer = true
+                            viewDocument(document)
                         }) {
                             HStack(spacing: Spacing.xs) {
                                 Image(systemName: "eye.fill")
@@ -378,11 +384,7 @@ struct PrescriptionDetailView: View {
                         }
                         
                         Button(action: {
-                            let activityController = UIActivityViewController(activityItems: [document.fileURL], applicationActivities: nil)
-                            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                               let rootViewController = windowScene.windows.first?.rootViewController {
-                                rootViewController.present(activityController, animated: true)
-                            }
+                            shareDocument(document)
                         }) {
                             HStack(spacing: Spacing.xs) {
                                 Image(systemName: "square.and.arrow.up")
@@ -573,6 +575,64 @@ struct PrescriptionDetailView: View {
             }
         } else {
             return "Complete"
+        }
+    }
+    
+    // MARK: - Document Handling Methods
+    
+    private func viewDocument(_ document: Document) {
+        // Validate file exists
+        guard FileManager.default.fileExists(atPath: document.fileURL.path) else {
+            errorMessage = "Document not found. The file may have been moved or deleted.\n\nPath: \(document.fileURL.path)"
+            showingErrorAlert = true
+            return
+        }
+        
+        // Check if file is readable
+        guard FileManager.default.isReadableFile(atPath: document.fileURL.path) else {
+            errorMessage = "Cannot access document. The file may be corrupted or you may not have permission to read it."
+            showingErrorAlert = true
+            return
+        }
+        
+        // Check file size to ensure it's not empty or corrupted
+        do {
+            let attributes = try FileManager.default.attributesOfItem(atPath: document.fileURL.path)
+            if let fileSize = attributes[.size] as? Int64, fileSize == 0 {
+                errorMessage = "Document appears to be empty or corrupted."
+                showingErrorAlert = true
+                return
+            }
+        } catch {
+            errorMessage = "Cannot read document information: \(error.localizedDescription)"
+            showingErrorAlert = true
+            return
+        }
+        
+        // All validations passed, show document
+        documentToView = document
+        showingDocumentViewer = true
+    }
+    
+    private func shareDocument(_ document: Document) {
+        // Validate file exists before sharing
+        guard FileManager.default.fileExists(atPath: document.fileURL.path) else {
+            errorMessage = "Cannot share document. The file may have been moved or deleted."
+            showingErrorAlert = true
+            return
+        }
+        
+        // Check if file is readable
+        guard FileManager.default.isReadableFile(atPath: document.fileURL.path) else {
+            errorMessage = "Cannot access document for sharing. The file may be corrupted."
+            showingErrorAlert = true
+            return
+        }
+        
+        let activityController = UIActivityViewController(activityItems: [document.fileURL], applicationActivities: nil)
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootViewController = windowScene.windows.first?.rootViewController {
+            rootViewController.present(activityController, animated: true)
         }
     }
 }

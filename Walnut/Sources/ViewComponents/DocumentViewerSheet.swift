@@ -78,24 +78,85 @@ private struct PDFDocumentView: View {
     let url: URL
     @State private var showingError = false
     @State private var errorMessage = ""
+    @State private var isLoading = true
+    @State private var pdfLoadFailed = false
     
     var body: some View {
         Group {
-            if FileManager.default.fileExists(atPath: url.path) {
-                PDFKitView(url: url)
-                    .background(Color(.systemGroupedBackground))
-            } else {
+            if !FileManager.default.fileExists(atPath: url.path) {
                 DocumentErrorView(
                     title: "PDF Not Found",
-                    message: "The PDF document could not be located.",
+                    message: "The PDF document could not be located at:\n\(url.path)",
                     systemImage: "doc.text.fill"
                 )
+            } else if !FileManager.default.isReadableFile(atPath: url.path) {
+                DocumentErrorView(
+                    title: "Cannot Access PDF",
+                    message: "The PDF document exists but cannot be read. It may be corrupted or you may not have permission to access it.",
+                    systemImage: "doc.text.fill"
+                )
+            } else if pdfLoadFailed {
+                DocumentErrorView(
+                    title: "Invalid PDF",
+                    message: "The file appears to be corrupted or is not a valid PDF document.",
+                    systemImage: "doc.text.fill"
+                )
+            } else if isLoading {
+                VStack {
+                    ProgressView("Loading PDF...")
+                        .scaleEffect(1.2)
+                    Text("Please wait while the document loads")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 8)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .onAppear {
+                    validatePDF()
+                }
+            } else {
+                PDFKitView(url: url)
+                    .background(Color(.systemGroupedBackground))
             }
         }
         .alert("Error", isPresented: $showingError) {
             Button("OK") { }
         } message: {
             Text(errorMessage)
+        }
+    }
+    
+    private func validatePDF() {
+        DispatchQueue.global(qos: .userInitiated).async {
+            // Check file size
+            do {
+                let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
+                if let fileSize = attributes[.size] as? Int64, fileSize == 0 {
+                    DispatchQueue.main.async {
+                        self.pdfLoadFailed = true
+                        self.isLoading = false
+                    }
+                    return
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.pdfLoadFailed = true
+                    self.isLoading = false
+                }
+                return
+            }
+            
+            // Try to load PDF document to validate it
+            if let pdfDocument = PDFDocument(url: url), pdfDocument.pageCount > 0 {
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.pdfLoadFailed = true
+                    self.isLoading = false
+                }
+            }
         }
     }
 }
@@ -177,20 +238,49 @@ private struct DocumentErrorView: View {
     let systemImage: String
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 24) {
+            // Error Icon
             Image(systemName: systemImage)
-                .font(.system(size: 60))
-                .foregroundColor(.gray)
+                .font(.system(size: 72, weight: .light))
+                .foregroundColor(.red.opacity(0.7))
             
-            Text(title)
-                .font(.title2)
-                .fontWeight(.semibold)
+            VStack(spacing: 12) {
+                // Error Title
+                Text(title)
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .multilineTextAlignment(.center)
+                
+                // Error Message
+                Text(message)
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                    .padding(.horizontal, 32)
+            }
             
-            Text(message)
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
+            VStack(spacing: 16) {
+                Divider()
+                    .padding(.horizontal, 40)
+                
+                // Helpful suggestions
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("What you can try:")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Label("Check if the document was moved or deleted", systemImage: "questionmark.circle")
+                        Label("Try re-uploading the document", systemImage: "arrow.clockwise")
+                        Label("Contact support if the issue persists", systemImage: "envelope")
+                    }
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                }
                 .padding(.horizontal, 40)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemGroupedBackground))

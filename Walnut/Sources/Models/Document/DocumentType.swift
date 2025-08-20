@@ -13,6 +13,7 @@ enum DocumentType: String, CaseIterable, Codable {
     
     case prescription
     case labResult = "lab result"
+    case unknown
    
     
     // MARK: - Computed Properties
@@ -22,6 +23,8 @@ enum DocumentType: String, CaseIterable, Codable {
             return "Rx"
         case .labResult:
             return "Lab"
+        case .unknown:
+            return "Doc"
         }
     }
     
@@ -31,6 +34,8 @@ enum DocumentType: String, CaseIterable, Codable {
             return "pills.fill"
         case .labResult:
             return "flask.fill"
+        case .unknown:
+            return "doc.fill"
         }
     }
     
@@ -40,6 +45,8 @@ enum DocumentType: String, CaseIterable, Codable {
             return .blue
         case .labResult:
             return .red
+        case .unknown:
+            return .gray
         }
     }
     
@@ -49,7 +56,7 @@ enum DocumentType: String, CaseIterable, Codable {
             return .blue
         case .labResult:
             return .red
-        default:
+        case .unknown:
             return .gray
         }
     }
