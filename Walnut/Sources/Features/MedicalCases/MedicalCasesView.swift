@@ -13,7 +13,7 @@ import WalnutDesignSystem
 struct MedicalCasesView: View {
     
     @Environment(\.modelContext) private var modelContext
-
+    
     @Query private var medicalCases: [MedicalCase]
     
     private let patient: Patient
@@ -108,12 +108,12 @@ struct MedicalCasesView: View {
                         .font(.title2.weight(.semibold))
                         .foregroundStyle(.primary)
                     
-                    Text(medicalCases.isEmpty ? 
+                    Text(medicalCases.isEmpty ?
                          "Create your first medical case to get started" :
-                         "No cases match your search or filter criteria")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
+                            "No cases match your search or filter criteria")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
                 }
                 
                 if medicalCases.isEmpty {
@@ -128,7 +128,7 @@ struct MedicalCasesView: View {
         }
         .padding(.horizontal, Spacing.medium)
     }
-
+    
     // MARK: - Body
     
     var body: some View {
@@ -139,23 +139,28 @@ struct MedicalCasesView: View {
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                 } else {
-                    List {
-                        ForEach(filteredAndSortedCases) { medicalCase in
-                            Button {
-                                selectedCase = medicalCase
-                            } label: {
-                                EnhancedMedicalCaseListItem(medicalCase: medicalCase)
-                            }
-                            .buttonStyle(.plain)
-                            .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.medium, bottom: Spacing.xs, trailing: Spacing.medium))
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(Color.clear)
-                            .contextMenu {
-                                contextMenuItems(for: medicalCase)
+                    ScrollView {
+                        LazyVGrid(
+                            columns: [.init(), .init()],
+                            alignment: .leading,
+                            spacing: Spacing.xs
+                        ) {
+                            ForEach(filteredAndSortedCases) { medicalCase in
+                                Button {
+                                    selectedCase = medicalCase
+                                } label: {
+                                    EnhancedMedicalCaseListItem(medicalCase: medicalCase)
+                                }
+                                .buttonStyle(.plain)
+                                .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.medium, bottom: Spacing.xs, trailing: Spacing.medium))
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Color.clear)
+                                .contextMenu {
+                                    contextMenuItems(for: medicalCase)
+                                }
                             }
                         }
                     }
-                    .listStyle(.plain)
                 }
             }
             .navigationTitle("Medical Cases")

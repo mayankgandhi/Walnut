@@ -75,7 +75,7 @@ extension MedicalCase {
         title: "Hypertension Management",
         notes: "Patient presents with elevated blood pressure readings over the past 3 months. Family history of cardiovascular disease. Currently experiencing mild headaches and occasional dizziness. Diagnosed with Stage 1 hypertension. Started on ACE inhibitor therapy with good response. Regular follow-ups show gradual improvement.",
         treatmentPlan: "1. Start ACE inhibitor (Lisinopril 10mg daily)\n2. Dietary modifications - reduce sodium intake\n3. Regular exercise 30min/day\n4. Weight management\n5. Follow-up in 4 weeks",
-        type: .consultation,
+        type: .healthCheckup,
         specialty: .cardiologist,
         isActive: true,
         createdAt: Date().addingTimeInterval(-2_592_000), // 30 days ago

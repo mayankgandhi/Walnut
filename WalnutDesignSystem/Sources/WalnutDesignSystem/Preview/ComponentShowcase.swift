@@ -54,6 +54,79 @@ public struct ComponentShowcase: View {
                 }
        
                 
+                Section("Icons & File System") {
+                    NavigationLink("Folder Icons") {
+                        ScrollView {
+                            VStack(spacing: Spacing.large) {
+                                Text("Medical Case Folders")
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                
+                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.medium), count: 3), spacing: Spacing.medium) {
+                                    FolderIcon(caseType: .consultation, documentCount: 3)
+                                    FolderIcon(caseType: .surgery, documentCount: 7)
+                                    FolderIcon(caseType: .healthCheckup, documentCount: 0)
+                                    FolderIcon(caseType: .immunisation, documentCount: 1)
+                                    FolderIcon(caseType: .followUp, documentCount: 12)
+                                    FolderIcon(caseType: .treatment, documentCount: 5)
+                                }
+                                
+                                Text("Document Files")
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.top)
+                                
+                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.medium), count: 3), spacing: Spacing.medium) {
+                                    FileIcon(
+                                        documentType: .prescription,
+                                        fileName: "Prescription.pdf",
+                                        previewText: "Take 1 tablet daily with food. Lisinopril 10mg for blood pressure management.",
+                                        size: 70
+                                    )
+                                    
+                                    FileIcon(
+                                        documentType: .labResult,
+                                        fileName: "Blood_Test.pdf",
+                                        previewText: "Hemoglobin: 14.2 g/dL, White Blood Cells: 7,500, Platelets: 250,000",
+                                        size: 70
+                                    )
+                                    
+                                    FileIcon(
+                                        documentType: .invoice,
+                                        fileName: "Invoice.pdf",
+                                        previewText: "Consultation Fee: $150, Lab Work: $75, Total Amount: $225",
+                                        size: 70
+                                    )
+                                    
+                                    FileIcon(
+                                        documentType: .discharge,
+                                        fileName: "Discharge.pdf",
+                                        previewText: "Patient discharged in stable condition. Follow-up in 2 weeks.",
+                                        size: 70
+                                    )
+                                    
+                                    FileIcon(
+                                        documentType: .imaging,
+                                        fileName: "X-Ray.jpg",
+                                        previewText: "Normal chest X-ray. No acute findings. Heart size normal.",
+                                        size: 70
+                                    )
+                                    
+                                    FileIcon(
+                                        documentType: .unknown,
+                                        fileName: "Document.pdf",
+                                        size: 70
+                                    )
+                                }
+                            }
+                            .padding()
+                        }
+                        .navigationTitle("Icons")
+                    }
+                }
+                
                 Section("Menu & Navigation") {
                     NavigationLink("Menu Items") {
                         VStack(spacing: Spacing.small) {
@@ -115,60 +188,7 @@ public struct ComponentShowcase: View {
                 }
                 
                
-//                Section("Design Tokens") {
-//                    NavigationLink("Colors & Typography") {
-//                        VStack(alignment: .leading, spacing: Spacing.large) {
-//                            // Colors
-//                            VStack(alignment: .leading, spacing: Spacing.medium) {
-//                                Text("Healthcare Colors")
-//                                    .font(.headline.weight(.semibold))
-//                                
-//                                HStack(spacing: Spacing.small) {
-//                                    ColorSwatch("Primary", color: .healthPrimary)
-//                                    ColorSwatch("Success", color: .healthSuccess)
-//                                    ColorSwatch("Warning", color: .healthWarning)
-//                                    ColorSwatch("Error", color: .healthError)
-//                                }
-//                            }
-//                            
-//                            // Typography
-//                            VStack(alignment: .leading, spacing: Spacing.medium) {
-//                                Text("Typography")
-//                                    .font(.headline.weight(.semibold))
-//                                
-//                                VStack(alignment: .leading, spacing: Spacing.small) {
-//                                    Text("Large Title")
-//                                        .font(.largeTitle.weight(.bold))
-//                                    Text("Title")
-//                                        .font(.title.weight(.semibold))
-//                                    Text("Headline")
-//                                        .font(.headline.weight(.medium))
-//                                    Text("Body Text")
-//                                        .font(.body)
-//                                    Text("Caption")
-//                                        .font(.caption)
-//                                        .foregroundStyle(.secondary)
-//                                }
-//                            }
-//                            
-//                            // Buttons
-//                            VStack(alignment: .leading, spacing: Spacing.medium) {
-//                                Text("Buttons")
-//                                    .font(.headline.weight(.semibold))
-//                                
-//                                HStack(spacing: Spacing.medium) {
-//                                    DSButton("Primary", style: .primary) {}
-//                                    DSButton("Secondary", style: .secondary) {}
-//                                    DSButton("Danger", style: .danger) {}
-//                                }
-//                            }
-//                            
-//                            Spacer()
-//                        }
-//                        .padding()
-//                        .navigationTitle("Design Tokens")
-//                    }
-//                }
+
             }
             .navigationTitle("WalnutDesignSystem")
         }
