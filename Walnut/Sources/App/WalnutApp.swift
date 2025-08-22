@@ -26,6 +26,7 @@ struct WalnutApp: App {
                     BloodReport.self,
                     BloodTestResult.self
                 ])
+                .preferredColorScheme(.light) // Force light mode
         }
     }
 }

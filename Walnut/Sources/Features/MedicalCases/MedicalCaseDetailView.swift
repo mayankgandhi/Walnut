@@ -156,75 +156,8 @@ struct MedicalCaseDetailView: View {
                             )
                         }
                         
-                        // Enhanced Treatment Plan & Notes Section
                         VStack(spacing: Spacing.medium) {
-                            // Treatment Plan with enhanced card design
-                            if !medicalCase.treatmentPlan.isEmpty {
-                                VStack(alignment: .leading, spacing: Spacing.small) {
-                                    Button(action: { 
-                                        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) { 
-                                            isExpanded.toggle() 
-                                        } 
-                                    }) {
-                                        HStack {
-                                            HStack(spacing: Spacing.xs) {
-                                                Circle()
-                                                    .fill(Color.healthPrimary.opacity(0.2))
-                                                    .frame(width: 32, height: 32)
-                                                    .overlay {
-                                                        Image(systemName: "list.clipboard.fill")
-                                                            .font(.caption.weight(.medium))
-                                                            .foregroundStyle(Color.healthPrimary)
-                                                    }
-                                                
-                                                VStack(alignment: .leading, spacing: 2) {
-                                                    Text("Treatment Plan")
-                                                        .font(.subheadline.weight(.semibold))
-                                                        .foregroundStyle(.primary)
-                                                    
-                                                    Text(isExpanded ? "Tap to collapse" : "Tap to view details")
-                                                        .font(.caption2)
-                                                        .foregroundStyle(.secondary)
-                                                }
-                                            }
-                                            
-                                            Spacer()
-                                            
-                                            Image(systemName: isExpanded ? "chevron.up.circle.fill" : "chevron.down.circle.fill")
-                                                .font(.title3)
-                                                .foregroundStyle(.secondary)
-                                                .rotationEffect(.degrees(isExpanded ? 180 : 0))
-                                        }
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
-                                    
-                                    if isExpanded {
-                                        Text(medicalCase.treatmentPlan)
-                                            .font(.subheadline)
-                                            .foregroundStyle(.primary)
-                                            .padding(.top, Spacing.small)
-                                            .fixedSize(horizontal: false, vertical: true)
-                                            .transition(.asymmetric(
-                                                insertion: .opacity.combined(with: .move(edge: .top)),
-                                                removal: .opacity.combined(with: .move(edge: .bottom))
-                                            ))
-                                    } else {
-                                        Text(medicalCase.treatmentPlan)
-                                            .font(.subheadline)
-                                            .foregroundStyle(.secondary)
-                                            .lineLimit(2)
-                                            .padding(.top, Spacing.xs)
-                                    }
-                                }
-                                .padding(Spacing.medium)
-                                .background(Color.healthPrimary.opacity(0.05))
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color.healthPrimary.opacity(0.1), lineWidth: 1)
-                                )
-                            }
-                            
+                        
                             // Enhanced Notes Section
                             if !medicalCase.notes.isEmpty {
                                 HStack(spacing: Spacing.small) {
@@ -285,17 +218,8 @@ struct MedicalCaseDetailView: View {
                     }
                 }
                 
-                // Enhanced Content Sections with modern layouts
-                VStack(spacing: Spacing.large) {
-                    EnhancedPrescriptionSection(medicalCase: medicalCase)
-                    
-                    EnhancedBloodReportsSection(medicalCase: medicalCase)
-                    
-                    // Show unparsed documents only if there are any
-                    if !medicalCase.unparsedDocuments.isEmpty {
-                        EnhancedUnparsedDocumentsSection(medicalCase: medicalCase)
-                    }
-                }
+                // Unified Documents Section with modern layout
+                UnifiedDocumentsSection(medicalCase: medicalCase)
             }
             .padding(.vertical, Spacing.medium)
         }

@@ -46,7 +46,6 @@ struct MedicalCasesView: View {
             cases = cases.filter { medicalCase in
                 medicalCase.title.localizedCaseInsensitiveContains(searchText) ||
                 medicalCase.notes.localizedCaseInsensitiveContains(searchText) ||
-                medicalCase.treatmentPlan.localizedCaseInsensitiveContains(searchText) ||
                 medicalCase.patient.fullName.localizedCaseInsensitiveContains(searchText)
             }
         }

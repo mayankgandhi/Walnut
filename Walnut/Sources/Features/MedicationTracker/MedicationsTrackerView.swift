@@ -20,7 +20,7 @@ struct MedicationsTrackerView: View {
     }
     
     var body: some View {
-        List {
+        ScrollView {
             UpcomingMedicationsSection(patient: patient)
         }
         .toolbar {

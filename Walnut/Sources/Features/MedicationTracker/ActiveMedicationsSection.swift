@@ -16,7 +16,6 @@ struct ActiveMedicationsSection: View {
     @Environment(\.modelContext) private var modelContext
     @State private var activeMedications: [Medication] = []
     @State private var medicationTracker = MedicationTracker()
-    @State private var showingMedicationEditor = false
     
     private var groupedMedications: [MedicationTracker.TimePeriod: [MedicationTracker.MedicationScheduleInfo]] {
         medicationTracker.groupMedicationsByTimePeriod(activeMedications)
@@ -44,10 +43,6 @@ struct ActiveMedicationsSection: View {
         }
         .onAppear {
             loadActiveMedications()
-        }
-        .sheet(isPresented: $showingMedicationEditor) {
-            // You can implement medication editor here if needed
-            Text("Medication Editor")
         }
     }
     

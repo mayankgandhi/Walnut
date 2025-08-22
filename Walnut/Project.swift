@@ -24,6 +24,7 @@ let infoPlist: InfoPlist = .extendingDefault(with: [
     "UIStatusBarStyle": .string("UIStatusBarStyleDefault"),
     "UIViewControllerBasedStatusBarAppearance": .boolean(true),
     "UIRequiresFullScreen": .boolean(false),
+    "UIUserInterfaceStyle": .string("Light"),
     "OneSignal_suppress_launch_urls": .boolean(true),
     "BGTaskSchedulerPermittedIdentifiers": .array([
         .string("$(PRODUCT_BUNDLE_IDENTIFIER)"),

@@ -25,8 +25,7 @@ public struct FileIcon: View {
         documentType: DocumentType,
         iconColor: Color? = nil,
         backgroundColor: Color? = nil,
-        size: FileIconSize = .medium,
-        showBadge: Bool = false
+        size: FileIconSize = .medium
     ) {
         self.filename = filename
         self.subtitle = subtitle
@@ -177,33 +176,6 @@ public enum FileIconSize {
                     subtitle: "Small size example",
                     documentType: .insurance,
                     size: .small
-                )
-            }
-            
-            // Interactive states
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Interactive States")
-                    .font(.headline)
-                    .padding(.horizontal)
-                
-                FileIcon(
-                    filename: "Vaccination Record",
-                    subtitle: "With badge indicator",
-                    documentType: .vaccination
-                )
-                
-                FileIcon(
-                    filename: "Selected Document",
-                    subtitle: "Selected state example",
-                    documentType: .discharge
-                )
-                
-                FileIcon(
-                    filename: "Referral Letter",
-                    subtitle: "Custom colors",
-                    documentType: .referral,
-                    iconColor: .purple,
-                    backgroundColor: .purple
                 )
             }
         }

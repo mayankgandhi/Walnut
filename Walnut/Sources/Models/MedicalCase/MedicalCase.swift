@@ -17,7 +17,6 @@ class MedicalCase: Identifiable, Sendable {
     
     var title: String
     var notes: String
-    var treatmentPlan: String
     var type: MedicalCaseType // immunisation, health-checkup, surgery, follow-up, treatment, diagnosis
     var specialty: MedicalSpecialty // Cardiologist, Endocrinologist, etc.
     var isActive: Bool
@@ -39,7 +38,6 @@ class MedicalCase: Identifiable, Sendable {
     init(id: UUID,
          title: String,
          notes: String,
-         treatmentPlan: String,
          type: MedicalCaseType,
          specialty: MedicalSpecialty,
          isActive: Bool,
@@ -52,7 +50,6 @@ class MedicalCase: Identifiable, Sendable {
         self.id = id
         self.title = title
         self.notes = notes
-        self.treatmentPlan = treatmentPlan
         self.type = type
         self.specialty = specialty
         self.isActive = isActive
@@ -74,7 +71,6 @@ extension MedicalCase {
         id: UUID(),
         title: "Hypertension Management",
         notes: "Patient presents with elevated blood pressure readings over the past 3 months. Family history of cardiovascular disease. Currently experiencing mild headaches and occasional dizziness. Diagnosed with Stage 1 hypertension. Started on ACE inhibitor therapy with good response. Regular follow-ups show gradual improvement.",
-        treatmentPlan: "1. Start ACE inhibitor (Lisinopril 10mg daily)\n2. Dietary modifications - reduce sodium intake\n3. Regular exercise 30min/day\n4. Weight management\n5. Follow-up in 4 weeks",
         type: .healthCheckup,
         specialty: .cardiologist,
         isActive: true,

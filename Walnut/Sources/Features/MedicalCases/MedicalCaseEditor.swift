@@ -26,7 +26,6 @@ struct MedicalCaseEditor: View {
     
     @State private var title = ""
     @State private var notes = ""
-    @State private var treatmentPlan = ""
     @State private var selectedType: MedicalCaseType = .consultation
     @State private var selectedSpecialty: MedicalSpecialty = .generalPractitioner
     @State private var isActive = true
@@ -40,7 +39,6 @@ struct MedicalCaseEditor: View {
     private enum FormField: Hashable, CaseIterable {
         case title
         case notes
-        case treatmentPlan
         
         private enum NextFieldType {
             case textField(FormField)
@@ -52,9 +50,7 @@ struct MedicalCaseEditor: View {
             case .title:
                 return .nonTextFieldOrEnd  // Next: Type picker
             case .notes:
-                return .textField(.treatmentPlan)
-            case .treatmentPlan:
-                return .nonTextFieldOrEnd  // Next: Toggle (last field)
+                return .nonTextFieldOrEnd
             }
         }
         
@@ -82,14 +78,13 @@ struct MedicalCaseEditor: View {
     }
     
     private var isFormValid: Bool {
-        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !treatmentPlan.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
     // Focus navigation helpers
     private func focusNextField(after currentField: FormField) {
         if currentField.shouldDismissKeyboard {
-            if currentField == .treatmentPlan && isFormValid {
+            if isFormValid {
                 submitForm()
             } else {
                 focusedField = nil
@@ -220,21 +215,7 @@ struct MedicalCaseEditor: View {
                                 }
                             )
                             .focused($focusedField, equals: .notes)
-                            
-                            TextFieldItem(
-                                icon: "cross.case.fill",
-                                title: "Treatment Plan",
-                                text: $treatmentPlan,
-                                placeholder: "Treatment plan and recommendations",
-                                helperText: "Detailed treatment steps and recommendations",
-                                iconColor: .healthError,
-                                isRequired: true,
-                                submitLabel: FormField.treatmentPlan.appropriateSubmitLabel,
-                                onSubmit: {
-                                    focusNextField(after: .treatmentPlan)
-                                }
-                            )
-                            .focused($focusedField, equals: .treatmentPlan)
+                          
                         }
                     }
                     
@@ -291,7 +272,6 @@ struct MedicalCaseEditor: View {
     private func loadMedicalCaseData(_ medicalCase: MedicalCase) {
         title = medicalCase.title
         notes = medicalCase.notes
-        treatmentPlan = medicalCase.treatmentPlan
         selectedType = medicalCase.type
         selectedSpecialty = medicalCase.specialty
         isActive = medicalCase.isActive
@@ -304,7 +284,6 @@ struct MedicalCaseEditor: View {
             // Edit existing medical case
             medicalCase.title = title.trimmingCharacters(in: .whitespacesAndNewlines)
             medicalCase.notes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
-            medicalCase.treatmentPlan = treatmentPlan.trimmingCharacters(in: .whitespacesAndNewlines)
             medicalCase.type = selectedType
             medicalCase.specialty = selectedSpecialty
             medicalCase.isActive = isActive
@@ -315,7 +294,6 @@ struct MedicalCaseEditor: View {
                 id: UUID(),
                 title: title.trimmingCharacters(in: .whitespacesAndNewlines),
                 notes: notes.trimmingCharacters(in: .whitespacesAndNewlines),
-                treatmentPlan: treatmentPlan.trimmingCharacters(in: .whitespacesAndNewlines),
                 type: selectedType,
                 specialty: selectedSpecialty,
                 isActive: isActive,
