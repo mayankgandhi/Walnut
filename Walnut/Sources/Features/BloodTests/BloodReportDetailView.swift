@@ -635,34 +635,12 @@ struct BloodReportDetailView: View {
     private func documentCard(document: Document) -> some View {
         HealthCard {
             VStack(alignment: .leading, spacing: Spacing.medium) {
-                HStack(spacing: Spacing.small) {
-                    Image(systemName: document.documentType.typeIcon)
-                        .font(.headline)
-                        .foregroundStyle(document.documentType.backgroundColor)
-                    
-                    Text("Lab Report Document")
-                        .font(.headline.weight(.semibold))
-                    
-                    Spacer()
-                }
+               
                 
                 // Document preview section
                 HStack(spacing: Spacing.medium) {
                     // Document icon
-                    VStack(spacing: Spacing.xs) {
-                        Circle()
-                            .fill(document.documentType.backgroundColor.opacity(0.15))
-                            .frame(width: Size.avatarLarge, height: Size.avatarLarge)
-                            .overlay {
-                                Image(systemName: document.documentType.typeIcon)
-                                    .font(.system(size: 24, weight: .semibold))
-                                    .foregroundStyle(document.documentType.backgroundColor)
-                            }
-                        
-                        Text(document.documentType.displayName)
-                            .font(.caption2.weight(.medium))
-                            .foregroundStyle(.secondary)
-                    }
+                   
                     
                     VStack(alignment: .leading, spacing: Spacing.xs) {
                         Text(document.fileName)
@@ -701,7 +679,6 @@ struct BloodReportDetailView: View {
                         .foregroundStyle(.white)
                         .padding(.horizontal, Spacing.medium)
                         .padding(.vertical, Spacing.small)
-                        .background(document.documentType.backgroundColor)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                     
@@ -714,10 +691,8 @@ struct BloodReportDetailView: View {
                             Text("Share")
                                 .font(.subheadline.weight(.medium))
                         }
-                        .foregroundStyle(document.documentType.backgroundColor)
                         .padding(.horizontal, Spacing.medium)
                         .padding(.vertical, Spacing.small)
-                        .background(document.documentType.backgroundColor.opacity(0.1))
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                     
@@ -954,7 +929,7 @@ struct BloodReportDetailView: View {
         fileName: "Complete_Blood_Count_Quest_Diagnostics.pdf",
         fileURL: URL(string: "https://example.com/report.pdf")!,
         documentType: .labResult,
-        fileSize: 245760
+        fileSize: 245760,
     )
     
     let sampleBloodReport = BloodReport(

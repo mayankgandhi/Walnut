@@ -345,9 +345,13 @@ struct DocumentProcessingUseCase {
                 fileURL: localFileURL
             )
             
-        case .unknown:
+        default:
             // This case shouldn't be reached in normal parsing flow, but added for exhaustiveness
-            throw DocumentProcessingError.parsingFailed(NSError(domain: "DocumentProcessing", code: -1, userInfo: [NSLocalizedDescriptionKey: "Cannot parse unknown document type"]))
+            throw DocumentProcessingError.parsingFailed(
+                NSError(domain: "DocumentProcessing",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "Cannot parse unknown document type"])
+            )
         }
     }
     
@@ -368,7 +372,7 @@ struct DocumentProcessingUseCase {
         let document = Document(
             fileName: tempFileURL.lastPathComponent,
             fileURL: localFileURL,
-            documentType: .unknown,
+            documentType: .labResult,
             fileSize: fileSize
         )
         

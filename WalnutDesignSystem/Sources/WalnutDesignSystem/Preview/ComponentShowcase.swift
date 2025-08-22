@@ -54,78 +54,78 @@ public struct ComponentShowcase: View {
                 }
        
                 
-                Section("Icons & File System") {
-                    NavigationLink("Folder Icons") {
-                        ScrollView {
-                            VStack(spacing: Spacing.large) {
-                                Text("Medical Case Folders")
-                                    .font(.title2)
-                                    .fontWeight(.bold)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                
-                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.medium), count: 3), spacing: Spacing.medium) {
-                                    FolderIcon(caseType: .consultation, documentCount: 3)
-                                    FolderIcon(caseType: .surgery, documentCount: 7)
-                                    FolderIcon(caseType: .healthCheckup, documentCount: 0)
-                                    FolderIcon(caseType: .immunisation, documentCount: 1)
-                                    FolderIcon(caseType: .followUp, documentCount: 12)
-                                    FolderIcon(caseType: .treatment, documentCount: 5)
-                                }
-                                
-                                Text("Document Files")
-                                    .font(.title2)
-                                    .fontWeight(.bold)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.top)
-                                
-                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.medium), count: 3), spacing: Spacing.medium) {
-                                    FileIcon(
-                                        documentType: .prescription,
-                                        fileName: "Prescription.pdf",
-                                        previewText: "Take 1 tablet daily with food. Lisinopril 10mg for blood pressure management.",
-                                        size: 70
-                                    )
-                                    
-                                    FileIcon(
-                                        documentType: .labResult,
-                                        fileName: "Blood_Test.pdf",
-                                        previewText: "Hemoglobin: 14.2 g/dL, White Blood Cells: 7,500, Platelets: 250,000",
-                                        size: 70
-                                    )
-                                    
-                                    FileIcon(
-                                        documentType: .invoice,
-                                        fileName: "Invoice.pdf",
-                                        previewText: "Consultation Fee: $150, Lab Work: $75, Total Amount: $225",
-                                        size: 70
-                                    )
-                                    
-                                    FileIcon(
-                                        documentType: .discharge,
-                                        fileName: "Discharge.pdf",
-                                        previewText: "Patient discharged in stable condition. Follow-up in 2 weeks.",
-                                        size: 70
-                                    )
-                                    
-                                    FileIcon(
-                                        documentType: .imaging,
-                                        fileName: "X-Ray.jpg",
-                                        previewText: "Normal chest X-ray. No acute findings. Heart size normal.",
-                                        size: 70
-                                    )
-                                    
-                                    FileIcon(
-                                        documentType: .unknown,
-                                        fileName: "Document.pdf",
-                                        size: 70
-                                    )
-                                }
-                            }
-                            .padding()
-                        }
-                        .navigationTitle("Icons")
-                    }
-                }
+//                Section("Icons & File System") {
+//                    NavigationLink("Folder Icons") {
+//                        ScrollView {
+//                            VStack(spacing: Spacing.large) {
+//                                Text("Medical Case Folders")
+//                                    .font(.title2)
+//                                    .fontWeight(.bold)
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                                
+//                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.medium), count: 3), spacing: Spacing.medium) {
+//                                    FolderIcon(caseType: .consultation, documentCount: 3)
+//                                    FolderIcon(caseType: .surgery, documentCount: 7)
+//                                    FolderIcon(caseType: .healthCheckup, documentCount: 0)
+//                                    FolderIcon(caseType: .immunisation, documentCount: 1)
+//                                    FolderIcon(caseType: .followUp, documentCount: 12)
+//                                    FolderIcon(caseType: .treatment, documentCount: 5)
+//                                }
+//                                
+//                                Text("Document Files")
+//                                    .font(.title2)
+//                                    .fontWeight(.bold)
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                                    .padding(.top)
+//                                
+//                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.medium), count: 3), spacing: Spacing.medium) {
+//                                    FileIcon(
+//                                        documentType: .prescription,
+//                                        fileName: "Prescription.pdf",
+//                                        previewText: "Take 1 tablet daily with food. Lisinopril 10mg for blood pressure management.",
+//                                        size: 70
+//                                    )
+//                                    
+//                                    FileIcon(
+//                                        documentType: .labResult,
+//                                        fileName: "Blood_Test.pdf",
+//                                        previewText: "Hemoglobin: 14.2 g/dL, White Blood Cells: 7,500, Platelets: 250,000",
+//                                        size: 70
+//                                    )
+//                                    
+//                                    FileIcon(
+//                                        documentType: .invoice,
+//                                        fileName: "Invoice.pdf",
+//                                        previewText: "Consultation Fee: $150, Lab Work: $75, Total Amount: $225",
+//                                        size: 70
+//                                    )
+//                                    
+//                                    FileIcon(
+//                                        documentType: .discharge,
+//                                        fileName: "Discharge.pdf",
+//                                        previewText: "Patient discharged in stable condition. Follow-up in 2 weeks.",
+//                                        size: 70
+//                                    )
+//                                    
+//                                    FileIcon(
+//                                        documentType: .imaging,
+//                                        fileName: "X-Ray.jpg",
+//                                        previewText: "Normal chest X-ray. No acute findings. Heart size normal.",
+//                                        size: 70
+//                                    )
+//                                    
+//                                    FileIcon(
+//                                        documentType: .unknown,
+//                                        fileName: "Document.pdf",
+//                                        size: 70
+//                                    )
+//                                }
+//                            }
+//                            .padding()
+//                        }
+//                        .navigationTitle("Icons")
+//                    }
+//                }
                 
                 Section("Menu & Navigation") {
                     NavigationLink("Menu Items") {

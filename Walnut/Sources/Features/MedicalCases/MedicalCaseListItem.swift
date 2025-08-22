@@ -17,6 +17,7 @@ struct EnhancedMedicalCaseListItem: View {
             VStack(alignment: .center, spacing: Spacing.small) {
                 // Medical Case Icon
                 Image(systemName: "folder.fill")
+                    .renderingMode(.template)
                     .resizable()
                     .scaledToFit()
                     .foregroundStyle(medicalCase.type.backgroundColor)

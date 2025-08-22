@@ -550,7 +550,7 @@ struct PrescriptionEditor: View {
                     fileName: "Manual_Prescription_\(Date().formatted(.iso8601.year().month().day()))",
                     fileURL: URL(fileURLWithPath: ""),
                     documentType: .prescription,
-                    fileSize: 0
+                    fileSize: 0,
                 ),
                 medicalCase: medicalCase,
                 medications: medications
