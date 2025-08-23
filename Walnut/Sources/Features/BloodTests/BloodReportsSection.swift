@@ -80,7 +80,7 @@ struct BloodReportsSectionHeader: View {
                 Image(systemName: "doc.badge.plus")
             }
         }
-        .bloodReportDocumentPicker(for: medicalCase, isPresented: $showAddBloodReport)
+        .documentPicker(for: medicalCase, allowedTypes: [.labResult], isPresented: $showAddBloodReport)
     }
 }
 

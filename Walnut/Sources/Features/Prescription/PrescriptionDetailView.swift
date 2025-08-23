@@ -48,7 +48,11 @@ struct PrescriptionDetailView: View {
                         
                         // Document Section
                         if prescription.document != nil {
-                            enhancedDocumentCard
+                            DocumentCard(
+                                document: prescription.document,
+                                title: "Prescription Document",
+                                viewButtonText: "View Document"
+                            )
                         }
                         
                         // Metadata Section
@@ -330,77 +334,6 @@ struct PrescriptionDetailView: View {
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(Color.healthPrimary.opacity(0.1), lineWidth: 1)
                         )
-                }
-            }
-        }
-    }
-    
-    // MARK: - Enhanced Document Card
-    private var enhancedDocumentCard: some View {
-        HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-                HStack(spacing: Spacing.small) {
-                    Circle()
-                        .fill(Color.blue.opacity(0.2))
-                        .frame(width: 36, height: 36)
-                        .overlay {
-                            Image(systemName: "doc.text.fill")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundStyle(.blue)
-                        }
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Prescription Document")
-                            .font(.headline.weight(.bold))
-                            .foregroundStyle(.primary)
-                        
-                        if let document = prescription.document {
-                            Text(document.fileName)
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                        }
-                    }
-                    
-                    Spacer()
-                }
-                
-                if let document = prescription.document {
-                    HStack(spacing: Spacing.medium) {
-                        Button(action: {
-                            viewDocument(document)
-                        }) {
-                            HStack(spacing: Spacing.xs) {
-                                Image(systemName: "eye.fill")
-                                    .font(.caption)
-                                Text("View Document")
-                                    .font(.caption.weight(.medium))
-                            }
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, Spacing.medium)
-                            .padding(.vertical, Spacing.small)
-                            .background(.blue)
-                            .clipShape(Capsule())
-                        }
-                        
-                        Button(action: {
-                            shareDocument(document)
-                        }) {
-                            HStack(spacing: Spacing.xs) {
-                                Image(systemName: "square.and.arrow.up")
-                                    .font(.caption)
-                                Text("Share")
-                                    .font(.caption.weight(.medium))
-                            }
-                            .foregroundStyle(.blue)
-                            .padding(.horizontal, Spacing.medium)
-                            .padding(.vertical, Spacing.small)
-                            .background(Color.blue.opacity(0.1))
-                            .clipShape(Capsule())
-                        }
-                        
-                        Spacer()
-                    }
                 }
             }
         }

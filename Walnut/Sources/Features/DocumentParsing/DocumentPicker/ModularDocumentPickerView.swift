@@ -8,78 +8,93 @@
 
 import SwiftUI
 import SwiftData
+import AIKit
 
 struct ModularDocumentPickerView: View {
     
     // MARK: - Configuration
     
     let medicalCase: MedicalCase
-    let store: DocumentPickerStore
+    let allowedDocumentTypes: [DocumentType]
     
     // MARK: - Environment
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @Environment(DocumentProcessingService.self) private var processingService
     
     // MARK: - State
     
+    @State private var store: DocumentPickerStore
+    @State private var processingService: DocumentProcessingService?
     @State private var showingProcessingStatus = false
     
     // MARK: - Initialization
     
-    init(medicalCase: MedicalCase, store: DocumentPickerStore) {
+    init(medicalCase: MedicalCase, allowedDocumentTypes: [DocumentType] = DocumentType.allCases) {
         self.medicalCase = medicalCase
-        self.store = store
+        self.allowedDocumentTypes = allowedDocumentTypes
+        
+        self._store = State(initialValue: DocumentPickerStore(
+            documentTypes: allowedDocumentTypes,
+            defaultDocumentType: allowedDocumentTypes.first ?? .prescription
+        ))
     }
     
     // MARK: - Body
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 24) {
-                // Document Type Selection
-                DocumentTypeSelector()
-                    .environment(store)
-                    .padding(.horizontal)
-                
-                // Document Source Picker
-                DocumentSourcePicker()
-                    .environment(store)
-                    .padding(.horizontal)
-                
-                // Clear selection button
-                if store.hasSelection {
-                    Button("Clear Selection") {
-                        store.clearSelection()
+            Group {
+                if let processingService = processingService {
+                    VStack(spacing: 24) {
+                        // Document Type Selection
+                        DocumentTypeSelector()
+                            .environment(store)
+                            .padding(.horizontal)
+                        
+                        // Document Source Picker
+                        DocumentSourcePicker()
+                            .environment(store)
+                            .padding(.horizontal)
+                        
+                        // Clear selection button
+                        if store.hasSelection {
+                            Button("Clear Selection") {
+                                store.clearSelection()
+                            }
+                            .font(.subheadline)
+                            .foregroundColor(.red)
+                            .padding(.horizontal)
+                        }
+                        
+                        // Error message
+                        if let errorMessage = store.errorMessage {
+                            Text(errorMessage)
+                                .foregroundColor(.red)
+                                .padding(.horizontal)
+                        }
+                        
+                        // Upload button
+                        if store.canUpload && !processingService.isProcessing {
+                            Button("Upload \(store.selectedDocument != nil ? "Document" : "Image")") {
+                                processDocument()
+                            }
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                            .background(Color.blue)
+                            .cornerRadius(12)
+                            .padding(.horizontal)
+                        }
+                        
+                        Spacer()
                     }
-                    .font(.subheadline)
-                    .foregroundColor(.red)
-                    .padding(.horizontal)
+                    .environment(processingService)
+                } else {
+                    ProgressView("Initializing...")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                
-                // Error message
-                if let errorMessage = store.errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .padding(.horizontal)
-                }
-                
-                // Upload button
-                if store.canUpload && !processingService.isProcessing {
-                    Button("Upload \(store.selectedDocument != nil ? "Document" : "Image")") {
-                        processDocument()
-                    }
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(Color.blue)
-                    .cornerRadius(12)
-                    .padding(.horizontal)
-                }
-                
-                Spacer()
             }
             .navigationTitle("Add Document")
             .navigationBarTitleDisplayMode(.inline)
@@ -91,8 +106,17 @@ struct ModularDocumentPickerView: View {
                 }
             }
             .sheet(isPresented: $showingProcessingStatus) {
-                DocumentProcessingStatusView()
-                    .environment(processingService)
+                if let processingService = processingService {
+                    DocumentProcessingStatusView()
+                        .environment(processingService)
+                }
+            }
+        }
+        .task {
+            if processingService == nil {
+                processingService = DocumentProcessingService.createWithAIKit(
+                    modelContext: modelContext
+                )
             }
         }
     }
@@ -100,6 +124,8 @@ struct ModularDocumentPickerView: View {
     // MARK: - Actions
     
     private func processDocument() {
+        guard let processingService = processingService else { return }
+        
         showingProcessingStatus = true
         
         processingService.processDocument(from: store, for: medicalCase) { result in
@@ -195,32 +221,19 @@ private struct DocumentProcessingStatusView: View {
     }
 }
 
-// MARK: - Factory Methods & Initializers
+// MARK: - Convenience Extensions
 
-extension ModularDocumentPickerView {
+extension View {
     
-    // For prescription documents
-    static func forPrescriptions(medicalCase: MedicalCase) -> ModularDocumentPickerView {
-        ModularDocumentPickerView(
-            medicalCase: medicalCase,
-            store: DocumentPickerStore.forPrescriptions()
-        )
-    }
-    
-    // For blood reports
-    static func forBloodReports(medicalCase: MedicalCase) -> ModularDocumentPickerView {
-        ModularDocumentPickerView(
-            medicalCase: medicalCase,
-            store: DocumentPickerStore.forBloodReports()
-        )
-    }
-    
-    // For all document types
-    static func forAllDocuments(medicalCase: MedicalCase) -> ModularDocumentPickerView {
-        ModularDocumentPickerView(
-            medicalCase: medicalCase,
-            store: DocumentPickerStore.forAllDocuments()
-        )
+    /// Present a unified document picker sheet
+    func documentPicker(
+        for medicalCase: MedicalCase,
+        allowedTypes: [DocumentType] = DocumentType.allCases,
+        isPresented: Binding<Bool>
+    ) -> some View {
+        self.sheet(isPresented: isPresented) {
+            ModularDocumentPickerView(medicalCase: medicalCase, allowedDocumentTypes: allowedTypes)
+        }
     }
 }
 

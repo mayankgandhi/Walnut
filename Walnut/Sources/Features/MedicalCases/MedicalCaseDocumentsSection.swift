@@ -83,7 +83,7 @@ struct DocumentsSectionHeader: View {
             }
             
         }
-        .prescriptionDocumentPicker(for: medicalCase, isPresented: $showAddDocument)
+        .documentPicker(for: medicalCase, allowedTypes: [.prescription], isPresented: $showAddDocument)
     }
 }
 

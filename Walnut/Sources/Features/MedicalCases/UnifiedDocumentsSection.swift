@@ -146,9 +146,7 @@ struct UnifiedDocumentsSection: View {
                 .navigationDestination(item: $selectedDocument) { document in
                     DocumentDetailView(document: document)
                 }
-                .sheet(isPresented: $showAddDocument) {
-                    DocumentPickerView(medicalCase: medicalCase)
-                }
+                .documentPicker(for: medicalCase, isPresented: $showAddDocument)
             }
             
         }
@@ -460,33 +458,6 @@ struct DocumentDetailView: View {
     }
 }
 
-struct DocumentPickerView: View {
-    let medicalCase: MedicalCase
-    @Environment(\.dismiss) private var dismiss
-    
-    var body: some View {
-        NavigationView {
-            VStack {
-                Text("Document Picker")
-                    .font(.title)
-                
-                Button("Close") {
-                    dismiss()
-                }
-                .buttonStyle(.borderedProminent)
-            }
-            .navigationTitle("Add Document")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-}
 
 #Preview {
     UnifiedDocumentsSection(medicalCase: .sampleCase)
