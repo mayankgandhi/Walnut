@@ -13,7 +13,7 @@ import WalnutDesignSystem
 struct BloodReportDetailView: View {
     let bloodReport: BloodReport
     @Environment(\.dismiss) private var dismiss
-
+    
     @State private var selectedCategory: String?
     @State private var showAllTests = false
     
@@ -40,7 +40,7 @@ struct BloodReportDetailView: View {
                         
                         if bloodReport.document != nil {
                             DocumentCard(
-                                document: bloodReport.document,
+                                document: bloodReport.document!,
                                 title: "Lab Report Document",
                                 viewButtonText: "View Report"
                             )
@@ -56,7 +56,7 @@ struct BloodReportDetailView: View {
     
     // MARK: - Enhanced Header Card
     private var enhancedHeaderCard: some View {
-        HealthCard(padding: Spacing.large) {
+        HealthCard {
             VStack(spacing: Spacing.large) {
                 // Hero Section with enhanced specialty visualization
                 HStack(spacing: Spacing.large) {
@@ -67,8 +67,6 @@ struct BloodReportDetailView: View {
                         )
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundStyle(Color.red)
-                        .scaleEffect(1.0)
-                        .animation(.spring(response: 0.6, dampingFraction: 0.8), value: bloodReport.testName)
                         .background {
                             Circle()
                                 .fill(
@@ -130,10 +128,7 @@ struct BloodReportDetailView: View {
                 }
                 
                 // Enhanced metadata section with modern card grid
-                LazyVGrid(columns: [
-                    GridItem(.flexible(), spacing: Spacing.small),
-                    GridItem(.flexible(), spacing: Spacing.small)
-                ], spacing: Spacing.medium) {
+                HStack {
                     
                     // Test Date Card
                     VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -150,12 +145,10 @@ struct BloodReportDetailView: View {
                         }
                         
                         Text(bloodReport.resultDate.formatted(date: .abbreviated, time: .omitted))
-                            .font(.caption.weight(.semibold))
+                            .font(.footnote.weight(.semibold))
                             .foregroundStyle(.secondary)
                     }
-                    .padding(Spacing.small)
-                    .background(Color(UIColor.secondarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    
                     
                     // Category Card
                     VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -172,12 +165,10 @@ struct BloodReportDetailView: View {
                         }
                         
                         Text(bloodReport.category.isEmpty ? "General" : bloodReport.category)
-                            .font(.caption.weight(.semibold))
+                            .font(.footnote.weight(.semibold))
                             .foregroundStyle(.secondary)
                     }
-                    .padding(Spacing.small)
-                    .background(Color(UIColor.secondarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    
                 }
             }
         }
@@ -222,7 +213,7 @@ struct BloodReportDetailView: View {
     }
     
     private func abnormalResultHighlight(testResult: BloodTestResult) -> some View {
-        HealthCard(padding: Spacing.medium) {
+        HealthCard {
             HStack(spacing: Spacing.medium) {
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text(testResult.testName)
@@ -255,50 +246,45 @@ struct BloodReportDetailView: View {
     
     // Enhanced Test Results Grid using BioMarkerGridItemView
     private var enhancedTestResultsGrid: some View {
-        HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-                // Section Header
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Test Results")
-                            .font(.subheadline.weight(.bold))
-                            .foregroundStyle(.primary)
-                        
-                        Text("\(bloodReport.testResults.count) biomarkers measured")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
+        VStack(alignment: .leading, spacing: Spacing.small) {
+            // Section Header
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Test Results")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(.primary)
                     
-                    Spacer()
-                    
-                    let abnormalCount = bloodReport.testResults.filter(\.isAbnormal).count
-                    if abnormalCount > 0 {
-                        HStack(spacing: Spacing.xs) {
-                            Circle()
-                                .fill(Color.healthError)
-                                .frame(width: 8, height: 8)
-                            
-                            Text("\(abnormalCount) need attention")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(Color.healthError)
-                        }
-                        .padding(.horizontal, Spacing.small)
-                        .padding(.vertical, 4)
-                        .background(Color.healthError.opacity(0.1))
-                        .clipShape(Capsule())
-                    }
+                    Text("\(bloodReport.testResults.count) biomarkers measured")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
-                .padding(.horizontal, Spacing.small)
                 
-                // Grid of BioMarker Items
-                VStack(spacing: Spacing.medium) {
-                    ForEach(convertToBioMarkers(), id: \.id) { biomarker in
-                        BioMarkerGridItemView(
-                            biomarker: biomarker
-                        )
+                Spacer()
+                
+                let abnormalCount = bloodReport.testResults.filter(\.isAbnormal).count
+                if abnormalCount > 0 {
+                    HStack(spacing: Spacing.xs) {
+                        Circle()
+                            .fill(Color.healthError)
+                            .frame(width: 8, height: 8)
+                        
+                        Text("\(abnormalCount) need attention")
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(Color.healthError)
                     }
+                    .padding(.horizontal, Spacing.small)
+                    .padding(.vertical, 4)
+                    .background(Color.healthError.opacity(0.1))
+                    .clipShape(Capsule())
                 }
-                .padding(.horizontal, Spacing.small)
+            }
+            .padding(.horizontal, Spacing.small)
+            
+            // Grid of BioMarker Items
+            ForEach(convertToBioMarkers(), id: \.id) { biomarker in
+                BioMarkerGridItemView(
+                    biomarker: biomarker
+                )
             }
         }
     }
@@ -381,39 +367,18 @@ struct BloodReportDetailView: View {
     // Enhanced Notes Card
     private var enhancedNotesCard: some View {
         HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-                HStack(spacing: Spacing.small) {
-                    Circle()
-                        .fill(Color.healthSuccess.opacity(0.2))
-                        .frame(width: 36, height: 36)
-                        .overlay {
-                            Image(systemName: "note.text")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundStyle(Color.healthSuccess)
-                        }
-                    
-                    Text("Clinical Notes")
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(.primary)
-                    
-                    Spacer()
-                }
+            VStack(alignment: .leading) {
+                HealthCardHeader.clinicalNotes()
                 
                 Text(bloodReport.notes)
                     .font(.subheadline)
                     .lineSpacing(4)
                     .foregroundStyle(.primary)
-                    .padding(Spacing.small)
-                    .background(Color.healthSuccess.opacity(0.05))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.healthSuccess.opacity(0.1), lineWidth: 1)
-                    )
+                    
             }
         }
     }
-
+    
 }
 
 #Preview {

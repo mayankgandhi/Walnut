@@ -166,7 +166,7 @@ public struct BiomarkerDetailView: View {
     
     // MARK: - Hero Section
     private var heroSection: some View {
-        HealthCard(padding: Spacing.large) {
+        HealthCard {
             VStack(spacing: Spacing.medium) {
                 // Current value display
                 HStack {
@@ -237,7 +237,7 @@ public struct BiomarkerDetailView: View {
     
     // MARK: - Time Frame Selector
     private var timeFrameSelector: some View {
-        HealthCard(padding: Spacing.medium) {
+        HealthCard {
             VStack(alignment: .leading, spacing: Spacing.small) {
                 Text("Time Range")
                     .font(.caption.weight(.medium))
@@ -288,7 +288,7 @@ public struct BiomarkerDetailView: View {
     
     // MARK: - Chart Section
     private var chartSection: some View {
-        HealthCard(padding: Spacing.large) {
+        HealthCard {
             VStack(alignment: .leading, spacing: Spacing.medium) {
                 // Chart header
                 HStack {
@@ -384,7 +384,7 @@ public struct BiomarkerDetailView: View {
             GridItem(.flexible())
         ], spacing: Spacing.medium) {
             
-            HealthCard(padding: Spacing.medium) {
+            HealthCard {
                 VStack(spacing: Spacing.xs) {
                     Text("Normal Range")
                         .font(.caption.weight(.medium))
@@ -401,7 +401,7 @@ public struct BiomarkerDetailView: View {
                 }
             }
             
-            HealthCard(padding: Spacing.medium) {
+            HealthCard {
                 VStack(spacing: Spacing.xs) {
                     Text("Status")
                         .font(.caption.weight(.medium))
@@ -418,7 +418,7 @@ public struct BiomarkerDetailView: View {
                 }
             }
             
-            HealthCard(padding: Spacing.medium) {
+            HealthCard {
                 VStack(spacing: Spacing.xs) {
                     Text("Readings")
                         .font(.caption.weight(.medium))
@@ -438,7 +438,7 @@ public struct BiomarkerDetailView: View {
     
     // MARK: - Information Section
     private var informationSection: some View {
-        HealthCard(padding: Spacing.large) {
+        HealthCard {
             VStack(alignment: .leading, spacing: Spacing.medium) {
                 Text("About \(biomarkerName)")
                     .font(.headline.weight(.bold))
@@ -488,7 +488,7 @@ public struct BiomarkerDetailView: View {
     
     // MARK: - Historical Data Section
     private var historicalDataSection: some View {
-        HealthCard(padding: Spacing.large) {
+        HealthCard {
             VStack(alignment: .leading, spacing: Spacing.medium) {
                 Text("Recent Readings")
                     .font(.headline.weight(.bold))

@@ -14,7 +14,7 @@ struct PatientHeaderCard: View {
     let patient: Patient
     
     var body: some View {
-        HealthCard(padding: 0) {
+        HealthCard {
             VStack(spacing: 0) {
                 // Header section with gradient background
                 VStack(spacing: Spacing.medium) {

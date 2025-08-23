@@ -18,45 +18,11 @@ struct PrescriptionMedicationsCard: View {
             VStack(alignment: .leading, spacing: Spacing.medium) {
                 // Enhanced Header with Walnut Design System
                 
-                HStack(spacing: Spacing.small) {
-                    // Icon with design system styling
-                    Circle()
-                        .fill(Color.healthPrimary.opacity(0.15))
-                        .frame(width: 44, height: 44)
-                        .overlay {
-                            Image(systemName: "pills.fill")
-                                .font(.title3.weight(.semibold))
-                                .foregroundStyle(Color.healthPrimary)
-                        }
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Medications")
-                            .font(.headline.weight(.bold))
-                            .foregroundStyle(.primary)
-                        
-                        Text("\(medications.count) prescribed")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    
-                    Spacer()
-                    
-                    // Medication count badge using design system
-                    HStack(spacing: 4) {
-                        Circle()
-                            .fill(Color.healthSuccess)
-                            .frame(width: 6, height: 6)
-                        
-                        Text("\(medications.count)")
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(Color.healthSuccess)
-                    }
-                    .padding(.horizontal, Spacing.small)
-                    .padding(.vertical, 4)
-                    .background(Color.healthSuccess.opacity(0.1))
-                    .clipShape(Capsule())
-                    
-                }
+                
+                HealthCardHeader
+                    .medicalDocuments(count: medications.count, onAddTap: {
+                        /// TODO
+                    })
                 
                 if medications.isEmpty {
                     // Empty state with design system styling

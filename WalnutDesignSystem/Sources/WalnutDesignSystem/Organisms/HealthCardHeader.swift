@@ -21,7 +21,8 @@ public struct HealthCardHeader: View {
     private let actionIcon: String?
     private let actionColor: Color
     private let onActionTap: (() -> Void)?
-    private let isActionPressed: Bool
+    
+    @State private var isActionPressed: Bool
     
     // MARK: - Initialization
     
@@ -34,7 +35,6 @@ public struct HealthCardHeader: View {
         subtitle: String? = nil,
         actionIcon: String? = nil,
         actionColor: Color = .healthPrimary,
-        isActionPressed: Bool = false,
         onActionTap: (() -> Void)? = nil
     ) {
         self.icon = icon
@@ -45,14 +45,14 @@ public struct HealthCardHeader: View {
         self.subtitle = subtitle
         self.actionIcon = actionIcon
         self.actionColor = actionColor
-        self.isActionPressed = isActionPressed
+        self.isActionPressed = false
         self.onActionTap = onActionTap
     }
     
     // MARK: - Body
     
     public var body: some View {
-        HStack(spacing: Spacing.medium) {
+        HStack(spacing: Spacing.large) {
             // Dynamic icon with gradient background (optional)
             if let icon = icon {
                 iconView(icon)
@@ -74,24 +74,25 @@ public struct HealthCardHeader: View {
     
     @ViewBuilder
     private func iconView(_ iconName: String) -> some View {
-        Image(systemName: iconName)
-            .font(.system(size: iconSize, weight: .semibold))
-            .foregroundStyle(iconColor)
-            .background {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                iconColor.opacity(0.2),
-                                iconColor.opacity(0.05)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
+        ZStack {
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            iconColor.opacity(0.2),
+                            iconColor.opacity(0.05)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
                     )
-                    .frame(width: iconBackgroundSize, height: iconBackgroundSize)
-                    .shadow(color: iconColor.opacity(0.2), radius: 4, x: 0, y: 2)
-            }
+                )
+                .frame(width: iconBackgroundSize, height: iconBackgroundSize)
+                .shadow(color: iconColor.opacity(0.2), radius: 4, x: 0, y: 2)
+            
+            Image(systemName: iconName)
+                .font(.system(size: iconSize, weight: .semibold))
+                .foregroundStyle(iconColor)
+        }
     }
     
     private var contentView: some View {
@@ -127,7 +128,6 @@ public extension HealthCardHeader {
     /// Standard medical documents header
     static func medicalDocuments(
         count: Int,
-        isAddPressed: Bool = false,
         onAddTap: @escaping () -> Void
     ) -> HealthCardHeader {
         HealthCardHeader(
@@ -135,7 +135,6 @@ public extension HealthCardHeader {
             title: "Medical Documents",
             subtitle: "\(count) documents",
             actionIcon: "plus.circle.fill",
-            isActionPressed: isAddPressed,
             onActionTap: onAddTap
         )
     }
@@ -169,7 +168,6 @@ public extension HealthCardHeader {
     static func prescriptions(
         count: Int,
         abnormalCount: Int? = nil,
-        isAddPressed: Bool = false,
         onAddTap: @escaping () -> Void
     ) -> HealthCardHeader {
         var subtitle = "\(count) documents"
@@ -183,7 +181,6 @@ public extension HealthCardHeader {
             title: "Prescriptions",
             subtitle: subtitle,
             actionIcon: "plus.circle.fill",
-            isActionPressed: isAddPressed,
             onActionTap: onAddTap
         )
     }
@@ -208,7 +205,6 @@ public extension HealthCardHeader {
             subtitle: subtitle,
             actionIcon: "plus.circle.fill",
             actionColor: .healthError,
-            isActionPressed: isAddPressed,
             onActionTap: onAddTap
         )
     }
@@ -237,7 +233,6 @@ public extension HealthCardHeader {
         subtitle: String? = nil,
         actionIcon: String? = nil,
         actionColor: Color = .healthPrimary,
-        isActionPressed: Bool = false,
         onActionTap: (() -> Void)? = nil
     ) -> HealthCardHeader {
         HealthCardHeader(
@@ -247,7 +242,6 @@ public extension HealthCardHeader {
             subtitle: subtitle,
             actionIcon: actionIcon,
             actionColor: actionColor,
-            isActionPressed: isActionPressed,
             onActionTap: onActionTap
         )
     }
@@ -257,58 +251,38 @@ public extension HealthCardHeader {
 
 #Preview("Standard Headers") {
     ScrollView {
-        VStack(spacing: Spacing.large) {
-            HealthCard {
-                VStack(spacing: Spacing.large) {
-                    // Medical Documents Header
-                    HealthCardHeader.medicalDocuments(
-                        count: 12,
-                        onAddTap: {
-                            print("Add document tapped")
-                        }
-                    )
-                    
-                    Divider()
-                    
-                    // Timeline Header
-                    HealthCardHeader.timeline()
-                    
-                    Divider()
-                    
-                    // Clinical Notes Header
-                    HealthCardHeader.clinicalNotes(characterCount: 245)
-                    
-                    Divider()
-                    
-                    // Prescriptions Header
-                    HealthCardHeader.prescriptions(
-                        count: 8,
-                        onAddTap: {
-                            print("Add prescription tapped")
-                        }
-                    )
-                    
-                    Divider()
-                    
-                    // Blood Reports Header
-                    HealthCardHeader.bloodReports(
-                        count: 5,
-                        abnormalCount: 2,
-                        onAddTap: {
-                            print("Add blood report tapped")
-                        }
-                    )
-                    
-                    Divider()
-                    
-                    // Failed Documents Header
-                    HealthCardHeader.failedDocuments(count: 3)
+        VStack(spacing: Spacing.xl) {
+            HealthCardHeader.medicalDocuments(
+                count: 12,
+                onAddTap: {
+                    print("Add document tapped")
                 }
-            }
+            )
+            // Timeline Header
+            HealthCardHeader.timeline()
+            // Clinical Notes Header
+            HealthCardHeader.clinicalNotes(characterCount: 245)
+            // Prescriptions Header
+            HealthCardHeader.prescriptions(
+                count: 8,
+                onAddTap: {
+                    print("Add prescription tapped")
+                }
+            )
+            // Blood Reports Header
+            HealthCardHeader.bloodReports(
+                count: 5,
+                abnormalCount: 2,
+                onAddTap: {
+                    print("Add blood report tapped")
+                }
+            )
+            // Failed Documents Header
+            HealthCardHeader.failedDocuments(count: 3)
         }
-        .padding()
     }
 }
+
 
 #Preview("Custom Headers") {
     ScrollView {
@@ -328,7 +302,7 @@ public extension HealthCardHeader {
                         }
                     )
                     
-                    Divider()
+                    
                     
                     // Minimal header (title only)
                     HealthCardHeader.custom(
@@ -336,7 +310,7 @@ public extension HealthCardHeader {
                         title: "Patient Summary"
                     )
                     
-                    Divider()
+                    
                     
                     // Header with subtitle but no action
                     HealthCardHeader.custom(
@@ -348,35 +322,5 @@ public extension HealthCardHeader {
                 }
             }
         }
-        .padding()
     }
-}
-
-#Preview("Interactive States") {
-    struct InteractivePreview: View {
-        @State private var isPressed = false
-        
-        var body: some View {
-            HealthCard {
-                HealthCardHeader.medicalDocuments(
-                    count: 5,
-                    isAddPressed: isPressed,
-                    onAddTap: {
-                        withAnimation(.easeInOut(duration: 0.1)) {
-                            isPressed = true
-                        }
-                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            withAnimation(.easeInOut(duration: 0.1)) {
-                                isPressed = false
-                            }
-                        }
-                    }
-                )
-            }
-            .padding()
-        }
-    }
-    
-    return InteractivePreview()
 }

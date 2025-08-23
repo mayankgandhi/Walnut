@@ -14,32 +14,37 @@ struct EnhancedMedicalCaseListItem: View {
     let medicalCase: MedicalCase
     
     var body: some View {
-            VStack(alignment: .center, spacing: Spacing.small) {
-                // Medical Case Icon
-                Image(systemName: "folder.fill")
-                    .renderingMode(.template)
-                    .resizable()
-                    .scaledToFit()
-                    .foregroundStyle(medicalCase.type.backgroundColor)
-                    .overlay {
-                        Image(systemName: medicalCase.specialty.icon)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 25, height: 25)
-                            .foregroundStyle(medicalCase.specialty.color)
-                            .padding(Spacing.small)
-                            .background(medicalCase.specialty.color.opacity(0.20))
-                            .clipShape(Circle())
-                            .offset(y: 15)
-                    }
-                
-                Text(medicalCase.title)
-                    .font(
-                        .system(.subheadline, design: .serif, weight: .semibold)
+        VStack(alignment: .center, spacing: Spacing.small) {
+            // Medical Case Icon
+            Image(systemName: "folder.fill")
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .foregroundStyle(medicalCase.type.backgroundColor)
+                .overlay {
+                    Image(systemName: medicalCase.specialty.icon)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 25, height: 25)
+                        .foregroundStyle(medicalCase.specialty.color)
+                        .padding(Spacing.small)
+                        .background(medicalCase.specialty.color.opacity(0.20))
+                        .clipShape(Circle())
+                        .offset(y: 15)
+                }
+            
+            Text(medicalCase.title)
+                .font(
+                    .system(
+                        .subheadline,
+                        design: .rounded,
+                        weight: .semibold
                     )
-                    .foregroundStyle(.primary)
-                    .lineLimit(2)
-                
+                )
+                .foregroundStyle(.primary)
+                .lineLimit(2)
+            
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 
                 Text(medicalCase.type.displayName)
                     .font(
@@ -57,8 +62,9 @@ struct EnhancedMedicalCaseListItem: View {
                     )
                     .foregroundStyle(.tertiary)
             }
-            .padding(Spacing.medium)
         }
+        .padding(Spacing.medium)
+    }
 }
 
 

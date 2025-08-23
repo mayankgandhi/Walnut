@@ -29,24 +29,19 @@ protocol TimelineEventProvider {
 // MARK: - Generic Timeline Component
 
 struct Timeline: View {
-    let title: String
-    let icon: String
+   
     let events: [TimelineEvent]
     
-    init(title: String, icon: String, events: [TimelineEvent]) {
-        self.title = title
-        self.icon = icon
+    init( events: [TimelineEvent]) {
         self.events = events
     }
     
-    init<Provider: TimelineEventProvider>(title: String, icon: String, provider: Provider) {
-        self.title = title
-        self.icon = icon
+    init<Provider: TimelineEventProvider>(provider: Provider) {
         self.events = provider.generateTimelineEvents()
     }
     
     var body: some View {
-        HealthCard(padding: Spacing.large) {
+        HealthCard {
             VStack(alignment: .leading, spacing: Spacing.xl) {
                 // Section Header
                 timelineHeader
@@ -58,34 +53,7 @@ struct Timeline: View {
     }
     
     var timelineHeader: some View {
-        HStack(spacing: Spacing.large) {
-            // Dynamic icon with gradient background
-            Image(systemName: icon)
-                .font(.title3.weight(.semibold))
-                .foregroundStyle(Color.healthPrimary)
-                .background {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color.healthPrimary.opacity(0.2),
-                                    Color.healthPrimary.opacity(0.05)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 48, height: 48)
-                        .shadow(color: Color.healthPrimary.opacity(0.2), radius: 4, x: 0, y: 2)
-                }
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.headline.weight(.bold))
-                    .foregroundStyle(.primary)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        HealthCardHeader.timeline()
     }
     
     var timelineEvents: some View {
@@ -175,8 +143,6 @@ struct MedicalCaseTimeline: View {
     
     var body: some View {
         Timeline(
-            title: "Timeline",
-            icon: "clock.arrow.circlepath",
             provider: MedicalCaseTimelineEventProvider(medicalCase: medicalCase)
         )
     }
@@ -256,8 +222,6 @@ private extension TimelineItemView {
     VStack(spacing: Spacing.large) {
         // Generic Timeline with custom events
         Timeline(
-            title: "Custom Timeline",
-            icon: "star.circle.fill",
             events: [
                 TimelineEvent(
                     icon: "checkmark.circle.fill",

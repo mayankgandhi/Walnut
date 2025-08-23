@@ -16,65 +16,46 @@ public struct BioMarkerGridItemView: View {
     }
     
     public var body: some View {
-        
-        HStack(spacing: Spacing.medium) {
-            // Top section with small icon and status
-            // Small supporting icon
-            Circle()
-                .fill(biomarker.healthStatus.color.opacity(0.15))
-                .frame(width: 32, height: 32)
-                .overlay {
-                    Image(systemName: biomarker.iconName)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(biomarker.healthStatus.color)
-                }
-            
-            
-            // Status indicator with better text handling
-            HStack(spacing: Spacing.xs) {
+        HealthCard {
+            HStack(alignment: .center, spacing: Spacing.medium) {
+                
                 Circle()
-                    .fill(biomarker.healthStatus.color)
-                    .frame(width: 6, height: 6)
-                    .scaleEffect(biomarker.healthStatus == .critical ? 1.2 : 1.0)
+                    .fill(biomarker.healthStatus.color.opacity(0.15))
+                    .frame(width: 32, height: 32)
+                    .overlay {
+                        Image(systemName: biomarker.iconName)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(biomarker.healthStatus.color)
+                    }
                 
-                Text(biomarker.healthStatus.displayName.uppercased())
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(biomarker.healthStatus.color)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-            }
-            .padding(.horizontal, Spacing.small)
-            .padding(.vertical, 3)
-            .background(biomarker.healthStatus.color.opacity(0.1))
-            .clipShape(Capsule())
-            
-            // Bottom section with name and reference - improved text handling
-            VStack(spacing: Spacing.xs) {
-                // Biomarker name with better handling for long names
-                Text(biomarker.name)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.primary)
-                    .lineLimit(3)
-                    .minimumScaleFactor(0.8)
-                    .multilineTextAlignment(.center)
-                    .allowsTightening(true)
-                    .fixedSize(horizontal: false, vertical: true)
-                
-                // Reference range with truncation
-                if !biomarker.referenceRange.isEmpty {
-                    Text("Ref: \(biomarker.referenceRange)")
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.7)
+                // Bottom section with name and reference - improved text handling
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    // Biomarker name with better handling for long names
+                    Text(biomarker.name)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .lineLimit(3)
+                        .minimumScaleFactor(0.8)
                         .multilineTextAlignment(.center)
+                        .allowsTightening(true)
+                        .fixedSize(horizontal: false, vertical: true)
+                    
+                    // Reference range with truncation
+                    if !biomarker.referenceRange.isEmpty {
+                        Text("Ref: \(biomarker.referenceRange)")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.7)
+                            .multilineTextAlignment(.center)
+                    }
                 }
-            }
-            
-            VStack(spacing: Spacing.small) {
-                // Hero value - the star of the show with better text handling
-                VStack(spacing: Spacing.xs) {
-                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                
+                Spacer()
+                
+                VStack(alignment: .trailing, spacing: Spacing.small) {
+                    
+                    HStack(alignment: .center, spacing: 4) {
                         Text(biomarker.currentValue)
                             .font(
                                 .system(
@@ -83,11 +64,9 @@ public struct BioMarkerGridItemView: View {
                                     weight: .bold
                                 )
                             )
-                            .foregroundStyle(biomarker.healthStatus.color)
                             .lineLimit(2)
                             .minimumScaleFactor(0.5)
                             .multilineTextAlignment(.center)
-                            .allowsTightening(true)
                         
                         if !biomarker.unit.isEmpty {
                             Text(biomarker.unit)
@@ -95,21 +74,28 @@ public struct BioMarkerGridItemView: View {
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.8)
-                                .offset(y: 2) // Align with baseline
                         }
                     }
-                }
-                
-                // Glow effect behind the value for critical status
-                if biomarker.healthStatus == .critical {
-                    Rectangle()
-                        .fill(biomarker.healthStatus.color)
-                        .frame(height: 2)
-                        .blur(radius: 4)
-                        .scaleEffect(x: 0.8, y: 1.0)
+                    
+                    // Status indicator with better text handling
+                    HStack(spacing: Spacing.xs) {
+                        Circle()
+                            .fill(biomarker.healthStatus.color)
+                            .frame(width: 6, height: 6)
+                            .scaleEffect(biomarker.healthStatus == .critical ? 1.2 : 1.0)
+                        
+                        Text(biomarker.healthStatus.displayName.uppercased())
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(biomarker.healthStatus.color)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    }
+                    .padding(.horizontal, Spacing.small)
+                    .padding(.vertical, 3)
+                    .background(biomarker.healthStatus.color.opacity(0.1))
+                    .clipShape(Capsule())
                 }
             }
-            
         }
     }
 }
@@ -246,26 +232,19 @@ extension BioMarker {
     )
 }
 
-#Preview("Grid Layout") {
+#Preview("List") {
     ScrollView {
-        LazyVGrid(columns: [
-            GridItem(.flexible(), spacing: Spacing.medium),
-            GridItem(.flexible(), spacing: Spacing.medium)
-        ], spacing: Spacing.medium) {
-            ForEach(BioMarker.samples, id: \.id) { biomarker in
-                BioMarkerGridItemView(
-                    biomarker: biomarker
-                )
-                .frame(height: 200)
-            }
+        
+        ForEach(BioMarker.samples, id: \.id) { biomarker in
+            BioMarkerGridItemView(
+                biomarker: biomarker
+            )
         }
-        .padding()
     }
     .background(Color(UIColor.systemGroupedBackground))
 }
 
 #Preview("Different States") {
-    HStack(spacing: Spacing.medium) {
         BioMarkerGridItemView(
             biomarker: BioMarker.samples[1]
         )
@@ -273,6 +252,4 @@ extension BioMarker {
         BioMarkerGridItemView(
             biomarker: BioMarker.samples[5]
         )
-    }
-    .padding()
 }

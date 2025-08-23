@@ -14,11 +14,10 @@ public struct HealthCard<Content: View>: View {
     private let padding: CGFloat
     
     public init(
-        padding: CGFloat = Spacing.medium,
         @ViewBuilder content: () -> Content
     ) {
         self.content = content()
-        self.padding = padding
+        self.padding = Spacing.medium
     }
     
     public var body: some View {

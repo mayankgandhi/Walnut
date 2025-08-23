@@ -39,7 +39,7 @@ struct MedicalCaseDetailView: View {
     }
     
     var heroSection: some View {
-        HealthCard(padding: Spacing.large) {
+        HealthCard {
             HStack(spacing: Spacing.medium) {
                 // Specialty Icon with Modern Design
                 ZStack {
@@ -134,7 +134,7 @@ struct MedicalCaseDetailView: View {
     }
     
     var caseTypeCard: some View {
-        HealthCard(padding: Spacing.medium) {
+        HealthCard {
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 HStack {
                     Image(systemName: "folder")
@@ -157,7 +157,7 @@ struct MedicalCaseDetailView: View {
     }
     
     var dateCard: some View {
-        HealthCard(padding: Spacing.medium) {
+        HealthCard {
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 HStack {
                     Image(systemName: "calendar")
@@ -187,27 +187,10 @@ struct MedicalCaseDetailView: View {
 private extension MedicalCaseDetailView {
     
     var clinicalNotesSection: some View {
-        HealthCard(padding: Spacing.large) {
+        HealthCard {
             VStack(alignment: .leading, spacing: Spacing.medium) {
-                // Section Header
-                HStack(spacing: Spacing.small) {
-                    ZStack {
-                        Circle()
-                            .fill(Color.healthSuccess.opacity(0.15))
-                            .frame(width: 36, height: 36)
-                        
-                        Image(systemName: "note.text")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundStyle(Color.healthSuccess)
-                    }
-                    
-                    Text("Clinical Notes")
-                        .font(.headline.weight(.semibold))
-                        .foregroundStyle(.primary)
-                    
-                    Spacer()
-                }
-                
+                HealthCardHeader.clinicalNotes()
+
                 // Notes Content
                 Text(medicalCase.notes)
                     .font(.subheadline)

@@ -91,7 +91,7 @@ struct MedicalCasesView: View {
     // MARK: - Subviews
     
     private var emptyStateView: some View {
-        HealthCard(padding: Spacing.xl) {
+        HealthCard {
             VStack(spacing: Spacing.large) {
                 Circle()
                     .fill(Color.healthPrimary.opacity(0.15))
@@ -140,7 +140,7 @@ struct MedicalCasesView: View {
                 } else {
                     ScrollView {
                         LazyVGrid(
-                            columns: [.init(), .init()],
+                            columns: [.init(), .init(), .init()],
                             alignment: .leading,
                             spacing: Spacing.xs
                         ) {
@@ -151,9 +151,6 @@ struct MedicalCasesView: View {
                                     EnhancedMedicalCaseListItem(medicalCase: medicalCase)
                                 }
                                 .buttonStyle(.plain)
-                                .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.medium, bottom: Spacing.xs, trailing: Spacing.medium))
-                                .listRowSeparator(.hidden)
-                                .listRowBackground(Color.clear)
                                 .contextMenu {
                                     contextMenuItems(for: medicalCase)
                                 }

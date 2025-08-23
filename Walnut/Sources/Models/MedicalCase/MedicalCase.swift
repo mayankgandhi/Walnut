@@ -69,7 +69,7 @@ extension MedicalCase {
     @MainActor
     static var sampleCase =  MedicalCase(
         id: UUID(),
-        title: "Hypertension Management",
+        title: "Hypertension",
         notes: "Patient presents with elevated blood pressure readings over the past 3 months. Family history of cardiovascular disease. Currently experiencing mild headaches and occasional dizziness. Diagnosed with Stage 1 hypertension. Started on ACE inhibitor therapy with good response. Regular follow-ups show gradual improvement.",
         type: .healthCheckup,
         specialty: .cardiologist,

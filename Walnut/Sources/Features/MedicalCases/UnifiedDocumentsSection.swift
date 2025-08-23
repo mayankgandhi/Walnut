@@ -22,53 +22,10 @@ struct UnifiedDocumentsSection: View {
     var body: some View {
         HealthCard {
             VStack(alignment: .leading, spacing: Spacing.medium) {
-                // Enhanced Section Header
                 
-                HStack(spacing: Spacing.medium) {
-                    // Dynamic icon with gradient background
-                    Image(systemName: "folder.fill.badge.plus")
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(Color.healthPrimary)
-                        .background {
-                            Circle()
-                                .fill(
-                                    LinearGradient(
-                                        colors: [
-                                            Color.healthPrimary.opacity(0.2),
-                                            Color.healthPrimary.opacity(0.05)
-                                        ],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .frame(width: 48, height: 48)
-                                .shadow(color: Color.healthPrimary.opacity(0.2), radius: 4, x: 0, y: 2)
-                        }
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        
-                        Text("Medical Documents")
-                            .font(.headline.weight(.bold))
-                            .foregroundStyle(.primary)
-                        
-                        Text("\(totalDocumentCount) documents")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        
-                    }
-                    
-                    Spacer()
-                    
-                    // Add button with subtle animation
-                    Button(action: { showAddDocument = true }) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title2)
-                            .foregroundStyle(Color.healthPrimary)
-                            .scaleEffect(showAddDocument ? 0.9 : 1.0)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    
-                }
+                // Enhanced Section Header
+                HealthCardHeader.medicalDocuments(count: totalDocumentCount,
+                                                  onAddTap: { showAddDocument = true })
                 
                 if allDocuments.isEmpty {
                     // Modern empty state
@@ -326,5 +283,5 @@ enum DocumentItem {
 #Preview {
     UnifiedDocumentsSection(medicalCase: .sampleCase)
         .padding(Spacing.medium)
-
+    
 }

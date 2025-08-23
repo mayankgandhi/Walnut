@@ -40,7 +40,7 @@ struct PrescriptionDetailView: View {
                 // Document Section
                 if prescription.document != nil {
                     DocumentCard(
-                        document: prescription.document,
+                        document: prescription.document!,
                         title: "Prescription Document",
                         viewButtonText: "View Document"
                     )
@@ -55,7 +55,7 @@ struct PrescriptionDetailView: View {
     
     // MARK: - Enhanced Header Card
     private var enhancedHeaderCard: some View {
-        HealthCard(padding: Spacing.medium) {
+        HealthCard {
             VStack(alignment: .leading, spacing: Spacing.large) {
                 // Hero Section with enhanced prescription visualization
                 HStack(alignment: .center, spacing: Spacing.large) {
@@ -159,7 +159,6 @@ struct PrescriptionDetailView: View {
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(.secondary)
                     }
-                    .padding(Spacing.small)
                     .background(Color(UIColor.secondarySystemGroupedBackground))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     
@@ -193,28 +192,12 @@ struct PrescriptionDetailView: View {
     private var enhancedFollowUpCard: some View {
         HealthCard {
             VStack(alignment: .leading, spacing: Spacing.medium) {
-                HStack(spacing: Spacing.small) {
-                    Circle()
-                        .fill(Color.healthWarning.opacity(0.2))
-                        .frame(width: 36, height: 36)
-                        .overlay {
-                            Image(systemName: "calendar.badge.clock")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundStyle(Color.healthWarning)
-                        }
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Follow-up Required")
-                            .font(.headline.weight(.bold))
-                            .foregroundStyle(.primary)
-                        
-                        if let followUpDate = prescription.followUpDate {
-                            Text("Due \(followUpDate.formatted(date: .abbreviated, time: .omitted))")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
+                HealthCardHeader(
+                    icon: "calendar.badge.clock",
+                    iconColor: Color.healthWarning,
+                    title: "Follow-up Required",
+                    subtitle: prescription.followUpDate != nil ? "Due \(prescription.followUpDate!.formatted(date: .abbreviated, time: .omitted))" : nil,
+                )
                 
                 if let followUpTests = prescription.followUpTests, !followUpTests.isEmpty {
                     VStack(alignment: .leading, spacing: Spacing.small) {
@@ -252,30 +235,8 @@ struct PrescriptionDetailView: View {
     private var enhancedNotesCard: some View {
         HealthCard {
             VStack(alignment: .leading, spacing: Spacing.medium) {
-                HStack(spacing: Spacing.small) {
-                    Circle()
-                        .fill(Color.healthPrimary.opacity(0.2))
-                        .frame(width: 36, height: 36)
-                        .overlay {
-                            Image(systemName: "note.text")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundStyle(Color.healthPrimary)
-                        }
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Clinical Notes")
-                            .font(.headline.weight(.bold))
-                            .foregroundStyle(.primary)
-                        
-                        if let notes = prescription.notes {
-                            Text("\(notes.count) characters")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    
-                    Spacer()
-                }
+                
+                HealthCardHeader.clinicalNotes()
                 
                 if let notes = prescription.notes {
                     Text(notes)

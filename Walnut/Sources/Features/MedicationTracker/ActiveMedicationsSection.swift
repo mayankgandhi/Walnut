@@ -72,7 +72,7 @@ struct ActiveMedicationsSection: View {
     }
     
     private var emptyStateView: some View {
-        HealthCard(padding: Spacing.large) {
+        HealthCard {
             VStack(spacing: Spacing.medium) {
                 Circle()
                     .fill(Color.secondary.opacity(0.15))
