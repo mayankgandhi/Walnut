@@ -10,14 +10,14 @@ import SwiftUI
 import WalnutDesignSystem
 
 struct UnifiedDocumentsSection: View {
+    
     let medicalCase: MedicalCase
     
-    @State private var selectedPrescription: Prescription?
-    @State private var selectedBloodReport: BloodReport?
-    @State private var selectedDocument: Document?
-    
     @State private var showAddDocument = false
-    @State private var isRetrying = false
+    @State private var isExpanded = true
+    @State private var navigationState = NavigationState()
+    
+    private let factory = DocumentFactory.shared
     
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.medium) {
@@ -137,13 +137,13 @@ struct UnifiedDocumentsSection: View {
                     }
                 }
                 .transition(.opacity.combined(with: .move(edge: .top)))
-                .navigationDestination(item: $selectedPrescription) { prescription in
+                .navigationDestination(item: $navigationState.selectedPrescription) { prescription in
                     PrescriptionDetailView(prescription: prescription)
                 }
-                .navigationDestination(item: $selectedBloodReport) { bloodReport in
+                .navigationDestination(item: $navigationState.selectedBloodReport) { bloodReport in
                     BloodReportDetailView(bloodReport: bloodReport)
                 }
-                .navigationDestination(item: $selectedDocument) { document in
+                .navigationDestination(item: $navigationState.selectedDocument) { document in
                     DocumentDetailView(document: document)
                 }
                 .documentPicker(for: medicalCase, isPresented: $showAddDocument)
@@ -158,6 +158,9 @@ struct UnifiedDocumentsSection: View {
     
     @ViewBuilder
     private func documentRow(for item: DocumentItem) -> some View {
+        let actionHandler = factory.createActionHandler(for: item)
+        let contextMenuItems = actionHandler.getContextMenuItems()
+        
         Group {
             switch item {
             case .prescription(let prescription):
@@ -167,11 +170,9 @@ struct UnifiedDocumentsSection: View {
                     documentType: .prescription
                 )
                 .onTapGesture {
-                    selectedPrescription = prescription
+                    navigationState.selectedPrescription = prescription
                 }
-                .contextMenu {
-                    prescriptionContextMenu(for: prescription)
-                }
+                .documentContextMenu(items: contextMenuItems)
                 
             case .bloodReport(let bloodReport):
                 FileIcon(
@@ -180,11 +181,9 @@ struct UnifiedDocumentsSection: View {
                     documentType: .labResult
                 )
                 .onTapGesture {
-                    selectedBloodReport = bloodReport
+                    navigationState.selectedBloodReport = bloodReport
                 }
-                .contextMenu {
-                    bloodReportContextMenu(for: bloodReport)
-                }
+                .documentContextMenu(items: contextMenuItems)
                 
             case .unparsedDocument(let document):
                 HStack {
@@ -196,28 +195,15 @@ struct UnifiedDocumentsSection: View {
                         backgroundColor: .orange
                     )
                     .onTapGesture {
-                        selectedDocument = document
+                        navigationState.selectedDocument = document
                     }
                     
-                    Button(action: { retryParsing(document) }) {
-                        HStack(spacing: 4) {
-                            if isRetrying {
-                                ProgressView()
-                                    .controlSize(.mini)
-                                    .tint(.orange)
-                            } else {
-                                Image(systemName: "arrow.clockwise.circle.fill")
-                                    .font(.title3)
-                            }
-                        }
-                        .foregroundStyle(.orange)
+                    // Get retry button from the unparsed document handler
+                    if let unparsedHandler = actionHandler as? UnparsedDocumentActionHandler {
+                        unparsedHandler.getRetryButton()
                     }
-                    .disabled(isRetrying)
-                    .padding(.trailing, Spacing.medium)
                 }
-                .contextMenu {
-                    unparsedDocumentContextMenu(for: document)
-                }
+                .documentContextMenu(items: contextMenuItems)
             }
         }
     }
@@ -325,96 +311,6 @@ struct UnifiedDocumentsSection: View {
         
         return components.joined(separator: " • ")
     }
-    
-    private func retryParsing(_ document: Document) {
-        isRetrying = true
-        // TODO: Implement retry parsing logic
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            isRetrying = false
-        }
-    }
-    
-    // MARK: - Context Menus
-    
-    @ViewBuilder
-    private func prescriptionContextMenu(for prescription: Prescription) -> some View {
-        Button {
-            // Edit prescription
-        } label: {
-            Label("Edit Prescription", systemImage: "pencil")
-        }
-        
-        Button {
-            selectedPrescription = prescription
-        } label: {
-            Label("View Details", systemImage: "eye")
-        }
-        
-        Divider()
-        
-        Button {
-            shareDocument(prescription.document)
-        } label: {
-            Label("Share Document", systemImage: "square.and.arrow.up")
-        }
-        .disabled(prescription.document == nil)
-    }
-    
-    @ViewBuilder
-    private func bloodReportContextMenu(for bloodReport: BloodReport) -> some View {
-        Button {
-            selectedBloodReport = bloodReport
-        } label: {
-            Label("View Details", systemImage: "eye")
-        }
-        
-        Divider()
-        
-        Button {
-            shareDocument(bloodReport.document)
-        } label: {
-            Label("Share Document", systemImage: "square.and.arrow.up")
-        }
-        .disabled(bloodReport.document == nil)
-    }
-    
-    @ViewBuilder
-    private func unparsedDocumentContextMenu(for document: Document) -> some View {
-        Button {
-            retryParsing(document)
-        } label: {
-            Label("Retry Parsing", systemImage: "arrow.clockwise")
-        }
-        
-        Button {
-            selectedDocument = document
-        } label: {
-            Label("View Document", systemImage: "eye")
-        }
-        
-        Divider()
-        
-        Button {
-            shareDocument(document)
-        } label: {
-            Label("Share Document", systemImage: "square.and.arrow.up")
-        }
-        
-    }
-    
-    private func shareDocument(_ document: Document?) {
-        guard let document = document else { return }
-        
-        let activityController = UIActivityViewController(
-            activityItems: [document.fileURL],
-            applicationActivities: nil
-        )
-        
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootViewController = windowScene.windows.first?.rootViewController {
-            rootViewController.present(activityController, animated: true)
-        }
-    }
 }
 
 // MARK: - Supporting Types
@@ -447,16 +343,6 @@ enum DocumentItem {
     }
 }
 
-// MARK: - Placeholder Views
-
-struct DocumentDetailView: View {
-    let document: Document
-    
-    var body: some View {
-        Text("Document Detail View for \(document.fileName)")
-            .navigationTitle("Document")
-    }
-}
 
 
 #Preview {
