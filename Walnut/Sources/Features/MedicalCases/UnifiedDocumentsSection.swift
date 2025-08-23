@@ -20,138 +20,116 @@ struct UnifiedDocumentsSection: View {
     private let factory = DocumentFactory.shared
     
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.medium) {
-            // Enhanced Section Header
-            
-            HStack(spacing: Spacing.medium) {
-                // Dynamic icon with gradient background
-                ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color.healthPrimary.opacity(0.2),
-                                    Color.healthPrimary.opacity(0.05)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 48, height: 48)
-                        .shadow(color: Color.healthPrimary.opacity(0.2), radius: 4, x: 0, y: 2)
-                    
+        HealthCard {
+            VStack(alignment: .leading, spacing: Spacing.medium) {
+                // Enhanced Section Header
+                
+                HStack(spacing: Spacing.medium) {
+                    // Dynamic icon with gradient background
                     Image(systemName: "folder.fill.badge.plus")
                         .font(.title3.weight(.semibold))
                         .foregroundStyle(Color.healthPrimary)
-                }
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Medical Documents")
-                        .font(.headline.weight(.bold))
-                        .foregroundStyle(.primary)
+                        .background {
+                            Circle()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [
+                                            Color.healthPrimary.opacity(0.2),
+                                            Color.healthPrimary.opacity(0.05)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 48, height: 48)
+                                .shadow(color: Color.healthPrimary.opacity(0.2), radius: 4, x: 0, y: 2)
+                        }
                     
-                    HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        
+                        Text("Medical Documents")
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(.primary)
+                        
                         Text("\(totalDocumentCount) documents")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                         
-                        if unparsedCount > 0 {
-                            Text("•")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                            
-                            Text("\(unparsedCount) need attention")
-                                .font(.subheadline.weight(.medium))
-                                .foregroundStyle(.orange)
-                        }
-                        
-                        if abnormalResultsCount > 0 {
-                            Text("•")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                            
-                            Text("\(abnormalResultsCount) abnormal")
-                                .font(.subheadline.weight(.medium))
-                                .foregroundStyle(Color.healthError)
-                        }
-                    }
-                }
-                
-                Spacer()
-                
-                // Add button with subtle animation
-                Button(action: { showAddDocument = true }) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.title2)
-                        .foregroundStyle(Color.healthPrimary)
-                        .scaleEffect(showAddDocument ? 0.9 : 1.0)
-                }
-                .buttonStyle(PlainButtonStyle())
-                
-                
-            }
-            
-            if allDocuments.isEmpty {
-                // Modern empty state
-                VStack(spacing: Spacing.large) {
-                    ZStack {
-                        Circle()
-                            .fill(Color.healthPrimary.opacity(0.1))
-                            .frame(width: 80, height: 80)
-                        
-                        Image(systemName: "doc.badge.plus")
-                            .font(.system(size: 32, weight: .light))
-                            .foregroundStyle(Color.healthPrimary.opacity(0.6))
                     }
                     
-                    VStack(spacing: Spacing.small) {
-                        Text("No documents yet")
-                            .font(.title3.weight(.semibold))
-                            .foregroundStyle(.primary)
-                        
-                        Text("Add medical documents to track prescriptions, lab results, and more")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(nil)
-                    }
+                    Spacer()
                     
-                    Button("Add First Document") {
-                        showAddDocument = true
+                    // Add button with subtle animation
+                    Button(action: { showAddDocument = true }) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(Color.healthPrimary)
+                            .scaleEffect(showAddDocument ? 0.9 : 1.0)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Color.healthPrimary)
-                    .controlSize(.large)
+                    .buttonStyle(PlainButtonStyle())
+                    
                 }
-                .padding(.vertical, Spacing.xl)
-                .transition(.opacity.combined(with: .scale(scale: 0.95)))
-            } else {
-                // Rich document list with grouping
-                LazyVStack(spacing: Spacing.small) {
-                    ForEach(allDocuments, id: \.id) { item in
-                        documentRow(for: item)
-                            .transition(.asymmetric(
-                                insertion: .move(edge: .top).combined(with: .opacity),
-                                removal: .move(edge: .trailing).combined(with: .opacity)
-                            ))
+                
+                if allDocuments.isEmpty {
+                    // Modern empty state
+                    VStack(spacing: Spacing.large) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.healthPrimary.opacity(0.1))
+                                .frame(width: 80, height: 80)
+                            
+                            Image(systemName: "doc.badge.plus")
+                                .font(.system(size: 32, weight: .light))
+                                .foregroundStyle(Color.healthPrimary.opacity(0.6))
+                        }
+                        
+                        VStack(spacing: Spacing.small) {
+                            Text("No documents yet")
+                                .font(.title3.weight(.semibold))
+                                .foregroundStyle(.primary)
+                            
+                            Text("Add medical documents to track prescriptions, lab results, and more")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(nil)
+                        }
+                        
+                        Button("Add First Document") {
+                            showAddDocument = true
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(Color.healthPrimary)
+                        .controlSize(.large)
                     }
+                    .padding(.vertical, Spacing.xl)
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                } else {
+                    // Rich document list with grouping
+                    LazyVStack(spacing: Spacing.small) {
+                        ForEach(allDocuments, id: \.id) { item in
+                            documentRow(for: item)
+                                .transition(.asymmetric(
+                                    insertion: .move(edge: .top).combined(with: .opacity),
+                                    removal: .move(edge: .trailing).combined(with: .opacity)
+                                ))
+                        }
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .navigationDestination(item: $navigationState.selectedPrescription) { prescription in
+                        PrescriptionDetailView(prescription: prescription)
+                    }
+                    .navigationDestination(item: $navigationState.selectedBloodReport) { bloodReport in
+                        BloodReportDetailView(bloodReport: bloodReport)
+                    }
+                    .navigationDestination(item: $navigationState.selectedDocument) { document in
+                        DocumentDetailView(document: document)
+                    }
+                    .documentPicker(for: medicalCase, isPresented: $showAddDocument)
                 }
-                .transition(.opacity.combined(with: .move(edge: .top)))
-                .navigationDestination(item: $navigationState.selectedPrescription) { prescription in
-                    PrescriptionDetailView(prescription: prescription)
-                }
-                .navigationDestination(item: $navigationState.selectedBloodReport) { bloodReport in
-                    BloodReportDetailView(bloodReport: bloodReport)
-                }
-                .navigationDestination(item: $navigationState.selectedDocument) { document in
-                    DocumentDetailView(document: document)
-                }
-                .documentPicker(for: medicalCase, isPresented: $showAddDocument)
+                
             }
-            
         }
-        .padding(.horizontal)
-        
     }
     
     // MARK: - Document Row Builder
@@ -254,7 +232,7 @@ struct UnifiedDocumentsSection: View {
         var components: [String] = []
         
         if let doctorName = prescription.doctorName {
-            components.append("Dr. \(doctorName)")
+            components.append("\(doctorName)")
         }
         
         if let facilityName = prescription.facilityName {
@@ -347,4 +325,6 @@ enum DocumentItem {
 
 #Preview {
     UnifiedDocumentsSection(medicalCase: .sampleCase)
+        .padding(Spacing.medium)
+
 }

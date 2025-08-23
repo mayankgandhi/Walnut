@@ -90,7 +90,7 @@ struct PrescriptionTimelineEventProvider: TimelineEventProvider {
                     icon: "pills.fill",
                     color: .blue,
                     title: "Prescription Issued",
-                    subtitle: prescription.doctorName.map { "Dr. \($0) - \(subtitle)" } ?? subtitle,
+                    subtitle: prescription.doctorName.map { "\($0) - \(subtitle)" } ?? subtitle,
                     date: prescription.dateIssued
                 )
             }

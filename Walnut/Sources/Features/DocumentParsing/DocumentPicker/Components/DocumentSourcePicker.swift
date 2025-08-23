@@ -129,7 +129,7 @@ private struct CameraPickerView: View {
 // MARK: - Preview
 
 #Preview {
-    @Previewable @State var store = DocumentPickerStore.forPrescriptions()
+    @Previewable @State var store = DocumentPickerStore.forAllDocuments()
     
     VStack {
         DocumentSourcePicker()

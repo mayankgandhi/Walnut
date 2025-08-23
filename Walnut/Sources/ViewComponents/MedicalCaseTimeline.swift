@@ -47,7 +47,7 @@ struct Timeline: View {
     
     var body: some View {
         HealthCard(padding: Spacing.large) {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
+            VStack(alignment: .leading, spacing: Spacing.xl) {
                 // Section Header
                 timelineHeader
                 
@@ -56,34 +56,40 @@ struct Timeline: View {
             }
         }
     }
-}
-
-// MARK: - Timeline Private Views
-
-private extension Timeline {
     
     var timelineHeader: some View {
-        HStack(spacing: Spacing.small) {
-            ZStack {
-                Circle()
-                    .fill(Color.healthPrimary.opacity(0.15))
-                    .frame(width: 36, height: 36)
-                
-                Image(systemName: icon)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundStyle(Color.healthPrimary)
+        HStack(spacing: Spacing.large) {
+            // Dynamic icon with gradient background
+            Image(systemName: icon)
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(Color.healthPrimary)
+                .background {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.healthPrimary.opacity(0.2),
+                                    Color.healthPrimary.opacity(0.05)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 48, height: 48)
+                        .shadow(color: Color.healthPrimary.opacity(0.2), radius: 4, x: 0, y: 2)
+                }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(.primary)
             }
-            
-            Text(title)
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(.primary)
-            
-            Spacer()
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     var timelineEvents: some View {
-        VStack(spacing: Spacing.medium) {
+        VStack {
             let sortedEvents = events.sorted(by: { $0.date < $1.date })
             
             ForEach(Array(sortedEvents.enumerated()), id: \.element.id) { index, event in
@@ -122,7 +128,7 @@ struct MedicalCaseTimelineEventProvider: TimelineEventProvider {
                     icon: "pills.fill",
                     color: .blue,
                     title: "Prescription Added",
-                    subtitle: prescription.doctorName.map { "Dr. \($0)" } ?? "New medication prescribed",
+                    subtitle: prescription.doctorName.map { "\($0)" } ?? "New medication prescribed",
                     date: prescription.dateIssued
                 )
             }

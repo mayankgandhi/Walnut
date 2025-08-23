@@ -38,7 +38,8 @@ struct DocumentTypeSelector: View {
 // MARK: - Preview
 
 #Preview("Multiple Types") {
-    @Previewable @State var store = DocumentPickerStore.forAllDocuments()
+    @Previewable
+    @State var store = DocumentPickerStore.forAllDocuments()
     
     VStack {
         DocumentTypeSelector()
@@ -50,7 +51,8 @@ struct DocumentTypeSelector: View {
 }
 
 #Preview("Single Type") {
-    @Previewable @State var store = DocumentPickerStore.forPrescriptions()
+    @Previewable
+    @State var store = DocumentPickerStore.forAllDocuments()
     
     VStack {
         DocumentTypeSelector()

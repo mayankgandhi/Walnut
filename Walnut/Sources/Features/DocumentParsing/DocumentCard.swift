@@ -40,12 +40,12 @@ struct DocumentCard: View {
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text(title)
-                            .font(.headline.weight(.bold))
+                            .font(.subheadline.weight(.bold))
                             .foregroundStyle(.primary)
                         
                         if let document = document {
                             Text(document.fileName)
-                                .font(.subheadline)
+                                .font(.footnote)
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
                         }

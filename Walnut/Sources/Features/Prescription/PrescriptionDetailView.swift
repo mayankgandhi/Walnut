@@ -15,87 +15,50 @@ struct PrescriptionDetailView: View {
     
     @Environment(\.dismiss) private var dismiss
     @State private var showingMedicationEditor = false
-    @State private var showingDocumentViewer = false
-    @State private var documentToView: Document?
-    @State private var headerScale: CGFloat = 1.0
-    @State private var showingErrorAlert = false
-    @State private var errorMessage = ""
-    @Namespace private var heroTransition
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: Spacing.xl) {
-                    // Enhanced Hero Header with Prescription Focus
-                    enhancedHeaderCard
-                    
-                    // Enhanced Content Sections
-                    VStack(spacing: Spacing.xl) {
-                        // Medications Section - Most Important
-                        if !prescription.medications.isEmpty {
-                            PrescriptionMedicationsCard(medications: prescription.medications)
-                        }
-                        
-                        // Follow-up Section
-                        if prescription.followUpDate != nil || !(prescription.followUpTests?.isEmpty ?? false) {
-                            enhancedFollowUpCard
-                        }
-                        
-                        // Clinical Notes Section
-                        if let notes = prescription.notes, !notes.isEmpty {
-                            enhancedNotesCard
-                        }
-                        
-                        // Document Section
-                        if prescription.document != nil {
-                            DocumentCard(
-                                document: prescription.document,
-                                title: "Prescription Document",
-                                viewButtonText: "View Document"
-                            )
-                        }
-                        
-                        // Metadata Section
-                        enhancedMetadataCard
-                    }
+        ScrollView {
+            VStack(alignment: .leading, spacing: Spacing.medium) {
+                // Enhanced Hero Header with Prescription Focus
+                enhancedHeaderCard
+                
+                // Medications Section - Most Important
+                if !prescription.medications.isEmpty {
+                    PrescriptionMedicationsCard(medications: prescription.medications)
                 }
-                .padding(.horizontal, Spacing.medium)
-                .padding(.top, Spacing.xl)
-                .padding(.bottom, Spacing.xl)
-            }
-            .background(Color(UIColor.systemGroupedBackground))
-            .navigationTitle("Prescription")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                    .font(.system(size: 16, weight: .semibold))
+                
+                // Follow-up Section
+                if prescription.followUpDate != nil || !(prescription.followUpTests?.isEmpty ?? false) {
+                    enhancedFollowUpCard
+                }
+                
+                // Clinical Notes Section
+                if let notes = prescription.notes, !notes.isEmpty {
+                    enhancedNotesCard
+                }
+                
+                // Document Section
+                if prescription.document != nil {
+                    DocumentCard(
+                        document: prescription.document,
+                        title: "Prescription Document",
+                        viewButtonText: "View Document"
+                    )
                 }
             }
-            .sheet(isPresented: $showingMedicationEditor) {
-                PrescriptionMedicationEditor(prescription: prescription)
-            }
-            .fullScreenCover(isPresented: $showingDocumentViewer) {
-                if let document = documentToView {
-                    DocumentViewerSheet(document: document)
-                }
-            }
-            .alert("Document Error", isPresented: $showingErrorAlert) {
-                Button("OK") { }
-            } message: {
-                Text(errorMessage)
-            }
+            .padding(.horizontal, Spacing.medium)
+        }
+        .sheet(isPresented: $showingMedicationEditor) {
+            PrescriptionMedicationEditor(prescription: prescription)
         }
     }
     
     // MARK: - Enhanced Header Card
     private var enhancedHeaderCard: some View {
-        HealthCard(padding: Spacing.large) {
-            VStack(spacing: Spacing.large) {
+        HealthCard(padding: Spacing.medium) {
+            VStack(alignment: .leading, spacing: Spacing.large) {
                 // Hero Section with enhanced prescription visualization
-                HStack(spacing: Spacing.large) {
+                HStack(alignment: .center, spacing: Spacing.large) {
                     // Enhanced Prescription Icon with animated background
                     ZStack {
                         // Animated background gradient
@@ -117,23 +80,18 @@ struct PrescriptionDetailView: View {
                         Circle()
                             .stroke(Color.healthSuccess.opacity(0.2), lineWidth: 2)
                             .frame(width: 88, height: 88)
-                            .scaleEffect(headerScale)
-                            .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: headerScale)
-                            .onAppear { headerScale = 1.1 }
-                        
+                            
                         // Main icon with enhanced styling
                         Image(systemName: "cross.fill")
                             .font(.system(size: 32, weight: .semibold, design: .rounded))
                             .foregroundStyle(Color.healthSuccess)
                             .scaleEffect(1.0)
-                            .animation(.spring(response: 0.6, dampingFraction: 0.8), value: prescription.dateIssued)
                     }
-                    .matchedGeometryEffect(id: "prescription-icon", in: heroTransition)
                     
                     // Enhanced content with better hierarchy
                     VStack(alignment: .leading, spacing: Spacing.small) {
                         if let doctorName = prescription.doctorName {
-                            Text("Dr. \(doctorName)")
+                            Text("\(doctorName)")
                                 .font(.title.weight(.bold))
                                 .foregroundStyle(.primary)
                                 .lineLimit(2)
@@ -175,7 +133,6 @@ struct PrescriptionDetailView: View {
                         }
                     }
                     
-                    Spacer()
                 }
                 
                 // Enhanced metadata section with modern card grid
@@ -257,8 +214,6 @@ struct PrescriptionDetailView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
-                    
-                    Spacer()
                 }
                 
                 if let followUpTests = prescription.followUpTests, !followUpTests.isEmpty {
@@ -334,81 +289,6 @@ struct PrescriptionDetailView: View {
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(Color.healthPrimary.opacity(0.1), lineWidth: 1)
                         )
-                }
-            }
-        }
-    }
-    
-    // MARK: - Enhanced Metadata Card
-    private var enhancedMetadataCard: some View {
-        HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-                HStack(spacing: Spacing.small) {
-                    Circle()
-                        .fill(Color.purple.opacity(0.2))
-                        .frame(width: 36, height: 36)
-                        .overlay {
-                            Image(systemName: "info.circle.fill")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundStyle(.purple)
-                        }
-                    
-                    Text("Prescription Information")
-                        .font(.headline.weight(.bold))
-                        .foregroundStyle(.primary)
-                    
-                    Spacer()
-                }
-                
-                LazyVGrid(columns: [
-                    GridItem(.flexible(), spacing: Spacing.small),
-                    GridItem(.flexible(), spacing: Spacing.small)
-                ], spacing: Spacing.medium) {
-                    
-                    // Days since prescription
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        HStack {
-                            Image(systemName: "clock")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(.orange)
-                            
-                            Text("Days Ago")
-                                .font(.caption2.weight(.medium))
-                                .foregroundStyle(.tertiary)
-                            
-                            Spacer()
-                        }
-                        
-                        let daysAgo = Calendar.current.dateComponents([.day], from: prescription.dateIssued, to: Date()).day ?? 0
-                        Text("\(daysAgo)")
-                            .font(.title3.weight(.bold))
-                            .foregroundStyle(.orange)
-                    }
-                    .padding(Spacing.small)
-                    .background(Color(UIColor.secondarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    
-                    // Total medications
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        HStack {
-                            Image(systemName: "pills")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(.cyan)
-                            
-                            Text("Medications")
-                                .font(.caption2.weight(.medium))
-                                .foregroundStyle(.tertiary)
-                            
-                            Spacer()
-                        }
-                        
-                        Text("\(prescription.medications.count)")
-                            .font(.title3.weight(.bold))
-                            .foregroundStyle(.cyan)
-                    }
-                    .padding(Spacing.small)
-                    .background(Color(UIColor.secondarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
             }
         }
@@ -511,62 +391,14 @@ struct PrescriptionDetailView: View {
         }
     }
     
-    // MARK: - Document Handling Methods
-    
-    private func viewDocument(_ document: Document) {
-        // Validate file exists
-        guard FileManager.default.fileExists(atPath: document.fileURL.path) else {
-            errorMessage = "Document not found. The file may have been moved or deleted.\n\nPath: \(document.fileURL.path)"
-            showingErrorAlert = true
-            return
-        }
-        
-        // Check if file is readable
-        guard FileManager.default.isReadableFile(atPath: document.fileURL.path) else {
-            errorMessage = "Cannot access document. The file may be corrupted or you may not have permission to read it."
-            showingErrorAlert = true
-            return
-        }
-        
-        // Check file size to ensure it's not empty or corrupted
-        do {
-            let attributes = try FileManager.default.attributesOfItem(atPath: document.fileURL.path)
-            if let fileSize = attributes[.size] as? Int64, fileSize == 0 {
-                errorMessage = "Document appears to be empty or corrupted."
-                showingErrorAlert = true
-                return
-            }
-        } catch {
-            errorMessage = "Cannot read document information: \(error.localizedDescription)"
-            showingErrorAlert = true
-            return
-        }
-        
-        // All validations passed, show document
-        documentToView = document
-        showingDocumentViewer = true
-    }
-    
-    private func shareDocument(_ document: Document) {
-        // Validate file exists before sharing
-        guard FileManager.default.fileExists(atPath: document.fileURL.path) else {
-            errorMessage = "Cannot share document. The file may have been moved or deleted."
-            showingErrorAlert = true
-            return
-        }
-        
-        // Check if file is readable
-        guard FileManager.default.isReadableFile(atPath: document.fileURL.path) else {
-            errorMessage = "Cannot access document for sharing. The file may be corrupted."
-            showingErrorAlert = true
-            return
-        }
-        
-        let activityController = UIActivityViewController(activityItems: [document.fileURL], applicationActivities: nil)
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootViewController = windowScene.windows.first?.rootViewController {
-            rootViewController.present(activityController, animated: true)
-        }
+   
+}
+
+// MARK: - Comprehensive Preview
+
+#Preview("Complete Prescription") {
+    NavigationStack {
+        PrescriptionDetailView(prescription: .samplePrescription(for: .sampleCase))
     }
 }
 

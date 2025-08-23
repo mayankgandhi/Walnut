@@ -17,89 +17,76 @@ struct PrescriptionMedicationsCard: View {
         HealthCard {
             VStack(alignment: .leading, spacing: Spacing.medium) {
                 // Enhanced Header with Walnut Design System
-                Button(action: {
-                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                        isExpanded.toggle()
-                    }
-                }) {
-                    HStack(spacing: Spacing.small) {
-                        // Icon with design system styling
-                        Circle()
-                            .fill(Color.healthPrimary.opacity(0.15))
-                            .frame(width: 44, height: 44)
-                            .overlay {
-                                Image(systemName: "pills.fill")
-                                    .font(.title3.weight(.semibold))
-                                    .foregroundStyle(Color.healthPrimary)
-                            }
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Medications")
-                                .font(.headline.weight(.bold))
-                                .foregroundStyle(.primary)
-                            
-                            Text("\(medications.count) prescribed")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                        
-                        Spacer()
-                        
-                        // Medication count badge using design system
-                        HStack(spacing: 4) {
-                            Circle()
-                                .fill(Color.healthSuccess)
-                                .frame(width: 6, height: 6)
-                            
-                            Text("\(medications.count)")
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(Color.healthSuccess)
-                        }
-                        .padding(.horizontal, Spacing.small)
-                        .padding(.vertical, 4)
-                        .background(Color.healthSuccess.opacity(0.1))
-                        .clipShape(Capsule())
-                        
-                        // Expand/collapse indicator
-                        Image(systemName: isExpanded ? "chevron.up.circle" : "chevron.down.circle")
-                            .font(.title3)
-                            .foregroundStyle(.secondary)
-                            .rotationEffect(.degrees(isExpanded ? 0 : 180))
-                    }
-                }
-                .buttonStyle(PlainButtonStyle())
                 
-                // Medications List with animation
-                if isExpanded {
-                    if medications.isEmpty {
-                        // Empty state with design system styling
-                        VStack(spacing: Spacing.medium) {
-                            Image(systemName: "pills")
-                                .font(.system(size: 48))
-                                .foregroundStyle(.quaternary)
-                            
-                            VStack(spacing: Spacing.xs) {
-                                Text("No medications")
-                                    .font(.subheadline.weight(.medium))
-                                    .foregroundStyle(.secondary)
-                                
-                                Text("Prescription medications will appear here")
-                                    .font(.caption)
-                                    .foregroundStyle(.tertiary)
-                                    .multilineTextAlignment(.center)
-                            }
+                HStack(spacing: Spacing.small) {
+                    // Icon with design system styling
+                    Circle()
+                        .fill(Color.healthPrimary.opacity(0.15))
+                        .frame(width: 44, height: 44)
+                        .overlay {
+                            Image(systemName: "pills.fill")
+                                .font(.title3.weight(.semibold))
+                                .foregroundStyle(Color.healthPrimary)
                         }
-                        .padding(.vertical, Spacing.large)
-                        .transition(.opacity.combined(with: .move(edge: .top)))
-                    } else {
-                        LazyVStack(spacing: Spacing.small) {
-                            ForEach(medications, id: \.id) { medication in
-                                EnhancedMedicationCard(medication: medication)
-                            }
-                        }
-                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Medications")
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(.primary)
+                        
+                        Text("\(medications.count) prescribed")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                     }
+                    
+                    Spacer()
+                    
+                    // Medication count badge using design system
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(Color.healthSuccess)
+                            .frame(width: 6, height: 6)
+                        
+                        Text("\(medications.count)")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(Color.healthSuccess)
+                    }
+                    .padding(.horizontal, Spacing.small)
+                    .padding(.vertical, 4)
+                    .background(Color.healthSuccess.opacity(0.1))
+                    .clipShape(Capsule())
+                    
                 }
+                
+                if medications.isEmpty {
+                    // Empty state with design system styling
+                    VStack(spacing: Spacing.medium) {
+                        Image(systemName: "pills")
+                            .font(.system(size: 48))
+                            .foregroundStyle(.quaternary)
+                        
+                        VStack(spacing: Spacing.xs) {
+                            Text("No medications")
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(.secondary)
+                            
+                            Text("Prescription medications will appear here")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
+                    .padding(.vertical, Spacing.large)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                } else {
+                    LazyVStack(spacing: Spacing.small) {
+                        ForEach(medications, id: \.id) { medication in
+                            EnhancedMedicationCard(medication: medication)
+                        }
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+                
             }
         }
     }

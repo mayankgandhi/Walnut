@@ -14,7 +14,6 @@ import PhotosUI
 class DocumentPickerStore {
     
     // MARK: - Published State
-    
     var selectedDocumentType: DocumentType = .prescription
     var selectedDocument: URL?
     var selectedImage: UIImage?
@@ -28,13 +27,11 @@ class DocumentPickerStore {
     var isCameraPresented = false
     
     // MARK: - Configuration
-    
     let availableDocumentTypes: [DocumentType]
     let supportedFileTypes: [UTType]
     let maxFileSizeMB: Int
     
     // MARK: - Computed Properties
-    
     var hasSelection: Bool {
         selectedDocument != nil || selectedImage != nil
     }
@@ -192,21 +189,6 @@ class DocumentPickerStore {
 // MARK: - Factory Methods
 
 extension DocumentPickerStore {
-    
-    static func forPrescriptions() -> DocumentPickerStore {
-        DocumentPickerStore(
-            documentTypes: [.prescription],
-            defaultDocumentType: .prescription
-        )
-    }
-    
-    static func forBloodReports() -> DocumentPickerStore {
-        DocumentPickerStore(
-            documentTypes: [.labResult],
-            defaultDocumentType: .labResult
-        )
-    }
-    
     static func forAllDocuments() -> DocumentPickerStore {
         DocumentPickerStore(
             documentTypes: DocumentType.allCases,
