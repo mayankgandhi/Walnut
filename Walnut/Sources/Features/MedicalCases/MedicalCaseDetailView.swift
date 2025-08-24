@@ -190,11 +190,11 @@ private extension MedicalCaseDetailView {
         HealthCard {
             VStack(alignment: .leading, spacing: Spacing.medium) {
                 HealthCardHeader.clinicalNotes()
-
+                
                 // Notes Content
                 Text(medicalCase.notes)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .font(.body)
+                    .foregroundStyle(.primary)
                     .lineLimit(nil)
                     .multilineTextAlignment(.leading)
             }

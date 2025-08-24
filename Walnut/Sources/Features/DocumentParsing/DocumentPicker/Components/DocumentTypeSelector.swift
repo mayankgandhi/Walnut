@@ -15,7 +15,8 @@ struct DocumentTypeSelector: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Document Type")
+            
+            Text("Select a document Type")
                 .font(.headline)
                 .foregroundColor(.primary)
             

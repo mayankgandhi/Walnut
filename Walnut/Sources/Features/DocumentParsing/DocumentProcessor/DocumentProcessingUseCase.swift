@@ -215,7 +215,8 @@ struct DocumentProcessingUseCase {
     
     func execute(
         from store: DocumentPickerStore,
-        for medicalCase: MedicalCase
+        for medicalCase: MedicalCase,
+        selectedDocumentType: DocumentType
     ) async throws -> ProcessingResult {
         
         var tempFileURL: URL?
@@ -235,7 +236,7 @@ struct DocumentProcessingUseCase {
             do {
                 let modelId = try await parseAndSaveDocument(
                     tempFileURL: tempFileURL!,
-                    documentType: store.selectedDocumentType,
+                    documentType: selectedDocumentType,
                     medicalCase: medicalCase
                 )
                 
@@ -248,7 +249,7 @@ struct DocumentProcessingUseCase {
                 await updateProgress(1.0, "Complete!")
                 
                 return ProcessingResult(
-                    documentType: store.selectedDocumentType,
+                    documentType: selectedDocumentType,
                     modelId: modelId,
                     originalFileName: tempFileURL?.lastPathComponent ?? "Unknown File"
                 )

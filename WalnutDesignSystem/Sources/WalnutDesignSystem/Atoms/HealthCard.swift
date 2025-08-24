@@ -23,7 +23,7 @@ public struct HealthCard<Content: View>: View {
     public var body: some View {
         content
             .padding(padding)
-            .cardStyle()
+            .subtleCardStyle()
     }
 }
 

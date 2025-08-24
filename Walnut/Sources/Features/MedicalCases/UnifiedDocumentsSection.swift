@@ -34,7 +34,7 @@ struct UnifiedDocumentsSection: View {
                 
                 if allDocuments.isEmpty {
                     // Modern empty state
-                    VStack(spacing: Spacing.large) {
+                    VStack(alignment: .center, spacing: Spacing.large) {
                         ZStack {
                             Circle()
                                 .fill(Color.healthPrimary.opacity(0.1))
@@ -45,9 +45,9 @@ struct UnifiedDocumentsSection: View {
                                 .foregroundStyle(Color.healthPrimary.opacity(0.6))
                         }
                         
-                        VStack(spacing: Spacing.small) {
+                        VStack(alignment: .center, spacing: Spacing.small) {
                             Text("No documents yet")
-                                .font(.title3.weight(.semibold))
+                                .font(.headline.weight(.semibold))
                                 .foregroundStyle(.primary)
                             
                             Text("Add medical documents to track prescriptions, lab results, and more")
@@ -57,8 +57,12 @@ struct UnifiedDocumentsSection: View {
                                 .lineLimit(nil)
                         }
                         
-                        Button("Add First Document") {
+                        Button {
                             showAddDocument = true
+                        } label: {
+                            Text("Add First Document")
+                                .font(.body)
+                                .foregroundStyle(.primary)
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(Color.healthPrimary)
@@ -68,7 +72,7 @@ struct UnifiedDocumentsSection: View {
                     .transition(.opacity.combined(with: .scale(scale: 0.95)))
                 } else {
                     // Rich document list with grouping
-                    LazyVStack(spacing: Spacing.small) {
+                    LazyVStack(alignment: .center, spacing: Spacing.small) {
                         ForEach(allDocuments, id: \.id) { item in
                             documentRow(for: item)
                                 .transition(.asymmetric(

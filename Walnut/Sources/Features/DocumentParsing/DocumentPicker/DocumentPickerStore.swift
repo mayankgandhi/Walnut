@@ -14,7 +14,7 @@ import PhotosUI
 class DocumentPickerStore {
     
     // MARK: - Published State
-    var selectedDocumentType: DocumentType = .prescription
+    var selectedDocumentType: DocumentType?
     var selectedDocument: URL?
     var selectedImage: UIImage?
     var selectedPhotos: [PhotosPickerItem] = []

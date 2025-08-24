@@ -22,15 +22,14 @@ public struct HealthCardHeader: View {
     private let actionColor: Color
     private let onActionTap: (() -> Void)?
     
-    @State private var isActionPressed: Bool
     
     // MARK: - Initialization
     
     public init(
         icon: String? = nil,
         iconColor: Color = .healthPrimary,
-        iconSize: CGFloat = 18,
-        iconBackgroundSize: CGFloat = 48,
+        iconSize: CGFloat = 16,
+        iconBackgroundSize: CGFloat = 36,
         title: String,
         subtitle: String? = nil,
         actionIcon: String? = nil,
@@ -45,14 +44,13 @@ public struct HealthCardHeader: View {
         self.subtitle = subtitle
         self.actionIcon = actionIcon
         self.actionColor = actionColor
-        self.isActionPressed = false
         self.onActionTap = onActionTap
     }
     
     // MARK: - Body
     
     public var body: some View {
-        HStack(spacing: Spacing.large) {
+        HStack(spacing: Spacing.medium) {
             // Dynamic icon with gradient background (optional)
             if let icon = icon {
                 iconView(icon)
@@ -98,12 +96,12 @@ public struct HealthCardHeader: View {
     private var contentView: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
-                .font(.headline.weight(.bold))
+                .font(.subheadline.weight(.bold))
                 .foregroundStyle(.primary)
             
             if let subtitle = subtitle {
                 Text(subtitle)
-                    .font(.subheadline)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
             }
         }
@@ -113,9 +111,8 @@ public struct HealthCardHeader: View {
     private func actionButton(_ iconName: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: iconName)
-                .font(.title2)
+                .font(.title3)
                 .foregroundStyle(actionColor)
-                .scaleEffect(isActionPressed ? 0.9 : 1.0)
         }
         .buttonStyle(PlainButtonStyle())
     }

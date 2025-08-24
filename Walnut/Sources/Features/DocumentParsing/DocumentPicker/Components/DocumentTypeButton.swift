@@ -15,7 +15,7 @@ struct DocumentTypeButton: View {
     let isSelected: Bool
     
     var body: some View {
-        HStack(spacing: Spacing.xs) {
+        HStack(spacing: Spacing.small) {
             // Icon with enhanced styling
             ZStack {
                 Circle()
@@ -33,7 +33,7 @@ struct DocumentTypeButton: View {
                     .foregroundStyle(iconColor)
             }
             
-            VStack(spacing: 2) {
+            VStack(alignment: .leading) {
                 Text(type.displayName)
                     .font(.caption.weight(isSelected ? .semibold : .medium))
                     .foregroundStyle(textColor)
@@ -49,7 +49,7 @@ struct DocumentTypeButton: View {
             }
         }
         .padding(Spacing.small)
-        .frame(maxWidth: .infinity, alignment: .center)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(backgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(

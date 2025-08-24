@@ -71,6 +71,7 @@ class DocumentProcessingService {
     func processDocument(
         from store: DocumentPickerStore,
         for medicalCase: MedicalCase,
+        selectedDocumentType: DocumentType,
         onCompletion: @escaping (Result<ProcessingResult, Error>) -> Void
     ) {
         guard store.validateSelection() else {
@@ -91,7 +92,11 @@ class DocumentProcessingService {
                     progressDelegate: self
                 )
                 
-                let result = try await useCase.execute(from: store, for: medicalCase)
+                let result = try await useCase.execute(
+                    from: store,
+                    for: medicalCase,
+                    selectedDocumentType: selectedDocumentType
+                )
                 
                 await MainActor.run {
                     self.handleProcessingCompletion(.success(result))

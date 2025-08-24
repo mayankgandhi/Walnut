@@ -20,7 +20,7 @@ struct ModularDocumentPickerView: View {
     // MARK: - Environment
     
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
+    private var modelContext: ModelContext
     
     // MARK: - State
     
@@ -37,6 +37,7 @@ struct ModularDocumentPickerView: View {
     ) {
         self.medicalCase = medicalCase
         self.allowedDocumentTypes = allowedDocumentTypes
+        self.modelContext = modelContext
         
         self._store = State(initialValue: DocumentPickerStore(
             documentTypes: allowedDocumentTypes,
@@ -55,6 +56,7 @@ struct ModularDocumentPickerView: View {
                 DocumentTypeSelector()
                     .environment(store)
                     .padding(.horizontal)
+                
                 if showingProcessingStatus {
                     DocumentProcessingStatusView(
                         isProcessing: $store.isProcessing,
@@ -62,7 +64,7 @@ struct ModularDocumentPickerView: View {
                         processingStatus: $processingService.processingStatus,
                         lastError: $processingService.lastError
                     )
-                } else {
+                } else if store.selectedDocumentType != nil {
                     // Document Source Picker
                     DocumentSourcePicker()
                         .environment(store)
@@ -86,7 +88,9 @@ struct ModularDocumentPickerView: View {
                     }
                     
                     // Upload button
-                    if store.canUpload && !processingService.isProcessing {
+                    if store.canUpload &&
+                        !processingService.isProcessing &&
+                        store.selectedDocumentType != nil {
                         Button("Upload \(store.selectedDocument != nil ? "Document" : "Image")") {
                             processDocument()
                         }
@@ -104,8 +108,8 @@ struct ModularDocumentPickerView: View {
             .navigationTitle("Add Document")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Cancel", systemImage: "xmark.circle.fill") {
                         dismiss()
                     }
                 }
@@ -118,7 +122,12 @@ struct ModularDocumentPickerView: View {
     
     private func processDocument() {
         showingProcessingStatus = true
-        processingService.processDocument(from: store, for: medicalCase) { result in
+        processingService
+            .processDocument(
+                from: store,
+                for: medicalCase,
+                selectedDocumentType: store.selectedDocumentType!
+            ) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success:
