@@ -96,7 +96,7 @@ public struct HealthCardHeader: View {
     private var contentView: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
-                .font(.subheadline.weight(.bold))
+                .font(.title3.weight(.bold))
                 .foregroundStyle(.primary)
             
             if let subtitle = subtitle {
@@ -111,7 +111,7 @@ public struct HealthCardHeader: View {
     private func actionButton(_ iconName: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: iconName)
-                .font(.title3)
+                .font(.title)
                 .foregroundStyle(actionColor)
         }
         .buttonStyle(PlainButtonStyle())

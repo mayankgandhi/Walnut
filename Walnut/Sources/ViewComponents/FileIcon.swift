@@ -51,13 +51,13 @@ public struct FileIcon: View {
             // File information
             VStack(alignment: .leading, spacing: 2) {
                 Text(filename)
-                    .font(.headline)
+                    .font(.system(.body, design: .rounded, weight: .medium))
                     .foregroundColor(.primary)
                     .lineLimit(1)
                     .truncationMode(.middle)
                 
                 Text(subtitle)
-                    .font(.caption)
+                    .font(.system(.caption, design: .rounded, weight: .regular))
                     .foregroundColor(.secondary)
                     .lineLimit(1)
                     .truncationMode(.tail)

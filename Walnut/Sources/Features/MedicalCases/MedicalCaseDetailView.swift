@@ -15,7 +15,7 @@ struct MedicalCaseDetailView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: Spacing.medium) {
+            VStack(spacing: Spacing.large) {
                 // Modern Hero Header
                 heroSection
                 
@@ -187,10 +187,10 @@ struct MedicalCaseDetailView: View {
 private extension MedicalCaseDetailView {
     
     var clinicalNotesSection: some View {
-        HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-                HealthCardHeader.clinicalNotes()
-                
+        VStack(alignment: .leading, spacing: Spacing.medium) {
+            HealthCardHeader.clinicalNotes()
+            
+            HealthCard {
                 // Notes Content
                 Text(medicalCase.notes)
                     .font(.body)

@@ -246,7 +246,7 @@ class UnparsedDocumentActionHandler: DocumentActionHandler {
     func getNavigationDestination() -> AnyView? {
         if navigationState.selectedDocument != nil {
             return AnyView(
-                DocumentDetailView(document: document)
+                DocumentViewer(document: document)
             )
         }
         return nil
@@ -300,16 +300,6 @@ class NavigationState {
     var selectedDocument: Document?
 }
 
-// MARK: - Document Detail Views Placeholders
-
-struct DocumentDetailView: View {
-    let document: Document
-    
-    var body: some View {
-        Text("Document Detail View for \(document.fileName)")
-            .navigationTitle("Document")
-    }
-}
 
 // MARK: - SwiftUI Extensions for Context Menu
 

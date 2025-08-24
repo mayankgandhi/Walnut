@@ -14,6 +14,9 @@ struct DocumentCard: View {
     let title: String
     let viewButtonText: String
     
+    @State private var showingDocumentViewer = false
+    @State private var shareSheetPresented = false
+    
     init(
         document: Document,
         title: String,
@@ -73,79 +76,124 @@ struct DocumentCard: View {
                 }
             }
         }
+        .sheet(isPresented: $showingDocumentViewer) {
+            NavigationStack {
+                DocumentViewer(document: document)
+                    .navigationTitle(document.fileName)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button("Done") {
+                                showingDocumentViewer = false
+                            }
+                        }
+                    }
+            }
+        }
+        .sheet(isPresented: $shareSheetPresented) {
+            ShareSheet(items: [document.fileURL])
+        }
     }
     
     // MARK: - Internal Functions
     
     private func viewDocument(_ document: Document) {
-        // Open document using UIDocumentInteractionController
-        let documentController = UIDocumentInteractionController(url: document.fileURL)
-        
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootViewController = windowScene.windows.first?.rootViewController {
-            documentController.presentPreview(animated: true)
-            documentController.delegate = rootViewController as? UIDocumentInteractionControllerDelegate
-        }
+        showingDocumentViewer = true
     }
     
     private func shareDocument(_ document: Document) {
-        let activityController = UIActivityViewController(
-            activityItems: [document.fileURL],
-            applicationActivities: nil
-        )
-        
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootViewController = windowScene.windows.first?.rootViewController {
-            // For iPad
-            if let popoverController = activityController.popoverPresentationController {
-                popoverController.sourceView = rootViewController.view
-                popoverController.sourceRect = CGRect(x: rootViewController.view.bounds.midX, y: rootViewController.view.bounds.midY, width: 0, height: 0)
-                popoverController.permittedArrowDirections = []
-            }
-            
-            rootViewController.present(activityController, animated: true)
-        }
+        shareSheetPresented = true
     }
+}
+
+// MARK: - Share Sheet
+
+private struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+    
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        return controller
+    }
+    
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 // MARK: - Preview
 
-#Preview {
-    VStack(spacing: Spacing.large) {
-        // Prescription Document Card
-        DocumentCard(
-            document: Document.sampleDocument,
-            title: "Prescription Document",
-            viewButtonText: "View Document"
-        )
-        
-        // Blood Report Document Card
-        DocumentCard(
-            document: Document.sampleDocument,
-            title: "Lab Report Document",
-            viewButtonText: "View Report"
-        )
-        
-        // Generic Medical Document Card
-        DocumentCard(
-            document: Document.sampleDocument,
-            title: "X-Ray Results",
-            viewButtonText: "View X-Ray"
-        )
+#Preview("Document Cards") {
+    NavigationStack {
+        ScrollView {
+            VStack(spacing: Spacing.large) {
+                VStack(alignment: .leading, spacing: Spacing.medium) {
+                    Text("Document Cards")
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(.primary)
+                    
+                    Text("Interactive document cards with view and share functionality")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                // Prescription Document Card
+                DocumentCard(
+                    document: Document.samplePDFDocument,
+                    title: "Prescription Document",
+                    viewButtonText: "View Prescription"
+                )
+                
+                // Blood Report Document Card
+                DocumentCard(
+                    document: Document.sampleImageDocument,
+                    title: "Lab Report Document",
+                    viewButtonText: "View Report"
+                )
+                
+                // Generic Medical Document Card
+                DocumentCard(
+                    document: Document.sampleDocument,
+                    title: "X-Ray Results",
+                    viewButtonText: "View X-Ray"
+                )
+            }
+            .padding()
+        }
+        .navigationTitle("Document Cards")
+        .navigationBarTitleDisplayMode(.large)
     }
-    .padding()
 }
 
 // MARK: - Sample Data Extension
 
 private extension Document {
     static let sampleDocument = Document(
-        fileName: "Blood_Test_Results_2024.pdf",
-        fileURL: URL(string: "file://sample.pdf")!,
-        documentType: .consultation,
+        fileName: "Medical_Document.pdf",
+        fileURL: URL(string: "file://medical_document.pdf")!,
+        documentType: .unknown,
         uploadDate: Date(),
         fileSize: 1024000,
         createdAt: Date(),
         updatedAt: Date()
+    )
+    
+    static let samplePDFDocument = Document(
+        fileName: "Prescription_Report_2024.pdf",
+        fileURL: URL(string: "file://prescription.pdf")!,
+        documentType: .prescription,
+        uploadDate: Date().addingTimeInterval(-86400 * 2), // 2 days ago
+        fileSize: 2048000,
+        createdAt: Date().addingTimeInterval(-86400 * 2),
+        updatedAt: Date().addingTimeInterval(-86400 * 2)
+    )
+    
+    static let sampleImageDocument = Document(
+        fileName: "Blood_Test_Results.jpg",
+        fileURL: URL(string: "file://blood_test.jpg")!,
+        documentType: .labResult,
+        uploadDate: Date().addingTimeInterval(-86400), // 1 day ago
+        fileSize: 512000,
+        createdAt: Date().addingTimeInterval(-86400),
+        updatedAt: Date().addingTimeInterval(-86400)
     )
 }

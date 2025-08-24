@@ -1,5 +1,5 @@
 //
-//  DocumentViewerSheet.swift
+//  DocumentViewer.swift
 //  Walnut
 //
 //  Created by Mayank Gandhi on 03/08/25.
@@ -9,35 +9,28 @@
 import SwiftUI
 import PDFKit
 
-struct DocumentViewerSheet: View {
+struct DocumentViewer: View {
+    
     let document: Document
     @Environment(\.dismiss) private var dismiss
     @State private var shareSheetPresented = false
     
     var body: some View {
-        NavigationView {
-            documentContentView
-                .navigationTitle(document.fileName)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Done") {
-                            dismiss()
-                        }
-                    }
-                    
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: {
-                            shareSheetPresented = true
-                        }) {
-                            Image(systemName: "square.and.arrow.up")
-                        }
+        documentContentView
+            .navigationTitle(document.fileName)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        shareSheetPresented = true
+                    }) {
+                        Image(systemName: "square.and.arrow.up")
                     }
                 }
-                .sheet(isPresented: $shareSheetPresented) {
-                    ShareSheet(items: [document.fileURL])
-                }
-        }
+            }
+            .sheet(isPresented: $shareSheetPresented) {
+                ShareSheet(items: [document.fileURL])
+            }
     }
     
     @ViewBuilder
@@ -220,6 +213,7 @@ private struct ImageDocumentView: View {
 
 // MARK: - Unsupported Document View
 private struct UnsupportedDocumentView: View {
+    
     let document: Document
     
     var body: some View {
@@ -233,57 +227,17 @@ private struct UnsupportedDocumentView: View {
 
 // MARK: - Document Error View
 private struct DocumentErrorView: View {
+    
     let title: String
     let message: String
     let systemImage: String
     
     var body: some View {
-        VStack(spacing: 24) {
-            // Error Icon
-            Image(systemName: systemImage)
-                .font(.system(size: 72, weight: .light))
-                .foregroundColor(.red.opacity(0.7))
-            
-            VStack(spacing: 12) {
-                // Error Title
-                Text(title)
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .multilineTextAlignment(.center)
-                
-                // Error Message
-                Text(message)
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-                    .padding(.horizontal, 32)
-            }
-            
-            VStack(spacing: 16) {
-                Divider()
-                    .padding(.horizontal, 40)
-                
-                // Helpful suggestions
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("What you can try:")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Label("Check if the document was moved or deleted", systemImage: "questionmark.circle")
-                        Label("Try re-uploading the document", systemImage: "arrow.clockwise")
-                        Label("Contact support if the issue persists", systemImage: "envelope")
-                    }
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                }
-                .padding(.horizontal, 40)
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemGroupedBackground))
+        ContentUnavailableView(
+            title,
+            systemImage: systemImage,
+            description: Text(message)
+        )
     }
 }
 
@@ -300,5 +254,5 @@ private struct ShareSheet: UIViewControllerRepresentable {
 }
 
 #Preview {
-    DocumentViewerSheet(document: Document.document)
+    DocumentViewer(document: Document.document)
 }

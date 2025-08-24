@@ -41,11 +41,10 @@ struct Timeline: View {
     }
     
     var body: some View {
-        HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.xl) {
-                // Section Header
-                timelineHeader
-                
+        VStack(alignment: .leading, spacing: Spacing.medium) {
+            // Section Header
+            timelineHeader
+            HealthCard {
                 // Timeline Items
                 timelineEvents
             }

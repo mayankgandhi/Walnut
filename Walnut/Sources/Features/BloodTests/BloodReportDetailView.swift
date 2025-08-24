@@ -366,15 +366,15 @@ struct BloodReportDetailView: View {
     
     // Enhanced Notes Card
     private var enhancedNotesCard: some View {
-        HealthCard {
-            VStack(alignment: .leading) {
-                HealthCardHeader.clinicalNotes()
-                
+        VStack(alignment: .leading) {
+            HealthCardHeader.clinicalNotes()
+            
+            HealthCard {
                 Text(bloodReport.notes)
                     .font(.subheadline)
                     .lineSpacing(4)
                     .foregroundStyle(.primary)
-                    
+                
             }
         }
     }
