@@ -24,7 +24,7 @@ struct ParsedBloodReport: ParseableModel, OpenAISchemaDefinable {
         ParsedBloodReport: testName(String), labName(String), category(String), resultDate(Date:ISO8601-format), notes(String), testResults([ParsedBloodTestResult])
         ParsedBloodTestResult: testName(String), value(String), unit(String), referenceRange(String), isAbnormal(Bool)
         
-        Please extract all blood test results from the lab report. The resultDate should be the date when the tests were performed or results were available.
+        Please extract all blood test results from the lab report. The resultDate should be the date when the tests were performed or results were available. 
         Strictly Follow this rule: Expected all date strings to be ISO8601-format.
         """
     }

@@ -9,7 +9,7 @@
 import SwiftUI
 
 // MARK: - DocumentType Extensions
-public enum DocumentType: String, CaseIterable, Codable {
+public enum DocumentType: String, CaseIterable, Codable, Identifiable {
     
     case prescription
     case labResult = "lab result"
@@ -20,7 +20,6 @@ public enum DocumentType: String, CaseIterable, Codable {
     case consultation = "consultation notes"
     case vaccination = "vaccination record"
     case insurance = "insurance document"
-    case referral = "referral letter"
     
     public var displayName: String {
         switch self {
@@ -33,17 +32,15 @@ public enum DocumentType: String, CaseIterable, Codable {
         case .invoice:
             return "Bill"
         case .discharge:
-            return "Disc"
+            return "Discharge Summary"
         case .imaging:
-            return "Img"
+            return "Imaging"
         case .consultation:
-            return "Notes"
+            return "Consultation"
         case .vaccination:
-            return "Vacc"
+            return "Vaccination"
         case .insurance:
-            return "Ins"
-        case .referral:
-            return "Ref"
+            return "Insurance"
         }
     }
     
@@ -67,8 +64,6 @@ public enum DocumentType: String, CaseIterable, Codable {
             return "syringe.fill"
         case .insurance:
             return "creditcard.fill"
-        case .referral:
-            return "person.2.fill"
         }
     }
     
@@ -92,8 +87,6 @@ public enum DocumentType: String, CaseIterable, Codable {
             return .mint
         case .insurance:
             return .indigo
-        case .referral:
-            return .cyan
         }
     }
     
@@ -117,8 +110,29 @@ public enum DocumentType: String, CaseIterable, Codable {
             return .mint
         case .insurance:
             return .indigo
-        case .referral:
-            return .cyan
+        }
+    }
+    
+    public var subtitle: String {
+        switch self {
+        case .prescription:
+            return "Medications & dosages"
+        case .labResult:
+            return "Blood tests & analysis"
+        case .unknown:
+            return "General documents"
+        case .invoice:
+            return "Bills & payments"
+        case .discharge:
+            return "Hospital summary"
+        case .imaging:
+            return "X-rays, MRI, CT scans"
+        case .consultation:
+            return "Doctor visit notes"
+        case .vaccination:
+            return "Immunization records"
+        case .insurance:
+            return "Coverage & policies"
         }
     }
     
@@ -142,9 +156,11 @@ public enum DocumentType: String, CaseIterable, Codable {
             return "vaccination record"
         case .insurance:
             return "insurance document"
-        case .referral:
-            return "referral letter"
         }
+    }
+    
+    public var id: String {
+        self.rawValue
     }
     
     // MARK: - Initializers
@@ -176,8 +192,6 @@ public enum DocumentType: String, CaseIterable, Codable {
         case "insurance document", "insurance", "insurance card", "coverage", "policy":
             self = .insurance
         case "referral letter", "referral", "specialist referral", "referral form":
-            self = .referral
-        case "document", "file", "medical document", "health document":
             self = .unknown
         default:
             return nil

@@ -36,11 +36,7 @@ public final class DocumentParser {
         let mimeType = MimeTypeResolver.mimeType(for: fileName)
         
         let prompt = """
-        Please analyze this document and extract the information according to the following structure:
-        
-        \(type.parseDefinition)
-        
-        Return the information as structured JSON matching the schema provided.
+        Please analyze this document and extract the information according to the following structure: \(type.parseDefinition) Return the information as structured JSON matching the schema provided.
         """
         
         let chatRequest = OpenAIChatRequest(

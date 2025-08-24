@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import WalnutDesignSystem
 
 struct DocumentTypeSelector: View {
     
@@ -18,21 +19,37 @@ struct DocumentTypeSelector: View {
                 .font(.headline)
                 .foregroundColor(.primary)
             
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(store.availableDocumentTypes, id: \.self) { type in
+            LazyVGrid(
+                columns: [
+                    .init(
+                        .flexible(minimum: 20, maximum: .infinity),
+                        spacing: Spacing.medium,
+                        alignment: .leading
+                    ),
+                    .init(
+                        .flexible(minimum: 20, maximum: .infinity),
+                        spacing: Spacing.medium,
+                        alignment: .leading
+                    )
+                ],
+                alignment: .leading,
+                spacing: Spacing.medium
+            ) {
+                ForEach(store.availableDocumentTypes, id: \.self) { type in
+                    Button {
+                        store.selectDocumentType(type)
+                    } label: {
                         DocumentTypeButton(
                             type: type,
                             isSelected: store.selectedDocumentType == type
-                        ) {
-                            store.selectDocumentType(type)
-                        }
+                        )
                     }
+                    .buttonStyle(.plain)
                 }
-                .padding(.horizontal, 4) // Small padding for scroll content
             }
         }
     }
+    
 }
 
 // MARK: - Preview

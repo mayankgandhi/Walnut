@@ -11,21 +11,26 @@ import WalnutDesignSystem
 
 struct UnifiedDocumentsSection: View {
     
+    @Environment(\.modelContext) private var modelContext
+
     let medicalCase: MedicalCase
     
     @State private var showAddDocument = false
-    @State private var isExpanded = true
     @State private var navigationState = NavigationState()
     
     private let factory = DocumentFactory.shared
     
     var body: some View {
         HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
+            VStack(
+                alignment: .leading,
+                spacing: Spacing.medium
+            ) {
                 
-                // Enhanced Section Header
-                HealthCardHeader.medicalDocuments(count: totalDocumentCount,
-                                                  onAddTap: { showAddDocument = true })
+                HealthCardHeader.medicalDocuments(
+                    count: totalDocumentCount,
+                    onAddTap: { showAddDocument = true }
+                )
                 
                 if allDocuments.isEmpty {
                     // Modern empty state
@@ -82,9 +87,13 @@ struct UnifiedDocumentsSection: View {
                     .navigationDestination(item: $navigationState.selectedDocument) { document in
                         DocumentDetailView(document: document)
                     }
-                    .documentPicker(for: medicalCase, isPresented: $showAddDocument)
+                    .sheet(isPresented: $showAddDocument) {
+                        ModularDocumentPickerView(
+                            medicalCase: medicalCase,
+                            modelContext: modelContext
+                        )
+                    }
                 }
-                
             }
         }
     }
