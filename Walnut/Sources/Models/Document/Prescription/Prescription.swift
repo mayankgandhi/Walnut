@@ -28,7 +28,7 @@ class Prescription {
     var createdAt: Date
     var updatedAt: Date
     
-    @Relationship(inverse: \MedicalCase.prescriptions)
+    @Relationship
     var medicalCase: MedicalCase
     
     @Relationship(deleteRule: .cascade)

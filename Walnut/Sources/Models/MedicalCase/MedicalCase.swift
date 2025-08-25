@@ -26,10 +26,10 @@ class MedicalCase: Identifiable, Sendable {
   
     var patient: Patient
     
-    @Relationship(deleteRule: .cascade)
+    @Relationship(deleteRule: .cascade, inverse: \Prescription.medicalCase)
     var prescriptions: [Prescription] = []
     
-    @Relationship(deleteRule: .cascade)
+    @Relationship(deleteRule: .cascade, inverse: \BloodReport.medicalCase)
     var bloodReports: [BloodReport] = []
     
     @Relationship(deleteRule: .cascade)
