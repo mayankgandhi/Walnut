@@ -44,11 +44,55 @@ struct DocumentProcessingUseCase {
         var tempFileURL: URL?
         
         do {
-            // Step 1: Prepare file for processing
+            // Step 1: Prepare file for processing and save locally
             await updateProgress(0.1, "Preparing file...")
-            tempFileURL = try await fileService.prepareFile(from: store)
             
-            // Step 2: Ensure directories exist
+            // Create local file URL based on selection type and save the file
+            if let selectedDocument = store.selectedDocument {
+                // Handle document file selection - save using URL method
+                let localFileURL = try documentFileManager.saveDocument(
+                    from: selectedDocument,
+                    patientName: medicalCase.patient.fullName,
+                    medicalCaseTitle: medicalCase.title,
+                    documentType: documentTypeToStorageType(selectedDocumentType),
+                    date: Date(),
+                    fileName: selectedDocument.lastPathComponent
+                )
+                // Use the local file as temp file for AI processing
+                tempFileURL = localFileURL
+                
+            } else if let selectedImage = store.selectedImage {
+                // Handle image selection - convert to data and save using Data method
+                guard let imageData = selectedImage.jpegData(compressionQuality: 0.8) else {
+                    throw DocumentProcessingError.filePreparationFailed(
+                        NSError(
+                            domain: "DocumentProcessing",
+                            code: -1,
+                            userInfo: [NSLocalizedDescriptionKey: "Failed to convert image to data"]
+                        )
+                    )
+                }
+                
+                let fileName = "image_\(Int(Date().timeIntervalSince1970)).jpg"
+                let localFileURL = try documentFileManager.saveDocument(
+                    data: imageData,
+                    patientName: medicalCase.patient.fullName,
+                    medicalCaseTitle: medicalCase.title,
+                    documentType: documentTypeToStorageType(selectedDocumentType),
+                    date: Date(),
+                    fileName: fileName
+                )
+                // Use the local file as temp file for AI processing
+                tempFileURL = localFileURL
+                
+            } else {
+                throw DocumentProcessingError.filePreparationFailed(
+                    NSError(domain: "DocumentProcessing", code: -1, 
+                           userInfo: [NSLocalizedDescriptionKey: "No file selected"])
+                )
+            }
+            
+            // Step 2: Ensure directories exist (already done by saveDocument)
             await updateProgress(0.2, "Setting up storage...")
             try documentFileManager.ensureDirectoriesExist()
             
@@ -62,11 +106,8 @@ struct DocumentProcessingUseCase {
                     medicalCase: medicalCase
                 )
                 
-                // Step 4: Cleanup temp file
-                await updateProgress(0.9, "Cleaning up...")
-                if let tempFileURL = tempFileURL {
-                    fileService.cleanupTemporaryFile(at: tempFileURL)
-                }
+                // Step 4: Complete
+                await updateProgress(0.9, "Finalizing...")
                 
                 await updateProgress(1.0, "Complete!")
                 
@@ -84,11 +125,8 @@ struct DocumentProcessingUseCase {
                     medicalCase: medicalCase
                 )
                 
-                // Step 5: Cleanup temp file
-                await updateProgress(0.9, "Cleaning up...")
-                if let tempFileURL = tempFileURL {
-                    fileService.cleanupTemporaryFile(at: tempFileURL)
-                }
+                // Step 5: Complete
+                await updateProgress(0.9, "Finalizing...")
                 
                 await updateProgress(1.0, "Document saved as unparsed!")
                 
@@ -100,11 +138,6 @@ struct DocumentProcessingUseCase {
             }
             
         } catch {
-            // Cleanup on error
-            if let tempFileURL = tempFileURL {
-                fileService.cleanupTemporaryFile(at: tempFileURL)
-            }
-            
             // Re-throw with context
             throw mapError(error)
         }
@@ -133,39 +166,21 @@ struct DocumentProcessingUseCase {
         case .prescription:
             let parsedPrescription = try await aiService.parseDocument(from: tempFileURL, as: ParsedPrescription.self)
             
-            // Save file locally with organized structure
-            let localFileURL = try documentFileManager.saveDocument(
-                from: tempFileURL,
-                patientName: medicalCase.patient.fullName,
-                medicalCaseTitle: medicalCase.title,
-                documentType: DocumentStorageType.prescription,
-                date: parsedPrescription.dateIssued,
-                fileName: tempFileURL.lastPathComponent
-            )
-            
+            // File is already saved locally in the prepare step, just use the same URL
             return try await repository.savePrescription(
                 parsedPrescription,
                 to: medicalCase,
-                fileURL: localFileURL
+                fileURL: tempFileURL
             )
             
         case .labResult:
             let parsedBloodReport = try await aiService.parseDocument(from: tempFileURL, as: ParsedBloodReport.self)
             
-            // Save file locally with organized structure
-            let localFileURL = try documentFileManager.saveDocument(
-                from: tempFileURL,
-                patientName: medicalCase.patient.fullName,
-                medicalCaseTitle: medicalCase.title,
-                documentType: DocumentStorageType.bloodReport,
-                date: parsedBloodReport.resultDate,
-                fileName: tempFileURL.lastPathComponent
-            )
-            
+            // File is already saved locally in the prepare step, just use the same URL
             return try await repository.saveBloodReport(
                 parsedBloodReport,
                 to: medicalCase,
-                fileURL: localFileURL
+                fileURL: tempFileURL
             )
             
         default:
@@ -182,19 +197,12 @@ struct DocumentProcessingUseCase {
         tempFileURL: URL,
         medicalCase: MedicalCase
     ) async throws -> PersistentIdentifier {
-        // Save file locally as unparsed document
-        let localFileURL = try documentFileManager.saveUnparsedDocument(
-            from: tempFileURL,
-            patientName: medicalCase.patient.fullName,
-            medicalCaseTitle: medicalCase.title,
-            fileName: tempFileURL.lastPathComponent
-        )
-        
+        // File is already saved locally in the prepare step
         // Create a Document record for unparsed document
-        let fileSize = (try? FileManager.default.attributesOfItem(atPath: localFileURL.path)[.size] as? Int64) ?? 0
+        let fileSize = (try? FileManager.default.attributesOfItem(atPath: tempFileURL.path)[.size] as? Int64) ?? 0
         let document = Document(
             fileName: tempFileURL.lastPathComponent,
-            fileURL: localFileURL,
+            fileURL: tempFileURL,
             documentType: .labResult,
             fileSize: fileSize
         )
@@ -206,6 +214,17 @@ struct DocumentProcessingUseCase {
     @MainActor
     private func updateProgress(_ progress: Double, _ status: String) {
         progressDelegate?.didUpdateProgress(progress, status: status)
+    }
+    
+    private func documentTypeToStorageType(_ documentType: DocumentType) -> DocumentStorageType {
+        switch documentType {
+        case .prescription:
+            return .prescription
+        case .labResult:
+            return .bloodReport
+        default:
+            return .unparsed
+        }
     }
     
 }

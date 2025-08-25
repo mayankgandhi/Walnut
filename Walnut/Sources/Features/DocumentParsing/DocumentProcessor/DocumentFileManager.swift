@@ -61,6 +61,47 @@ struct DocumentFileManager {
         return destinationURL
     }
     
+    /// Saves document data directly to local storage with organized folder structure
+    /// - Parameters:
+    ///   - data: Document data to save
+    ///   - patientName: Patient's full name for folder structure
+    ///   - medicalCaseTitle: Medical case title for folder structure
+    ///   - documentType: Type of document (prescription, bloodReport, unparsed)
+    ///   - date: Date for file naming (prescription date, blood report date, or current date for unparsed)
+    ///   - fileName: File name with extension
+    /// - Returns: Local file URL where the document was saved
+    func saveDocument(
+        data: Data,
+        patientName: String,
+        medicalCaseTitle: String,
+        documentType: DocumentStorageType,
+        date: Date,
+        fileName: String
+    ) throws -> URL {
+        
+        // Create folder structure
+        let patientFolder = createPatientFolder(patientName: patientName)
+        let caseFolder = createMedicalCaseFolder(in: patientFolder, caseTitle: medicalCaseTitle)
+        let documentFolder = createDocumentTypeFolder(in: caseFolder, type: documentType)
+        
+        // Generate unique file name with date
+        let fileExtension = URL(fileURLWithPath: fileName).pathExtension
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        let dateString = dateFormatter.string(from: date)
+        
+        let sanitizedFileName = sanitizeFileName(fileName)
+        let finalFileName = fileExtension.isEmpty ? 
+            "\(dateString)_\(sanitizedFileName)" : 
+            "\(dateString)_\(sanitizedFileName).\(fileExtension)"
+        let destinationURL = documentFolder.appendingPathComponent(finalFileName)
+        
+        // Write data to destination
+        try writeData(data, to: destinationURL)
+        
+        return destinationURL
+    }
+    
     /// Saves an unparsed document when parsing fails
     /// - Parameters:
     ///   - sourceURL: Source file URL to copy from
@@ -155,6 +196,16 @@ struct DocumentFileManager {
         
         // Copy the file
         try fileManager.copyItem(at: sourceURL, to: destinationURL)
+    }
+    
+    private func writeData(_ data: Data, to destinationURL: URL) throws {
+        // Remove existing file if it exists
+        if fileManager.fileExists(atPath: destinationURL.path) {
+            try fileManager.removeItem(at: destinationURL)
+        }
+        
+        // Write the data
+        try data.write(to: destinationURL)
     }
     
     /// Sanitizes file/folder names to be safe for file system
