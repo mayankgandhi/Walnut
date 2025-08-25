@@ -16,20 +16,17 @@ import AIKit
 struct DocumentProcessingUseCase {
     
     private let aiService: UnifiedDocumentParsingService
-    private let fileService: FilePreparationService
     private let repository: DocumentRepositoryProtocol
     private let documentFileManager: DocumentFileManager
     private weak var progressDelegate: DocumentProcessingProgressDelegate?
     
     init(
         aiService: UnifiedDocumentParsingService,
-        fileService: FilePreparationService,
         repository: DocumentRepositoryProtocol,
         documentFileManager: DocumentFileManager = DocumentFileManager(),
         progressDelegate: DocumentProcessingProgressDelegate?
     ) {
         self.aiService = aiService
-        self.fileService = fileService
         self.repository = repository
         self.documentFileManager = documentFileManager
         self.progressDelegate = progressDelegate

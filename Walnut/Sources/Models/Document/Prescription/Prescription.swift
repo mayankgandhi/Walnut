@@ -81,7 +81,7 @@ class Prescription {
             facilityName: parsedPrescription.facilityName,
             notes: parsedPrescription.notes,
             document: Document(
-                fileName: "\(parsedPrescription.doctorName ?? "Unknown")_\(medicalCase.title)_prescription",
+                fileName: fileURL.lastPathComponent,
                 fileURL: fileURL,
                 documentType: .prescription,
                 fileSize: fileSize

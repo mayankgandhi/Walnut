@@ -18,12 +18,6 @@ protocol DocumentProcessingProgressDelegate: AnyObject {
     @MainActor func didCompleteProcessing(with result: Result<ProcessingResult, Error>)
 }
 
-/// Protocol for file operations
-protocol FilePreparationService {
-    func prepareFile(from store: DocumentPickerStore) async throws -> URL
-    func cleanupTemporaryFile(at url: URL)
-}
-
 /// Protocol for database operations
 protocol DocumentRepositoryProtocol {
     func savePrescription(_ parsedPrescription: ParsedPrescription, to medicalCase: MedicalCase, fileURL: URL) async throws -> PersistentIdentifier
@@ -39,7 +33,6 @@ class DocumentProcessingService {
     // MARK: - Dependencies
     
     private let aiService: UnifiedDocumentParsingService
-    private let fileService: FilePreparationService
     private let repository: DocumentRepositoryProtocol
     
     // MARK: - State
@@ -57,11 +50,9 @@ class DocumentProcessingService {
     
     init(
         aiService: UnifiedDocumentParsingService,
-        fileService: FilePreparationService,
         repository: DocumentRepositoryProtocol
     ) {
         self.aiService = aiService
-        self.fileService = fileService
         self.repository = repository
     }
     
@@ -87,7 +78,6 @@ class DocumentProcessingService {
             do {
                 let useCase = DocumentProcessingUseCase(
                     aiService: aiService,
-                    fileService: fileService,
                     repository: repository,
                     progressDelegate: self
                 )
@@ -255,26 +245,17 @@ struct ProcessingResult {
 
 extension DocumentProcessingService {
     
-   
     /// Creates a DocumentProcessingService using AIKit's unified parsing
     static func createWithAIKit(
         modelContext: ModelContext
     ) -> DocumentProcessingService {
         let aiService = AIKitFactory.createUnifiedService()
-        let fileService = DefaultFilePreparationService()
         let repository = DefaultDocumentRepository(modelContext: modelContext)
         
         return DocumentProcessingService(
             aiService: aiService,
-            fileService: fileService,
             repository: repository
         )
     }
     
-}
-
-// MARK: - Environment Extension
-
-extension EnvironmentValues {
-    @Entry var documentProcessingService: DocumentProcessingService? = nil
 }
