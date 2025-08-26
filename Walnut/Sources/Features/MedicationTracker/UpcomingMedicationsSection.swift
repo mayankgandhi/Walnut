@@ -12,61 +12,65 @@ import WalnutDesignSystem
 struct UpcomingMedicationsSection: View {
     
     let patient: Patient
-
+    
     @State private var activeMedications: [Medication] = []
     @State private var medicationTracker = MedicationTracker()
     @State private var currentTime = Date()
+    @State private var showAllMedications = false
     
     private var upcomingMedications: [MedicationTracker.MedicationScheduleInfo] {
         medicationTracker.getUpcomingMedications(activeMedications, withinHours: 6)
     }
     
     var body: some View {
-        HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-
-                sectionHeaderView
-                
-                if upcomingMedications.isEmpty {
-                    emptyStateView
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                } else {
-                    ForEach(Array(upcomingMedications.enumerated()), id: \.element.medication.id) { index, medicationInfo in
-                        MedicationCard.upcoming(
-                            medicationName: medicationInfo.medication.name,
-                            dosage: medicationInfo.dosageText,
-                            timing: medicationInfo.displayTime,
-                            instructions: medicationInfo.medication.instructions,
-                            timePeriod: mapToDesignSystemTimePeriod(medicationInfo.timePeriod),
-                            timeUntilDue: medicationInfo.timeUntilDue.map { medicationTracker.formatTimeUntilDue($0) } ?? ""
-                        ) {
-                            
-                        }
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: Spacing.xs, leading: 0, bottom: Spacing.xs, trailing: 0))
+        VStack(alignment: .leading, spacing: Spacing.medium) {
+            
+            sectionHeaderView
+            
+            if upcomingMedications.isEmpty {
+                emptyStateView
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+            } else {
+                ForEach(Array(upcomingMedications.enumerated()), id: \.element.medication.id) { index, medicationInfo in
+                    MedicationCard.upcoming(
+                        medicationName: medicationInfo.medication.name,
+                        dosage: medicationInfo.dosageText,
+                        timing: medicationInfo.displayTime,
+                        instructions: medicationInfo.medication.instructions,
+                        timePeriod: mapToDesignSystemTimePeriod(medicationInfo.timePeriod),
+                        timeUntilDue: medicationInfo.timeUntilDue.map { medicationTracker.formatTimeUntilDue($0) } ?? ""
+                    ) {
+                        
                     }
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: Spacing.xs, leading: 0, bottom: Spacing.xs, trailing: 0))
                 }
             }
         }
+        .padding(Spacing.medium)
         .onAppear {
             loadActiveMedications()
+        }
+        .navigationDestination(isPresented: $showAllMedications) {
+            ActiveMedicationsSection(patient: patient)
         }
     }
     
     // MARK: - Subviews
     
     private var sectionHeaderView: some View {
-        HStack(spacing: Spacing.small) {
-            Image(systemName: "clock.badge.fill")
-                .font(.headline)
-                .foregroundStyle(Color.healthWarning)
+        VStack(alignment: .leading, spacing: Spacing.small) {
             
-            Text("Upcoming Medications")
-                .font(.headline.weight(.semibold))
-            
-            Spacer()
+            HealthCardHeader(
+                icon: "pills.fill",
+                iconColor: Color.healthPrimary,
+                title: "Upcoming Medications",
+                actionIcon: "cross.case.fill",
+                actionColor: Color.healthSuccess) {
+                    showAllMedications = true
+                }
             
             if !upcomingMedications.isEmpty {
                 Text("Next 6 hours")

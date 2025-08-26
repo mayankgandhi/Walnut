@@ -128,7 +128,7 @@ public extension HealthCardHeader {
         onAddTap: @escaping () -> Void
     ) -> HealthCardHeader {
         HealthCardHeader(
-            icon: "folder.fill.badge.plus",
+            icon: "heart.text.square.fill",
             title: "Medical Documents",
             subtitle: "\(count) documents",
             actionIcon: "plus.circle.fill",

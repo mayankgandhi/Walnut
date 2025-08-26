@@ -17,17 +17,7 @@ struct PatientSettingsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: Spacing.large) {
-                // Patient Header Section
-                VStack(alignment: .leading, spacing: Spacing.medium) {
-                    Text("Patient Profile")
-                        .font(.headline)
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    PatientHeaderCard(patient: patient)
-                }
                 
-                // Settings Menu Section
                 VStack(alignment: .leading, spacing: Spacing.medium) {
                     Text("Settings")
                         .font(.headline)
@@ -111,6 +101,7 @@ struct PatientSettingsView: View {
         .sheet(isPresented: $showEditPatient) {
             PatientEditor(patient: patient)
         }
+        .navigationTitle("Settings")
     }
 }
 

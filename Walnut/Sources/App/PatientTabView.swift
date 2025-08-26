@@ -31,13 +31,6 @@ struct PatientTabView: View {
                     BloodTestsView(patient: patient)
                 }
             }
-            
-            Tab("Settings", systemImage: "gearshape.fill") {
-                NavigationStack {
-                    PatientSettingsView(patient: patient)
-                        .navigationTitle("Settings")
-                }
-            }
         }
         .navigationTitle(patient.fullName)
         .navigationBarTitleDisplayMode(.inline)

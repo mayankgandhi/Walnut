@@ -82,6 +82,7 @@ struct PatientHeaderCard: View {
                 }
             }
         }
+        .padding(.horizontal, Spacing.medium)
     }
 }
 

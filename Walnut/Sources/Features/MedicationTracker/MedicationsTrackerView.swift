@@ -8,12 +8,13 @@
 
 import SwiftUI
 import SwiftData
+import WalnutDesignSystem
 
 struct MedicationsTrackerView: View {
     
     let patient: Patient
     @Environment(\.modelContext) private var modelContext
-    @State private var showAllMedications = false
+    @State private var showSettings = false
     
     init(patient: Patient) {
         self.patient = patient
@@ -21,20 +22,23 @@ struct MedicationsTrackerView: View {
     
     var body: some View {
         ScrollView {
+            PatientHeaderCard(patient: patient)
+            
             UpcomingMedicationsSection(patient: patient)
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    showAllMedications = true
+                    showSettings = true
                 } label: {
-                    Text("View All")
-                        .font(.system(size: 16, weight: .medium))
+                    Image(systemName: "gear.circle.fill")
+                        .foregroundStyle(Color.healthPrimary)
                 }
             }
         }
-        .navigationDestination(isPresented: $showAllMedications) {
-            ActiveMedicationsSection(patient: patient)
+       
+        .navigationDestination(isPresented: $showSettings) {
+            PatientSettingsView(patient: patient)
         }
     }
 }
