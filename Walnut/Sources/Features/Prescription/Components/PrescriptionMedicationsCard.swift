@@ -14,47 +14,34 @@ struct PrescriptionMedicationsCard: View {
     @State private var isExpanded = true
     
     var body: some View {
-        HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-                // Enhanced Header with Walnut Design System
+        VStack(alignment: .leading, spacing: Spacing.medium) {
+            HealthCardHeader(
+                icon: "pills.fill",
+                iconColor: .healthSuccess,
+                title: "Medications",
+                subtitle: "\(medications.count) Medications"
+            )
+            
+            if medications.isEmpty {
+                // Empty state with design system styling
+                ContentUnavailableView(
+                    "No medications",
+                    systemImage: "pills",
+                    description: Text("Prescription medications will appear here")
+                )
                 
-                
-                HealthCardHeader
-                    .medicalDocuments(count: medications.count, onAddTap: {
-                        /// TODO
-                    })
-                
-                if medications.isEmpty {
-                    // Empty state with design system styling
-                    VStack(spacing: Spacing.medium) {
-                        Image(systemName: "pills")
-                            .font(.system(size: 48))
-                            .foregroundStyle(.quaternary)
-                        
-                        VStack(spacing: Spacing.xs) {
-                            Text("No medications")
-                                .font(.subheadline.weight(.medium))
-                                .foregroundStyle(.secondary)
+            } else {
+                LazyVStack(spacing: Spacing.medium) {
+                    ForEach(medications, id: \.id) { medication in
+                        HealthCard {
                             
-                            Text("Prescription medications will appear here")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
-                                .multilineTextAlignment(.center)
-                        }
-                    }
-                    .padding(.vertical, Spacing.large)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-                } else {
-                    LazyVStack(spacing: Spacing.small) {
-                        ForEach(medications, id: \.id) { medication in
                             EnhancedMedicationCard(medication: medication)
                         }
                     }
-                    .transition(.opacity.combined(with: .move(edge: .top)))
                 }
-                
             }
         }
+        
     }
     
 }
@@ -63,10 +50,9 @@ struct PrescriptionMedicationsCard: View {
 
 struct EnhancedMedicationCard: View {
     let medication: Medication
-    @State private var isPressed = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.small) {
+        VStack(alignment: .leading, spacing: Spacing.medium) {
             medicationHeaderSection
             
             if !medication.frequency.isEmpty {
@@ -77,10 +63,7 @@ struct EnhancedMedicationCard: View {
                 instructionsSection(instructions)
             }
         }
-        .padding(Spacing.small)
-        .background(cardBackground)
-        .scaleEffect(isPressed ? 0.98 : 1.0)
-        .animation(.easeInOut(duration: 0.1), value: isPressed)
+        
     }
     
     // MARK: - Subviews
@@ -190,19 +173,22 @@ struct EnhancedMedicationCard: View {
     }
     
     private func frequencyChip(at index: Int) -> some View {
-        VStack(spacing: 2) {
-            Text(medication.frequency[index].mealTime.rawValue)
+        HStack(spacing: Spacing.xs) {
+            if let timing = medication.frequency[index].timing {
+                Text(timing.rawValue.capitalized)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Color.healthWarning)
+            }
+            Text(medication.frequency[index].mealTime.rawValue.capitalized)
                 .font(.caption.weight(.bold))
                 .foregroundStyle(Color.healthWarning)
-            
-            Text("Time \(index + 1)")
-                .font(.caption2.weight(.medium))
-                .foregroundStyle(.tertiary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, Spacing.xs)
         .padding(.vertical, 4)
         .background(Color.healthWarning.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 6))
+        
     }
     
     private func instructionsSection(_ instructions: String) -> some View {
@@ -264,6 +250,75 @@ struct EnhancedMedicationCard: View {
         } else {
             return "pills.fill"
         }
+    }
+}
+
+#Preview("Prescription Medications Card") {
+    ScrollView {
+        VStack(spacing: 16) {
+            PrescriptionMedicationsCard(medications: [
+                Medication(
+                    id: UUID(),
+                    name: "Amoxicillin",
+                    frequency: [
+                        MedicationSchedule(
+                            mealTime: .breakfast,
+                            timing: .after,
+                            dosage: "500mg"
+                        ),
+                        MedicationSchedule(
+                            mealTime: .dinner,
+                            timing: .after,
+                            dosage: "500mg"
+                        )
+                    ],
+                    numberOfDays: 7,
+                    dosage: "500mg",
+                    instructions: "Take with food. Complete the full course even if you feel better."
+                ),
+                Medication(
+                    id: UUID(),
+                    name: "Ibuprofen",
+                    frequency: [
+                        MedicationSchedule(
+                            mealTime: .breakfast,
+                            timing: .after,
+                            dosage: "400mg"
+                        ),
+                        MedicationSchedule(
+                            mealTime: .lunch,
+                            timing: .after,
+                            dosage: "400mg"
+                        ),
+                        MedicationSchedule(
+                            mealTime: .dinner,
+                            timing: .after,
+                            dosage: "400mg"
+                        )
+                    ],
+                    numberOfDays: 5,
+                    dosage: "400mg",
+                    instructions: "Take with food to avoid stomach upset. Do not exceed recommended dose."
+                ),
+                Medication(
+                    id: UUID(),
+                    name: "Vitamin D3",
+                    frequency: [
+                        MedicationSchedule(
+                            mealTime: .breakfast,
+                            timing: .after,
+                            dosage: "1000 IU"
+                        )
+                    ],
+                    numberOfDays: 30,
+                    dosage: "1000 IU"
+                )
+            ])
+            
+            PrescriptionMedicationsCard(medications: [])
+        }
+        .padding()
+        .background(Color(UIColor.systemGroupedBackground))
     }
 }
 
