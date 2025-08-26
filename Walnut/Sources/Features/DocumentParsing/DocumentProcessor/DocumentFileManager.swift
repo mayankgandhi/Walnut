@@ -37,23 +37,17 @@ struct DocumentFileManager {
         medicalCaseTitle: String,
         documentType: DocumentStorageType,
         date: Date,
-        fileName: String
     ) throws -> URL {
         
-        // Create folder structure
-        let patientFolder = createPatientFolder(patientName: patientName)
-        let caseFolder = createMedicalCaseFolder(in: patientFolder, caseTitle: medicalCaseTitle)
-        let documentFolder = createDocumentTypeFolder(in: caseFolder, type: documentType)
-        
+
         // Generate unique file name with date
-        let fileExtension = sourceURL.pathExtension
+        let fileName = sourceURL.lastPathComponent
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
         let dateString = dateFormatter.string(from: date)
         
         let sanitizedFileName = sanitizeFileName(fileName)
-        let finalFileName = "\(dateString)_\(sanitizedFileName).\(fileExtension)"
-        let destinationURL = documentFolder.appendingPathComponent(finalFileName)
+        let destinationURL = documentsDirectory.appendingPathComponent(sanitizedFileName)
         
         // Copy file to destination
         try copyFile(from: sourceURL, to: destinationURL)
@@ -79,22 +73,14 @@ struct DocumentFileManager {
         fileName: String
     ) throws -> URL {
         
-        // Create folder structure
-        let patientFolder = createPatientFolder(patientName: patientName)
-        let caseFolder = createMedicalCaseFolder(in: patientFolder, caseTitle: medicalCaseTitle)
-        let documentFolder = createDocumentTypeFolder(in: caseFolder, type: documentType)
-        
         // Generate unique file name with date
         let fileExtension = URL(fileURLWithPath: fileName).pathExtension
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
-        let dateString = dateFormatter.string(from: date)
         
         let sanitizedFileName = sanitizeFileName(fileName)
         let finalFileName = fileExtension.isEmpty ? 
-            "\(dateString)_\(sanitizedFileName)" : 
-            "\(dateString)_\(sanitizedFileName).\(fileExtension)"
-        let destinationURL = documentFolder.appendingPathComponent(finalFileName)
+            "\(sanitizedFileName)" :
+            "\(sanitizedFileName).\(fileExtension)"
+        let destinationURL = documentsDirectory.appendingPathComponent(finalFileName)
         
         // Write data to destination
         try writeData(data, to: destinationURL)
@@ -113,7 +99,6 @@ struct DocumentFileManager {
         from sourceURL: URL,
         patientName: String,
         medicalCaseTitle: String,
-        fileName: String
     ) throws -> URL {
         return try saveDocument(
             from: sourceURL,
@@ -121,7 +106,6 @@ struct DocumentFileManager {
             medicalCaseTitle: medicalCaseTitle,
             documentType: .unparsed,
             date: Date(),
-            fileName: fileName
         )
     }
     
@@ -150,44 +134,7 @@ struct DocumentFileManager {
     
     // MARK: - Private Methods
     
-    private func createPatientFolder(patientName: String) -> URL {
-        let patientFolderName = sanitizeFileName(patientName)
-        let patientFolder = documentsDirectory.appendingPathComponent(patientFolderName)
-        
-        try? fileManager.createDirectory(
-            at: patientFolder,
-            withIntermediateDirectories: true,
-            attributes: nil
-        )
-        
-        return patientFolder
-    }
-    
-    private func createMedicalCaseFolder(in patientFolder: URL, caseTitle: String) -> URL {
-        let caseFolderName = sanitizeFileName(caseTitle)
-        let caseFolder = patientFolder.appendingPathComponent(caseFolderName)
-        
-        try? fileManager.createDirectory(
-            at: caseFolder,
-            withIntermediateDirectories: true,
-            attributes: nil
-        )
-        
-        return caseFolder
-    }
-    
-    private func createDocumentTypeFolder(in caseFolder: URL, type: DocumentStorageType) -> URL {
-        let typeFolder = caseFolder.appendingPathComponent(type.folderName)
-        
-        try? fileManager.createDirectory(
-            at: typeFolder,
-            withIntermediateDirectories: true,
-            attributes: nil
-        )
-        
-        return typeFolder
-    }
-    
+   
     private func copyFile(from sourceURL: URL, to destinationURL: URL) throws {
         // Remove existing file if it exists
         if fileManager.fileExists(atPath: destinationURL.path) {

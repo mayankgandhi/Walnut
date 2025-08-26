@@ -81,8 +81,8 @@ class Prescription {
             facilityName: parsedPrescription.facilityName,
             notes: parsedPrescription.notes,
             document: Document(
-                fileName: "\(fileURL.lastPathComponent)",
-                fileURL: "\(fileURL.lastPathComponent)",
+                fileName: fileURL.lastPathComponent,
+                fileURL: fileURL.lastPathComponent,
                 documentType: .prescription,
                 fileSize: fileSize
             ),

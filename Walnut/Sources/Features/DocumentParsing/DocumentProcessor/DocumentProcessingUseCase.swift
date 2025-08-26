@@ -52,8 +52,7 @@ struct DocumentProcessingUseCase {
                     patientName: medicalCase.patient.fullName,
                     medicalCaseTitle: medicalCase.title,
                     documentType: documentTypeToStorageType(selectedDocumentType),
-                    date: Date(),
-                    fileName: selectedDocument.lastPathComponent
+                    date: Date()
                 )
                 // Use the local file as temp file for AI processing
                 tempFileURL = localFileURL

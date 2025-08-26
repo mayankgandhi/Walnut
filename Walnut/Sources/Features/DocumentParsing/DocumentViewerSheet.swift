@@ -44,7 +44,7 @@ struct DocumentViewer: View {
         case .image:
             let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
                 .appendingPathComponent("WalnutMedicalRecords")
-                .appendingPathComponent(document.fileURL)
+                .appendingPathCoamponent(document.fileURL)
             return AnyView(ImageDocumentView(url: url))
         case .unsupported:
             return AnyView(UnsupportedDocumentView(document: document))
@@ -55,7 +55,7 @@ struct DocumentViewer: View {
         let pathExtension = document.fileURL.components(separatedBy: ".").last
         
         switch pathExtension {
-        case "pdf":
+        case "pdf", "PDF":
             return .pdf
         case "jpg", "jpeg", "png", "heic", "heif":
             return .image
