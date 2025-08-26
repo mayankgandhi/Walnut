@@ -169,7 +169,7 @@ private struct ShareSheet: UIViewControllerRepresentable {
 private extension Document {
     static let sampleDocument = Document(
         fileName: "Medical_Document.pdf",
-        fileURL: URL(string: "file://medical_document.pdf")!,
+        fileURL: "file://medical_document.pdf",
         documentType: .unknown,
         uploadDate: Date(),
         fileSize: 1024000,
@@ -179,7 +179,7 @@ private extension Document {
     
     static let samplePDFDocument = Document(
         fileName: "Prescription_Report_2024.pdf",
-        fileURL: URL(string: "file://prescription.pdf")!,
+        fileURL: "file://prescription.pdf",
         documentType: .prescription,
         uploadDate: Date().addingTimeInterval(-86400 * 2), // 2 days ago
         fileSize: 2048000,
@@ -189,7 +189,7 @@ private extension Document {
     
     static let sampleImageDocument = Document(
         fileName: "Blood_Test_Results.jpg",
-        fileURL: URL(string: "file://blood_test.jpg")!,
+        fileURL: "file://blood_test.jpg",
         documentType: .labResult,
         uploadDate: Date().addingTimeInterval(-86400), // 1 day ago
         fileSize: 512000,

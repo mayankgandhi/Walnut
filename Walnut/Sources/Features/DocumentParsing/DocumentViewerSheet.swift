@@ -16,7 +16,7 @@ struct DocumentViewer: View {
     @State private var shareSheetPresented = false
     
     var body: some View {
-        documentContentView
+        documentContentView()
             .navigationTitle(document.fileName)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -34,19 +34,25 @@ struct DocumentViewer: View {
     }
     
     @ViewBuilder
-    private var documentContentView: some View {
+    private func documentContentView() -> some View {
         switch documentFileType {
         case .pdf:
-            PDFDocumentView(url: document.fileURL)
+            let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+                .appendingPathComponent("WalnutMedicalRecords")
+                .appendingPathComponent(document.fileURL)
+            return AnyView(PDFDocumentView(url: url))
         case .image:
-            ImageDocumentView(url: document.fileURL)
+            let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+                .appendingPathComponent("WalnutMedicalRecords")
+                .appendingPathComponent(document.fileURL)
+            return AnyView(ImageDocumentView(url: url))
         case .unsupported:
-            UnsupportedDocumentView(document: document)
+            return AnyView(UnsupportedDocumentView(document: document))
         }
     }
     
     private var documentFileType: DocumentFileType {
-        let pathExtension = document.fileURL.pathExtension.lowercased()
+        let pathExtension = document.fileURL.components(separatedBy: ".").last
         
         switch pathExtension {
         case "pdf":
@@ -68,11 +74,14 @@ private enum DocumentFileType {
 
 // MARK: - PDF Document View
 private struct PDFDocumentView: View {
+    
     let url: URL
     @State private var showingError = false
     @State private var errorMessage = ""
     @State private var isLoading = true
     @State private var pdfLoadFailed = false
+    
+    private let documentFileManager = DocumentFileManager()
     
     var body: some View {
         Group {
@@ -219,7 +228,7 @@ private struct UnsupportedDocumentView: View {
     var body: some View {
         DocumentErrorView(
             title: "Unsupported Format",
-            message: "This document format (\(document.fileURL.pathExtension.uppercased())) is not supported for preview.",
+            message: "This document format (\(document.fileURL) is not supported for preview.",
             systemImage: "doc.questionmark.fill"
         )
     }

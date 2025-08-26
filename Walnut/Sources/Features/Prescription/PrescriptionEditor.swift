@@ -546,12 +546,7 @@ struct PrescriptionEditor: View {
                 doctorName: doctorName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : doctorName.trimmingCharacters(in: .whitespacesAndNewlines),
                 facilityName: facilityName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : facilityName.trimmingCharacters(in: .whitespacesAndNewlines),
                 notes: notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : notes.trimmingCharacters(in: .whitespacesAndNewlines),
-                document: Document(
-                    fileName: "Manual_Prescription_\(Date().formatted(.iso8601.year().month().day()))",
-                    fileURL: URL(fileURLWithPath: ""),
-                    documentType: .prescription,
-                    fileSize: 0,
-                ),
+                document: nil,
                 medicalCase: medicalCase,
                 medications: medications
             )
@@ -580,7 +575,7 @@ struct PrescriptionEditor: View {
         notes: "Take with food",
         document: Document(
             fileName: "Sample_Prescription",
-            fileURL: URL(fileURLWithPath: ""),
+            fileURL: "pas.pasd",
             documentType: .prescription,
             fileSize: 0
         ),

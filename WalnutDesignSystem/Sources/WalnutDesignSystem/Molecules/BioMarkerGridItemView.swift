@@ -36,7 +36,7 @@ public struct BioMarkerGridItemView: View {
                         .foregroundStyle(.primary)
                         .lineLimit(3)
                         .minimumScaleFactor(0.8)
-                        .multilineTextAlignment(.center)
+                        .multilineTextAlignment(.leading)
                         .allowsTightening(true)
                         .fixedSize(horizontal: false, vertical: true)
                     
@@ -47,7 +47,7 @@ public struct BioMarkerGridItemView: View {
                             .foregroundStyle(.secondary)
                             .lineLimit(2)
                             .minimumScaleFactor(0.7)
-                            .multilineTextAlignment(.center)
+                            .multilineTextAlignment(.leading)
                     }
                 }
                 

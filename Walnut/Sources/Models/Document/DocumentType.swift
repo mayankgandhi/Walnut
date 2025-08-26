@@ -9,7 +9,7 @@
 import SwiftUI
 
 // MARK: - DocumentType Extensions
-public enum DocumentType: String, CaseIterable, Codable, Identifiable {
+@frozen public enum DocumentType: String, CaseIterable, Codable, Identifiable {
     
     case prescription
     case labResult = "lab result"

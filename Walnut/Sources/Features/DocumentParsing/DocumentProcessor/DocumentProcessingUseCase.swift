@@ -201,7 +201,7 @@ struct DocumentProcessingUseCase {
         
         let document = Document(
             fileName: tempFileURL.lastPathComponent,
-            fileURL: tempFileURL,
+            fileURL: tempFileURL.lastPathComponent,
             documentType: documentType,
             fileSize: fileSize
         )
@@ -221,7 +221,7 @@ struct DocumentProcessingUseCase {
         
         let document = Document(
             fileName: tempFileURL.lastPathComponent,
-            fileURL: tempFileURL,
+            fileURL: tempFileURL.lastPathComponent,
             documentType: documentType,
             fileSize: fileSize
         )
@@ -242,7 +242,7 @@ struct DocumentProcessingUseCase {
         case .labResult:
             return .bloodReport
         default:
-            return .unparsed
+            return .otherDocuments
         }
     }
     

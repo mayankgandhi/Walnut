@@ -44,7 +44,7 @@ class Prescription {
         doctorName: String? = nil,
         facilityName: String? = nil,
         notes: String? = nil,
-        document: Document,
+        document: Document?,
         medicalCase: MedicalCase,
         medications: [Medication],
         createdAt: Date = Date(),
@@ -81,8 +81,8 @@ class Prescription {
             facilityName: parsedPrescription.facilityName,
             notes: parsedPrescription.notes,
             document: Document(
-                fileName: "\(fileURL.lastPathComponent).\(fileURL.pathExtension)",
-                fileURL: fileURL,
+                fileName: "\(fileURL.lastPathComponent)",
+                fileURL: "\(fileURL.lastPathComponent)",
                 documentType: .prescription,
                 fileSize: fileSize
             ),
@@ -107,7 +107,9 @@ extension Prescription {
     
     @MainActor
     static func samplePrescription(for medicalCase: MedicalCase) -> Prescription {
-        let sampleFileURL = URL(fileURLWithPath: "/tmp/sample_prescription.pdf")
+        let sampleFileURL = URL(
+            fileURLWithPath: "/tmp/sample_prescription.pdf"
+        ).absoluteString
         
         let sampleMedications = [
             Medication(
@@ -186,7 +188,7 @@ extension Prescription {
         
         let document = Document(
             fileName: "Dr_Johnson_Chronic_Care.pdf",
-            fileURL: sampleFileURL,
+            fileURL: sampleFileURL.absoluteString,
             documentType: .prescription,
             fileSize: 198432 // ~194KB
         )

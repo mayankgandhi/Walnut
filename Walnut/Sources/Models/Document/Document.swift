@@ -16,7 +16,7 @@ class Document: Identifiable, Hashable {
     var id: UUID
     
     var fileName: String
-    var fileURL: URL
+    var fileURL: String
     
     var documentType: DocumentType
     var uploadDate: Date
@@ -29,7 +29,7 @@ class Document: Identifiable, Hashable {
     init(
         id: UUID = UUID(),
         fileName: String,
-        fileURL: URL,
+        fileURL: String,
         documentType: DocumentType,
         uploadDate: Date = Date(),
         fileSize: Int64,
@@ -53,7 +53,7 @@ extension Document {
     static var document: Document =  Document(
         id: UUID(),
         fileName: "Blood_Test_Results_2024.pdf",
-        fileURL: URL(string: "file://")!,
+        fileURL: "file://",
         documentType: .labResult,
         uploadDate: Date().addingTimeInterval(-86400 * 2),
         fileSize: 245760
@@ -65,7 +65,7 @@ extension Document {
         Document(
             id: UUID(),
             fileName: "Prescription_Cardiology.pdf",
-            fileURL: URL(string: "file://")!,
+            fileURL: "file://",
             documentType: .prescription,
             uploadDate: Date().addingTimeInterval(-86400 * 1),
             fileSize: 123456
@@ -73,7 +73,7 @@ extension Document {
         Document(
             id: UUID(),
             fileName: "Chest_XRay_Report.jpg",
-            fileURL: URL(string: "file://")!,
+            fileURL: "file://",
             documentType: .labResult,
             uploadDate: Date().addingTimeInterval(-86400 * 10),
             fileSize: 2097152

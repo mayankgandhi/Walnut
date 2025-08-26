@@ -113,7 +113,6 @@ struct BloodReportDetailView: View {
                     Spacer()
                 }
                 
-                // Enhanced metadata section with modern card grid
                 HStack {
                     
                     // Test Date Card
@@ -159,77 +158,7 @@ struct BloodReportDetailView: View {
             }
         }
     }
-    
-    // MARK: - Quick Stats Overview
-    
-    // MARK: - Abnormal Results Alert Card
-    private func abnormalResultsCard(abnormalResults: [BloodTestResult]) -> some View {
-        HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-                HStack(spacing: Spacing.small) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.headline)
-                        .foregroundStyle(Color.healthError)
-                    
-                    Text("Attention Required")
-                        .font(.headline.weight(.semibold))
-                        .foregroundStyle(Color.healthError)
-                    
-                    Spacer()
-                    
-                    Text("\(abnormalResults.count)")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(.white)
-                        .frame(minWidth: 24, minHeight: 24)
-                        .background(Circle().fill(Color.healthError))
-                }
-                
-                Text("The following test results are outside normal reference ranges and may require medical attention:")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .lineSpacing(2)
-                
-                VStack(spacing: Spacing.small) {
-                    ForEach(abnormalResults, id: \.id) { testResult in
-                        abnormalResultHighlight(testResult: testResult)
-                    }
-                }
-            }
-        }
-    }
-    
-    private func abnormalResultHighlight(testResult: BloodTestResult) -> some View {
-        HealthCard {
-            HStack(spacing: Spacing.medium) {
-                VStack(alignment: .leading, spacing: Spacing.xs) {
-                    Text(testResult.testName)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color.healthError)
-                    
-                    Text("Reference: \(testResult.referenceRange)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                
-                Spacer()
-                
-                VStack(alignment: .trailing, spacing: Spacing.xs) {
-                    HStack(spacing: Spacing.xs) {
-                        Text(testResult.value)
-                            .font(.subheadline.weight(.bold))
-                            .foregroundStyle(Color.healthError)
-                        
-                        Text(testResult.unit)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    
-                    WalnutDesignSystem.StatusIndicator(status: .critical, showIcon: true)
-                }
-            }
-        }
-    }
-    
+
     // Enhanced Test Results Grid using BioMarkerGridItemView
     private var enhancedTestResultsGrid: some View {
         VStack(alignment: .leading, spacing: Spacing.small) {
@@ -372,7 +301,7 @@ struct BloodReportDetailView: View {
     let sampleCase = MedicalCase.sampleCase
     let sampleDocument = Document(
         fileName: "Complete_Blood_Count_Quest_Diagnostics.pdf",
-        fileURL: URL(string: "https://example.com/report.pdf")!,
+        fileURL: "https://example.com/report.pdf",
         documentType: .labResult,
         fileSize: 245760,
     )
