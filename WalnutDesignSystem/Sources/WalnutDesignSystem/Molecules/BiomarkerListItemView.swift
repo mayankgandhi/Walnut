@@ -15,80 +15,106 @@ public struct BiomarkerListItemView: View {
     private let color: Color
     private let biomarkerInfo: BiomarkerInfo
     private let biomarkerTrends: BiomarkerTrends
+    private let iconName: String
     
     public init(
         data: [Double],
         color: Color = .healthPrimary,
         biomarkerInfo: BiomarkerInfo,
-        biomarkerTrends: BiomarkerTrends
+        biomarkerTrends: BiomarkerTrends,
+        iconName: String = "chart.line.uptrend.xyaxis"
     ) {
         self.data = data
         self.color = color
         self.biomarkerInfo = biomarkerInfo
         self.biomarkerTrends = biomarkerTrends
+        self.iconName = iconName
     }
     
     public var body: some View {
-        HStack(spacing: 16) {
-            // Left side - Biomarker info
-            VStack(alignment: .leading, spacing: 4) {
-                Text(biomarkerInfo.name)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
+        HealthCard {
+            HStack(alignment: .center, spacing: Spacing.medium) {
+                // Health status indicator with icon
+                Circle()
+                    .fill(color.opacity(0.15))
+                    .frame(width: 36, height: 36)
+                    .overlay {
+                        Image(systemName: iconName)
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundStyle(color)
+                    }
                 
-                HStack(spacing: 4) {
-                    Text(biomarkerTrends.currentValueText)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
+                // Biomarker info section - improved text handling
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    // Biomarker name with better handling for long names
+                    Text(biomarkerInfo.name)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.8)
+                        .multilineTextAlignment(.leading)
+                        .allowsTightening(true)
                     
-                    Text(biomarkerInfo.unit)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .offset(y: 2)
+                    // Current value with unit
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        Text(biomarkerTrends.currentValueText)
+                            .font(.system(.title3, design: .rounded, weight: .bold))
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                        
+                        if !biomarkerInfo.unit.isEmpty {
+                            Text(biomarkerInfo.unit)
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                        }
+                    }
+                    
+                    // Reference range with improved formatting
+                    if !biomarkerTrends.normalRange.isEmpty {
+                        Text("Ref: \(biomarkerTrends.normalRange)")
+                            .font(.footnote)
+                            .foregroundStyle(.tertiary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
                 }
                 
-                HStack(spacing: 4) {
-                    Image(systemName: biomarkerTrends.trendDirection.iconName)
-                        .foregroundColor(biomarkerTrends.trendDirection.color)
-                        .font(.caption)
-                    Text(biomarkerTrends.comparisonPercentage)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundColor(biomarkerTrends.trendDirection.color)
-                    Text("vs last week")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            
-            Spacer()
-            
-            // Right side - Mini chart
-            VStack(alignment: .trailing, spacing: 4) {
-                miniChartView
+                Spacer()
                 
-                Text("Normal")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.green)
+                // Right side content
+                VStack(alignment: .trailing, spacing: Spacing.small) {
+                    // Mini chart
+                    miniChartView
+                    
+                    // Trend information with status badge design
+                    HStack(spacing: Spacing.xs) {
+                        Image(systemName: biomarkerTrends.trendDirection.iconName)
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(biomarkerTrends.trendDirection.color)
+                        
+                        Text(biomarkerTrends.comparisonPercentage)
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(biomarkerTrends.trendDirection.color)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
+                    .padding(.horizontal, Spacing.xs)
+                    .padding(.vertical, 2)
+                    .background(biomarkerTrends.trendDirection.color.opacity(0.1))
+                    .clipShape(Capsule())
+                }
             }
         }
-        .padding(.vertical, 12)
-        .padding(.horizontal, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
-                .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
-        )
     }
     
     private var miniChartView: some View {
         let normalRange = parseNormalRange(biomarkerTrends.normalRange)
         
         return Chart {
-            // Normal range background area
+            // Normal range background area with softer styling
             if let range = normalRange {
                 RectangleMark(
                     xStart: .value("Start", 0),
@@ -96,21 +122,40 @@ public struct BiomarkerListItemView: View {
                     yStart: .value("Min", range.min),
                     yEnd: .value("Max", range.max)
                 )
-                .foregroundStyle(.green.opacity(0.1))
-                .cornerRadius(4)
+                .foregroundStyle(Color.healthSuccess.opacity(0.08))
+                .cornerRadius(2)
             }
             
-            // Line chart connecting all points
+            // Gradient area under the line
+            ForEach(Array(data.enumerated()), id: \.offset) { index, value in
+                if index < data.count - 1 {
+                    AreaMark(
+                        x: .value("Index", index),
+                        yStart: .value("Min", data.min() ?? 0),
+                        yEnd: .value("Value", value)
+                    )
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [color.opacity(0.3), color.opacity(0.05)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                }
+            }
+            
+            // Line chart with improved styling
             ForEach(Array(data.enumerated()), id: \.offset) { index, value in
                 LineMark(
                     x: .value("Index", index),
                     y: .value("Value", value)
                 )
-                .foregroundStyle(.gray.opacity(0.8))
-                .lineStyle(StrokeStyle(lineWidth: 1.5))
+                .foregroundStyle(color)
+                .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+                .interpolationMethod(.catmullRom)
             }
             
-            // Data points with color coding
+            // Data points with refined design
             ForEach(Array(data.enumerated()), id: \.offset) { index, value in
                 let isInRange = isValueInNormalRange(value, normalRange: normalRange)
                 let isLatest = index == data.count - 1
@@ -119,8 +164,22 @@ public struct BiomarkerListItemView: View {
                     x: .value("Index", index),
                     y: .value("Value", value)
                 )
-                .foregroundStyle(isInRange ? .green : .red)
-                .symbolSize(isLatest ? 40 : 25)
+                .foregroundStyle(isLatest ? color : color.opacity(0.6))
+                .symbolSize(isLatest ? 36 : 20)
+                .symbol(isLatest ? .circle : .circle)
+            }
+            
+            // Highlight the latest point with a ring
+            if let lastIndex = data.indices.last, let lastValue = data.last {
+                PointMark(
+                    x: .value("Index", lastIndex),
+                    y: .value("Value", lastValue)
+                )
+                .foregroundStyle(.clear)
+                .symbolSize(50)
+                .symbol(.circle)
+                .lineStyle(StrokeStyle(lineWidth: 1.5))
+                .foregroundStyle(color.opacity(0.4))
             }
         }
         .chartXAxis(.hidden)
@@ -128,7 +187,15 @@ public struct BiomarkerListItemView: View {
         .chartBackground { _ in
             Color.clear
         }
-        .frame(width: 80, height: 40)
+        .chartPlotStyle { plot in
+            plot.frame(height: 44)
+        }
+        .frame(width: 88, height: 44)
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(color.opacity(0.02))
+                .stroke(color.opacity(0.1), lineWidth: 0.5)
+        )
     }
     
     // Helper function to parse normal range string
@@ -167,13 +234,13 @@ public struct BiomarkerListItemView: View {
     }
 }
 
-#Preview {
+#Preview("Enhanced Biomarker List") {
     ScrollView {
-        VStack(spacing: 12) {
-            // Values mostly in normal range
+        VStack(spacing: Spacing.medium) {
+            // Hemoglobin - optimal values with upward trend
             BiomarkerListItemView(
                 data: [13.8, 12.5, 14.5, 14.1, 14.3, 13.8, 14.2],
-                color: .healthPrimary,
+                color: .healthSuccess,
                 biomarkerInfo: BiomarkerInfo(
                     name: "Hemoglobin",
                     description: "Hemoglobin carries oxygen in red blood cells",
@@ -187,13 +254,14 @@ public struct BiomarkerListItemView: View {
                     comparisonPercentage: "3%",
                     trendDirection: .up,
                     normalRange: "12.0-15.5"
-                )
+                ),
+                iconName: "drop.fill"
             )
             
-            // Mix of normal and abnormal values
+            // Blood Glucose - stable but slightly elevated
             BiomarkerListItemView(
                 data: [95, 110, 92, 105, 94, 91, 96],
-                color: .glucose,
+                color: .healthWarning,
                 biomarkerInfo: BiomarkerInfo(
                     name: "Blood Glucose",
                     description: "Blood sugar levels",
@@ -207,15 +275,16 @@ public struct BiomarkerListItemView: View {
                     comparisonPercentage: "2%",
                     trendDirection: .stable,
                     normalRange: "70-100"
-                )
+                ),
+                iconName: "cube.fill"
             )
             
-            // Values outside normal range (high)
+            // Blood Pressure - high with downward trend
             BiomarkerListItemView(
                 data: [180, 195, 205, 188, 192, 210, 185],
-                color: .red,
+                color: .healthError,
                 biomarkerInfo: BiomarkerInfo(
-                    name: "Blood Pressure",
+                    name: "Systolic Blood Pressure",
                     description: "Systolic blood pressure",
                     normalRange: "90-120",
                     unit: "mmHg"
@@ -227,13 +296,14 @@ public struct BiomarkerListItemView: View {
                     comparisonPercentage: "3%",
                     trendDirection: .down,
                     normalRange: "90-120"
-                )
+                ),
+                iconName: "heart.fill"
             )
             
-            // "Less than" range format
+            // Total Cholesterol - improving trend
             BiomarkerListItemView(
-                data: [180, 195, 220, 188, 192, 210, 185],
-                color: .purple,
+                data: [220, 215, 208, 195, 192, 188, 185],
+                color: .healthPrimary,
                 biomarkerInfo: BiomarkerInfo(
                     name: "Total Cholesterol",
                     description: "Total cholesterol levels",
@@ -243,14 +313,57 @@ public struct BiomarkerListItemView: View {
                 biomarkerTrends: BiomarkerTrends(
                     currentValue: 185,
                     currentValueText: "185",
-                    comparisonText: "5 mg/dL",
-                    comparisonPercentage: "3%",
+                    comparisonText: "3 mg/dL",
+                    comparisonPercentage: "2%",
                     trendDirection: .down,
                     normalRange: "< 200"
-                )
+                ),
+                iconName: "waveform.path.ecg"
+            )
+            
+            // White Blood Cell Count - normal range
+            BiomarkerListItemView(
+                data: [6.8, 7.2, 6.5, 7.1, 6.9, 7.3, 7.0],
+                color: .healthSuccess,
+                biomarkerInfo: BiomarkerInfo(
+                    name: "White Blood Cell Count",
+                    description: "Immune system cells count",
+                    normalRange: "4.5-11.0",
+                    unit: "K/μL"
+                ),
+                biomarkerTrends: BiomarkerTrends(
+                    currentValue: 7.0,
+                    currentValueText: "7.0",
+                    comparisonText: "0.3 K/μL",
+                    comparisonPercentage: "4%",
+                    trendDirection: .stable,
+                    normalRange: "4.5-11.0"
+                ),
+                iconName: "shield.fill"
+            )
+            
+            // Vitamin D - critical level with upward trend
+            BiomarkerListItemView(
+                data: [15, 16, 18, 19, 21, 23, 25],
+                color: .orange,
+                biomarkerInfo: BiomarkerInfo(
+                    name: "Vitamin D",
+                    description: "Essential vitamin for bone health",
+                    normalRange: "30-100",
+                    unit: "ng/mL"
+                ),
+                biomarkerTrends: BiomarkerTrends(
+                    currentValue: 25,
+                    currentValueText: "25",
+                    comparisonText: "2 ng/mL",
+                    comparisonPercentage: "8%",
+                    trendDirection: .up,
+                    normalRange: "30-100"
+                ),
+                iconName: "sun.max.fill"
             )
         }
         .padding()
     }
-    .background(Color(.systemGroupedBackground))
+    .background(Color(UIColor.systemGroupedBackground))
 }

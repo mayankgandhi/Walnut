@@ -171,20 +171,31 @@ public struct BiomarkerDetailView: View {
                 // Current value display
                 HStack {
                     VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("Current Value")
+                        Text("Latest Value")
                             .font(.caption.weight(.medium))
                             .foregroundStyle(.secondary)
                         
-                        HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
+                        HStack(alignment: .center, spacing: Spacing.xs) {
                             Text(currentValue?.value.formatted(.number.precision(.fractionLength(1))) ?? "--")
-                                .font(.system(size: 48, weight: .bold, design: .rounded))
+                                .font(
+                                    .system(
+                                        .title,
+                                        design: .rounded,
+                                        weight: .black
+                                    )
+                                )
                                 .foregroundStyle(color)
                                 .contentTransition(.numericText())
                             
                             Text(unit)
-                                .font(.title3.weight(.medium))
+                                .font(
+                                    .system(
+                                        .subheadline,
+                                        design: .rounded,
+                                        weight: .black
+                                    )
+                                )
                                 .foregroundStyle(.secondary)
-                                .offset(y: -8)
                         }
                     }
                     

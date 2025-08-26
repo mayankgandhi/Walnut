@@ -347,8 +347,198 @@ struct BloodTestsView: View {
 }
 
 
-#Preview {
-    NavigationStack {
-        BloodTestsView(patient: Patient.samplePatient)
+// MARK: - Preview Container Helper
+struct PreviewContainer {
+    static func createModelContainer() -> ModelContainer {
+        let schema = Schema([
+            Patient.self,
+            MedicalCase.self, 
+            BloodReport.self,
+            BloodTestResult.self
+        ])
+        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+        
+        do {
+            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+        } catch {
+            fatalError("Could not create ModelContainer: \(error)")
+        }
     }
+}
+
+#Preview("Blood Tests View with Data") {
+    let container = PreviewContainer.createModelContainer()
+    
+    let patient = Patient.samplePatient
+    
+    // Create medical case
+    let medicalCase = MedicalCase.sampleCase
+    
+    // Create sample blood reports with test results
+    let bloodReport1 = BloodReport(
+        testName: "Complete Blood Count",
+        labName: "LabCorp",
+        category: "Hematology",
+        resultDate: Date().addingTimeInterval(-14*24*60*60),
+        notes: "All values within normal range",
+        medicalCase: medicalCase
+    )
+    
+    let bloodReport2 = BloodReport(
+        testName: "Comprehensive Metabolic Panel",
+        labName: "Quest Diagnostics",
+        category: "Chemistry",
+        resultDate: Date().addingTimeInterval(-7*24*60*60),
+        notes: "Slightly elevated glucose",
+        medicalCase: medicalCase
+    )
+    
+    let bloodReport3 = BloodReport(
+        testName: "Lipid Panel",
+        labName: "LabCorp",
+        category: "Lipid",
+        resultDate: Date().addingTimeInterval(-2*24*60*60),
+        notes: "Good cholesterol levels",
+        medicalCase: medicalCase
+    )
+    
+    // Test results for first blood report (2 weeks ago)
+    let testResults1 = [
+        BloodTestResult(
+            testName: "Hemoglobin",
+            value: "13.8",
+            unit: "g/dL",
+            referenceRange: "12.0-15.5",
+            isAbnormal: false,
+            bloodReport: bloodReport1
+        ),
+        BloodTestResult(
+            testName: "White Blood Cell Count",
+            value: "7.2",
+            unit: "K/uL",
+            referenceRange: "4.5-11.0",
+            isAbnormal: false,
+            bloodReport: bloodReport1
+        ),
+        BloodTestResult(
+            testName: "Platelets",
+            value: "285",
+            unit: "K/uL",
+            referenceRange: "150-450",
+            isAbnormal: false,
+            bloodReport: bloodReport1
+        )
+    ]
+    
+    // Test results for second blood report (1 week ago) 
+    let testResults2 = [
+        BloodTestResult(
+            testName: "Glucose",
+            value: "102",
+            unit: "mg/dL",
+            referenceRange: "70-99",
+            isAbnormal: true,
+            bloodReport: bloodReport2
+        ),
+        BloodTestResult(
+            testName: "Creatinine",
+            value: "1.0",
+            unit: "mg/dL",
+            referenceRange: "0.7-1.3",
+            isAbnormal: false,
+            bloodReport: bloodReport2
+        ),
+        BloodTestResult(
+            testName: "Hemoglobin",
+            value: "14.1",
+            unit: "g/dL",
+            referenceRange: "12.0-15.5",
+            isAbnormal: false,
+            bloodReport: bloodReport2
+        )
+    ]
+    
+    // Test results for third blood report (2 days ago)
+    let testResults3 = [
+        BloodTestResult(
+            testName: "Total Cholesterol",
+            value: "185",
+            unit: "mg/dL",
+            referenceRange: "<200",
+            isAbnormal: false,
+            bloodReport: bloodReport3
+        ),
+        BloodTestResult(
+            testName: "HDL Cholesterol",
+            value: "58",
+            unit: "mg/dL",
+            referenceRange: ">40",
+            isAbnormal: false,
+            bloodReport: bloodReport3
+        ),
+        BloodTestResult(
+            testName: "LDL Cholesterol",
+            value: "110",
+            unit: "mg/dL",
+            referenceRange: "<130",
+            isAbnormal: false,
+            bloodReport: bloodReport3
+        ),
+        BloodTestResult(
+            testName: "Triglycerides",
+            value: "95",
+            unit: "mg/dL",
+            referenceRange: "<150",
+            isAbnormal: false,
+            bloodReport: bloodReport3
+        )
+    ]
+    
+    // Add test results to blood reports
+    bloodReport1.testResults = testResults1
+    bloodReport2.testResults = testResults2
+    bloodReport3.testResults = testResults3
+    
+    // Add to model context
+    container.mainContext.insert(patient)
+    container.mainContext.insert(medicalCase)
+    container.mainContext.insert(bloodReport1)
+    container.mainContext.insert(bloodReport2)
+    container.mainContext.insert(bloodReport3)
+    
+    testResults1.forEach { container.mainContext.insert($0) }
+    testResults2.forEach { container.mainContext.insert($0) }
+    testResults3.forEach { container.mainContext.insert($0) }
+    
+    return NavigationStack {
+        BloodTestsView(patient: patient)
+    }
+    .modelContainer(container)
+}
+
+#Preview("Empty Blood Tests View") {
+    let container = PreviewContainer.createModelContainer()
+    let patient = Patient.samplePatient
+    
+    container.mainContext.insert(patient)
+    
+    return NavigationStack {
+        BloodTestsView(patient: patient)
+    }
+    .modelContainer(container)
+}
+
+#Preview("Loading State") {
+    let container = PreviewContainer.createModelContainer()
+    let patient = Patient.samplePatient
+    
+    container.mainContext.insert(patient)
+    
+    return NavigationStack {
+        BloodTestsView(patient: patient)
+            .onAppear {
+                // Simulate loading state
+            }
+    }
+    .modelContainer(container)
 }
