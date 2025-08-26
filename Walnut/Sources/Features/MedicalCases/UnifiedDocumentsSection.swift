@@ -30,72 +30,74 @@ struct UnifiedDocumentsSection: View {
                 count: totalDocumentCount,
                 onAddTap: { showAddDocument = true }
             )
-            
-            if allDocuments.isEmpty {
-                // Modern empty state
-                VStack(alignment: .center, spacing: Spacing.large) {
-                    ZStack {
-                        Circle()
-                            .fill(Color.healthPrimary.opacity(0.1))
-                            .frame(width: 80, height: 80)
+            Group {
+                if allDocuments.isEmpty {
+                    // Modern empty state
+                    VStack(alignment: .center, spacing: Spacing.large) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.healthPrimary.opacity(0.1))
+                                .frame(width: 80, height: 80)
+                            
+                            Image(systemName: "doc.badge.plus")
+                                .font(.system(size: 32, weight: .light))
+                                .foregroundStyle(Color.healthPrimary.opacity(0.6))
+                        }
                         
-                        Image(systemName: "doc.badge.plus")
-                            .font(.system(size: 32, weight: .light))
-                            .foregroundStyle(Color.healthPrimary.opacity(0.6))
+                        VStack(alignment: .center, spacing: Spacing.small) {
+                            Text("No documents yet")
+                                .font(.headline.weight(.semibold))
+                                .foregroundStyle(.primary)
+                            
+                            Text("Add medical documents to track prescriptions, lab results, and more")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(nil)
+                        }
+                        
+                        Button {
+                            showAddDocument = true
+                        } label: {
+                            Text("Add First Document")
+                                .font(.body)
+                                .foregroundStyle(.primary)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(Color.healthPrimary)
+                        .controlSize(.large)
+                    }
+                    .padding(.vertical, Spacing.xl)
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                } else {
+                    // Rich document list with grouping
+                    LazyVStack(alignment: .center, spacing: Spacing.small) {
+                        ForEach(allDocuments, id: \.id) { item in
+                            documentRow(for: item)
+                                .transition(.asymmetric(
+                                    insertion: .move(edge: .top).combined(with: .opacity),
+                                    removal: .move(edge: .trailing).combined(with: .opacity)
+                                ))
+                        }
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .navigationDestination(item: $navigationState.selectedPrescription) { prescription in
+                        PrescriptionDetailView(prescription: prescription)
+                    }
+                    .navigationDestination(item: $navigationState.selectedBloodReport) { bloodReport in
+                        BloodReportDetailView(bloodReport: bloodReport)
+                    }
+                    .navigationDestination(item: $navigationState.selectedDocument) { document in
+                        DocumentViewer(document: document)
                     }
                     
-                    VStack(alignment: .center, spacing: Spacing.small) {
-                        Text("No documents yet")
-                            .font(.headline.weight(.semibold))
-                            .foregroundStyle(.primary)
-                        
-                        Text("Add medical documents to track prescriptions, lab results, and more")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(nil)
-                    }
-                    
-                    Button {
-                        showAddDocument = true
-                    } label: {
-                        Text("Add First Document")
-                            .font(.body)
-                            .foregroundStyle(.primary)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Color.healthPrimary)
-                    .controlSize(.large)
                 }
-                .padding(.vertical, Spacing.xl)
-                .transition(.opacity.combined(with: .scale(scale: 0.95)))
-            } else {
-                // Rich document list with grouping
-                LazyVStack(alignment: .center, spacing: Spacing.small) {
-                    ForEach(allDocuments, id: \.id) { item in
-                        documentRow(for: item)
-                            .transition(.asymmetric(
-                                insertion: .move(edge: .top).combined(with: .opacity),
-                                removal: .move(edge: .trailing).combined(with: .opacity)
-                            ))
-                    }
-                }
-                .transition(.opacity.combined(with: .move(edge: .top)))
-                .navigationDestination(item: $navigationState.selectedPrescription) { prescription in
-                    PrescriptionDetailView(prescription: prescription)
-                }
-                .navigationDestination(item: $navigationState.selectedBloodReport) { bloodReport in
-                    BloodReportDetailView(bloodReport: bloodReport)
-                }
-                .navigationDestination(item: $navigationState.selectedDocument) { document in
-                    DocumentViewer(document: document)
-                }
-                .sheet(isPresented: $showAddDocument) {
-                    ModularDocumentPickerView(
-                        medicalCase: medicalCase,
-                        modelContext: modelContext
-                    )
-                }
+            }
+            .sheet(isPresented: $showAddDocument) {
+                ModularDocumentPickerView(
+                    medicalCase: medicalCase,
+                    modelContext: modelContext
+                )
             }
         }
     }
@@ -131,12 +133,27 @@ struct UnifiedDocumentsSection: View {
                 }
                 .documentContextMenu(items: contextMenuItems)
                 
+            case .document(let document):
+                HStack {
+                    FileIcon(
+                        filename: formatUnparsedDocumentTitle(document),
+                        subtitle: formatUnparsedDocumentSubtitle(document),
+                        documentType: document.documentType,
+                        iconColor: document.documentType.color,
+                        backgroundColor: document.documentType.backgroundColor
+                    )
+                    .onTapGesture {
+                        navigationState.selectedDocument = document
+                    }
+                }
+                .documentContextMenu(items: contextMenuItems)
+                
             case .unparsedDocument(let document):
                 HStack {
                     FileIcon(
                         filename: formatUnparsedDocumentTitle(document),
                         subtitle: formatUnparsedDocumentSubtitle(document),
-                        documentType: .unknown,
+                        documentType: document.documentType,
                         iconColor: .orange,
                         backgroundColor: .orange
                     )
@@ -168,6 +185,8 @@ struct UnifiedDocumentsSection: View {
         // Add unparsed documents
         items.append(contentsOf: medicalCase.unparsedDocuments.map { .unparsedDocument($0) })
         
+        items.append(contentsOf: medicalCase.otherDocuments.map { .document($0) })
+        
         // Sort by date (most recent first)
         return items.sorted { item1, item2 in
             item1.sortDate > item2.sortDate
@@ -175,17 +194,11 @@ struct UnifiedDocumentsSection: View {
     }
     
     private var totalDocumentCount: Int {
-        medicalCase.prescriptions.count +
-        medicalCase.bloodReports.count +
-        medicalCase.unparsedDocuments.count
+        allDocuments.count
     }
     
     private var unparsedCount: Int {
         medicalCase.unparsedDocuments.count
-    }
-    
-    private var abnormalResultsCount: Int {
-        medicalCase.bloodReports.flatMap(\.testResults).filter(\.isAbnormal).count
     }
     
     // MARK: - Helper Methods
@@ -264,6 +277,7 @@ struct UnifiedDocumentsSection: View {
 enum DocumentItem {
     case prescription(Prescription)
     case bloodReport(BloodReport)
+    case document(Document)
     case unparsedDocument(Document)
     
     var id: String {
@@ -272,8 +286,10 @@ enum DocumentItem {
             return "prescription-\(prescription.id)"
         case .bloodReport(let bloodReport):
             return "bloodReport-\(bloodReport.id)"
-        case .unparsedDocument(let document):
+        case .document(let document):
             return "document-\(document.id)"
+        case .unparsedDocument(let document):
+            return "unparsedDocument-\(document.id)"
         }
     }
     
@@ -284,6 +300,8 @@ enum DocumentItem {
         case .bloodReport(let bloodReport):
             return bloodReport.resultDate
         case .unparsedDocument(let document):
+            return document.uploadDate
+        case .document(let document):
             return document.uploadDate
         }
     }

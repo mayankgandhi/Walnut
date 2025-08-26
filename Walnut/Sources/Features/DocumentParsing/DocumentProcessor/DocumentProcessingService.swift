@@ -22,6 +22,7 @@ protocol DocumentProcessingProgressDelegate: AnyObject {
 protocol DocumentRepositoryProtocol {
     func savePrescription(_ parsedPrescription: ParsedPrescription, to medicalCase: MedicalCase, fileURL: URL) async throws -> PersistentIdentifier
     func saveBloodReport(_ parsedBloodReport: ParsedBloodReport, to medicalCase: MedicalCase, fileURL: URL) async throws -> PersistentIdentifier
+    func saveDocument(_ document: Document, to medicalCase: MedicalCase) async throws -> PersistentIdentifier
     func saveUnparsedDocument(_ document: Document, to medicalCase: MedicalCase) async throws -> PersistentIdentifier
 }
 
@@ -216,6 +217,20 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
         return bloodReport.persistentModelID
     }
     
+    @MainActor
+    func saveDocument(
+        _ document: Document,
+        to medicalCase: MedicalCase
+    ) async throws -> PersistentIdentifier {
+        modelContext.insert(document)
+        
+        // Add document to medical case's unparsed documents array
+        medicalCase.otherDocuments.append(document)
+        
+        try modelContext.save()
+        return document.persistentModelID
+    }
+        
     @MainActor
     func saveUnparsedDocument(
         _ document: Document,

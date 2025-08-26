@@ -77,7 +77,7 @@ class BloodReport: Identifiable, Sendable {
             notes: notes,
             medicalCase: medicalCase,
             document: Document(
-                fileName: "\(testName)_\(labName)_blood_report",
+                fileName: "\(fileURL.lastPathComponent).\(fileURL.pathExtension)",
                 fileURL: fileURL,
                 documentType: .labResult,
                 fileSize: fileSize

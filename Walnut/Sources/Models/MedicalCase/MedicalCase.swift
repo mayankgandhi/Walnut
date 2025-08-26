@@ -35,6 +35,9 @@ class MedicalCase: Identifiable, Sendable {
     @Relationship(deleteRule: .cascade)
     var unparsedDocuments: [Document] = []
     
+    @Relationship(deleteRule: .cascade)
+    var otherDocuments: [Document] = []
+    
     init(id: UUID,
          title: String,
          notes: String,

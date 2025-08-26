@@ -108,20 +108,6 @@ struct BloodReportDetailView: View {
                                     .foregroundStyle(.secondary)
                             }
                         }
-                        
-                        // Enhanced status with overall health indicator
-                        let abnormalCount = bloodReport.testResults.filter(\.isAbnormal).count
-                        HStack(spacing: Spacing.xs) {
-                            Circle()
-                                .fill(abnormalCount == 0 ? Color.healthSuccess : Color.healthWarning)
-                                .frame(width: 8, height: 8)
-                                .scaleEffect(abnormalCount > 0 ? 1.0 : 0.8)
-                                .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: abnormalCount > 0)
-                            
-                            Text(abnormalCount == 0 ? "All Results Normal" : "\(abnormalCount) Abnormal Results")
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(abnormalCount == 0 ? Color.healthSuccess : Color.healthWarning)
-                        }
                     }
                     
                     Spacer()

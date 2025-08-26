@@ -103,8 +103,6 @@ struct DocumentProcessingUseCase {
                     medicalCase: medicalCase
                 )
                 
-                // Step 4: Complete
-                await updateProgress(0.9, "Finalizing...")
                 
                 await updateProgress(1.0, "Complete!")
                 
@@ -119,7 +117,8 @@ struct DocumentProcessingUseCase {
                 await updateProgress(0.6, "Parsing failed, saving as unparsed document...")
                 let modelId = try await saveUnparsedDocument(
                     tempFileURL: tempFileURL!,
-                    medicalCase: medicalCase
+                    medicalCase: medicalCase,
+                    documentType: selectedDocumentType
                 )
                 
                 // Step 5: Complete
@@ -181,26 +180,49 @@ struct DocumentProcessingUseCase {
             )
             
         default:
-            // This case shouldn't be reached in normal parsing flow, but added for exhaustiveness
-            throw DocumentProcessingError.parsingFailed(
-                NSError(domain: "DocumentProcessing",
-                        code: -1,
-                        userInfo: [NSLocalizedDescriptionKey: "Cannot parse unknown document type"])
+            // This case is for non parsing documents, where we are just sharing
+            return try await saveDocument(
+                tempFileURL: tempFileURL,
+                medicalCase: medicalCase,
+                documentType: documentType
             )
+            
         }
     }
     
-    private func saveUnparsedDocument(
+    private func saveDocument(
         tempFileURL: URL,
-        medicalCase: MedicalCase
+        medicalCase: MedicalCase,
+        documentType: DocumentType
     ) async throws -> PersistentIdentifier {
         // File is already saved locally in the prepare step
         // Create a Document record for unparsed document
         let fileSize = (try? FileManager.default.attributesOfItem(atPath: tempFileURL.path)[.size] as? Int64) ?? 0
+        
         let document = Document(
             fileName: tempFileURL.lastPathComponent,
             fileURL: tempFileURL,
-            documentType: .labResult,
+            documentType: documentType,
+            fileSize: fileSize
+        )
+        
+        // Add document to medical case's unparsed documents
+        return try await repository.saveDocument(document, to: medicalCase)
+    }
+    
+    private func saveUnparsedDocument(
+        tempFileURL: URL,
+        medicalCase: MedicalCase,
+        documentType: DocumentType
+    ) async throws -> PersistentIdentifier {
+        // File is already saved locally in the prepare step
+        // Create a Document record for unparsed document
+        let fileSize = (try? FileManager.default.attributesOfItem(atPath: tempFileURL.path)[.size] as? Int64) ?? 0
+        
+        let document = Document(
+            fileName: tempFileURL.lastPathComponent,
+            fileURL: tempFileURL,
+            documentType: documentType,
             fileSize: fileSize
         )
         
