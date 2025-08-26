@@ -122,4 +122,129 @@ extension Patient {
         updatedAt: Date(),
         medicalCases: []
     )
+    
+    @MainActor
+    static let samplePatientWithMedications: Patient = {
+        let patient = Patient(
+            id: UUID(),
+            firstName: "Sarah",
+            lastName: "Wilson",
+            dateOfBirth: Calendar.current.date(byAdding: .year, value: -42, to: Date()) ?? Date(),
+            gender: "Female",
+            bloodType: "O+",
+            emergencyContactName: "Robert Wilson",
+            emergencyContactPhone: "(555) 987-6543",
+            notes: "Patient with diabetes and hypertension. Regular monitoring required.",
+            isActive: true,
+            primaryColorHex: "#FF6B6B",
+            createdAt: Date(),
+            updatedAt: Date(),
+            medicalCases: []
+        )
+        
+        // Create medical case for diabetes management
+        let diabetesCase = MedicalCase(
+            id: UUID(),
+            title: "Type 2 Diabetes Management",
+            notes: "Patient diagnosed with Type 2 diabetes 3 years ago. Good control with medication and lifestyle changes.",
+            type: .treatment,
+            specialty: .endocrinologist,
+            isActive: true,
+            createdAt: Date().addingTimeInterval(-86400 * 30),
+            updatedAt: Date(),
+            patient: patient
+        )
+        
+        // Create medical case for hypertension
+        let hypertensionCase = MedicalCase(
+            id: UUID(),
+            title: "Essential Hypertension",
+            notes: "Well-controlled hypertension with ACE inhibitor therapy.",
+            type: .treatment,
+            specialty: .cardiologist,
+            isActive: true,
+            createdAt: Date().addingTimeInterval(-86400 * 60),
+            updatedAt: Date(),
+            patient: patient
+        )
+        
+        // Create prescriptions with medications
+        let diabetesPrescription = Prescription(
+            id: UUID(),
+            followUpDate: Date().addingTimeInterval(86400 * 90),
+            followUpTests: ["HbA1c", "Kidney function"],
+            dateIssued: Date().addingTimeInterval(-86400 * 7),
+            doctorName: "Dr. Emily Chen",
+            facilityName: "Diabetes Care Center",
+            notes: "Continue current medications. Monitor blood sugar daily.",
+            document: nil,
+            medicalCase: diabetesCase,
+            medications: [
+                Medication(
+                    id: UUID(),
+                    name: "Metformin",
+                    frequency: [
+                        MedicationSchedule(mealTime: .breakfast, timing: .after, dosage: "500mg"),
+                        MedicationSchedule(mealTime: .dinner, timing: .after, dosage: "500mg")
+                    ],
+                    numberOfDays: 90,
+                    dosage: "500mg",
+                    instructions: "Take with meals to control blood sugar"
+                ),
+                Medication(
+                    id: UUID(),
+                    name: "Insulin Glargine",
+                    frequency: [
+                        MedicationSchedule(mealTime: .bedtime, timing: .before, dosage: "20 units")
+                    ],
+                    numberOfDays: 90,
+                    dosage: "20 units",
+                    instructions: "Inject subcutaneously at bedtime"
+                )
+            ]
+        )
+        
+        let hypertensionPrescription = Prescription(
+            id: UUID(),
+            followUpDate: Date().addingTimeInterval(86400 * 60),
+            followUpTests: ["Blood pressure monitoring"],
+            dateIssued: Date().addingTimeInterval(-86400 * 14),
+            doctorName: "Dr. James Rodriguez",
+            facilityName: "Heart Care Clinic",
+            notes: "Blood pressure well controlled. Continue current therapy.",
+            document: nil,
+            medicalCase: hypertensionCase,
+            medications: [
+                Medication(
+                    id: UUID(),
+                    name: "Lisinopril",
+                    frequency: [
+                        MedicationSchedule(mealTime: .breakfast, timing: .before, dosage: "10mg")
+                    ],
+                    numberOfDays: 90,
+                    dosage: "10mg",
+                    instructions: "Take at the same time each morning"
+                ),
+                Medication(
+                    id: UUID(),
+                    name: "Amlodipine",
+                    frequency: [
+                        MedicationSchedule(mealTime: .breakfast, timing: .after, dosage: "5mg")
+                    ],
+                    numberOfDays: 90,
+                    dosage: "5mg",
+                    instructions: "Take once daily with breakfast"
+                )
+            ]
+        )
+        
+        // Add prescriptions to medical cases
+        diabetesCase.prescriptions = [diabetesPrescription]
+        hypertensionCase.prescriptions = [hypertensionPrescription]
+        
+        // Add medical cases to patient
+        patient.medicalCases = [diabetesCase, hypertensionCase]
+        
+        return patient
+    }()
 }

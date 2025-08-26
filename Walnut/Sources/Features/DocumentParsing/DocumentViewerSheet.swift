@@ -57,7 +57,7 @@ struct DocumentViewer: View {
         switch pathExtension {
         case "pdf", "PDF":
             return .pdf
-        case "jpg", "jpeg", "png", "heic", "heif":
+        case "jpg", "jpeg", "png", "heic", "heif","JPG", "JPEG", "PNG", "HEIC", "HEIF":
             return .image
         default:
             return .unsupported
@@ -191,7 +191,7 @@ private struct ImageDocumentView: View {
                 )
             }
         }
-        .onAppear {
+        .task {
             loadImage()
         }
     }

@@ -12,7 +12,7 @@ import WalnutDesignSystem
 struct UpcomingMedicationsSection: View {
     
     let patient: Patient
-    @Environment(\.modelContext) private var modelContext
+
     @State private var activeMedications: [Medication] = []
     @State private var medicationTracker = MedicationTracker()
     @State private var currentTime = Date()
@@ -22,34 +22,36 @@ struct UpcomingMedicationsSection: View {
     }
     
     var body: some View {
-        Section {
-            if upcomingMedications.isEmpty {
-                emptyStateView
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-            } else {
-                ForEach(Array(upcomingMedications.enumerated()), id: \.element.medication.id) { index, medicationInfo in
-                    MedicationCard.upcoming(
-                        medicationName: medicationInfo.medication.name,
-                        dosage: medicationInfo.dosageText,
-                        timing: medicationInfo.displayTime,
-                        instructions: medicationInfo.medication.instructions,
-                        timePeriod: mapToDesignSystemTimePeriod(medicationInfo.timePeriod),
-                        timeUntilDue: medicationInfo.timeUntilDue.map { medicationTracker.formatTimeUntilDue($0) } ?? ""
-                    ) {
-                        markMedicationTaken(medicationInfo)
+        HealthCard {
+            VStack(alignment: .leading, spacing: Spacing.medium) {
+
+                sectionHeaderView
+                
+                if upcomingMedications.isEmpty {
+                    emptyStateView
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                } else {
+                    ForEach(Array(upcomingMedications.enumerated()), id: \.element.medication.id) { index, medicationInfo in
+                        MedicationCard.upcoming(
+                            medicationName: medicationInfo.medication.name,
+                            dosage: medicationInfo.dosageText,
+                            timing: medicationInfo.displayTime,
+                            instructions: medicationInfo.medication.instructions,
+                            timePeriod: mapToDesignSystemTimePeriod(medicationInfo.timePeriod),
+                            timeUntilDue: medicationInfo.timeUntilDue.map { medicationTracker.formatTimeUntilDue($0) } ?? ""
+                        ) {
+                            
+                        }
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: Spacing.xs, leading: 0, bottom: Spacing.xs, trailing: 0))
                     }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets(top: Spacing.xs, leading: 0, bottom: Spacing.xs, trailing: 0))
                 }
             }
-        } header: {
-            sectionHeaderView
         }
         .onAppear {
             loadActiveMedications()
-            startTimer()
         }
     }
     
@@ -118,24 +120,15 @@ struct UpcomingMedicationsSection: View {
         }
     }
     
-    
-    private func startTimer() {
-        Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
-            currentTime = Date()
-        }
-    }
-    
-    private func markMedicationTaken(_ medicationInfo: MedicationTracker.MedicationScheduleInfo) {
-        let impactFeedback = UIImpactFeedbackGenerator(style: .rigid)
-        impactFeedback.prepare()
-        impactFeedback.impactOccurred(intensity: 0.8)
-        
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-            currentTime = Date()
-        }
-        
-        print("Marked \(medicationInfo.medication.name) as taken")
-    }
 }
 
+#Preview("With Medications") {
+    UpcomingMedicationsSection(patient: .samplePatientWithMedications)
+        .modelContainer(for: Patient.self, inMemory: true)
+}
+
+#Preview("Empty State") {
+    UpcomingMedicationsSection(patient: .samplePatient)
+        .modelContainer(for: Patient.self, inMemory: true)
+}
 

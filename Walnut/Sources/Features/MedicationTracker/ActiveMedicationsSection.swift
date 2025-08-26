@@ -22,24 +22,27 @@ struct ActiveMedicationsSection: View {
     }
     
     var body: some View {
-        Section {
-            if activeMedications.isEmpty {
-                emptyStateView
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-            } else {
-                // Time Period Groups
-                ForEach(MedicationTracker.TimePeriod.allCases, id: \.self) { timePeriod in
-                    if let medicationsForPeriod = groupedMedications[timePeriod], !medicationsForPeriod.isEmpty {
-                        timePeriodSection(timePeriod: timePeriod, medications: medicationsForPeriod)
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets(top: Spacing.xs, leading: 0, bottom: Spacing.xs, trailing: 0))
+        ScrollView {
+            VStack(alignment: .leading, spacing: Spacing.medium) {
+                sectionHeaderView
+                
+                if activeMedications.isEmpty {
+                    emptyStateView
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                } else {
+                    // Time Period Groups
+                    ForEach(MedicationTracker.TimePeriod.allCases, id: \.self) { timePeriod in
+                        if let medicationsForPeriod = groupedMedications[timePeriod], !medicationsForPeriod.isEmpty {
+                            timePeriodSection(timePeriod: timePeriod, medications: medicationsForPeriod)
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                                .listRowInsets(EdgeInsets(top: Spacing.xs, leading: 0, bottom: Spacing.xs, trailing: 0))
+                        }
                     }
                 }
             }
-        } header: {
-            sectionHeaderView
+            .padding(Spacing.medium)
         }
         .onAppear {
             loadActiveMedications()
@@ -161,4 +164,14 @@ struct ActiveMedicationsSection: View {
             return .night
         }
     }
+}
+
+#Preview("With Active Medications") {
+    ActiveMedicationsSection(patient: .samplePatientWithMedications)
+        .modelContainer(for: Patient.self, inMemory: true)
+}
+
+#Preview("Empty State") {
+    ActiveMedicationsSection(patient: .samplePatient)
+        .modelContainer(for: Patient.self, inMemory: true)
 }

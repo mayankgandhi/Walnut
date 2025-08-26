@@ -90,14 +90,7 @@ struct PatientSettingsView: View {
                             // TODO: Appearance settings
                         }
                         
-                        MenuListItem(
-                            icon: "info.circle.fill",
-                            title: "About",
-                            subtitle: "App version and info",
-                            iconColor: .gray
-                        ) {
-                            // TODO: About screen
-                        }
+                        AboutMenuListItem()
                         
                         MenuListItem(
                             icon: "questionmark.circle.fill",
@@ -120,6 +113,7 @@ struct PatientSettingsView: View {
         }
     }
 }
+
 
 #Preview {
     NavigationStack {
