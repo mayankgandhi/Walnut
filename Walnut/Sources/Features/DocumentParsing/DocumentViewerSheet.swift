@@ -44,7 +44,7 @@ struct DocumentViewer: View {
         case .image:
             let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
                 .appendingPathComponent("WalnutMedicalRecords")
-                .appendingPathCoamponent(document.fileURL)
+                .appendingPathComponent(document.fileURL)
             return AnyView(ImageDocumentView(url: url))
         case .unsupported:
             return AnyView(UnsupportedDocumentView(document: document))
