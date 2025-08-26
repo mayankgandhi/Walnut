@@ -36,7 +36,6 @@ struct MedicationsTrackerView: View {
                 }
             }
         }
-       
         .navigationDestination(isPresented: $showSettings) {
             PatientSettingsView(patient: patient)
         }

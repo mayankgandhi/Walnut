@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import WalnutDesignSystem
 
 struct PatientTabView: View {
     let patient: Patient
@@ -16,7 +17,6 @@ struct PatientTabView: View {
             Tab("Medications", systemImage: "pills.fill") {
                 NavigationStack {
                     MedicationsTrackerView(patient: patient)
-                        .navigationTitle("Medications")
                 }
             }
             
