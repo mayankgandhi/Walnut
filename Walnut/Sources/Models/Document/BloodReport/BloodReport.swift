@@ -26,10 +26,10 @@ class BloodReport: Identifiable, Sendable {
     
     var medicalCase: MedicalCase
     
-    @Relationship(deleteRule: .cascade)
+    @Relationship(deleteRule: .cascade, inverse: \Document.bloodReport)
     var document: Document?
     
-    @Relationship(deleteRule: .cascade)
+    @Relationship(deleteRule: .cascade, inverse: \BloodTestResult.bloodReport)
     var testResults: [BloodTestResult] = []
     
     init(id: UUID = UUID(),

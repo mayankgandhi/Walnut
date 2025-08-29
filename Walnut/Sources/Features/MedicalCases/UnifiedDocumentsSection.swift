@@ -206,7 +206,11 @@ struct UnifiedDocumentsSection: View {
     private func formatPrescriptionTitle(_ prescription: Prescription) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .medium
-        return "Prescription - \(dateFormatter.string(from: prescription.dateIssued))"
+        if let dateIssued = prescription.dateIssued as Date? {
+            return "Prescription - \(dateFormatter.string(from: dateIssued))"
+        } else {
+            return "Prescription"
+        }
     }
     
     private func formatPrescriptionSubtitle(_ prescription: Prescription) -> String {

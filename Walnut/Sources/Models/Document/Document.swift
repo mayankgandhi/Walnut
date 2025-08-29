@@ -25,6 +25,11 @@ class Document: Identifiable, Hashable {
     
     var createdAt: Date
     var updatedAt: Date
+
+    // Inverse Relationships
+    var prescription: Prescription?
+    var bloodReport: BloodReport?
+    var medicalCase: MedicalCase?
         
     init(
         id: UUID = UUID(),

@@ -507,7 +507,9 @@ struct PrescriptionEditor: View {
     private func loadPrescriptionData(_ prescription: Prescription) {
         doctorName = prescription.doctorName ?? ""
         facilityName = prescription.facilityName ?? ""
-        dateIssued = prescription.dateIssued
+        if let dateIssued = prescription.dateIssued {
+            self.dateIssued = dateIssued
+        }
         followUpDate = prescription.followUpDate
         hasFollowUp = prescription.followUpDate != nil
         followUpTests = prescription.followUpTests?.joined(separator: ", ") ?? ""

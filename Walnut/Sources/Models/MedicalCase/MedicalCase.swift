@@ -32,10 +32,10 @@ class MedicalCase: Identifiable, Sendable {
     @Relationship(deleteRule: .cascade, inverse: \BloodReport.medicalCase)
     var bloodReports: [BloodReport] = []
     
-    @Relationship(deleteRule: .cascade)
+    @Relationship(deleteRule: .cascade, inverse: \Document.medicalCase)
     var unparsedDocuments: [Document] = []
     
-    @Relationship(deleteRule: .cascade)
+    @Relationship(deleteRule: .cascade, inverse: \Document.medicalCase)
     var otherDocuments: [Document] = []
     
     init(id: UUID,

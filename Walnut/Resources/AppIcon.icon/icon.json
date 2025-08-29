@@ -4,170 +4,33 @@
   },
   "groups" : [
     {
+      "blend-mode" : "normal",
+      "blur-material" : 0.5,
       "layers" : [
         {
-          "image-name" : "3 2.png",
-          "name" : "3 2",
-          "position-specializations" : [
-            {
-              "idiom" : "square",
-              "value" : {
-                "scale" : 0.25,
-                "translation-in-points" : [
-                  279.4048235408337,
-                  -319.1415452673556
-                ]
-              }
-            }
-          ]
+          "image-name" : "Copy of BloodTracker Icon.png",
+          "name" : "Copy of BloodTracker Icon"
         },
         {
-          "blend-mode" : "normal",
-          "fill" : "none",
-          "glass" : false,
-          "image-name" : "2.png",
-          "name" : "2",
-          "position-specializations" : [
-            {
-              "value" : {
-                "scale" : 0.2,
-                "translation-in-points" : [
-                  -222.109375,
-                  -285.2734375
-                ]
-              }
-            },
+          "blend-mode" : "darken",
+          "fill" : "automatic",
+          "hidden-specializations" : [
             {
               "idiom" : "square",
-              "value" : {
-                "scale" : 0.1,
-                "translation-in-points" : [
-                  309.6171875,
-                  -363.8671875
-                ]
-              }
+              "value" : false
             }
-          ]
-        }
-      ],
-      "position-specializations" : [
-        {
-          "idiom" : "square",
-          "value" : {
-            "scale" : 1,
-            "translation-in-points" : [
-              0,
-              20
-            ]
-          }
+          ],
+          "image-name" : "xdcfvgbhnj.png",
+          "name" : "xdcfvgbhnj"
         }
       ],
       "shadow" : {
-        "kind" : "neutral",
+        "kind" : "layer-color",
         "opacity" : 0.5
       },
       "translucency" : {
         "enabled" : true,
-        "value" : 0.5
-      }
-    },
-    {
-      "layers" : [
-        {
-          "blend-mode-specializations" : [
-            {
-              "value" : "darken"
-            },
-            {
-              "appearance" : "dark",
-              "value" : "multiply"
-            }
-          ],
-          "fill-specializations" : [
-            {
-              "appearance" : "dark",
-              "value" : "none"
-            }
-          ],
-          "image-name" : "1 2.png",
-          "name" : "1 2",
-          "opacity-specializations" : [
-            {
-              "appearance" : "dark",
-              "value" : 0.8
-            }
-          ],
-          "position" : {
-            "scale" : 1,
-            "translation-in-points" : [
-              -244.45351102154308,
-              -66.62551099695298
-            ]
-          }
-        },
-        {
-          "image-name" : "Walnut Icon.png",
-          "name" : "Walnut Icon",
-          "position-specializations" : [
-            {
-              "idiom" : "square",
-              "value" : {
-                "scale" : 0.3,
-                "translation-in-points" : [
-                  266.4883322135792,
-                  -20.992726350346786
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "image-name" : "5.png",
-          "name" : "5",
-          "position-specializations" : [
-            {
-              "idiom" : "square",
-              "value" : {
-                "scale" : 0.3,
-                "translation-in-points" : [
-                  40.698729907319944,
-                  216.86646774126766
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "image-name" : "4.png",
-          "name" : "4",
-          "position-specializations" : [
-            {
-              "idiom" : "square",
-              "value" : {
-                "scale" : 0.3,
-                "translation-in-points" : [
-                  570.078125,
-                  258.6171875
-                ]
-              }
-            }
-          ]
-        }
-      ],
-      "position" : {
-        "scale" : 1,
-        "translation-in-points" : [
-          -263.4375,
-          43.9765625
-        ]
-      },
-      "shadow" : {
-        "kind" : "neutral",
-        "opacity" : 0.5
-      },
-      "translucency" : {
-        "enabled" : true,
-        "value" : 0.5
+        "value" : 0.2
       }
     }
   ],

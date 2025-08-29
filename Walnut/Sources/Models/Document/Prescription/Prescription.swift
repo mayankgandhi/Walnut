@@ -12,11 +12,10 @@ import Foundation
 @Model
 class Prescription {
     
-    @Attribute(.unique)
-    var id: UUID
+    var id: UUID?
     
     // Metadata
-    var dateIssued: Date
+    var dateIssued: Date?
     var doctorName: String?
     var facilityName: String?
     
@@ -25,13 +24,12 @@ class Prescription {
         
     var notes: String?
     
-    var createdAt: Date
-    var updatedAt: Date
+    var createdAt: Date?
+    var updatedAt: Date?
     
-    @Relationship
-    var medicalCase: MedicalCase
+    var medicalCase: MedicalCase?
     
-    @Relationship(deleteRule: .cascade)
+    @Relationship(deleteRule: .cascade, inverse: \Document.prescription)
     var document: Document?
     
     @Relationship(deleteRule: .cascade, inverse: \Medication.prescription)

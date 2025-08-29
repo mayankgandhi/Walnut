@@ -16,9 +16,11 @@ struct PrescriptionListItem: View {
             // Header with date and doctor
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(prescription.dateIssued, style: .date)
-                        .font(.headline)
-                        .foregroundColor(.primary)
+                    if let dateIssued = prescription.dateIssued {
+                        Text(dateIssued, style: .date)
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                    }
                     
                     if let doctorName = prescription.doctorName {
                         Text(doctorName)

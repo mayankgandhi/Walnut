@@ -154,10 +154,11 @@ struct PrescriptionDetailView: View {
                             
                             Spacer()
                         }
-                        
-                        Text(prescription.dateIssued.formatted(date: .abbreviated, time: .omitted))
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.secondary)
+                        if let dateIssued = prescription.dateIssued {
+                            Text(dateIssued.formatted(date: .abbreviated, time: .omitted))
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                        }
                     }
                     
                     // Follow-up Card

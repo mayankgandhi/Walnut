@@ -17,7 +17,7 @@ struct TimelineEvent: Identifiable {
     let color: Color
     let title: String
     let subtitle: String?
-    let date: Date
+    let date: Date?
 }
 
 // MARK: - Timeline Event Provider Protocol
@@ -209,10 +209,11 @@ private extension TimelineItemView {
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.secondary)
             }
-            
-            Text(event.date.formatted(date: .abbreviated, time: .shortened))
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
+            if let date = event.date {
+                Text(date.formatted(date: .abbreviated, time: .shortened))
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
         }
     }
 }

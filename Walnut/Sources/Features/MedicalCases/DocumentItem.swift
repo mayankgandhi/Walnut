@@ -11,6 +11,7 @@ import Foundation
 // MARK: - Supporting Types
 
 enum DocumentItem {
+    
     case prescription(Prescription)
     case bloodReport(BloodReport)
     case document(Document)
@@ -29,7 +30,7 @@ enum DocumentItem {
         }
     }
     
-    var sortDate: Date {
+    var sortDate: Date? {
         switch self {
         case .prescription(let prescription):
             return prescription.dateIssued
