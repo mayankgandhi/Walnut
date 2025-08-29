@@ -105,8 +105,8 @@ struct MedicalCaseTimelineEventProvider: TimelineEventProvider {
         let bloodReportEvents = medicalCase.bloodReports
             .sorted(by: { $0.resultDate < $1.resultDate })
             .map { bloodReport in
-                let abnormalCount = bloodReport.testResults.filter(\.isAbnormal).count
-                let subtitle = abnormalCount > 0 ? 
+                let abnormalCount = bloodReport.testResults.filter({ $0.isAbnormal ?? false }).count
+                let subtitle = abnormalCount > 0 ?
                     "\(bloodReport.testName) - \(abnormalCount) abnormal results" : 
                     "\(bloodReport.testName) - All normal"
                 

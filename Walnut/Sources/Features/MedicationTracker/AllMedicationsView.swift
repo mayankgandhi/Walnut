@@ -19,13 +19,13 @@ struct AllMedicationsView: View {
     
     private var activeMedications: [Medication] {
         patient.medicalCases
-            .filter { $0.isActive }
+            .filter { $0.isActive ?? false }
             .flatMap { $0.prescriptions.flatMap { $0.medications } }
     }
     
     private var inactiveMedications: [Medication] {
         patient.medicalCases
-            .filter { !$0.isActive }
+            .filter { !($0.isActive ?? true) }
             .flatMap { $0.prescriptions.flatMap { $0.medications } }
     }
     

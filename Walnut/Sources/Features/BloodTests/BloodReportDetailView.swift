@@ -34,7 +34,8 @@ struct BloodReportDetailView: View {
                     
                     // Enhanced Document & Metadata Section
                     VStack(spacing: Spacing.large) {
-                        if !bloodReport.notes.isEmpty {
+                        if bloodReport.notes != nil,
+                           !bloodReport.notes!.isEmpty {
                             enhancedNotesCard
                         }
                         
@@ -63,7 +64,7 @@ struct BloodReportDetailView: View {
                     // Enhanced Lab Icon with animated background
                     ZStack {
                         Image(
-                            systemName: bloodReport.document?.documentType.typeIcon ?? "folder"
+                            systemName: bloodReport.document?.documentType?.typeIcon ?? "folder"
                         )
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundStyle(Color.red)
@@ -86,13 +87,14 @@ struct BloodReportDetailView: View {
                     
                     // Enhanced content with better hierarchy
                     VStack(alignment: .leading, spacing: Spacing.small) {
-                        Text(bloodReport.testName)
-                            .font(.headline)
-                            .foregroundStyle(.primary)
-                            .lineLimit(3)
-                            .multilineTextAlignment(.leading)
-                        
-                        if !bloodReport.labName.isEmpty {
+                        if let testName = bloodReport.testName {
+                            Text(testName)
+                                .font(.headline)
+                                .foregroundStyle(.primary)
+                                .lineLimit(3)
+                                .multilineTextAlignment(.leading)
+                        }
+                        OptionalView(bloodReport.labName) { labName in
                             HStack(spacing: Spacing.xs) {
                                 Circle()
                                     .fill(Color.blue.opacity(0.2))
@@ -103,7 +105,7 @@ struct BloodReportDetailView: View {
                                             .foregroundStyle(.blue)
                                     }
                                 
-                                Text(bloodReport.labName)
+                                Text(labName)
                                     .font(.subheadline.weight(.medium))
                                     .foregroundStyle(.secondary)
                             }
@@ -207,8 +209,11 @@ struct BloodReportDetailView: View {
     // Convert BloodTestResult to BioMarker
     private func convertToBioMarkers() -> [BioMarker] {
         return bloodReport.testResults.map { testResult in
-            let healthStatus: HealthStatus = {
-                if !testResult.isAbnormal {
+            let healthStatus: HealthStatus? = {
+                guard let isAbnormal = testResult.isAbnormal else {
+                    return nil
+                }
+                if !isAbnormal {
                     return .optimal
                 } else {
                     // For abnormal results, we could add more logic here
@@ -285,11 +290,12 @@ struct BloodReportDetailView: View {
             HealthCardHeader.clinicalNotes()
             
             HealthCard {
-                Text(bloodReport.notes)
-                    .font(.subheadline)
-                    .lineSpacing(4)
-                    .foregroundStyle(.primary)
-                
+                OptionalView(bloodReport.notes) { notes in
+                    Text(notes)
+                        .font(.subheadline)
+                        .lineSpacing(4)
+                        .foregroundStyle(.primary)
+                }
             }
         }
     }

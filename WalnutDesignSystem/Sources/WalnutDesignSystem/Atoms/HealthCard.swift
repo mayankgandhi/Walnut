@@ -63,7 +63,7 @@ public struct PatientAvatar: View {
             HealthCard {
                 VStack(alignment: .leading, spacing: Spacing.small) {
                     HStack {
-                        PatientAvatar(initials: "JD")
+                        PatientAvatar(initials: "WW")
                         
                         VStack(alignment: .leading) {
                             Text("John Doe")

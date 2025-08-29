@@ -13,18 +13,18 @@ import SwiftData
 class Document: Identifiable, Hashable {
     
     @Attribute(.unique)
-    var id: UUID
+    var id: UUID?
     
-    var fileName: String
-    var fileURL: String
+    var fileName: String?
+    var fileURL: String?
     
-    var documentType: DocumentType
-    var uploadDate: Date
+    var documentType: DocumentType?
+    var uploadDate: Date?
     
-    var fileSize: Int64
+    var fileSize: Int64?
     
-    var createdAt: Date
-    var updatedAt: Date
+    var createdAt: Date?
+    var updatedAt: Date?
 
     // Inverse Relationships
     var prescription: Prescription?

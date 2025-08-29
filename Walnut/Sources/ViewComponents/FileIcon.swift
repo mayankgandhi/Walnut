@@ -12,7 +12,7 @@ public struct FileIcon: View {
     // Required properties
     let filename: String
     let subtitle: String
-    let documentType: DocumentType
+    let documentType: DocumentType?
 
     // Optional properties with defaults
     let iconColor: Color?
@@ -20,15 +20,15 @@ public struct FileIcon: View {
     let size: FileIconSize
     
     public init(
-        filename: String,
-        subtitle: String,
+        filename: String?,
+        subtitle: String?,
         documentType: DocumentType,
         iconColor: Color? = nil,
         backgroundColor: Color? = nil,
         size: FileIconSize = .medium
     ) {
-        self.filename = filename
-        self.subtitle = subtitle
+        self.filename = filename ?? "File"
+        self.subtitle = subtitle ?? ""
         self.documentType = documentType
         self.iconColor = iconColor
         self.backgroundColor = backgroundColor
@@ -43,7 +43,7 @@ public struct FileIcon: View {
                     .fill(effectiveBackgroundColor.opacity(0.1))
                     .frame(width: iconContainerSize, height: iconContainerSize)
                 
-                Image(systemName: documentType.typeIcon)
+                Image(systemName: documentType?.typeIcon ?? "stethoscope")
                     .font(.system(size: iconSize, weight: .semibold))
                     .foregroundStyle(effectiveIconColor)
             }
@@ -74,7 +74,9 @@ public struct FileIcon: View {
         )
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(filename), \(documentType.accessibilityDescription)")
+        .accessibilityLabel(
+            "\(filename), \(documentType?.accessibilityDescription)"
+        )
         .accessibilityHint("Double tap to open document")
         .accessibilityAddTraits(.isButton)
     }
@@ -82,11 +84,11 @@ public struct FileIcon: View {
     // MARK: - Computed Properties
     
     private var effectiveIconColor: Color {
-        iconColor ?? documentType.backgroundColor
+        iconColor ?? documentType?.backgroundColor ?? Color.green
     }
     
     private var effectiveBackgroundColor: Color {
-        backgroundColor ?? documentType.backgroundColor
+        backgroundColor ?? documentType?.backgroundColor ?? Color.blue
     }
     
     private var iconContainerSize: CGFloat {

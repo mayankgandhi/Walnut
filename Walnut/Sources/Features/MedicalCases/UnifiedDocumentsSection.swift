@@ -138,9 +138,9 @@ struct UnifiedDocumentsSection: View {
                     FileIcon(
                         filename: formatUnparsedDocumentTitle(document),
                         subtitle: formatUnparsedDocumentSubtitle(document),
-                        documentType: document.documentType,
-                        iconColor: document.documentType.color,
-                        backgroundColor: document.documentType.backgroundColor
+                        documentType: document.documentType ?? .unknown,
+                        iconColor: document.documentType?.color,
+                        backgroundColor: document.documentType?.backgroundColor
                     )
                     .onTapGesture {
                         navigationState.selectedDocument = document
@@ -153,7 +153,7 @@ struct UnifiedDocumentsSection: View {
                     FileIcon(
                         filename: formatUnparsedDocumentTitle(document),
                         subtitle: formatUnparsedDocumentSubtitle(document),
-                        documentType: document.documentType,
+                        documentType: document.documentType ?? .unknown,
                         iconColor: .orange,
                         backgroundColor: .orange
                     )
@@ -232,10 +232,11 @@ struct UnifiedDocumentsSection: View {
     }
     
     private func formatBloodReportTitle(_ bloodReport: BloodReport) -> String {
-        return bloodReport.testName
+        return bloodReport.testName ?? "Blood Report"
     }
     
     private func formatBloodReportSubtitle(_ bloodReport: BloodReport) -> String {
+        
         var components: [String] = []
         
         let dateFormatter = DateFormatter()
@@ -257,7 +258,7 @@ struct UnifiedDocumentsSection: View {
     }
     
     private func formatUnparsedDocumentTitle(_ document: Document) -> String {
-        return document.fileName
+        return document.fileName ?? "Unparsed Document"
     }
     
     private func formatUnparsedDocumentSubtitle(_ document: Document) -> String {

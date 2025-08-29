@@ -79,7 +79,7 @@ struct DocumentCard: View {
         .sheet(isPresented: $showingDocumentViewer) {
             NavigationStack {
                 DocumentViewer(document: document)
-                    .navigationTitle(document.fileName)
+                    .navigationTitle(document.fileName ?? "Document")
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .navigationBarLeading) {

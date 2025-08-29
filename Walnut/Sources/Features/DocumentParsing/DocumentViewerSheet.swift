@@ -17,7 +17,7 @@ struct DocumentViewer: View {
     
     var body: some View {
         documentContentView()
-            .navigationTitle(document.fileName)
+            .navigationTitle(document.fileName ?? "")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -37,14 +37,20 @@ struct DocumentViewer: View {
     private func documentContentView() -> some View {
         switch documentFileType {
         case .pdf:
+            guard let fileURL = document.fileURL else {
+                return AnyView(UnsupportedDocumentView(document: document))
+            }
             let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
                 .appendingPathComponent("WalnutMedicalRecords")
-                .appendingPathComponent(document.fileURL)
+                .appendingPathComponent(fileURL)
             return AnyView(PDFDocumentView(url: url))
         case .image:
+            guard let fileURL = document.fileURL else {
+                return AnyView(UnsupportedDocumentView(document: document))
+            }
             let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
                 .appendingPathComponent("WalnutMedicalRecords")
-                .appendingPathComponent(document.fileURL)
+                .appendingPathComponent(fileURL)
             return AnyView(ImageDocumentView(url: url))
         case .unsupported:
             return AnyView(UnsupportedDocumentView(document: document))
@@ -52,7 +58,11 @@ struct DocumentViewer: View {
     }
     
     private var documentFileType: DocumentFileType {
-        let pathExtension = document.fileURL.components(separatedBy: ".").last
+        guard let fileURL = document.fileURL else {
+            return .unsupported
+        }
+        
+        let pathExtension = fileURL.components(separatedBy: ".").last
         
         switch pathExtension {
         case "pdf", "PDF":
@@ -63,6 +73,7 @@ struct DocumentViewer: View {
             return .unsupported
         }
     }
+    
 }
 
 // MARK: - Document File Types

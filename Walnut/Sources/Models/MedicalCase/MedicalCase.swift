@@ -13,18 +13,18 @@ import SwiftData
 class MedicalCase: Identifiable, Sendable {
     
     @Attribute(.unique)
-    var id: UUID
+    var id: UUID?
     
-    var title: String
-    var notes: String
-    var type: MedicalCaseType // immunisation, health-checkup, surgery, follow-up, treatment, diagnosis
-    var specialty: MedicalSpecialty // Cardiologist, Endocrinologist, etc.
-    var isActive: Bool
+    var title: String?
+    var notes: String?
+    var type: MedicalCaseType? // immunisation, health-checkup, surgery, follow-up, treatment, diagnosis
+    var specialty: MedicalSpecialty? // Cardiologist, Endocrinologist, etc.
+    var isActive: Bool?
     
-    var createdAt: Date
-    var updatedAt: Date
+    var createdAt: Date?
+    var updatedAt: Date?
   
-    var patient: Patient
+    var patient: Patient?
     
     @Relationship(deleteRule: .cascade, inverse: \Prescription.medicalCase)
     var prescriptions: [Prescription] = []
@@ -87,7 +87,7 @@ extension MedicalCase {
         patientID: UUID,
     ) -> Predicate<MedicalCase> {
         return #Predicate<MedicalCase> { medicalCase in
-            medicalCase.patient.id == patientID
+            medicalCase.patient?.id == patientID
         }
     }
 }

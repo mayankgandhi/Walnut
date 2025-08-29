@@ -13,15 +13,15 @@ import SwiftData
 class BloodTestResult: Identifiable, Sendable {
     
     @Attribute(.unique)
-    var id: UUID
+    var id: UUID?
     
-    var testName: String
-    var value: String
-    var unit: String
-    var referenceRange: String
-    var isAbnormal: Bool
+    var testName: String?
+    var value: String?
+    var unit: String?
+    var referenceRange: String?
+    var isAbnormal: Bool?
     
-    var bloodReport: BloodReport
+    var bloodReport: BloodReport?
     
     init(id: UUID = UUID(),
          testName: String,

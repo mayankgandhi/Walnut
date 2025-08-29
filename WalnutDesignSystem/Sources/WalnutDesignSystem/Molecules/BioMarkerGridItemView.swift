@@ -18,31 +18,37 @@ public struct BioMarkerGridItemView: View {
     public var body: some View {
         HealthCard {
             HStack(alignment: .center, spacing: Spacing.medium) {
+                if let healthStatus = biomarker.healthStatus,
+                   let iconName = biomarker.iconName {
+                    Circle()
+                        .fill(healthStatus.color.opacity(0.15))
+                        .frame(width: 32, height: 32)
+                        .overlay {
+                            Image(systemName: iconName)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundStyle(healthStatus.color)
+                        }
+                }
                 
-                Circle()
-                    .fill(biomarker.healthStatus.color.opacity(0.15))
-                    .frame(width: 32, height: 32)
-                    .overlay {
-                        Image(systemName: biomarker.iconName)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(biomarker.healthStatus.color)
-                    }
                 
                 // Bottom section with name and reference - improved text handling
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     // Biomarker name with better handling for long names
-                    Text(biomarker.name)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.primary)
-                        .lineLimit(3)
-                        .minimumScaleFactor(0.8)
-                        .multilineTextAlignment(.leading)
-                        .allowsTightening(true)
-                        .fixedSize(horizontal: false, vertical: true)
+                    if let name = biomarker.name {
+                        Text(name)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.primary)
+                            .lineLimit(3)
+                            .minimumScaleFactor(0.8)
+                            .multilineTextAlignment(.leading)
+                            .allowsTightening(true)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                     
                     // Reference range with truncation
-                    if !biomarker.referenceRange.isEmpty {
-                        Text("Ref: \(biomarker.referenceRange)")
+                    if let referenceRange = biomarker.referenceRange,
+                       !referenceRange.isEmpty {
+                        Text("Ref: \(referenceRange)")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                             .lineLimit(2)
@@ -56,20 +62,23 @@ public struct BioMarkerGridItemView: View {
                 VStack(alignment: .trailing, spacing: Spacing.small) {
                     
                     HStack(alignment: .center, spacing: 4) {
-                        Text(biomarker.currentValue)
-                            .font(
-                                .system(
-                                    .headline,
-                                    design: .rounded,
-                                    weight: .bold
+                        if let currentValue = biomarker.currentValue {
+                            Text(currentValue)
+                                .font(
+                                    .system(
+                                        .headline,
+                                        design: .rounded,
+                                        weight: .bold
+                                    )
                                 )
-                            )
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.5)
-                            .multilineTextAlignment(.center)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.5)
+                                .multilineTextAlignment(.center)
+                        }
                         
-                        if !biomarker.unit.isEmpty {
-                            Text(biomarker.unit)
+                        if let unit = biomarker.unit,
+                            !unit.isEmpty {
+                            Text(unit)
                                 .font(.subheadline.weight(.medium))
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
@@ -78,22 +87,24 @@ public struct BioMarkerGridItemView: View {
                     }
                     
                     // Status indicator with better text handling
-                    HStack(spacing: Spacing.xs) {
-                        Circle()
-                            .fill(biomarker.healthStatus.color)
-                            .frame(width: 6, height: 6)
-                            .scaleEffect(biomarker.healthStatus == .critical ? 1.2 : 1.0)
-                        
-                        Text(biomarker.healthStatus.displayName.uppercased())
-                            .font(.caption2.weight(.bold))
-                            .foregroundStyle(biomarker.healthStatus.color)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
+                    if let healthStatus = biomarker.healthStatus {
+                        HStack(spacing: Spacing.xs) {
+                            Circle()
+                                .fill(healthStatus.color)
+                                .frame(width: 6, height: 6)
+                                .scaleEffect(healthStatus == .critical ? 1.2 : 1.0)
+                            
+                            Text(healthStatus.displayName.uppercased())
+                                .font(.caption2.weight(.bold))
+                                .foregroundStyle(healthStatus.color)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        }
+                        .padding(.horizontal, Spacing.small)
+                        .padding(.vertical, 3)
+                        .background(healthStatus.color.opacity(0.1))
+                        .clipShape(Capsule())
                     }
-                    .padding(.horizontal, Spacing.small)
-                    .padding(.vertical, 3)
-                    .background(biomarker.healthStatus.color.opacity(0.1))
-                    .clipShape(Capsule())
                 }
             }
         }
@@ -103,14 +114,14 @@ public struct BioMarkerGridItemView: View {
 // MARK: - Supporting Types
 
 public struct BioMarker {
-    public let id: UUID
-    public let name: String
-    public let currentValue: String
-    public let unit: String
-    public let referenceRange: String
-    public let healthStatus: HealthStatus
-    public let iconName: String
-    public let lastUpdated: Date
+    public let id: UUID?
+    public let name: String?
+    public let currentValue: String?
+    public let unit: String?
+    public let referenceRange: String?
+    public let healthStatus: HealthStatus?
+    public let iconName: String?
+    public let lastUpdated: Date?
     
     public init(
         id: UUID = UUID(),
@@ -118,7 +129,7 @@ public struct BioMarker {
         currentValue: String,
         unit: String,
         referenceRange: String = "",
-        healthStatus: HealthStatus,
+        healthStatus: HealthStatus? = nil,
         iconName: String,
         lastUpdated: Date = Date()
     ) {

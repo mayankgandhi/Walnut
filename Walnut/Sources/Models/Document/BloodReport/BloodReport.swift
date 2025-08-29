@@ -13,18 +13,18 @@ import SwiftData
 class BloodReport: Identifiable, Sendable {
     
     @Attribute(.unique)
-    var id: UUID
+    var id: UUID?
     
-    var testName: String
-    var labName: String
-    var category: String
-    var resultDate: Date
-    var notes: String
+    var testName: String?
+    var labName: String?
+    var category: String?
+    var resultDate: Date?
+    var notes: String?
     
-    var createdAt: Date
-    var updatedAt: Date
+    var createdAt: Date?
+    var updatedAt: Date?
     
-    var medicalCase: MedicalCase
+    var medicalCase: MedicalCase?
     
     @Relationship(deleteRule: .cascade, inverse: \Document.bloodReport)
     var document: Document?

@@ -32,9 +32,9 @@ struct PatientTimelineEventProvider: TimelineEventProvider {
             .map { medicalCase in
                 TimelineEvent(
                     icon: "folder.badge.plus.fill",
-                    color: medicalCase.specialty.color,
+                    color: medicalCase.specialty?.color ?? .primary,
                     title: "New Medical Case",
-                    subtitle: "\(medicalCase.specialty.rawValue) - \(medicalCase.title)",
+                    subtitle: "\(String(describing: medicalCase.specialty?.rawValue)) - \(String(describing: medicalCase.title))",
                     date: medicalCase.createdAt
                 )
             }
@@ -52,14 +52,18 @@ struct DocumentTimelineEventProvider: TimelineEventProvider {
     func generateTimelineEvents() -> [TimelineEvent] {
         return documents
             .sorted(by: { $0.createdAt < $1.createdAt })
-            .map { document in
-                TimelineEvent(
-                    icon: documentIcon(for: document.documentType),
-                    color: documentColor(for: document.documentType),
-                    title: "Document Added",
-                    subtitle: "\(document.documentType.rawValue) - \(document.fileName)",
-                    date: document.createdAt
-                )
+            .compactMap { document in
+                if let documentType = document.documentType {
+                    return TimelineEvent(
+                        icon: documentIcon(for: documentType),
+                        color: documentColor(for: documentType),
+                        title: "Document Added",
+                        subtitle: "\(documentType.rawValue) - \(String(describing: document.fileName))",
+                        date: document.createdAt
+                    )
+                } else {
+                    return nil
+                }
             }
     }
     

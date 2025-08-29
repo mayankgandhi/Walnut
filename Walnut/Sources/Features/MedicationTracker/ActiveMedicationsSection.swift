@@ -147,7 +147,7 @@ struct ActiveMedicationsSection: View {
     }
     
     private func loadActiveMedications() {
-        let activeCases = patient.medicalCases.filter { $0.isActive }
+        let activeCases = patient.medicalCases.filter { $0.isActive ?? false }
         let medications = activeCases.flatMap { $0.prescriptions.flatMap { $0.medications } }
         self.activeMedications = medications
     }
