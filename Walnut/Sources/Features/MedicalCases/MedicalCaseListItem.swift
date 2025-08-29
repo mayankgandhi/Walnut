@@ -41,34 +41,30 @@ struct EnhancedMedicalCaseListItem: View {
                 }
             
             Text(medicalCase.title ?? "Medical Case")
-                .font(
-                    .system(
-                        .subheadline,
-                        design: .rounded,
-                        weight: .semibold
-                    )
-                )
+                .font(.system(.subheadline, design: .rounded, weight: .semibold))
                 .foregroundStyle(.primary)
                 .lineLimit(2)
             
             VStack(alignment: .leading, spacing: Spacing.xs) {
+                OptionalView(medicalCase.type) { medicalCaseType in
+                    Text(medicalCaseType.displayName)
+                        .font(
+                            .system(.caption2, design: .rounded, weight: .medium)
+                        )
+                        .foregroundStyle(medicalCaseType.foregroundColor)
+                        .padding(.horizontal, Spacing.small)
+                        .padding(.vertical, 2)
+                        .background(medicalCaseType.backgroundColor)
+                        .clipShape(Capsule())
+                }
                 
-                Text(medicalCase.type.displayName)
-                    .font(
-                        .system(.caption2, design: .rounded, weight: .medium)
-                    )
-                    .foregroundStyle(medicalCase.type.foregroundColor)
-                    .padding(.horizontal, Spacing.small)
-                    .padding(.vertical, 2)
-                    .background(medicalCase.type.backgroundColor)
-                    .clipShape(Capsule())
-                
-                Text(medicalCase.createdAt.formatted(date: .abbreviated, time: .omitted))
-                    .font(
-                        .system(.caption2, design: .default, weight: .regular)
-                    )
-                    .foregroundStyle(.tertiary)
+                OptionalView(medicalCase.createdAt) { createdAt in
+                    Text(createdAt.formatted(date: .abbreviated, time: .omitted))
+                        .font(.system(.caption2, design: .default, weight: .regular))
+                        .foregroundStyle(.tertiary)
+                }
             }
+            
         }
         .padding(Spacing.medium)
     }

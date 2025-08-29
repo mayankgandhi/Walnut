@@ -13,9 +13,10 @@ import WalnutDesignSystem
 struct MedicalCaseEditor: View {
     
     let medicalCase: MedicalCase?
-    let patient: Patient
+    let patient: Patient?
     
-    init(medicalCase: MedicalCase? = nil, patient: Patient) {
+    init(medicalCase: MedicalCase? = nil,
+         patient: Patient? = nil) {
         self.medicalCase = medicalCase
         self.patient = patient
     }
@@ -174,17 +175,17 @@ struct MedicalCaseEditor: View {
                         HealthCard {
                             HStack(spacing: Spacing.medium) {
                                 PatientAvatar(
-                                    initials: patient.initials,
-                                    color: patient.primaryColor,
+                                    initials: patient?.initials ?? "P",
+                                    color: patient?.primaryColor ?? Color.blue,
                                     size: Size.avatarLarge
                                 )
                                 
                                 VStack(alignment: .leading, spacing: Spacing.xs) {
-                                    Text(patient.fullName)
+                                    Text(patient?.fullName ?? "Patient")
                                         .font(.headline.weight(.semibold))
                                         .foregroundStyle(.primary)
                                     
-                                    Text("\(patient.age) years old • \(patient.gender)")
+                                    Text("\(patient?.age) years old • \(patient?.gender)")
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                 }
@@ -192,6 +193,7 @@ struct MedicalCaseEditor: View {
                                 Spacer()
                             }
                         }
+                        
                     }
                     
                     // Clinical Details Section
@@ -270,11 +272,20 @@ struct MedicalCaseEditor: View {
     }
     
     private func loadMedicalCaseData(_ medicalCase: MedicalCase) {
-        title = medicalCase.title
-        notes = medicalCase.notes
-        selectedType = medicalCase.type
-        selectedSpecialty = medicalCase.specialty
-        isActive = medicalCase.isActive
+        title = medicalCase.title ?? ""
+        notes = medicalCase.notes ?? ""
+        
+        if let type = medicalCase.type {
+            self.selectedType = type
+        }
+        
+        if let specialty = medicalCase.specialty {
+            self.selectedSpecialty = specialty
+        }
+        
+        if let isActive = medicalCase.isActive {
+            self.isActive = isActive
+        }
     }
     
     private func save() {

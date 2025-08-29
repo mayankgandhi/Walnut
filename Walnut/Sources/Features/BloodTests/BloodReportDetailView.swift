@@ -116,46 +116,49 @@ struct BloodReportDetailView: View {
                 }
                 
                 HStack {
-                    
-                    // Test Date Card
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        HStack {
-                            Image(systemName: "calendar")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(.blue)
+                    OptionalView(bloodReport.resultDate) { resultDate in
+                        // Test Date Card
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            HStack {
+                                Image(systemName: "calendar")
+                                    .font(.caption.weight(.medium))
+                                    .foregroundStyle(.blue)
+                                
+                                Text("Test Date")
+                                    .font(.caption2.weight(.medium))
+                                    .foregroundStyle(.tertiary)
+                                
+                                Spacer()
+                            }
                             
-                            Text("Test Date")
-                                .font(.caption2.weight(.medium))
-                                .foregroundStyle(.tertiary)
-                            
-                            Spacer()
+                            Text(resultDate.formatted(date: .abbreviated, time: .omitted))
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.secondary)
                         }
                         
-                        Text(bloodReport.resultDate.formatted(date: .abbreviated, time: .omitted))
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(.secondary)
                     }
                     
-                    
-                    // Category Card
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        HStack {
-                            Image(systemName: "tag")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(.green)
+                    OptionalView(bloodReport.category) { category in
+                        // Category Card
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
                             
-                            Text("Category")
-                                .font(.caption2.weight(.medium))
-                                .foregroundStyle(.tertiary)
+                            HStack {
+                                Image(systemName: "tag")
+                                    .font(.caption.weight(.medium))
+                                    .foregroundStyle(.green)
+                                
+                                Text("Category")
+                                    .font(.caption2.weight(.medium))
+                                    .foregroundStyle(.tertiary)
+                                
+                                Spacer()
+                            }
                             
-                            Spacer()
+                            Text(category)
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.secondary)
                         }
-                        
-                        Text(bloodReport.category.isEmpty ? "General" : bloodReport.category)
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(.secondary)
                     }
-                    
                 }
             }
         }
@@ -178,7 +181,7 @@ struct BloodReportDetailView: View {
                 
                 Spacer()
                 
-                let abnormalCount = bloodReport.testResults.filter(\.isAbnormal).count
+                let abnormalCount = bloodReport.testResults.filter{ $0.isAbnormal ?? false }.count
                 if abnormalCount > 0 {
                     HStack(spacing: Spacing.xs) {
                         Circle()
@@ -208,30 +211,30 @@ struct BloodReportDetailView: View {
     
     // Convert BloodTestResult to BioMarker
     private func convertToBioMarkers() -> [BioMarker] {
-        return bloodReport.testResults.map { testResult in
-            let healthStatus: HealthStatus? = {
-                guard let isAbnormal = testResult.isAbnormal else {
-                    return nil
-                }
-                if !isAbnormal {
-                    return .optimal
-                } else {
-                    // For abnormal results, we could add more logic here
-                    // to determine if it's warning or critical based on severity
-                    return .warning
-                }
-            }()
-            
-            return BioMarker(
-                name: testResult.testName,
-                currentValue: testResult.value,
-                unit: testResult.unit,
-                referenceRange: testResult.referenceRange,
-                healthStatus: healthStatus,
-                iconName: iconForTestName(testResult.testName),
-                lastUpdated: bloodReport.resultDate
-            )
-        }
+        
+//        let biomarkers: [BioMarker?] = bloodReport.testResults.map { testResult in
+//            
+//            guard let testName = testResult.testName,
+//                  let value = testResult.value,
+//                  let unit = testResult.unit else {
+//                return nil
+//            }
+//            
+//            let healthStatus: HealthStatus? = testResult.isAbnormal ?? false ? .warning : .good
+//            
+//            return BioMarker(
+//                name: testName,
+//                currentValue: value,
+//                unit: unit,
+//                referenceRange: testResult.referenceRange,
+//                healthStatus: healthStatus,
+//                iconName: iconForTestName(testName),
+//                lastUpdated: bloodReport.resultDate
+//            )
+//        }
+//        
+//        return biomarkers.compactMap { $0 }
+        return []
     }
     
     // Helper function to get appropriate icon for test name

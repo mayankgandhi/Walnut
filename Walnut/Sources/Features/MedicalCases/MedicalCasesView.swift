@@ -41,11 +41,15 @@ struct MedicalCasesView: View {
         // Apply search filter
         if !searchText.isEmpty {
             cases = cases.filter { medicalCase in
-                medicalCase.title.localizedCaseInsensitiveContains(searchText) ||
-                medicalCase.notes.localizedCaseInsensitiveContains(searchText) ||
-                medicalCase.patient.fullName.localizedCaseInsensitiveContains(searchText)
+                medicalCase.title?
+                    .localizedCaseInsensitiveContains(searchText) ?? false ||
+                medicalCase.notes?
+                    .localizedCaseInsensitiveContains(searchText) ?? false ||
+                medicalCase.patient?.fullName
+                    .localizedCaseInsensitiveContains(searchText) ?? false
             }
         }
+        
         return cases
     }
     
@@ -135,15 +139,15 @@ struct MedicalCasesView: View {
                 MedicalCaseEditor(patient: patient)
             })
             .sheet(item: $caseToEdit) { medicalCase in
-                MedicalCaseEditor(medicalCase: medicalCase, patient: medicalCase.patient)
+                MedicalCaseEditor(
+                    medicalCase: medicalCase,
+                    patient: medicalCase.patient
+                )
             }
             .alert("Delete Medical Case", isPresented: $showDeleteAlert) {
                 Button("Cancel", role: .cancel) { }
                 Button("Delete", role: .destructive) {
-                    // Handle deletion
-                    if let caseToDelete = caseToDelete {
-                        deleteMedicalCase(caseToDelete)
-                    }
+                    // TODO: Handle deletion
                 }
             } message: {
                 Text("Are you sure you want to delete this medical case? This action cannot be undone.")
@@ -176,16 +180,6 @@ struct MedicalCasesView: View {
             Label("Edit", systemImage: "pencil")
         }
         
-        Button {
-            // Toggle active status
-            toggleActiveStatus(for: medicalCase)
-        } label: {
-            Label(
-                medicalCase.isActive ? "Mark as Inactive" : "Mark as Active",
-                systemImage: medicalCase.isActive ? "xmark.circle" : "checkmark.circle"
-            )
-        }
-        
         Divider()
         
         Button(role: .destructive) {
@@ -196,15 +190,5 @@ struct MedicalCasesView: View {
         }
     }
     
-    // MARK: - Actions
     
-    private func deleteMedicalCase(_ medicalCase: MedicalCase) {
-        // TODO: Implement deletion logic here
-    }
-    
-    private func toggleActiveStatus(for medicalCase: MedicalCase) {
-        // Implement status toggle logic here
-        medicalCase.isActive.toggle()
-        medicalCase.updatedAt = Date()
-    }
 }

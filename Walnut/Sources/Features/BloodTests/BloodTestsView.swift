@@ -30,7 +30,7 @@ struct BloodTestsView: View {
         let patientID = patient.id
         _bloodReports = Query(
             filter: #Predicate<BloodReport> { report in
-                report.medicalCase.patient.id == patientID
+                report.medicalCase?.patient?.id == patientID
             },
             sort: \BloodReport.resultDate,
             order: .reverse
@@ -44,7 +44,7 @@ struct BloodTestsView: View {
                 loadingView
             } else if filteredBiomarkers.isEmpty && !bloodReports.isEmpty {
                 emptyFilteredResultsView
-            } else if bloodReports.isEmpty {
+            } else if bloodReports.isEmpty || aggregatedBiomarkers.isEmpty {
                 emptyStateView
             } else {
                 biomarkersList
@@ -86,8 +86,8 @@ struct BloodTestsView: View {
                         biomarkerInfo: BiomarkerInfo(
                             name: biomarker.testName,
                             description: biomarker.description,
-                            normalRange: biomarker.referenceRange,
-                            unit: biomarker.unit
+                            normalRange: biomarker.referenceRange.isEmpty ? "N/A" : biomarker.referenceRange,
+                            unit: biomarker.unit.isEmpty ? "" : biomarker.unit
                         ),
                         biomarkerTrends: BiomarkerTrends(
                             currentValue: biomarker.currentNumericValue,
@@ -95,7 +95,7 @@ struct BloodTestsView: View {
                             comparisonText: biomarker.trendText,
                             comparisonPercentage: biomarker.trendPercentage,
                             trendDirection: biomarker.trendDirection,
-                            normalRange: biomarker.referenceRange
+                            normalRange: biomarker.referenceRange.isEmpty ? "N/A" : biomarker.referenceRange
                         )
                     )
                     .onTapGesture {
@@ -110,8 +110,8 @@ struct BloodTestsView: View {
         .navigationDestination(item: $selectedBiomarker) { biomarker in
             BiomarkerDetailView(
                 biomarkerName: biomarker.testName,
-                unit: biomarker.unit,
-                normalRange: biomarker.referenceRange,
+                unit: biomarker.unit.isEmpty ? "N/A" : biomarker.unit,
+                normalRange: biomarker.referenceRange.isEmpty ? "N/A" : biomarker.referenceRange,
                 description: biomarker.description,
                 dataPoints: createDataPoints(for: biomarker),
                 color: biomarker.healthStatusColor
@@ -178,8 +178,10 @@ struct BloodTestsView: View {
         // Apply search filter
         if !searchText.isEmpty {
             filtered = filtered.filter { biomarker in
-                biomarker.testName.localizedCaseInsensitiveContains(searchText) ||
-                biomarker.category.localizedCaseInsensitiveContains(searchText)
+                let testName = biomarker.testName
+                let category = biomarker.category
+                return testName.localizedCaseInsensitiveContains(searchText) ||
+                       category.localizedCaseInsensitiveContains(searchText)
             }
         }
         
@@ -197,19 +199,24 @@ struct BloodTestsView: View {
         
         // Collect all test results for this biomarker from all blood reports
         for report in bloodReports {
+            guard let reportDate = report.resultDate else { continue }
+            
             for testResult in report.testResults {
-                if testResult.testName.lowercased() == biomarker.testName.lowercased() {
-                    if let value = Double(testResult.value) {
-                        dataPoints.append(
-                            BiomarkerDetailView.BiomarkerDataPoint(
-                                date: report.resultDate,
-                                value: value,
-                                isAbnormal: testResult.isAbnormal,
-                                bloodReport: report.labName
-                            )
-                        )
-                    }
+                guard let testName = testResult.testName,
+                      let value = testResult.value,
+                      testName.lowercased() == biomarker.testName.lowercased(),
+                      let numericValue = Double(value) else {
+                    continue
                 }
+                
+                dataPoints.append(
+                    BiomarkerDetailView.BiomarkerDataPoint(
+                        date: reportDate,
+                        value: numericValue,
+                        isAbnormal: testResult.isAbnormal ?? false,
+                        bloodReport: report.labName ?? "Unknown Lab"
+                    )
+                )
             }
         }
         
@@ -254,7 +261,9 @@ struct BloodTestsView: View {
         
         for report in bloodReports {
             for testResult in report.testResults {
-                let normalizedName = testResult.testName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                guard let testName = testResult.testName else { continue }
+                
+                let normalizedName = testName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
                 if testGroups[normalizedName] == nil {
                     testGroups[normalizedName] = []
                 }
@@ -269,13 +278,27 @@ struct BloodTestsView: View {
     }
     
     private func createAggregatedBiomarker(from results: [BloodTestResult]) -> AggregatedBiomarker? {
-        guard let latestResult = results.sorted(by: { $0.bloodReport.resultDate > $1.bloodReport.resultDate }).first else {
+        // Filter results that have all required data
+        let validResults = results.compactMap { result -> (BloodTestResult, Date)? in
+            guard let bloodReport = result.bloodReport,
+                  let resultDate = bloodReport.resultDate else {
+                return nil
+            }
+            return (result, resultDate)
+        }
+        
+        guard let (latestResult, latestDate) = validResults.sorted(by: { $0.1 > $1.1 }).first,
+              let testName = latestResult.testName,
+              let currentValue = latestResult.value else {
             return nil
         }
         
         // Calculate historical values for trend analysis
-        let sortedResults = results.sorted { $0.bloodReport.resultDate < $1.bloodReport.resultDate }
-        let historicalValues = sortedResults.compactMap { Double($0.value) }
+        let sortedResults = validResults.sorted { $0.1 < $1.1 }
+        let historicalValues = sortedResults.compactMap { result, _ -> Double? in
+            guard let value = result.value else { return nil }
+            return Double(value)
+        }
         
         // Calculate trend
         let (trendDirection, trendText, trendPercentage) = calculateTrend(from: historicalValues)
@@ -285,18 +308,18 @@ struct BloodTestsView: View {
         
         return AggregatedBiomarker(
             id: UUID(),
-            testName: latestResult.testName,
-            currentValue: latestResult.value,
-            unit: latestResult.unit,
-            referenceRange: latestResult.referenceRange,
-            category: latestResult.bloodReport.category,
-            latestDate: latestResult.bloodReport.resultDate,
+            testName: testName,
+            currentValue: currentValue,
+            unit: latestResult.unit ?? "",
+            referenceRange: latestResult.referenceRange ?? "",
+            category: latestResult.bloodReport?.category ?? "General",
+            latestDate: latestDate,
             historicalValues: historicalValues,
             healthStatus: healthStatus,
             trendDirection: trendDirection,
             trendText: trendText,
             trendPercentage: trendPercentage,
-            latestBloodReport: latestResult.bloodReport,
+            latestBloodReport: latestResult.bloodReport!,
             testCount: results.count
         )
     }
@@ -327,11 +350,14 @@ struct BloodTestsView: View {
     }
     
     private func determineHealthStatus(for result: BloodTestResult, from historicalValues: [Double]) -> AggregatedBiomarker.HealthStatus {
-        if result.isAbnormal {
+        let isAbnormal = result.isAbnormal ?? false
+        
+        if isAbnormal {
             // Check if it's consistently abnormal (critical) or just recent (warning)
-            let recentAbnormalCount = historicalValues.suffix(3).filter { value in
+            let recentAbnormalCount = historicalValues.suffix(3).filter { _ in
                 // This is a simplified check - in reality you'd parse reference ranges properly
-                result.isAbnormal
+                // For now, we'll just check if the current result is abnormal
+                isAbnormal
             }.count
             
             return recentAbnormalCount >= 2 ? .critical : .warning
@@ -498,6 +524,11 @@ struct PreviewContainer {
     bloodReport1.testResults = testResults1
     bloodReport2.testResults = testResults2
     bloodReport3.testResults = testResults3
+    
+    // Ensure all relationships are properly set
+    testResults1.forEach { $0.bloodReport = bloodReport1 }
+    testResults2.forEach { $0.bloodReport = bloodReport2 }
+    testResults3.forEach { $0.bloodReport = bloodReport3 }
     
     // Add to model context
     container.mainContext.insert(patient)

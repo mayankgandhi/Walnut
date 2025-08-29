@@ -46,7 +46,7 @@ class MedicalCase: Identifiable, Sendable {
          isActive: Bool,
          createdAt: Date,
          updatedAt: Date,
-         patient: Patient,
+         patient: Patient? = nil,
          prescriptions: [Prescription] = [],
          bloodReports: [BloodReport] = [],
          unparsedDocuments: [Document] = []) {

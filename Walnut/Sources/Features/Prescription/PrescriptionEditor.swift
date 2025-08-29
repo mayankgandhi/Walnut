@@ -180,213 +180,224 @@ struct PrescriptionEditor: View {
                         
                         HealthCard {
                             HStack(spacing: Spacing.medium) {
-                                Circle()
-                                    .fill(medicalCase.specialty.color.opacity(0.15))
-                                    .frame(width: Size.avatarLarge, height: Size.avatarLarge)
-                                    .overlay {
-                                        Image(systemName: medicalCase.specialty.icon)
-                                            .font(.system(size: 18, weight: .semibold))
-                                            .foregroundStyle(medicalCase.specialty.color)
-                                    }
                                 
-                                VStack(alignment: .leading, spacing: Spacing.xs) {
-                                    Text(medicalCase.title)
-                                        .font(.headline.weight(.semibold))
-                                        .foregroundStyle(.primary)
-                                    
-                                    Text(medicalCase.specialty.rawValue)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                    
-                                    HStack(spacing: Spacing.xs) {
-                                        WalnutDesignSystem.StatusIndicator(
-                                            status: medicalCase.isActive ? .good : .warning,
-                                            showIcon: false
-                                        )
-                                        
-                                        Text(medicalCase.isActive ? "Active" : "Inactive")
-                                            .font(.caption2.weight(.medium))
-                                            .foregroundStyle(medicalCase.isActive ? Color.healthSuccess : Color.healthWarning)
-                                    }
-                                }
-                                
-                                Spacer()
-                            }
-                        }
-                    }
-                    
-                    // Follow-up Information Section
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("Follow-up Information")
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                            .padding(.horizontal, Spacing.medium)
-                        
-                        VStack(spacing: Spacing.medium) {
-                            ToggleItem(
-                                icon: hasFollowUp ? "calendar.badge.clock" : "calendar.badge.minus",
-                                title: "Schedule Follow-up",
-                                subtitle: "Set follow-up appointment",
-                                isOn: $hasFollowUp,
-                                helperText: "Enable to set follow-up date and tests",
-                                iconColor: hasFollowUp ? .orange : .secondary
-                            )
-                            
-                            if hasFollowUp {
-                                DatePickerItem(
-                                    icon: "calendar.badge.plus",
-                                    title: "Follow-up Date",
-                                    selectedDate: Binding(
-                                        get: { followUpDate ?? Date().addingTimeInterval(7 * 24 * 60 * 60) },
-                                        set: { followUpDate = $0 }
-                                    ),
-                                    helperText: "When to schedule the follow-up",
-                                    iconColor: .orange,
-                                    isRequired: false
-                                )
-                                
-                                TextFieldItem(
-                                    icon: "testtube.2",
-                                    title: "Follow-up Tests",
-                                    text: $followUpTests,
-                                    placeholder: "Blood test, X-ray, etc. (comma-separated)",
-                                    helperText: "Tests to be performed during follow-up",
-                                    iconColor: .purple,
-                                    submitLabel: FormField.followUpTests.appropriateSubmitLabel,
-                                    onSubmit: {
-                                        focusNextField(after: .followUpTests)
-                                    }
-                                )
-                                .focused($focusedField, equals: .followUpTests)
-                            }
-                        }
-                    }
-                    
-                    // Additional Information Section
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("Additional Information")
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                            .padding(.horizontal, Spacing.medium)
-                        
-                        TextFieldItem(
-                            icon: "note.text",
-                            title: "Prescription Notes",
-                            text: $notes,
-                            placeholder: "Additional notes or instructions",
-                            helperText: "Any additional prescription details",
-                            iconColor: .gray,
-                            submitLabel: FormField.notes.appropriateSubmitLabel,
-                            onSubmit: {
-                                focusNextField(after: .notes)
-                            }
-                        )
-                        .focused($focusedField, equals: .notes)
-                    }
-                    
-                    // Medications Section
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        HStack {
-                            Text("Medications")
-                                .font(.headline)
-                                .foregroundStyle(.secondary)
-                            
-                            Spacer()
-                            
-                            Button {
-                                medicationToEdit = nil
-                                showMedicationEditor = true
-                            } label: {
-                                HStack(spacing: Spacing.xs) {
-                                    Image(systemName: "plus.circle.fill")
-                                        .font(.system(size: 16, weight: .semibold))
-                                    Text("Add")
-                                        .font(.system(size: 14, weight: .medium))
-                                }
-                                .foregroundStyle(Color.healthPrimary)
-                            }
-                        }
-                        .padding(.horizontal, Spacing.medium)
-                        
-                        if medications.isEmpty {
-                            HealthCard {
-                                VStack(spacing: Spacing.medium) {
+                                OptionalView(medicalCase.specialty) { specialty in
                                     Circle()
-                                        .fill(Color.secondary.opacity(0.15))
+                                        .fill(specialty.color.opacity(0.15))
                                         .frame(width: Size.avatarLarge, height: Size.avatarLarge)
                                         .overlay {
-                                            Image(systemName: "pills")
-                                                .font(.system(size: 24, weight: .semibold))
-                                                .foregroundStyle(.secondary)
+                                            Image(systemName: specialty.icon)
+                                                .font(.system(size: 18, weight: .semibold))
+                                                .foregroundStyle(specialty.color)
                                         }
+                                }
+                                
+                                VStack(alignment: .leading, spacing: Spacing.xs) {
                                     
-                                    VStack(spacing: Spacing.xs) {
-                                        Text("No Medications Added")
+                                    OptionalView(medicalCase.title) { title in
+                                        Text(title)
                                             .font(.headline.weight(.semibold))
                                             .foregroundStyle(.primary)
-                                        
-                                        Text("Tap the Add button to add medications to this prescription")
-                                            .font(.body)
-                                            .foregroundStyle(.secondary)
-                                            .multilineTextAlignment(.center)
                                     }
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, Spacing.medium)
-                            }
-                        } else {
-                            VStack(spacing: Spacing.medium) {
-                                ForEach(medications) { medication in
-                                    medicationListItem(medication: medication)
+                                    
+                                    OptionalView(medicalCase.specialty) { specialty in
+                                        Text(specialty.rawValue)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    
+                                    OptionalView(medicalCase.isActive) { isActive in
+                                        HStack(spacing: Spacing.xs) {
+                                            WalnutDesignSystem.StatusIndicator(
+                                                status: isActive ? .good : .warning,
+                                                showIcon: false
+                                            )
+                                            
+                                            
+                                            Text(isActive ? "Active" : "Inactive")
+                                                .font(.caption2.weight(.medium))
+                                                .foregroundStyle(isActive ? Color.healthSuccess : Color.healthWarning)
+                                        }
+                                    }
+                                    
+                                    Spacer()
                                 }
                             }
                         }
+                        
+                        // Follow-up Information Section
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text("Follow-up Information")
+                                .font(.headline)
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal, Spacing.medium)
+                            
+                            VStack(spacing: Spacing.medium) {
+                                ToggleItem(
+                                    icon: hasFollowUp ? "calendar.badge.clock" : "calendar.badge.minus",
+                                    title: "Schedule Follow-up",
+                                    subtitle: "Set follow-up appointment",
+                                    isOn: $hasFollowUp,
+                                    helperText: "Enable to set follow-up date and tests",
+                                    iconColor: hasFollowUp ? .orange : .secondary
+                                )
+                                
+                                if hasFollowUp {
+                                    DatePickerItem(
+                                        icon: "calendar.badge.plus",
+                                        title: "Follow-up Date",
+                                        selectedDate: Binding(
+                                            get: { followUpDate ?? Date().addingTimeInterval(7 * 24 * 60 * 60) },
+                                            set: { followUpDate = $0 }
+                                        ),
+                                        helperText: "When to schedule the follow-up",
+                                        iconColor: .orange,
+                                        isRequired: false
+                                    )
+                                    
+                                    TextFieldItem(
+                                        icon: "testtube.2",
+                                        title: "Follow-up Tests",
+                                        text: $followUpTests,
+                                        placeholder: "Blood test, X-ray, etc. (comma-separated)",
+                                        helperText: "Tests to be performed during follow-up",
+                                        iconColor: .purple,
+                                        submitLabel: FormField.followUpTests.appropriateSubmitLabel,
+                                        onSubmit: {
+                                            focusNextField(after: .followUpTests)
+                                        }
+                                    )
+                                    .focused($focusedField, equals: .followUpTests)
+                                }
+                            }
+                        }
+                        
+                        // Additional Information Section
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text("Additional Information")
+                                .font(.headline)
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal, Spacing.medium)
+                            
+                            TextFieldItem(
+                                icon: "note.text",
+                                title: "Prescription Notes",
+                                text: $notes,
+                                placeholder: "Additional notes or instructions",
+                                helperText: "Any additional prescription details",
+                                iconColor: .gray,
+                                submitLabel: FormField.notes.appropriateSubmitLabel,
+                                onSubmit: {
+                                    focusNextField(after: .notes)
+                                }
+                            )
+                            .focused($focusedField, equals: .notes)
+                        }
+                        
+                        // Medications Section
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            HStack {
+                                Text("Medications")
+                                    .font(.headline)
+                                    .foregroundStyle(.secondary)
+                                
+                                Spacer()
+                                
+                                Button {
+                                    medicationToEdit = nil
+                                    showMedicationEditor = true
+                                } label: {
+                                    HStack(spacing: Spacing.xs) {
+                                        Image(systemName: "plus.circle.fill")
+                                            .font(.system(size: 16, weight: .semibold))
+                                        Text("Add")
+                                            .font(.system(size: 14, weight: .medium))
+                                    }
+                                    .foregroundStyle(Color.healthPrimary)
+                                }
+                            }
+                            .padding(.horizontal, Spacing.medium)
+                            
+                            if medications.isEmpty {
+                                HealthCard {
+                                    VStack(spacing: Spacing.medium) {
+                                        Circle()
+                                            .fill(Color.secondary.opacity(0.15))
+                                            .frame(width: Size.avatarLarge, height: Size.avatarLarge)
+                                            .overlay {
+                                                Image(systemName: "pills")
+                                                    .font(.system(size: 24, weight: .semibold))
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                        
+                                        VStack(spacing: Spacing.xs) {
+                                            Text("No Medications Added")
+                                                .font(.headline.weight(.semibold))
+                                                .foregroundStyle(.primary)
+                                            
+                                            Text("Tap the Add button to add medications to this prescription")
+                                                .font(.body)
+                                                .foregroundStyle(.secondary)
+                                                .multilineTextAlignment(.center)
+                                        }
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, Spacing.medium)
+                                }
+                            } else {
+                                VStack(spacing: Spacing.medium) {
+                                    ForEach(medications) { medication in
+                                        medicationListItem(medication: medication)
+                                    }
+                                }
+                            }
+                        }
+                        
+                        Spacer(minLength: Spacing.xl)
+                    }
+                    .padding(.horizontal, Spacing.medium)
+                    .padding(.top, Spacing.medium)
+                }
+                .navigationTitle(editorTitle)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Save") {
+                            submitForm()
+                        }
+                        .disabled(!isFormValid)
+                        .font(.system(size: 16, weight: .semibold))
                     }
                     
-                    Spacer(minLength: Spacing.xl)
-                }
-                .padding(.horizontal, Spacing.medium)
-                .padding(.top, Spacing.medium)
-            }
-            .navigationTitle(editorTitle)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        submitForm()
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel", role: .cancel) {
+                            dismiss()
+                        }
+                        .font(.system(size: 16, weight: .medium))
                     }
-                    .disabled(!isFormValid)
-                    .font(.system(size: 16, weight: .semibold))
                 }
-                
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel", role: .cancel) {
-                        dismiss()
+                .onAppear {
+                    if let prescription {
+                        loadPrescriptionData(prescription)
                     }
-                    .font(.system(size: 16, weight: .medium))
+                }
+                .sheet(isPresented: $showMedicationEditor) {
+                    if let medicationToEdit = medicationToEdit {
+                        MedicationEditor(
+                            medication: medicationToEdit,
+                            onSave: handleMedicationSave
+                        )
+                    } else {
+                        MedicationEditor(
+                            medication: nil,
+                            onSave: handleMedicationSave
+                        )
+                    }
                 }
             }
-            .onAppear {
-                if let prescription {
-                    loadPrescriptionData(prescription)
-                }
-            }
-            .sheet(isPresented: $showMedicationEditor) {
-                if let medicationToEdit = medicationToEdit {
-                    MedicationEditor(
-                        medication: medicationToEdit,
-                        onSave: handleMedicationSave
-                    )
-                } else {
-                    MedicationEditor(
-                        medication: nil,
-                        onSave: handleMedicationSave
-                    )
-                }
-            }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
         }
-        .presentationDetents([.large])
-        .presentationDragIndicator(.visible)
     }
     
     @ViewBuilder
