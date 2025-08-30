@@ -15,7 +15,7 @@ struct MedicationDetailCard: View {
         VStack(alignment: .leading, spacing: 16) {
             medicationHeader
             
-            if !medication.frequency.isEmpty {
+            if !(medication.frequency?.isEmpty ?? true) {
                 scheduleSection
             }
             
@@ -38,11 +38,14 @@ struct MedicationDetailCard: View {
                 .frame(width: 8, height: 8)
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(medication.name)
-                    .font(.subheadline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.primary)
-                    .lineLimit(2)
+                OptionalView(medication.name) { name in
+                    Text(name)
+                        .font(.subheadline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                        .lineLimit(2)
+                }
+                
                 
                 if let dosage = medication.dosage, !dosage.isEmpty {
                     HStack(spacing: 4) {
@@ -60,7 +63,7 @@ struct MedicationDetailCard: View {
             
             Spacer()
             
-            Text("\(medication.numberOfDays) days")
+            Text("\(String(describing: medication.numberOfDays)) days")
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.green)
@@ -92,7 +95,7 @@ struct MedicationDetailCard: View {
                 
                 Spacer()
                 
-                Text("\(medication.frequency.count) times")
+                Text("\(medication.frequency?.count) times")
                     .font(.caption2)
                     .fontWeight(.medium)
                     .foregroundColor(.orange)
@@ -103,15 +106,24 @@ struct MedicationDetailCard: View {
                             .fill(.orange.opacity(0.1))
                     )
             }
-            
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: min(medication.frequency.count, 2)), spacing: 10) {
-                ForEach(medication.frequency.indices, id: \.self) { index in
-                    MedicationScheduleChip(
-                        schedule: medication.frequency[index],
-                        style: .premium
-                    )
+            OptionalView(medication.frequency) { frequency in
+                LazyVGrid(
+                    columns: Array(
+                        repeating: GridItem(.flexible(), spacing: 10),
+                        count: min(frequency.count, 2)
+                    ),
+                    spacing: 10
+                ) {
+                    ForEach(frequency.indices, id: \.self) { index in
+                        MedicationScheduleChip(
+                            schedule: frequency[index],
+                            style: .premium
+                        )
+                    }
                 }
             }
+            
+            
         }
     }
     

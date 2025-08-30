@@ -13,29 +13,28 @@ import SwiftUI
 @Model
 class Patient: Identifiable, Sendable, Hashable {
     
-    @Attribute(.unique)
-    var id: UUID
+    var id: UUID?
     
-    var firstName: String
-    var lastName: String
-    var dateOfBirth: Date
-    var gender: String
-    var bloodType: String
+    var firstName: String?
+    var lastName: String?
+    var dateOfBirth: Date?
+    var gender: String?
+    var bloodType: String?
     
-    var emergencyContactName: String
-    var emergencyContactPhone: String
+    var emergencyContactName: String?
+    var emergencyContactPhone: String?
     
-    var notes: String
-    var isActive: Bool
+    var notes: String?
+    var isActive: Bool?
     
     // Primary color for theming - stored as hex string
     var primaryColorHex: String?
     
-    var createdAt: Date
-    var updatedAt: Date
+    var createdAt: Date?
+    var updatedAt: Date?
     
     @Relationship(deleteRule: .cascade, inverse: \MedicalCase.patient)
-    var medicalCases: [MedicalCase]
+    var medicalCases: [MedicalCase]?
     
     init(id: UUID, firstName: String, lastName: String, dateOfBirth: Date, gender: String, bloodType: String, emergencyContactName: String, emergencyContactPhone: String, notes: String, isActive: Bool, primaryColorHex: String? = nil, createdAt: Date, updatedAt: Date, medicalCases: [MedicalCase]) {
         self.id = id
@@ -61,13 +60,14 @@ class Patient: Identifiable, Sendable, Hashable {
     
     // Computed property for age
     var age: Int {
-        Calendar.current.dateComponents([.year], from: dateOfBirth, to: Date()).year ?? 0
+        guard let dateOfBirth else { return 0 }
+        return Calendar.current.dateComponents([.year], from: dateOfBirth, to: Date()).year ?? 0
     }
     
     // Computed property for initials
     var initials: String {
-        let firstInitial = String(firstName.prefix(1).uppercased())
-        let lastInitial = String(lastName.prefix(1).uppercased())
+        let firstInitial = firstName?.prefix(1).uppercased() ?? ""
+        let lastInitial = lastName?.prefix(1).uppercased() ?? ""
         return "\(firstInitial)\(lastInitial)"
     }
     

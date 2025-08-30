@@ -10,7 +10,8 @@ import SwiftUI
 import SwiftData
 
 struct PrescriptionMedicationEditor: View {
-    let prescription: Prescription
+    
+    var prescription: Prescription
     
     @State private var showingMedicationEditor = false
     @State private var selectedMedication: Medication?
@@ -22,7 +23,7 @@ struct PrescriptionMedicationEditor: View {
         NavigationStack {
             List {
                 Section {
-                    ForEach(prescription.medications, id: \.id) { medication in
+                    ForEach(prescription.medications ?? [], id: \.id) { medication in
                         medicationRow(medication: medication)
                     }
                     .onDelete(perform: deleteMedications)
@@ -43,13 +44,13 @@ struct PrescriptionMedicationEditor: View {
                     HStack {
                         Text("Medications")
                         Spacer()
-                        Text("\(prescription.medications.count) total")
+                        Text("\(prescription.medications?.count) total")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                 }
                 
-                if !prescription.medications.isEmpty {
+                if !(prescription.medications?.isEmpty ?? true) {
                     Section("Quick Actions") {
                         Button(action: duplicateLastMedication) {
                             HStack {
@@ -94,10 +95,12 @@ struct PrescriptionMedicationEditor: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(medication.name)
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundColor(.primary)
+                        if let name = medication.name {
+                            Text(name)
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundColor(.primary)
+                        }
                         
                         if let dosage = medication.dosage {
                             Text(dosage)
@@ -118,9 +121,12 @@ struct PrescriptionMedicationEditor: View {
                             .foregroundColor(.green)
                             .clipShape(Capsule())
                         
-                        Text("\(medication.frequency.count) times/day")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
+                        OptionalView(medication.frequency) { frequency in
+                            Text("\(frequency.count) times/day")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                        
                     }
                     
                     Image(systemName: "chevron.right")
@@ -129,23 +135,26 @@ struct PrescriptionMedicationEditor: View {
                 }
                 
                 // Quick schedule preview
-                if !medication.frequency.isEmpty {
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: min(medication.frequency.count, 4)), spacing: 4) {
-                        ForEach(Array(medication.frequency.prefix(4).enumerated()), id: \.offset) { _, schedule in
-                            schedulePreviewChip(schedule: schedule)
-                        }
-                        
-                        if medication.frequency.count > 4 {
-                            Text("+\(medication.frequency.count - 4) more")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Color.gray.opacity(0.1))
-                                .clipShape(Capsule())
+                OptionalView(medication.frequency) { frequency in
+                    if !frequency.isEmpty {
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: min(frequency.count, 4)), spacing: 4) {
+                            ForEach(Array(frequency.prefix(4).enumerated()), id: \.offset) { _, schedule in
+                                schedulePreviewChip(schedule: schedule)
+                            }
+                            
+                            if frequency.count > 4 {
+                                Text("+\(frequency.count - 4) more")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Color.gray.opacity(0.1))
+                                    .clipShape(Capsule())
+                            }
                         }
                     }
                 }
+                
                 
                 if let instructions = medication.instructions, !instructions.isEmpty {
                     Text(instructions)
@@ -186,21 +195,24 @@ struct PrescriptionMedicationEditor: View {
     private func deleteMedications(at offsets: IndexSet) {
         withAnimation(.easeOut(duration: 0.3)) {
             for index in offsets {
-                let medicationToDelete = prescription.medications[index]
-                modelContext.delete(medicationToDelete)
+                if let medicationToDelete = prescription.medications?[index] {
+                    modelContext.delete(medicationToDelete)
+                }
             }
             prescription.updatedAt = Date()
         }
     }
     
     private func duplicateLastMedication() {
-        guard let lastMedication = prescription.medications.last else { return }
+        guard let lastMedication = prescription.medications?.last else {
+            return
+        }
         
         let duplicatedMedication = Medication(
             id: UUID(),
-            name: lastMedication.name,
-            frequency: lastMedication.frequency,
-            numberOfDays: lastMedication.numberOfDays,
+            name: lastMedication.name ?? "",
+            frequency: lastMedication.frequency ?? [],
+            numberOfDays: lastMedication.numberOfDays ?? 0,
             dosage: lastMedication.dosage,
             instructions: lastMedication.instructions,
             prescription: prescription
@@ -208,7 +220,7 @@ struct PrescriptionMedicationEditor: View {
         
         withAnimation(.easeIn(duration: 0.3)) {
             modelContext.insert(duplicatedMedication)
-            prescription.medications.append(duplicatedMedication)
+            prescription.medications?.append(duplicatedMedication)
             prescription.updatedAt = Date()
         }
     }

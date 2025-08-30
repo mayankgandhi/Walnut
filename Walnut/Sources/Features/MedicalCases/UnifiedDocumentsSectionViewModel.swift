@@ -122,11 +122,15 @@ class UnifiedDocumentsSectionViewModel {
         
         components.append(bloodReport.labName)
         
-        let abnormalCount = bloodReport.testResults.filter({ $0.isAbnormal  ?? false }).count
+        let abnormalCount = bloodReport.testResults?.filter({ $0.isAbnormal  ?? false }).count
         if abnormalCount > 0 {
-            components.append("\(abnormalCount) abnormal results")
-        } else if !bloodReport.testResults.isEmpty {
-            components.append("\(bloodReport.testResults.count) results")
+            components
+                .append("\(String(describing: abnormalCount)) abnormal results")
+        } else if !(bloodReport.testResults?.isEmpty ?? true) {
+            components
+                .append(
+                    "\(String(describing: bloodReport.testResults?.count)) results"
+                )
         }
         
         return components.compactMap({ $0 }).joined(separator: " • ")
@@ -187,31 +191,34 @@ class UnifiedDocumentsSectionViewModel {
     private func performDocumentLoad(from medicalCase: MedicalCase) async {
         do {
             // Perform expensive operations off the main thread
-            let documents = await withTaskGroup(of: [DocumentItem].self, returning: [DocumentItem].self) { group in
+            let documents = await withTaskGroup(
+                of: [DocumentItem]?.self,
+                returning: [DocumentItem]?.self
+            ) { group in
                 
                 // Load prescriptions
                 group.addTask {
-                    return medicalCase.prescriptions.map { DocumentItem.prescription($0) }
+                    return medicalCase.prescriptions?.map { DocumentItem.prescription($0) }
                 }
                 
                 // Load blood reports
                 group.addTask {
-                    return medicalCase.bloodReports.map { DocumentItem.bloodReport($0) }
+                    return medicalCase.bloodReports?.map { DocumentItem.bloodReport($0) }
                 }
                 
                 // Load unparsed documents
                 group.addTask {
-                    return medicalCase.unparsedDocuments.map { DocumentItem.unparsedDocument($0) }
+                    return medicalCase.unparsedDocuments?.map { DocumentItem.unparsedDocument($0) }
                 }
                 
                 // Load other documents
                 group.addTask {
-                    return medicalCase.otherDocuments.map { DocumentItem.document($0) }
+                    return medicalCase.otherDocuments?.map { DocumentItem.document($0) }
                 }
                 
                 var allItems: [DocumentItem] = []
                 for await items in group {
-                    allItems.append(contentsOf: items)
+                    allItems.append(contentsOf: items ?? [])
                 }
                 
                 // Sort by date (most recent first) - this is expensive, so do it once
@@ -221,9 +228,9 @@ class UnifiedDocumentsSectionViewModel {
             }
             
             // Update cache atomically on main thread
-            _allDocuments = documents
-            _cachedTotalCount = documents.count
-            _cachedUnparsedCount = medicalCase.unparsedDocuments.count
+            _allDocuments = documents ?? []
+            _cachedTotalCount = documents?.count ?? 0
+            _cachedUnparsedCount = medicalCase.unparsedDocuments?.count ?? 0
             _lastMedicalCaseUpdate = medicalCase.updatedAt ?? Date()
             
         } catch {

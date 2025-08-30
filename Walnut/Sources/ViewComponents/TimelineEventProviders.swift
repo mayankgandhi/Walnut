@@ -27,9 +27,9 @@ struct PatientTimelineEventProvider: TimelineEventProvider {
         ))
         
         // Medical cases events
-        let caseEvents = patient.medicalCases
+        if let caseEvents = patient.medicalCases?
             .sorted(by: { $0.createdAt < $1.createdAt })
-            .map { medicalCase in
+            .map({ medicalCase in
                 TimelineEvent(
                     icon: "folder.badge.plus.fill",
                     color: medicalCase.specialty?.color ?? .primary,
@@ -37,8 +37,9 @@ struct PatientTimelineEventProvider: TimelineEventProvider {
                     subtitle: "\(String(describing: medicalCase.specialty?.rawValue)) - \(String(describing: medicalCase.title))",
                     date: medicalCase.createdAt
                 )
-            }
-        events.append(contentsOf: caseEvents)
+            }) {
+            events.append(contentsOf: caseEvents)
+        }
         
         return events
     }
@@ -85,10 +86,10 @@ struct PrescriptionTimelineEventProvider: TimelineEventProvider {
         return prescriptions
             .sorted(by: { $0.dateIssued < $1.dateIssued })
             .map { prescription in
-                let medicationCount = prescription.medications.count
+                let medicationCount = prescription.medications?.count
                 let subtitle = medicationCount == 1 ? 
                     "1 medication prescribed" : 
-                    "\(medicationCount) medications prescribed"
+                "\(String(describing: medicationCount)) medications prescribed"
                 
                 return TimelineEvent(
                     icon: "pills.fill",

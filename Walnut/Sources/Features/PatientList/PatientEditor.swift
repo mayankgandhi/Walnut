@@ -316,16 +316,16 @@ struct PatientEditor: View {
     }
     
     private func loadPatientData(_ patient: Patient) {
-        firstName = patient.firstName
-        lastName = patient.lastName
-        dateOfBirth = patient.dateOfBirth
+        firstName = patient.firstName ?? firstName
+        lastName = patient.lastName ?? lastName
+        dateOfBirth = patient.dateOfBirth ?? dateOfBirth
         selectedDateOfBirth = patient.dateOfBirth
         selectedGender = patient.gender
         selectedBloodType = patient.bloodType
-        emergencyContactName = patient.emergencyContactName
-        emergencyContactPhone = patient.emergencyContactPhone
-        notes = patient.notes
-        isActive = patient.isActive
+        emergencyContactName = patient.emergencyContactName ?? emergencyContactName
+        emergencyContactPhone = patient.emergencyContactPhone ?? emergencyContactPhone
+        notes = patient.notes ?? notes
+        isActive = patient.isActive ?? isActive
         selectedColorHex = patient.primaryColorHex ?? Patient.generateRandomColorHex()
     }
     

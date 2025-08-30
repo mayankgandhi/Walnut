@@ -30,38 +30,38 @@ enum MedicalSpecialty: String, CaseIterable, Hashable, Codable, Sendable {
     
     var icon: String {
         switch self {
-        case .cardiologist:
-            return "heart.fill"
-        case .endocrinologist:
-            return "leaf.fill"
-        case .neurologist:
-            return "brain"
-        case .orthopedicSurgeon:
-            return "figure.walk"
-        case .pediatrician:
-            return "figure.2.and.child.holdinghands"
-        case .psychiatrist:
-            return "brain.head.profile"
-        case .ophthalmologist:
-            return "eye.fill"
-        case .oncologist:
-            return "cross.case.fill"
-        case .dermatologist:
-            return "hand.raised.fill"
-        case .gastroenterologist:
-            return "stomach"
-        case .pulmonologist:
-            return "lungs.fill"
-        case .urologist:
-            return "drop.fill"
-        case .gynecologist:
-            return "figure.dress.line.vertical.figure"
-        case .rheumatologist:
-            return "figure.flexibility"
-        case .dentist:
-            return "mouth.fill"
         case .generalPractitioner:
-            return "stethoscope"
+            return "generalPractitioner.png"
+        case .cardiologist:
+            return "cardiologist.png"
+        case .endocrinologist:
+            return "endocrinologist.png"
+        case .rheumatologist:
+            return "rheumatologist.png"
+        case .dermatologist:
+            return "dermatologist.png"
+        case .pediatrician:
+            return "pediatrician.png"
+        case .urologist:
+            return "urologist.png"
+        case .dentist:
+            return "dentist.png"
+        case .oncologist:
+            return "oncologist.png"
+        case .pulmonologist:
+            return "pulmonologist.png"
+        case .ophthalmologist:
+            return "ophthalmologist.png"
+        case .neurologist:
+            return "neurologist.png"
+        case .gynecologist:
+            return "gynecology.png"
+        case .orthopedicSurgeon:
+            return "orthopaedic.png"
+        case .gastroenterologist:
+            return "gastroenterelogist.png"
+        case .psychiatrist:
+            return "psychology.png"
         }
     }
     

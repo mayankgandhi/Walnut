@@ -12,15 +12,15 @@ import Foundation
 @Model
 class Medication {
     
-    var id: UUID
-    var name: String
-    var frequency: [MedicationSchedule]
-    var numberOfDays: Int
+    var id: UUID?
+    var name: String?
+    var frequency: [MedicationSchedule]?
+    var numberOfDays: Int?
     var dosage: String?
     var instructions: String?
     
-    var createdAt: Date
-    var updatedAt: Date
+    var createdAt: Date?
+    var updatedAt: Date?
     
     var prescription: Prescription?
     

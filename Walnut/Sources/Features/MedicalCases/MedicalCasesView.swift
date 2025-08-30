@@ -28,9 +28,11 @@ struct MedicalCasesView: View {
     
     init(patient: Patient) {
         self.patient = patient
-        self._medicalCases = Query(filter: MedicalCase.predicate(patientID: patient.id),
-                                   sort: \.updatedAt,
-                                   order: .reverse)
+        self._medicalCases = Query(
+            filter: MedicalCase.predicate(patientID: patient.id!),
+            sort: \.updatedAt,
+            order: .reverse
+        )
     }
     
     // MARK: - Computed Properties

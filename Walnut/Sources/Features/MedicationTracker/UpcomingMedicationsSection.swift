@@ -34,7 +34,7 @@ struct UpcomingMedicationsSection: View {
             } else {
                 ForEach(Array(upcomingMedications.enumerated()), id: \.element.medication.id) { index, medicationInfo in
                     MedicationCard.upcoming(
-                        medicationName: medicationInfo.medication.name,
+                        medicationName: medicationInfo.medication.name ?? "",
                         dosage: medicationInfo.dosageText,
                         timing: medicationInfo.displayTime,
                         instructions: medicationInfo.medication.instructions,
@@ -43,9 +43,6 @@ struct UpcomingMedicationsSection: View {
                     ) {
                         
                     }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets(top: Spacing.xs, leading: 0, bottom: Spacing.xs, trailing: 0))
                 }
             }
         }
@@ -106,9 +103,13 @@ struct UpcomingMedicationsSection: View {
     }
     
     private func loadActiveMedications() {
-        let activeCases = patient.medicalCases.filter { $0.isActive ?? false }
-        let medications = activeCases.flatMap { $0.prescriptions.flatMap { $0.medications } }
-        self.activeMedications = medications
+        let activeMedicalCases = patient.medicalCases?
+            .filter { $0.isActive ?? false }
+        let activeMedicalCasesPrescriptions: [Prescription] = (activeMedicalCases ?? []).compactMap(\.prescriptions)
+            .reduce([], +)
+        let activeMedications: [Medication] = activeMedicalCasesPrescriptions
+            .compactMap(\.medications).reduce([], +)
+        self.activeMedications = activeMedications
     }
     
     private func mapToDesignSystemTimePeriod(_ timePeriod: MedicationTracker.TimePeriod) -> MedicationTimePeriod {

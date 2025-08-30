@@ -18,17 +18,15 @@ struct AllMedicationsView: View {
     @State private var medicationToEdit: Medication? = nil
     
     private var activeMedications: [Medication] {
-        patient.medicalCases
+        let activeMedicalCases = patient.medicalCases?
             .filter { $0.isActive ?? false }
-            .flatMap { $0.prescriptions.flatMap { $0.medications } }
+        let activeMedicalCasesPrescriptions: [Prescription] = (activeMedicalCases ?? []).compactMap(\.prescriptions)
+            .reduce([], +)
+        let activeMedications: [Medication] = activeMedicalCasesPrescriptions
+            .compactMap(\.medications).reduce([], +)
+        return activeMedications
     }
-    
-    private var inactiveMedications: [Medication] {
-        patient.medicalCases
-            .filter { !($0.isActive ?? true) }
-            .flatMap { $0.prescriptions.flatMap { $0.medications } }
-    }
-    
+
     private func groupedActiveMedications() -> [MedicationTracker.TimePeriod: [MedicationTracker.MedicationScheduleInfo]] {
         medicationTracker.groupMedicationsByTimePeriod(activeMedications)
     }
@@ -53,24 +51,10 @@ struct AllMedicationsView: View {
                 }
             }
             
-            // Inactive Medications Section
-            if !inactiveMedications.isEmpty {
-                Section {
-                    ForEach(inactiveMedications) { medication in
-                        medicationRow(medication: medication, isActive: false)
-                    }
-                } header: {
-                    HStack {
-                        Image(systemName: "pause.circle.fill")
-                            .foregroundStyle(.secondary)
-                        Text("Inactive Medications")
-                            .font(.headline)
-                    }
-                }
-            }
+            
             
             // Empty State
-            if activeMedications.isEmpty && inactiveMedications.isEmpty {
+            if activeMedications.isEmpty {
                 ContentUnavailableView(
                     "No Medications",
                     systemImage: "pills",
@@ -138,20 +122,25 @@ struct AllMedicationsView: View {
     private func medicationScheduleRow(medicationInfo: MedicationTracker.MedicationScheduleInfo) -> some View {
         HStack(spacing: Spacing.medium) {
             // Medication Icon
-            Circle()
-                .fill(medicationInfo.timePeriod.color.opacity(0.1))
-                .frame(width: 36, height: 36)
-                .overlay {
-                    Text(String(medicationInfo.medication.name.prefix(1).uppercased()))
-                        .font(.system(.caption, design: .rounded, weight: .bold))
-                        .foregroundStyle(medicationInfo.timePeriod.color)
-                }
+            OptionalView(medicationInfo.medication.name) { name in
+                Circle()
+                    .fill(medicationInfo.timePeriod.color.opacity(0.1))
+                    .frame(width: 36, height: 36)
+                    .overlay {
+                        Text(String(name.prefix(1).uppercased()))
+                            .font(.system(.caption, design: .rounded, weight: .bold))
+                            .foregroundStyle(medicationInfo.timePeriod.color)
+                    }
+            }
+            
             
             // Medication Details
             VStack(alignment: .leading, spacing: 2) {
-                Text(medicationInfo.medication.name)
-                    .font(.system(.body, design: .rounded, weight: .medium))
-                    .foregroundStyle(.primary)
+                OptionalView(medicationInfo.medication.name) { name in
+                    Text(name)
+                        .font(.system(.body, design: .rounded, weight: .medium))
+                        .foregroundStyle(.primary)
+                }
                 
                 Text(medicationInfo.dosageText)
                     .font(.system(.caption, design: .rounded))
@@ -185,28 +174,31 @@ struct AllMedicationsView: View {
     private func medicationRow(medication: Medication, isActive: Bool) -> some View {
         HStack(spacing: Spacing.medium) {
             // Medication Icon
-            Circle()
-                .fill((isActive ? Color.healthSuccess : Color.secondary).opacity(0.1))
-                .frame(width: 36, height: 36)
-                .overlay {
-                    Text(String(medication.name.prefix(1).uppercased()))
-                        .font(.system(.caption, design: .rounded, weight: .bold))
-                        .foregroundStyle(isActive ? Color.healthSuccess : .secondary)
-                }
-            
-            // Medication Details
-            VStack(alignment: .leading, spacing: 2) {
-                Text(medication.name)
-                    .font(.system(.body, design: .rounded, weight: .medium))
-                    .foregroundStyle(isActive ? .primary : .secondary)
+            if let name = medication.name {
+                Circle()
+                    .fill((isActive ? Color.healthSuccess : Color.secondary).opacity(0.1))
+                    .frame(width: 36, height: 36)
+                    .overlay {
+                        Text(String(name.prefix(1).uppercased()))
+                            .font(.system(.caption, design: .rounded, weight: .bold))
+                            .foregroundStyle(isActive ? Color.healthSuccess : .secondary)
+                    }
                 
-                if let dosage = medication.dosage {
-                    Text(dosage)
-                        .font(.system(.caption, design: .rounded))
-                        .foregroundStyle(.secondary)
+                
+                // Medication Details
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(name)
+                        .font(.system(.body, design: .rounded, weight: .medium))
+                        .foregroundStyle(isActive ? .primary : .secondary)
+                    
+                    if let dosage = medication.dosage {
+                        Text(dosage)
+                            .font(.system(.caption, design: .rounded))
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
-            
+
             Spacer()
             
             // Edit button
@@ -225,11 +217,13 @@ struct AllMedicationsView: View {
     
     private func handleMedicationSave(_ medication: Medication) {
         // Find the prescription that contains this medication and update it
-        for medicalCase in patient.medicalCases {
-            for prescription in medicalCase.prescriptions {
-                if let medicationIndex = prescription.medications.firstIndex(where: { $0.id == medication.id }) {
+        for medicalCase in patient.medicalCases ?? [] {
+            for prescription in medicalCase.prescriptions ?? [] {
+                if let medicationIndex = prescription.medications?.firstIndex(
+                    where: { $0.id == medication.id
+                    }) {
                     // Update the medication in the prescription
-                    prescription.medications[medicationIndex] = medication
+                    prescription.medications?[medicationIndex] = medication
                     prescription.updatedAt = Date()
                     return
                 }

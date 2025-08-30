@@ -55,7 +55,7 @@ struct EnhancedMedicationCard: View {
         VStack(alignment: .leading, spacing: Spacing.medium) {
             medicationHeaderSection
             
-            if !medication.frequency.isEmpty {
+            if !(medication.frequency ?? []).isEmpty {
                 frequencySection
             }
             
@@ -90,10 +90,12 @@ struct EnhancedMedicationCard: View {
     
     private var medicationInfoSection: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(medication.name)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.primary)
-                .lineLimit(2)
+            if let name = medication.name, !name.isEmpty {
+                Text(name)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(2)
+            }
             
             if let dosage = medication.dosage, !dosage.isEmpty {
                 dosageInfo(dosage)
@@ -115,7 +117,7 @@ struct EnhancedMedicationCard: View {
     
     private var durationBadge: some View {
         VStack(spacing: 2) {
-            Text("\(medication.numberOfDays)")
+            Text("\(String(describing: medication.numberOfDays))")
                 .font(.caption.weight(.bold))
                 .foregroundStyle(Color.healthSuccess)
             
@@ -144,20 +146,22 @@ struct EnhancedMedicationCard: View {
     }
     
     private var frequencyHeader: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "clock")
-                .font(.caption)
-                .foregroundStyle(Color.healthWarning)
-            
-            Text("Schedule")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.primary)
-            
-            Spacer()
-            
-            Text("\(medication.frequency.count)x daily")
-                .font(.caption2.weight(.medium))
-                .foregroundStyle(Color.healthWarning)
+        OptionalView(medication.frequency) { frequency in
+            HStack(spacing: 6) {
+                Image(systemName: "clock")
+                    .font(.caption)
+                    .foregroundStyle(Color.healthWarning)
+                
+                Text("Schedule")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.primary)
+                
+                Spacer()
+                
+                Text("\(frequency.count)x daily")
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(Color.healthWarning)
+            }
         }
     }
     
@@ -166,20 +170,20 @@ struct EnhancedMedicationCard: View {
             GridItem(.flexible(), spacing: Spacing.xs),
             GridItem(.flexible(), spacing: Spacing.xs)
         ], spacing: Spacing.xs) {
-            ForEach(medication.frequency.indices, id: \.self) { index in
-                frequencyChip(at: index)
+            ForEach((medication.frequency ?? []).indices, id: \.self) { index in
+                frequencyChip(schedule: medication.frequency![index])
             }
         }
     }
     
-    private func frequencyChip(at index: Int) -> some View {
+    private func frequencyChip(schedule: MedicationSchedule) -> some View {
         HStack(spacing: Spacing.xs) {
-            if let timing = medication.frequency[index].timing {
+            if let timing = schedule.timing {
                 Text(timing.rawValue.capitalized)
                     .font(.caption.weight(.bold))
                     .foregroundStyle(Color.healthWarning)
             }
-            Text(medication.frequency[index].mealTime.rawValue.capitalized)
+            Text(schedule.mealTime.rawValue.capitalized)
                 .font(.caption.weight(.bold))
                 .foregroundStyle(Color.healthWarning)
         }
@@ -188,7 +192,6 @@ struct EnhancedMedicationCard: View {
         .padding(.vertical, 4)
         .background(Color.healthWarning.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 6))
-        
     }
     
     private func instructionsSection(_ instructions: String) -> some View {
@@ -242,10 +245,13 @@ struct EnhancedMedicationCard: View {
     }
     
     private var medicationIcon: String {
+        guard let name = medication.name else {
+            return "pills.fill"
+        }
         // You can customize icons based on medication type
-        if medication.name.lowercased().contains("antibiotic") {
+        if name.lowercased().contains("antibiotic") {
             return "shield.fill"
-        } else if medication.name.lowercased().contains("pain") {
+        } else if name.lowercased().contains("pain") {
             return "bolt.fill"
         } else {
             return "pills.fill"

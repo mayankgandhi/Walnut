@@ -134,7 +134,7 @@ struct ActiveMedicationsSection: View {
                 VStack(spacing: Spacing.small) {
                     ForEach(medications, id: \.medication.id) { medicationInfo in
                         MedicationCard.display(
-                            medicationName: medicationInfo.medication.name,
+                            medicationName: medicationInfo.medication.name ?? "",
                             dosage: medicationInfo.dosageText,
                             timing: medicationInfo.displayTime,
                             instructions: medicationInfo.medication.instructions,
@@ -147,8 +147,16 @@ struct ActiveMedicationsSection: View {
     }
     
     private func loadActiveMedications() {
-        let activeCases = patient.medicalCases.filter { $0.isActive ?? false }
-        let medications = activeCases.flatMap { $0.prescriptions.flatMap { $0.medications } }
+        let activeCases = patient.medicalCases?.filter { $0.isActive ?? false }
+        
+        let prescriptions: [Prescription] = activeCases?.reduce([], { partialResult, medicalCase in
+            return partialResult + (medicalCase.prescriptions ?? [])
+        }) ?? []
+        
+        let medications: [Medication] = prescriptions.reduce([], { partialResult, prescription in
+            return partialResult + (prescription.medications ?? [])
+        })
+        
         self.activeMedications = medications
     }
     

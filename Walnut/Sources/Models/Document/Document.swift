@@ -12,7 +12,6 @@ import SwiftData
 @Model
 class Document: Identifiable, Hashable {
     
-    @Attribute(.unique)
     var id: UUID?
     
     var fileName: String?

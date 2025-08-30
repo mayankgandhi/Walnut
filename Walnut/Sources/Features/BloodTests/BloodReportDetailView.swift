@@ -25,7 +25,7 @@ struct BloodReportDetailView: View {
                     enhancedHeaderCard
                     
                     // Test Results Grid
-                    if !bloodReport.testResults.isEmpty {
+                    if !(bloodReport.testResults?.isEmpty ?? true) {
                         enhancedTestResultsGrid
                     } else {
                         // Show empty state if no test results
@@ -174,14 +174,18 @@ struct BloodReportDetailView: View {
                         .font(.subheadline.weight(.bold))
                         .foregroundStyle(.primary)
                     
-                    Text("\(bloodReport.testResults.count) biomarkers measured")
+                    Text(
+                        "\(bloodReport.testResults?.count) biomarkers measured"
+                    )
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
                 
                 Spacer()
                 
-                let abnormalCount = bloodReport.testResults.filter{ $0.isAbnormal ?? false }.count
+                let abnormalCount = bloodReport.testResults?.filter{
+                    $0.isAbnormal ?? false
+                }.count
                 if abnormalCount > 0 {
                     HStack(spacing: Spacing.xs) {
                         Circle()

@@ -33,7 +33,7 @@ class Prescription {
     var document: Document?
     
     @Relationship(deleteRule: .cascade, inverse: \Medication.prescription)
-    var medications: [Medication]
+    var medications: [Medication]?
     
     init(
         id: UUID,

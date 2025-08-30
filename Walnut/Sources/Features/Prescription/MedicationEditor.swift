@@ -345,13 +345,13 @@ struct MedicationEditor: View {
     
     
     private func loadMedicationData(_ medication: Medication) {
-        medicationName = medication.name
+        medicationName = medication.name ?? ""
         dosage = medication.dosage ?? ""
         instructions = medication.instructions ?? ""
         numberOfDays = medication.numberOfDays
         
         // Load frequency data
-        for schedule in medication.frequency {
+        for schedule in medication.frequency ?? [] {
             switch schedule.mealTime {
             case .breakfast:
                 if schedule.timing == .before {

@@ -23,8 +23,10 @@ struct PrescriptionDetailView: View {
                 enhancedHeaderCard
                 
                 // Medications Section - Most Important
-                if !prescription.medications.isEmpty {
-                    PrescriptionMedicationsCard(medications: prescription.medications)
+                if !(prescription.medications?.isEmpty ?? true) {
+                    PrescriptionMedicationsCard(
+                        medications: prescription.medications ?? []
+                    )
                 }
                 
                 // Follow-up Section
@@ -124,10 +126,11 @@ struct PrescriptionDetailView: View {
                             Circle()
                                 .fill(Color.healthSuccess)
                                 .frame(width: 8, height: 8)
-                                .scaleEffect(prescription.medications.isEmpty ? 0.8 : 1.0)
-                                .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: prescription.medications.isEmpty)
+                                .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: prescription.medications?.isEmpty)
                             
-                            Text("\(prescription.medications.count) Medications Prescribed")
+                            Text(
+                                "\(String(describing: prescription.medications?.count)) Medications Prescribed"
+                            )
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(Color.healthSuccess)
                         }

@@ -409,16 +409,19 @@ struct PrescriptionEditor: View {
                     .fill(Color.healthPrimary.opacity(0.15))
                     .frame(width: Size.avatarMedium, height: Size.avatarMedium)
                     .overlay {
-                        Text(String(medication.name.prefix(1).uppercased()))
+                        Text(String(medication.name?.prefix(1).uppercased() ?? "P"))
                             .font(.system(size: 16, weight: .bold))
                             .foregroundStyle(Color.healthPrimary)
                     }
                 
                 // Medication details
                 VStack(alignment: .leading, spacing: Spacing.xs) {
-                    Text(medication.name)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.primary)
+                    OptionalView(medication.name) { name in
+                        Text(name)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.primary)
+                    }
+                    
                     
                     HStack(spacing: Spacing.xs) {
                         if let dosage = medication.dosage {
@@ -441,14 +444,15 @@ struct PrescriptionEditor: View {
                     }
                     
                     // Frequency display
-                    if !medication.frequency.isEmpty {
+                    if let frequency = medication.frequency,
+                        frequency.isEmpty {
                         HStack(spacing: Spacing.xs) {
-                            ForEach(medication.frequency.prefix(3), id: \.mealTime) { schedule in
+                            ForEach(frequency.prefix(3), id: \.mealTime) { schedule in
                                 frequencyBadge(for: schedule)
                             }
                             
-                            if medication.frequency.count > 3 {
-                                Text("+\(medication.frequency.count - 3)")
+                            if frequency.count > 3 {
+                                Text("+\(frequency.count - 3)")
                                     .font(.caption2.weight(.medium))
                                     .foregroundStyle(.secondary)
                                     .padding(.horizontal, 6)
@@ -525,7 +529,7 @@ struct PrescriptionEditor: View {
         hasFollowUp = prescription.followUpDate != nil
         followUpTests = prescription.followUpTests?.joined(separator: ", ") ?? ""
         notes = prescription.notes ?? ""
-        medications = prescription.medications
+        medications = prescription.medications ?? []
     }
     
     private func save() {

@@ -207,11 +207,11 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
         
         // IMPORTANT: Add test results to the blood report's testResults array
         // This establishes the bidirectional relationship properly
-        bloodReport.testResults.append(contentsOf: testResults)
+        bloodReport.testResults?.append(contentsOf: testResults)
         
         // CRUCIAL: Add blood report to the medical case's bloodReports array
         // This establishes the bidirectional relationship between MedicalCase and BloodReport
-        medicalCase.bloodReports.append(bloodReport)
+        medicalCase.bloodReports?.append(bloodReport)
         
         try modelContext.save()
         return bloodReport.persistentModelID
@@ -225,7 +225,7 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
         modelContext.insert(document)
         
         // Add document to medical case's unparsed documents array
-        medicalCase.otherDocuments.append(document)
+        medicalCase.otherDocuments?.append(document)
         
         try modelContext.save()
         return document.persistentModelID
@@ -239,7 +239,7 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
         modelContext.insert(document)
         
         // Add document to medical case's unparsed documents array
-        medicalCase.unparsedDocuments.append(document)
+        medicalCase.unparsedDocuments?.append(document)
         
         try modelContext.save()
         return document.persistentModelID

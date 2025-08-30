@@ -201,7 +201,7 @@ struct BloodTestsView: View {
         for report in bloodReports {
             guard let reportDate = report.resultDate else { continue }
             
-            for testResult in report.testResults {
+            for testResult in report.testResults ?? [] {
                 guard let testName = testResult.testName,
                       let value = testResult.value,
                       testName.lowercased() == biomarker.testName.lowercased(),
@@ -260,7 +260,7 @@ struct BloodTestsView: View {
         var testGroups: [String: [BloodTestResult]] = [:]
         
         for report in bloodReports {
-            for testResult in report.testResults {
+            for testResult in report.testResults ?? [] {
                 guard let testName = testResult.testName else { continue }
                 
                 let normalizedName = testName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()

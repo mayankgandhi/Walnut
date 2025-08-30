@@ -12,7 +12,6 @@ import SwiftData
 @Model
 class BloodTestResult: Identifiable, Sendable {
     
-    @Attribute(.unique)
     var id: UUID?
     
     var testName: String?

@@ -88,7 +88,7 @@ struct MedicalCaseTimelineEventProvider: TimelineEventProvider {
         ))
         
         // Prescription events
-        let prescriptionEvents = medicalCase.prescriptions
+        if let prescriptionEvents = medicalCase.prescriptions?
             .sorted(by: { $0.dateIssued < $1.dateIssued })
             .map { prescription in
                 TimelineEvent(
@@ -98,14 +98,17 @@ struct MedicalCaseTimelineEventProvider: TimelineEventProvider {
                     subtitle: prescription.doctorName.map { "\($0)" } ?? "New medication prescribed",
                     date: prescription.dateIssued
                 )
-            }
-        events.append(contentsOf: prescriptionEvents)
+        } {
+            events.append(contentsOf: prescriptionEvents)
+        }
+        
         
         // Blood report events
-        let bloodReportEvents = medicalCase.bloodReports
+        if let bloodReportEvents = medicalCase.bloodReports?
             .sorted(by: { $0.resultDate < $1.resultDate })
             .map { bloodReport in
-                let abnormalCount = bloodReport.testResults.filter({ $0.isAbnormal ?? false }).count
+            let abnormalCount = bloodReport.testResults?.filter(
+                { $0.isAbnormal ?? false }).count
                 let subtitle = abnormalCount > 0 ?
                     "\(bloodReport.testName) - \(abnormalCount) abnormal results" : 
                     "\(bloodReport.testName) - All normal"
@@ -117,8 +120,9 @@ struct MedicalCaseTimelineEventProvider: TimelineEventProvider {
                     subtitle: subtitle,
                     date: bloodReport.resultDate
                 )
-            }
-        events.append(contentsOf: bloodReportEvents)
+        } {
+            events.append(contentsOf: bloodReportEvents)
+        }
         
         // Case update event (if different from creation)
         if medicalCase.updatedAt != medicalCase.createdAt {

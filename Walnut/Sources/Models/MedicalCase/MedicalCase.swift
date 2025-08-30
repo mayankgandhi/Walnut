@@ -12,7 +12,6 @@ import SwiftData
 @Model
 class MedicalCase: Identifiable, Sendable {
     
-    @Attribute(.unique)
     var id: UUID?
     
     var title: String?
@@ -27,16 +26,16 @@ class MedicalCase: Identifiable, Sendable {
     var patient: Patient?
     
     @Relationship(deleteRule: .cascade, inverse: \Prescription.medicalCase)
-    var prescriptions: [Prescription] = []
+    var prescriptions: [Prescription]? = []
     
     @Relationship(deleteRule: .cascade, inverse: \BloodReport.medicalCase)
-    var bloodReports: [BloodReport] = []
+    var bloodReports: [BloodReport]? = []
     
     @Relationship(deleteRule: .cascade, inverse: \Document.medicalCase)
-    var unparsedDocuments: [Document] = []
+    var unparsedDocuments: [Document]? = []
     
     @Relationship(deleteRule: .cascade, inverse: \Document.medicalCase)
-    var otherDocuments: [Document] = []
+    var otherDocuments: [Document]? = []
     
     init(id: UUID,
          title: String,

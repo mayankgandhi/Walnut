@@ -12,7 +12,6 @@ import SwiftData
 @Model
 class BloodReport: Identifiable, Sendable {
     
-    @Attribute(.unique)
     var id: UUID?
     
     var testName: String?
@@ -30,7 +29,7 @@ class BloodReport: Identifiable, Sendable {
     var document: Document?
     
     @Relationship(deleteRule: .cascade, inverse: \BloodTestResult.bloodReport)
-    var testResults: [BloodTestResult] = []
+    var testResults: [BloodTestResult]? = []
     
     init(id: UUID = UUID(),
          testName: String,

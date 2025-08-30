@@ -79,7 +79,7 @@ class MedicationTracker {
         var grouped: [TimePeriod: [MedicationScheduleInfo]] = [:]
         
         for medication in medications {
-            for schedule in medication.frequency {
+            for schedule in medication.frequency ?? [] {
                 let timePeriod = mapMealTimeToTimePeriod(schedule.mealTime)
                 let info = MedicationScheduleInfo(
                     medication: medication,
@@ -107,7 +107,7 @@ class MedicationTracker {
         var upcomingMedications: [MedicationScheduleInfo] = []
         
         for medication in medications {
-            for schedule in medication.frequency {
+            for schedule in medication.frequency ?? [] {
                 let timePeriod = mapMealTimeToTimePeriod(schedule.mealTime)
                 let scheduleHour = getHourForTimePeriod(timePeriod)
                 

@@ -45,41 +45,42 @@ struct PatientHeaderCard: View {
                     MedicalInfoRow(
                         icon: "drop.fill",
                         title: "Blood Type",
-                        value: patient.bloodType.isEmpty ? "Unknown" : patient.bloodType,
+                        value: patient.bloodType ?? "Blood Group",
                         color: .red
                     )
                     
                     MedicalInfoRow(
                         icon: "phone.fill",
                         title: "Emergency Contact",
-                        value: patient.emergencyContactName.isEmpty ? "Not set" : patient.emergencyContactName,
+                        value: patient.emergencyContactName ?? "Not Set",
                         color: .blue
                     )
-                    
-                    MedicalInfoRow(
-                        icon: "calendar",
-                        title: "Date of Birth",
-                        value: patient.dateOfBirth.formatted(date: .abbreviated, time: .omitted),
-                        color: .green
-                    )
-                    
+                    OptionalView(patient.dateOfBirth) { dob in
+                        MedicalInfoRow(
+                            icon: "calendar",
+                            title: "Date of Birth",
+                            value: dob.formatted(date: .abbreviated, time: .omitted),
+                            color: .green
+                        )
+                    }
                 }
                 
                 // Notes section (if available)
-                if !patient.notes.isEmpty && patient.notes != "No notes available" {
+                OptionalView(patient.notes) { notes in
                     VStack(alignment: .leading, spacing: Spacing.xs) {
                         Text("Notes")
                             .font(.caption)
                             .fontWeight(.medium)
                             .foregroundStyle(.secondary)
                         
-                        Text(patient.notes)
+                        Text(notes)
                             .font(.footnote)
                             .lineLimit(3)
                             .multilineTextAlignment(.leading)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                
             }
         }
         .padding(.horizontal, Spacing.medium)
