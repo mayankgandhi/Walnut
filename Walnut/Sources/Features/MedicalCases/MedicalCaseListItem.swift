@@ -24,7 +24,7 @@ struct EnhancedMedicalCaseListItem: View {
                     medicalCase.type?.backgroundColor ?? Color.blue
                 )
                 .overlay {
-                    Image(systemName: medicalCase.specialty?.icon ?? "stethoscope")
+                    Image(medicalCase.specialty?.icon ?? "image")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 25, height: 25)

@@ -10,6 +10,7 @@ import SwiftUI
 import WalnutDesignSystem
 
 struct PatientTabView: View {
+    
     let patient: Patient
     
     var body: some View {
