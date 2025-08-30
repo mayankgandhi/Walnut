@@ -107,7 +107,7 @@ struct MedicalCasesView: View {
                 } else {
                     ScrollView {
                         LazyVGrid(
-                            columns: [.init(), .init(), .init()],
+                            columns: [.init(), .init()],
                             alignment: .leading,
                             spacing: Spacing.xs
                         ) {
@@ -115,7 +115,7 @@ struct MedicalCasesView: View {
                                 Button {
                                     selectedCase = medicalCase
                                 } label: {
-                                    EnhancedMedicalCaseListItem(medicalCase: medicalCase)
+                                    MedicalCaseListItem(medicalCase: medicalCase)
                                 }
                                 .buttonStyle(.plain)
                                 .contextMenu {

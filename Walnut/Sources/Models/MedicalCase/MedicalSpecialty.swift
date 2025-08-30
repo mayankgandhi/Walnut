@@ -31,37 +31,37 @@ enum MedicalSpecialty: String, CaseIterable, Hashable, Codable, Sendable {
     var icon: String {
         switch self {
         case .generalPractitioner:
-            return "generalPractitioner.png"
+            return "generalPractitioner"
         case .cardiologist:
-            return "cardiologist.png"
+            return "cardiologist"
         case .endocrinologist:
-            return "endocrinologist.png"
+            return "endocrinologist"
         case .rheumatologist:
-            return "rheumatologist.png"
+            return "rheumatologist"
         case .dermatologist:
-            return "dermatologist.png"
+            return "dermatologist"
         case .pediatrician:
-            return "pediatrician.png"
+            return "pediatrician"
         case .urologist:
-            return "urologist.png"
+            return "urologist"
         case .dentist:
-            return "dentist.png"
+            return "dentist"
         case .oncologist:
-            return "oncologist.png"
+            return "oncologist"
         case .pulmonologist:
-            return "pulmonologist.png"
+            return "pulmonologist"
         case .ophthalmologist:
-            return "ophthalmologist.png"
+            return "ophthalmologist"
         case .neurologist:
-            return "neurologist.png"
+            return "neurologist"
         case .gynecologist:
-            return "gynecology.png"
+            return "gynecology"
         case .orthopedicSurgeon:
-            return "orthopaedic.png"
+            return "orthopaedic"
         case .gastroenterologist:
-            return "gastroenterelogist.png"
+            return "gastroenterelogist"
         case .psychiatrist:
-            return "psychology.png"
+            return "psychology"
         }
     }
     
