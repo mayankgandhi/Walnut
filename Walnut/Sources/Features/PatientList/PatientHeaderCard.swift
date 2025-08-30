@@ -19,17 +19,17 @@ struct PatientHeaderCard: View {
                 // Patient identity section
                 HStack(spacing: Spacing.medium) {
                     PatientAvatar(
-                        initials: patient.initials,
+                        name: patient.name ?? "",
                         color: patient.primaryColor,
                         size: 64
                     )
                     
                     VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text(patient.fullName)
+                        Text(patient.name ?? "")
                             .font(.title3)
                             .fontWeight(.semibold)
                         
-                        Text("\(patient.age) years old • \(patient.gender)")
+                        Text("\(patient.age) years old • \(String(describing: patient.gender))")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }

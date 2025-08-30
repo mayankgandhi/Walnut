@@ -23,8 +23,7 @@ struct PatientEditor: View {
         patient == nil ? "Add Patient" : "Edit Patient"
     }
     
-    @State private var firstName = ""
-    @State private var lastName = ""
+    @State private var name = ""
     @State private var dateOfBirth = Date()
     @State private var selectedGender: String? = nil
     @State private var selectedBloodType: String? = nil
@@ -97,8 +96,7 @@ struct PatientEditor: View {
     @State private var selectedDateOfBirth: Date? = nil
     
     private var isFormValid: Bool {
-        !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
         selectedDateOfBirth != nil
     }
     
@@ -142,8 +140,8 @@ struct PatientEditor: View {
                         VStack(spacing: Spacing.medium) {
                             TextFieldItem(
                                 icon: "person.fill",
-                                title: "First Name",
-                                text: $firstName,
+                                title: "Name",
+                                text: $name,
                                 placeholder: "Enter first name",
                                 iconColor: .healthPrimary,
                                 isRequired: true,
@@ -154,21 +152,6 @@ struct PatientEditor: View {
                                 }
                             )
                             .focused($focusedField, equals: .firstName)
-                            
-                            TextFieldItem(
-                                icon: "person.fill",
-                                title: "Last Name",
-                                text: $lastName,
-                                placeholder: "Enter last name",
-                                iconColor: .healthPrimary,
-                                isRequired: true,
-                                contentType: .familyName,
-                                submitLabel: FormField.lastName.appropriateSubmitLabel,
-                                onSubmit: {
-                                    focusNextField(after: .lastName)
-                                }
-                            )
-                            .focused($focusedField, equals: .lastName)
                             
                             DatePickerItem(
                                 icon: "calendar",
@@ -316,8 +299,7 @@ struct PatientEditor: View {
     }
     
     private func loadPatientData(_ patient: Patient) {
-        firstName = patient.firstName ?? firstName
-        lastName = patient.lastName ?? lastName
+        name = patient.name ?? name
         dateOfBirth = patient.dateOfBirth ?? dateOfBirth
         selectedDateOfBirth = patient.dateOfBirth
         selectedGender = patient.gender
@@ -336,8 +318,7 @@ struct PatientEditor: View {
         
         if let patient {
             // Edit existing patient
-            patient.firstName = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
-            patient.lastName = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+            patient.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
             patient.dateOfBirth = finalDateOfBirth
             patient.gender = selectedGender ?? "Not Specified"
             patient.bloodType = selectedBloodType ?? "Unknown"
@@ -351,8 +332,7 @@ struct PatientEditor: View {
             // Create new patient
             let newPatient = Patient(
                 id: UUID(),
-                firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
-                lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines),
+                name: name.trimmingCharacters(in: .whitespacesAndNewlines),
                 dateOfBirth: finalDateOfBirth,
                 gender: selectedGender ?? "Not Specified",
                 bloodType: selectedBloodType ?? "Unknown",

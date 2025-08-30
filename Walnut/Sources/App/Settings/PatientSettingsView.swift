@@ -17,7 +17,9 @@ struct PatientSettingsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: Spacing.large) {
-                
+
+                PatientHeaderCard(patient: patient)
+
                 VStack(alignment: .leading, spacing: Spacing.medium) {
                     Text("Settings")
                         .font(.headline)

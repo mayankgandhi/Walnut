@@ -35,8 +35,7 @@ struct PatientsList<Content: View>: View {
             predicate = #Predicate<Patient> { _ in true }
         } else {
             predicate = #Predicate<Patient> { patient in
-                patient.firstName?.localizedStandardContains(searchText) ?? false ||
-                patient.lastName?.localizedStandardContains(searchText) ?? false
+                patient.name?.localizedStandardContains(searchText) ?? false
             }
         }
         

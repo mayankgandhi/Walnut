@@ -49,7 +49,7 @@ struct DocumentProcessingUseCase {
                 // Handle document file selection - save using URL method
                 let localFileURL = try documentFileManager.saveDocument(
                     from: selectedDocument,
-                    patientName: medicalCase.patient?.fullName ?? "Patient Name",
+                    patientName: medicalCase.patient?.name ?? "Patient Name",
                     medicalCaseTitle: medicalCase.title ?? "Medical Case",
                     documentType: documentTypeToStorageType(selectedDocumentType),
                     date: Date()
@@ -72,7 +72,7 @@ struct DocumentProcessingUseCase {
                 let fileName = "image_\(Int(Date().timeIntervalSince1970)).jpg"
                 let localFileURL = try documentFileManager.saveDocument(
                     data: imageData,
-                    patientName: medicalCase.patient?.fullName ?? "Patient Name",
+                    patientName: medicalCase.patient?.name ?? "Patient Name",
                     medicalCaseTitle: medicalCase.title ?? "Medical Case",
                     documentType: documentTypeToStorageType(selectedDocumentType),
                     date: Date(),

@@ -15,8 +15,7 @@ class Patient: Identifiable, Sendable, Hashable {
     
     var id: UUID?
     
-    var firstName: String?
-    var lastName: String?
+    var name: String?
     var dateOfBirth: Date?
     var gender: String?
     var bloodType: String?
@@ -36,10 +35,9 @@ class Patient: Identifiable, Sendable, Hashable {
     @Relationship(deleteRule: .cascade, inverse: \MedicalCase.patient)
     var medicalCases: [MedicalCase]?
     
-    init(id: UUID, firstName: String, lastName: String, dateOfBirth: Date, gender: String, bloodType: String, emergencyContactName: String, emergencyContactPhone: String, notes: String, isActive: Bool, primaryColorHex: String? = nil, createdAt: Date, updatedAt: Date, medicalCases: [MedicalCase]) {
+    init(id: UUID, name: String, dateOfBirth: Date, gender: String, bloodType: String, emergencyContactName: String, emergencyContactPhone: String, notes: String, isActive: Bool, primaryColorHex: String? = nil, createdAt: Date, updatedAt: Date, medicalCases: [MedicalCase]) {
         self.id = id
-        self.firstName = firstName
-        self.lastName = lastName
+        self.name = name
         self.dateOfBirth = dateOfBirth
         self.gender = gender
         self.bloodType = bloodType
@@ -53,22 +51,10 @@ class Patient: Identifiable, Sendable, Hashable {
         self.medicalCases = medicalCases
     }
     
-    // Computed property for full name
-    var fullName: String {
-        "\(firstName) \(lastName)"
-    }
-    
     // Computed property for age
     var age: Int {
         guard let dateOfBirth else { return 0 }
         return Calendar.current.dateComponents([.year], from: dateOfBirth, to: Date()).year ?? 0
-    }
-    
-    // Computed property for initials
-    var initials: String {
-        let firstInitial = firstName?.prefix(1).uppercased() ?? ""
-        let lastInitial = lastName?.prefix(1).uppercased() ?? ""
-        return "\(firstInitial)\(lastInitial)"
     }
     
     // Computed property for primary color
@@ -108,8 +94,7 @@ class Patient: Identifiable, Sendable, Hashable {
 extension Patient {
     static let samplePatient = Patient(
         id: UUID(),
-        firstName: "John",
-        lastName: "Doe",
+        name: "John Doe",
         dateOfBirth: Calendar.current.date(byAdding: .year, value: -35, to: Date()) ?? Date(),
         gender: "Male",
         bloodType: "A+",
@@ -127,8 +112,7 @@ extension Patient {
     static let samplePatientWithMedications: Patient = {
         let patient = Patient(
             id: UUID(),
-            firstName: "Sarah",
-            lastName: "Wilson",
+            name: "Sarah Wilson",
             dateOfBirth: Calendar.current.date(byAdding: .year, value: -42, to: Date()) ?? Date(),
             gender: "Female",
             bloodType: "O+",

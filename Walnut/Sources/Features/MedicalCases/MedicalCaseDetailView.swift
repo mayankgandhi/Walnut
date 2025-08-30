@@ -82,16 +82,16 @@ struct MedicalCaseDetailView: View {
                     
                     // Patient Info
                     HStack {
-                        if let fullName = medicalCase.patient?.fullName,
+                        if let fullName = medicalCase.patient?.name,
                            let specialty = medicalCase.specialty {
                             PatientAvatar(
-                                initials: String(fullName.prefix(2)),
+                                name: String(fullName.prefix(2)),
                                 color: specialty.color
                             )
                         }
                         
-                        if let fullName = medicalCase.patient?.fullName {
-                            Text(fullName ?? "Patient")
+                        if let fullName = medicalCase.patient?.name {
+                            Text(fullName)
                                 .font(.callout.weight(.medium))
                                 .foregroundStyle(.primary)
                         }

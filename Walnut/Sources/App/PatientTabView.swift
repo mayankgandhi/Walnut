@@ -31,8 +31,14 @@ struct PatientTabView: View {
                     BloodTestsView(patient: patient)
                 }
             }
+            
+            Tab("Settings", systemImage: "gear") {
+                NavigationStack {
+                    PatientSettingsView(patient: patient)
+                }
+            }
         }
-        .navigationTitle(patient.fullName)
+        .navigationTitle(patient.name ?? "")
         .navigationBarTitleDisplayMode(.inline)
     }
 }

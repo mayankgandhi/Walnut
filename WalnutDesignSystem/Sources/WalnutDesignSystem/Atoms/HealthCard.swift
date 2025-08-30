@@ -29,16 +29,16 @@ public struct HealthCard<Content: View>: View {
 
 /// Patient avatar component
 public struct PatientAvatar: View {
-    private let initials: String
+    private let name: String
     private let color: Color
     private let size: CGFloat
     
     public init(
-        initials: String,
+        name: String,
         color: Color = .healthPrimary,
         size: CGFloat = Size.avatarMedium
     ) {
-        self.initials = initials
+        self.name = name
         self.color = color
         self.size = size
     }
@@ -47,7 +47,7 @@ public struct PatientAvatar: View {
         Circle()
             .fill(color.opacity(0.2))
             .overlay(
-                Text(initials)
+                Text(name.prefix(2))
                     .font(.headline.weight(.semibold))
                     .foregroundStyle(color)
             )
@@ -63,7 +63,7 @@ public struct PatientAvatar: View {
             HealthCard {
                 VStack(alignment: .leading, spacing: Spacing.small) {
                     HStack {
-                        PatientAvatar(initials: "WW")
+                        PatientAvatar(name: "WW")
                         
                         VStack(alignment: .leading) {
                             Text("John Doe")

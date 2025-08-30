@@ -16,7 +16,7 @@ struct ValidationTest: View {
                 // Test all atomic components
                 DSButton("Test Button", style: .primary) {}
                 
-                PatientAvatar(initials: "JD", size: Size.avatarMedium)
+                PatientAvatar(name: "JD", size: Size.avatarMedium)
                 
                 StatusIndicator(status: .good)
                

@@ -28,13 +28,6 @@ struct BloodTestsView: View {
     init(patient: Patient) {
         self.patient = patient
         let patientID = patient.id
-        _bloodReports = Query(
-            filter: #Predicate<BloodReport> { report in
-                report.medicalCase?.patient?.id == patientID
-            },
-            sort: \BloodReport.resultDate,
-            order: .reverse
-        )
     }
     
     var body: some View {

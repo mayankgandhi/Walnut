@@ -175,13 +175,13 @@ struct MedicalCaseEditor: View {
                         HealthCard {
                             HStack(spacing: Spacing.medium) {
                                 PatientAvatar(
-                                    initials: patient?.initials ?? "P",
+                                    name: patient?.name ?? "P",
                                     color: patient?.primaryColor ?? Color.blue,
                                     size: Size.avatarLarge
                                 )
                                 
                                 VStack(alignment: .leading, spacing: Spacing.xs) {
-                                    Text(patient?.fullName ?? "Patient")
+                                    Text(patient?.name ?? "Patient")
                                         .font(.headline.weight(.semibold))
                                         .foregroundStyle(.primary)
                                     

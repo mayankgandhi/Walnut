@@ -47,7 +47,7 @@ struct MedicalCasesView: View {
                     .localizedCaseInsensitiveContains(searchText) ?? false ||
                 medicalCase.notes?
                     .localizedCaseInsensitiveContains(searchText) ?? false ||
-                medicalCase.patient?.fullName
+                medicalCase.patient?.name?
                     .localizedCaseInsensitiveContains(searchText) ?? false
             }
         }

@@ -14,30 +14,14 @@ struct MedicationsTrackerView: View {
     
     let patient: Patient
     @Environment(\.modelContext) private var modelContext
-    @State private var showSettings = false
     
     init(patient: Patient) {
         self.patient = patient
     }
     
     var body: some View {
-        ScrollView {
-            PatientHeaderCard(patient: patient)
-            
+        ScrollView {            
             UpcomingMedicationsSection(patient: patient)
-        }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showSettings = true
-                } label: {
-                    Image(systemName: "gear.circle.fill")
-                        .foregroundStyle(Color.healthPrimary)
-                }
-            }
-        }
-        .navigationDestination(isPresented: $showSettings) {
-            PatientSettingsView(patient: patient)
         }
     }
 }
