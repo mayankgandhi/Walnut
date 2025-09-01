@@ -57,6 +57,11 @@ struct PatientSettingsView: View {
                 .presentationCornerRadius(Spacing.large)
                 .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $viewModel.showICloudSync, onDismiss: {
+            viewModel.dismissICloudSync()
+        }) {
+            iCloudSyncSettingsView()
+        }
         .alert("Export Complete", isPresented: $viewModel.exportCompleted) {
             Button("OK") {
                 viewModel.resetExportState()

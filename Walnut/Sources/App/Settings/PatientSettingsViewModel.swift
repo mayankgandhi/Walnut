@@ -9,6 +9,7 @@
 import SwiftUI
 import SwiftData
 import Observation
+import CloudKit
 
 @Observable
 class PatientSettingsViewModel {
@@ -21,6 +22,7 @@ class PatientSettingsViewModel {
     var showPrivacySettings = false
     var showAppearanceSettings = false
     var showHelpSupport = false
+    var showICloudSync = false
     
     // Loading and Error States
     var isLoading = false
@@ -31,6 +33,9 @@ class PatientSettingsViewModel {
     var isExporting = false
     var exportProgress: Double = 0.0
     var exportCompleted = false
+    
+    // iCloud Sync
+    var iCloudSyncService = iCloudSyncService()
     
     // MARK: - Private Properties
     let patient: Patient
@@ -89,6 +94,14 @@ class PatientSettingsViewModel {
     func showPrivacy() {
         showPrivacySettings = true
         // TODO: Implement privacy settings navigation
+    }
+    
+    func showICloudSyncScreen() {
+        showICloudSync = true
+    }
+    
+    func dismissICloudSync() {
+        showICloudSync = false
     }
     
     // MARK: - Data Operations
@@ -178,6 +191,15 @@ class PatientSettingsViewModel {
     
     func getAppSettingsItems() -> [SettingsMenuItem] {
         return [
+            SettingsMenuItem(
+                icon: "icloud.fill",
+                title: "iCloud Sync",
+                subtitle: iCloudSyncService.isEnabled ? "Enabled - \(iCloudSyncService.syncStatus.displayText)" : "Keep your data in sync across devices",
+                iconColor: .blue,
+                action: { [weak self] in
+                    self?.showICloudSyncScreen()
+                }
+            ),
             SettingsMenuItem(
                 icon: "paintbrush.fill",
                 title: "Appearance",
