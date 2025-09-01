@@ -539,10 +539,10 @@ public struct ToggleItem: View {
 
 // MARK: - Validation State Helper
 
-private enum ValidationState {
+public enum ValidationState {
     case normal, success, warning, error
     
-    var color: Color {
+    public var color: Color {
         switch self {
         case .normal: return Color(.systemGray2)
         case .success: return Color(.systemGreen).opacity(0.7)
@@ -551,7 +551,7 @@ private enum ValidationState {
         }
     }
     
-    var iconName: String {
+    public var iconName: String {
         switch self {
         case .normal: return ""
         case .success: return "checkmark.circle.fill"

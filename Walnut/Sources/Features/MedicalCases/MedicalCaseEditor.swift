@@ -28,7 +28,7 @@ struct MedicalCaseEditor: View {
     @State private var title = ""
     @State private var notes = ""
     @State private var selectedType: MedicalCaseType = .consultation
-    @State private var selectedSpecialty: MedicalSpecialty = .generalPractitioner
+    @State private var selectedSpecialty: MedicalSpecialty? = .generalPractitioner
     @State private var isActive = true
     
     @Environment(\.dismiss) private var dismiss
@@ -79,7 +79,8 @@ struct MedicalCaseEditor: View {
     }
     
     private var isFormValid: Bool {
-        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        selectedSpecialty != nil
     }
     
     // Focus navigation helpers
@@ -147,21 +148,18 @@ struct MedicalCaseEditor: View {
                                 iconColor: .healthSuccess
                             )
                             
-                            MenuPickerItem(
+                            ButtonPickerItem(
                                 icon: "stethoscope",
                                 title: "Medical Specialty",
-                                selectedOption: Binding(
-                                    get: { selectedSpecialty.rawValue },
-                                    set: { newValue in
-                                        if let specialty = MedicalSpecialty.allCases.first(where: { $0.rawValue == newValue }) {
-                                            selectedSpecialty = specialty
-                                        }
-                                    }
-                                ),
-                                options: MedicalSpecialty.allCases.map { $0.rawValue },
+                                selectedOption: $selectedSpecialty,
+                                options: Array(MedicalSpecialty.allCases),
                                 placeholder: "Select specialty",
-                                iconColor: .purple
+                                bottomSheetTitle: "Select Medical Specialty",
+                                helperText: "Choose the relevant medical specialty",
+                                iconColor: .healthPrimary,
+                                isRequired: true
                             )
+                            
                         }
                     }
                     
@@ -306,7 +304,7 @@ struct MedicalCaseEditor: View {
                 title: title.trimmingCharacters(in: .whitespacesAndNewlines),
                 notes: notes.trimmingCharacters(in: .whitespacesAndNewlines),
                 type: selectedType,
-                specialty: selectedSpecialty,
+                specialty: selectedSpecialty ?? .generalPractitioner,
                 isActive: isActive,
                 createdAt: now,
                 updatedAt: now,

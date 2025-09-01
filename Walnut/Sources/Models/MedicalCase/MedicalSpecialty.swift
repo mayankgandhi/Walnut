@@ -8,8 +8,11 @@
 
 import Foundation
 import SwiftUI
+import WalnutDesignSystem
 
-enum MedicalSpecialty: String, CaseIterable, Hashable, Codable, Sendable {
+
+enum MedicalSpecialty: String, CaseIterable, Hashable, Codable, Sendable, ButtonPickable {
+
     
     case generalPractitioner = "General Practitioner"
     case cardiologist = "Cardiologist"
@@ -29,10 +32,14 @@ enum MedicalSpecialty: String, CaseIterable, Hashable, Codable, Sendable {
     case dentist = "Dentist"
     case ent = "ENT"
     
+    var description: String {
+        rawValue
+    }
+    
     var icon: String {
         switch self {
         case .generalPractitioner:
-            return "generalPractitioner"
+            return "generalPractictioner"
         case .cardiologist:
             return "cardiologist"
         case .endocrinologist:
@@ -64,7 +71,7 @@ enum MedicalSpecialty: String, CaseIterable, Hashable, Codable, Sendable {
         case .psychiatrist:
             return "psychology"
         case .ent:
-            return "ent"
+            return "generalPractictioner"
         }
     }
     
