@@ -47,16 +47,7 @@ struct DocumentProcessingUseCase {
             // Create local file URL based on selection type and save the file
             if let selectedDocument = store.selectedDocument {
                 // Handle document file selection - save using URL method
-                let localFileURL = try documentFileManager.saveDocument(
-                    from: selectedDocument,
-                    patientName: medicalCase.patient?.name ?? "Patient Name",
-                    medicalCaseTitle: medicalCase.title ?? "Medical Case",
-                    documentType: documentTypeToStorageType(selectedDocumentType),
-                    date: Date()
-                )
-                // Use the local file as temp file for AI processing
-                tempFileURL = localFileURL
-                
+                tempFileURL = selectedDocument
             } else if let selectedImage = store.selectedImage {
                 // Handle image selection - convert to data and save using Data method
                 guard let imageData = selectedImage.jpegData(compressionQuality: 0.8) else {
@@ -72,9 +63,6 @@ struct DocumentProcessingUseCase {
                 let fileName = "image_\(Int(Date().timeIntervalSince1970)).jpg"
                 let localFileURL = try documentFileManager.saveDocument(
                     data: imageData,
-                    patientName: medicalCase.patient?.name ?? "Patient Name",
-                    medicalCaseTitle: medicalCase.title ?? "Medical Case",
-                    documentType: documentTypeToStorageType(selectedDocumentType),
                     date: Date(),
                     fileName: fileName
                 )
@@ -87,10 +75,6 @@ struct DocumentProcessingUseCase {
                            userInfo: [NSLocalizedDescriptionKey: "No file selected"])
                 )
             }
-            
-            // Step 2: Ensure directories exist (already done by saveDocument)
-            await updateProgress(0.2, "Setting up storage...")
-            try documentFileManager.ensureDirectoriesExist()
             
             // Step 3: Parse document using AI service
             await updateProgress(0.4, "Parsing document...")
@@ -230,17 +214,6 @@ struct DocumentProcessingUseCase {
     @MainActor
     private func updateProgress(_ progress: Double, _ status: String) {
         progressDelegate?.didUpdateProgress(progress, status: status)
-    }
-    
-    private func documentTypeToStorageType(_ documentType: DocumentType) -> DocumentStorageType {
-        switch documentType {
-        case .prescription:
-            return .prescription
-        case .labResult:
-            return .bloodReport
-        default:
-            return .otherDocuments
-        }
     }
     
 }

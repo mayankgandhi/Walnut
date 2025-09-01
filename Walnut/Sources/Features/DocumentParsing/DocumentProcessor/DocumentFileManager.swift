@@ -25,21 +25,13 @@ struct DocumentFileManager {
     /// Saves a document file locally with the organized folder structure
     /// - Parameters:
     ///   - sourceURL: Source file URL to copy from
-    ///   - patientName: Patient's full name for folder structure
-    ///   - medicalCaseTitle: Medical case title for folder structure
-    ///   - documentType: Type of document (prescription, bloodReport, unparsed)
     ///   - date: Date for file naming (prescription date, blood report date, or current date for unparsed)
     ///   - fileName: Original file name
     /// - Returns: Local file URL where the document was saved
     func saveDocument(
         from sourceURL: URL,
-        patientName: String,
-        medicalCaseTitle: String,
-        documentType: DocumentStorageType,
-        date: Date,
+        date: Date = Date(),
     ) throws -> URL {
-        
-
         // Generate unique file name with date
         let fileName = sourceURL.lastPathComponent
         let dateFormatter = DateFormatter()
@@ -58,17 +50,11 @@ struct DocumentFileManager {
     /// Saves document data directly to local storage with organized folder structure
     /// - Parameters:
     ///   - data: Document data to save
-    ///   - patientName: Patient's full name for folder structure
-    ///   - medicalCaseTitle: Medical case title for folder structure
-    ///   - documentType: Type of document (prescription, bloodReport, unparsed)
     ///   - date: Date for file naming (prescription date, blood report date, or current date for unparsed)
     ///   - fileName: File name with extension
     /// - Returns: Local file URL where the document was saved
     func saveDocument(
         data: Data,
-        patientName: String,
-        medicalCaseTitle: String,
-        documentType: DocumentStorageType,
         date: Date,
         fileName: String
     ) throws -> URL {
@@ -91,40 +77,15 @@ struct DocumentFileManager {
     /// Saves an unparsed document when parsing fails
     /// - Parameters:
     ///   - sourceURL: Source file URL to copy from
-    ///   - patientName: Patient's full name for folder structure
-    ///   - medicalCaseTitle: Medical case title for folder structure
     ///   - fileName: Original file name
     /// - Returns: Local file URL where the document was saved
     func saveUnparsedDocument(
         from sourceURL: URL,
-        patientName: String,
-        medicalCaseTitle: String,
     ) throws -> URL {
         return try saveDocument(
             from: sourceURL,
-            patientName: patientName,
-            medicalCaseTitle: medicalCaseTitle,
-            documentType: .unparsed,
             date: Date(),
         )
-    }
-    
-    /// Creates all necessary directories if they don't exist
-    func ensureDirectoriesExist() throws {
-        try fileManager.createDirectory(
-            at: documentsDirectory,
-            withIntermediateDirectories: true,
-            attributes: nil
-        )
-    }
-    
-    /// Gets the folder path for a specific patient and medical case
-    func getFolderPath(patientName: String, medicalCaseTitle: String) -> URL {
-        let patientFolder = documentsDirectory
-            .appendingPathComponent(sanitizeFileName(patientName))
-        let caseFolder = patientFolder
-            .appendingPathComponent(sanitizeFileName(medicalCaseTitle))
-        return caseFolder
     }
     
     /// Checks if a file exists at the given URL
@@ -137,6 +98,10 @@ struct DocumentFileManager {
    
     private func copyFile(from sourceURL: URL, to destinationURL: URL) throws {
         // Remove existing file if it exists
+        guard fileManager.fileExists(atPath: sourceURL.path()) else {
+            throw NSError(domain: "1234", code: 1234)
+        }
+        
         if fileManager.fileExists(atPath: destinationURL.path) {
             try fileManager.removeItem(at: destinationURL)
         }

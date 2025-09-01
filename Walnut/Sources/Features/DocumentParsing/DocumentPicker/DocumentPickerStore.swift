@@ -48,7 +48,8 @@ class DocumentPickerStore {
     var canUpload: Bool {
         hasSelection && !isProcessing
     }
-    
+    private let documentFileManager: DocumentFileManager
+
     // MARK: - Initialization
     
     init(
@@ -60,6 +61,7 @@ class DocumentPickerStore {
         self.supportedFileTypes = supportedFileTypes
         self.maxFileSizeMB = maxFileSizeMB
         self.selectedDocumentType = nil
+        self.documentFileManager = DocumentFileManager()
     }
     
     // MARK: - Public Actions
@@ -100,31 +102,23 @@ class DocumentPickerStore {
         switch result {
         case .success(let urls):
             guard let url = urls.first else { return }
-            
-            guard url.startAccessingSecurityScopedResource() else {
-                errorMessage = "Unable to access the selected file"
-                return
-            }
-            
-            // Validate file size
-            do {
-                let resources = try url.resourceValues(forKeys: [.fileSizeKey])
-                if let fileSize = resources.fileSize {
-                    let fileSizeMB = fileSize / (1024 * 1024)
-                    if fileSizeMB > maxFileSizeMB {
-                        url.stopAccessingSecurityScopedResource()
-                        errorMessage = "File size exceeds \(maxFileSizeMB)MB limit"
-                        return
+           
+            if url.startAccessingSecurityScopedResource() {
+                let coordinator = NSFileCoordinator()
+                var error: NSError?
+                coordinator.coordinate(readingItemAt: url, options: [], error: &error) { newURL in
+                    do {
+                        let savedURL = try documentFileManager.saveDocument(from: url)
+                        selectedDocument = savedURL
+                    } catch {
+                        dump(error)
+                        errorMessage = "Unable to read file information"
                     }
                 }
-            } catch {
                 url.stopAccessingSecurityScopedResource()
-                errorMessage = "Unable to read file information"
-                return
+            } else {
+                errorMessage = "Failed to select and copy document."
             }
-            
-            selectedDocument = url
-            errorMessage = nil
             
         case .failure(let error):
             errorMessage = "Failed to select document: \(error.localizedDescription)"
