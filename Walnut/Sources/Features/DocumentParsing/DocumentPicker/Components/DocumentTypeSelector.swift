@@ -11,14 +11,16 @@ import WalnutDesignSystem
 
 struct DocumentTypeSelector: View {
     
-    @Environment(DocumentPickerStore.self) private var store
+    private var store: DocumentPickerStore
+    
+    init(store: DocumentPickerStore) {
+        self.store = store
+    }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Spacing.medium) {
             
-            Text("Select a document Type")
-                .font(.headline)
-                .foregroundColor(.primary)
+            HealthCardHeader(title: "Select a Document Type")
             
             LazyVGrid(
                 columns: [
@@ -49,6 +51,7 @@ struct DocumentTypeSelector: View {
                 }
             }
         }
+        .padding(.horizontal, Spacing.medium)
     }
     
 }
@@ -56,27 +59,7 @@ struct DocumentTypeSelector: View {
 // MARK: - Preview
 
 #Preview("Multiple Types") {
-    @Previewable
-    @State var store = DocumentPickerStore.forAllDocuments()
-    
-    VStack {
-        DocumentTypeSelector()
-            .environment(store)
-            .padding()
-        
-        Spacer()
-    }
-}
-
-#Preview("Single Type") {
-    @Previewable
-    @State var store = DocumentPickerStore.forAllDocuments()
-    
-    VStack {
-        DocumentTypeSelector()
-            .environment(store)
-            .padding()
-        
-        Spacer()
-    }
+    DocumentTypeSelector(
+        store: DocumentPickerStore.forAllDocuments()
+    )
 }

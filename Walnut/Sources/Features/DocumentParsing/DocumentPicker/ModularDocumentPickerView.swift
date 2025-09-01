@@ -9,53 +9,35 @@
 import SwiftUI
 import SwiftData
 import AIKit
+import WalnutDesignSystem
 
 struct ModularDocumentPickerView: View {
     
     // MARK: - Configuration
-    
     let medicalCase: MedicalCase
-    let allowedDocumentTypes: [DocumentType]
     
     // MARK: - Environment
-    
     @Environment(\.dismiss) private var dismiss
-    private var modelContext: ModelContext
-    
-    // MARK: - State
-    
     @State private var store: DocumentPickerStore
     @State private var processingService: DocumentProcessingService
+    // MARK: - State
+
     @State private var showingProcessingStatus = false
-    
-    // MARK: - Initialization
     
     init(
         medicalCase: MedicalCase,
-        allowedDocumentTypes: [DocumentType] = DocumentType.allCases,
-        modelContext: ModelContext
+        store: DocumentPickerStore,
+        processingService: DocumentProcessingService,
     ) {
         self.medicalCase = medicalCase
-        self.allowedDocumentTypes = allowedDocumentTypes
-        self.modelContext = modelContext
-        
-        self._store = State(initialValue: DocumentPickerStore(
-            documentTypes: allowedDocumentTypes,
-            defaultDocumentType: allowedDocumentTypes.first ?? .prescription
-        ))
-        self.processingService = DocumentProcessingService.createWithAIKit(
-            modelContext: modelContext
-        )
+        self.store = store
+        self.processingService = processingService
     }
     
     // MARK: - Body
     var body: some View {
         NavigationView {
-            VStack(spacing: 24) {
-                // Document Type Selection
-                DocumentTypeSelector()
-                    .environment(store)
-                    .padding(.horizontal)
+            VStack(alignment: .leading, spacing: Spacing.large) {
                 
                 if showingProcessingStatus {
                     DocumentProcessingStatusView(
@@ -141,3 +123,4 @@ struct ModularDocumentPickerView: View {
         }
     }
 }
+

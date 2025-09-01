@@ -23,9 +23,6 @@ struct DocumentProcessingStatusView: View {
     var body: some View {
         VStack(spacing: 24) {
             
-            // Progress indicator
-            
-            
             if isProcessing {
                 VStack(spacing: 12) {
                     Image(systemName: "square.and.arrow.up.fill")
@@ -52,9 +49,7 @@ struct DocumentProcessingStatusView: View {
             ProgressView(value: processingProgress)
                 .progressViewStyle(LinearProgressViewStyle())
                 .frame(maxWidth: 200)
-            
-            Spacer()
-            
+                        
             // Error handling
             if let error = lastError {
                 VStack(spacing: 12) {

@@ -17,34 +17,23 @@ struct DocumentTypeButton: View {
     var body: some View {
         HStack(spacing: Spacing.small) {
             // Icon with enhanced styling
-            ZStack {
-                Circle()
-                    .fill(iconBackgroundColor)
-                    .frame(width: 36, height: 36)
-                    .shadow(
-                        color: isSelected ? type.color.opacity(0.3) : .clear,
-                        radius: 4,
-                        x: 0,
-                        y: 2
-                    )
-                
-                Image(systemName: type.typeIcon)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(iconColor)
-            }
+            
+            Image(type.iconImage)
+                .resizable()
+                .frame(width: 36, height: 36)
             
             VStack(alignment: .leading) {
                 Text(type.displayName)
-                    .font(.caption.weight(isSelected ? .semibold : .medium))
+                    .font(.subheadline.weight(isSelected ? .semibold : .medium))
                     .foregroundStyle(textColor)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                 
                 Text(type.subtitle)
-                    .font(.caption2)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
-                    .multilineTextAlignment(.center)
+                    .multilineTextAlignment(.leading)
                     .minimumScaleFactor(0.8)
             }
         }
@@ -105,16 +94,6 @@ struct DocumentTypeButton: View {
 }
 
 #Preview("Waterfall Grid Layout") {
-    VStack(alignment: .leading, spacing: Spacing.medium) {
-        Text("Select Document Types")
-            .font(.title2.weight(.bold))
-            .foregroundStyle(.primary)
-        
-        Text("Flexible waterfall grid layout")
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-    }
-    
     // Waterfall grid layout using LazyVGrid
     LazyVGrid(
         columns: [

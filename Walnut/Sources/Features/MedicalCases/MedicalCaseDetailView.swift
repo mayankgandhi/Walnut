@@ -11,6 +11,7 @@ import WalnutDesignSystem
 
 struct MedicalCaseDetailView: View {
     
+    @Environment(\.modelContext) var modelContext
     let medicalCase: MedicalCase
     
     var body: some View {
@@ -32,7 +33,10 @@ struct MedicalCaseDetailView: View {
                 MedicalCaseTimeline(medicalCase: medicalCase)
                 
                 // Unified Documents Section (unchanged)
-                UnifiedDocumentsSection(medicalCase: medicalCase)
+                UnifiedDocumentsSection(
+                    modelContext: modelContext,
+                    medicalCase: medicalCase
+                )
             }
             .padding(.horizontal, Spacing.medium)
             .padding(.vertical, Spacing.small)

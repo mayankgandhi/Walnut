@@ -15,9 +15,7 @@ import SwiftUI
     case labResult = "lab result"
     case unknown
     case invoice
-    case discharge = "discharge summary"
     case imaging = "imaging report"
-    case consultation = "consultation notes"
     case vaccination = "vaccination record"
     case insurance = "insurance document"
     
@@ -31,16 +29,31 @@ import SwiftUI
             return "Doc"
         case .invoice:
             return "Bill"
-        case .discharge:
-            return "Discharge Summary"
         case .imaging:
             return "Imaging"
-        case .consultation:
-            return "Consultation"
         case .vaccination:
             return "Vaccination"
         case .insurance:
             return "Insurance"
+        }
+    }
+    
+    public var iconImage: String {
+        switch self {
+        case .prescription:
+            "prescription"
+        case .labResult:
+            "labresult"
+        case .unknown:
+            "document"
+        case .invoice:
+            "invoice"
+        case .imaging:
+            "imaging"
+        case .vaccination:
+            "vaccine"
+        case .insurance:
+            "insurance"
         }
     }
     
@@ -54,12 +67,8 @@ import SwiftUI
             return "doc.fill"
         case .invoice:
             return "dollarsign.square.fill"
-        case .discharge:
-            return "doc.text.fill"
         case .imaging:
             return "xray"
-        case .consultation:
-            return "stethoscope"
         case .vaccination:
             return "syringe.fill"
         case .insurance:
@@ -77,12 +86,8 @@ import SwiftUI
             return .gray
         case .invoice:
             return .green
-        case .discharge:
-            return .orange
         case .imaging:
             return .purple
-        case .consultation:
-            return .teal
         case .vaccination:
             return .mint
         case .insurance:
@@ -100,12 +105,8 @@ import SwiftUI
             return .gray
         case .invoice:
             return .green
-        case .discharge:
-            return .orange
         case .imaging:
             return .purple
-        case .consultation:
-            return .teal
         case .vaccination:
             return .mint
         case .insurance:
@@ -116,19 +117,15 @@ import SwiftUI
     public var subtitle: String {
         switch self {
         case .prescription:
-            return "Medications & dosages"
+            return "Medications & dosages, Doctor visit notes"
         case .labResult:
             return "Blood tests & analysis"
         case .unknown:
             return "General documents"
         case .invoice:
             return "Bills & payments"
-        case .discharge:
-            return "Hospital summary"
         case .imaging:
             return "X-rays, MRI, CT scans"
-        case .consultation:
-            return "Doctor visit notes"
         case .vaccination:
             return "Immunization records"
         case .insurance:
@@ -146,12 +143,8 @@ import SwiftUI
             return "medical document"
         case .invoice:
             return "medical bill"
-        case .discharge:
-            return "discharge summary"
         case .imaging:
             return "imaging report"
-        case .consultation:
-            return "consultation notes"
         case .vaccination:
             return "vaccination record"
         case .insurance:
@@ -177,16 +170,13 @@ import SwiftUI
         switch lowercased {
         case "lab result", "blood work", "lab", "laboratory", "test results", "blood test":
             self = .labResult
-        case "prescription", "rx", "medication", "medicine", "drug", "pills":
+        case "prescription", "rx", "medication", "medicine", "drug", "pills", "discharge summary", "discharge", "summary", "hospital discharge",
+            "consultation notes", "consultation", "notes", "visit notes", "doctor notes", "clinical notes":
             self = .prescription
         case "invoice", "bill", "billing", "payment", "receipt", "medical bill":
             self = .invoice
-        case "discharge summary", "discharge", "summary", "hospital discharge":
-            self = .discharge
         case "imaging report", "imaging", "x-ray", "xray", "mri", "ct scan", "ultrasound", "radiology":
             self = .imaging
-        case "consultation notes", "consultation", "notes", "visit notes", "doctor notes", "clinical notes":
-            self = .consultation
         case "vaccination record", "vaccination", "vaccine", "immunization", "shot record":
             self = .vaccination
         case "insurance document", "insurance", "insurance card", "coverage", "policy":

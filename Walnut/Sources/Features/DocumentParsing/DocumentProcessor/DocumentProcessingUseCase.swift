@@ -114,14 +114,12 @@ struct DocumentProcessingUseCase {
             } catch {
                 // Step 4: If parsing fails, save as unparsed document
                 await updateProgress(0.6, "Parsing failed, saving as unparsed document...")
+                
                 let modelId = try await saveUnparsedDocument(
                     tempFileURL: tempFileURL!,
                     medicalCase: medicalCase,
                     documentType: selectedDocumentType
                 )
-                
-                // Step 5: Complete
-                await updateProgress(0.9, "Finalizing...")
                 
                 await updateProgress(1.0, "Document saved as unparsed!")
                 

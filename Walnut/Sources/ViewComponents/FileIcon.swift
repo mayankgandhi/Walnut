@@ -166,12 +166,6 @@ public enum FileIconSize {
                     size: .large
                 )
                 
-                FileIcon(
-                    filename: "Consultation Notes",
-                    subtitle: "Medium size (default)",
-                    documentType: .consultation,
-                    size: .medium
-                )
                 
                 FileIcon(
                     filename: "Insurance Card",

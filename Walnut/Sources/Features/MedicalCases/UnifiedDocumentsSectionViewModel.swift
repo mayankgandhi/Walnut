@@ -16,8 +16,10 @@ class UnifiedDocumentsSectionViewModel {
     // MARK: - Published Properties
     var isLoading = false
     var error: Error?
-    var showAddDocument = false
     var navigationState = NavigationState()
+    
+    var showHealthRecordSelector: Bool = false
+    var showModularDocumentPicker: Bool = false
     
     // MARK: - Cached Properties
     private var _allDocuments: [DocumentItem] = []
@@ -171,7 +173,7 @@ class UnifiedDocumentsSectionViewModel {
     }
     
     func showAddDocumentSheet() {
-        showAddDocument = true
+        showHealthRecordSelector = true
     }
     
     // MARK: - Private Methods

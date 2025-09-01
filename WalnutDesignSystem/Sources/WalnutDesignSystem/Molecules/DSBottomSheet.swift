@@ -13,7 +13,7 @@ public struct DSBottomSheet<Content: View>: View {
     
     // MARK: - Properties
     
-    let title: String
+    let title: String?
     let subtitle: String?
     let onDismiss: () -> Void
     let content: () -> Content
@@ -27,7 +27,7 @@ public struct DSBottomSheet<Content: View>: View {
     ///   - onDismiss: Action to perform when dismiss button is tapped
     ///   - content: The main content of the bottom sheet
     public init(
-        title: String,
+        title: String? = nil,
         subtitle: String? = nil,
         onDismiss: @escaping () -> Void,
         @ViewBuilder content: @escaping () -> Content
@@ -43,15 +43,30 @@ public struct DSBottomSheet<Content: View>: View {
     public var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: Spacing.large) {
+                VStack(spacing: Spacing.medium) {
+                    if let title = title {
+                        // Header section with title and subtitle
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text(title)
+                                .font(.title2.weight(.bold))
+                                .foregroundStyle(.primary)
+                                .multilineTextAlignment(.leading)
+                            
+                            if let subtitle = subtitle {
+                                Text(subtitle)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                    .multilineTextAlignment(.leading)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    
                     content()
                 }
                 .padding(.horizontal, Spacing.medium)
-                .padding(.bottom, Spacing.large)
+                .padding(.bottom, Spacing.medium)
             }
-            .background(Color(UIColor.systemGroupedBackground))
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Dismiss") {
@@ -61,44 +76,10 @@ public struct DSBottomSheet<Content: View>: View {
                     .foregroundStyle(Color.healthPrimary)
                 }
             }
-            .safeAreaInset(edge: .top) {
-                // Drag indicator and header section
-                VStack(spacing: Spacing.small) {
-                    // Drag indicator
-                    Capsule()
-                        .fill(Color.secondary.opacity(0.3))
-                        .frame(width: 36, height: 5)
-                        .padding(.top, Spacing.xs)
-                    
-                    // Header section with title and subtitle
-                    if let subtitle = subtitle {
-                        VStack(spacing: Spacing.xs) {
-                            Text(title)
-                                .font(.title2.weight(.bold))
-                                .foregroundStyle(.primary)
-                                .multilineTextAlignment(.center)
-                            
-                            Text(subtitle)
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                                .multilineTextAlignment(.center)
-                        }
-                        .padding(.horizontal, Spacing.medium)
-                        .padding(.bottom, Spacing.small)
-                    }
-                    
-                    // Divider
-                    if subtitle != nil {
-                        Divider()
-                            .padding(.horizontal, Spacing.medium)
-                    }
-                }
-                .background(Color(UIColor.systemBackground))
-            }
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.hidden) // We provide our own
-        .presentationCornerRadius(16)
+        .presentationCornerRadius(Spacing.large)
         .interactiveDismissDisabled(false)
     }
 }

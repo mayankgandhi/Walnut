@@ -8,14 +8,30 @@
 
 import SwiftUI
 import WalnutDesignSystem
+import SwiftData
 
 struct UnifiedDocumentsSection: View {
     
-    @Environment(\.modelContext) private var modelContext
-    
+    private var modelContext: ModelContext
     let medicalCase: MedicalCase
-    
+    @State private var store: DocumentPickerStore
+    @State private var processingService: DocumentProcessingService
+   
     @State private var viewModel = UnifiedDocumentsSectionViewModel()
+    
+    init(
+        modelContext: ModelContext,
+        medicalCase: MedicalCase,
+        viewModel: UnifiedDocumentsSectionViewModel = UnifiedDocumentsSectionViewModel()
+    ) {
+        self.modelContext = modelContext
+        self.medicalCase = medicalCase
+        self._store = State(initialValue: DocumentPickerStore())
+        self.processingService = DocumentProcessingService.createWithAIKit(
+            modelContext: modelContext
+        )
+        self.viewModel = viewModel
+    }
     
     var body: some View {
         VStack(
@@ -43,12 +59,32 @@ struct UnifiedDocumentsSection: View {
             .animation(.easeInOut(duration: 0.3), value: viewModel.isLoading)
             .animation(.easeInOut(duration: 0.3), value: viewModel.isEmpty)
         }
-        .sheet(isPresented: $viewModel.showAddDocument) {
-            ModularDocumentPickerView(
-                medicalCase: medicalCase,
-                modelContext: modelContext
-            )
-        }
+        .sheet(
+            isPresented: $viewModel.showHealthRecordSelector,
+            onDismiss: {
+                viewModel.showHealthRecordSelector = false
+            },
+            content: {
+                HealthRecordSelectorBottomSheet(
+                    medicalCase: medicalCase,
+                    store: store,
+                    showModularDocumentPicker: $viewModel.showModularDocumentPicker
+                )
+            }
+        )
+        .sheet(
+            isPresented: $viewModel.showModularDocumentPicker,
+            onDismiss: {
+                viewModel.showModularDocumentPicker = false
+            },
+            content: {
+                ModularDocumentPickerView(
+                    medicalCase: medicalCase,
+                    store: store,
+                    processingService: processingService
+                )
+            }
+        )
         .navigationDestination(item: $viewModel.navigationState.selectedPrescription) { prescription in
             PrescriptionDetailView(prescription: prescription)
         }
@@ -133,8 +169,3 @@ struct UnifiedDocumentsSection: View {
     
 }
 
-#Preview {
-    UnifiedDocumentsSection(medicalCase: .sampleCase)
-        .padding(Spacing.medium)
-    
-}

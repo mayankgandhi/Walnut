@@ -55,12 +55,11 @@ class DocumentPickerStore {
         documentTypes: [DocumentType] = DocumentType.allCases,
         supportedFileTypes: [UTType] = [.pdf, .jpeg, .png],
         maxFileSizeMB: Int = 50,
-        defaultDocumentType: DocumentType = .prescription
     ) {
         self.availableDocumentTypes = documentTypes
         self.supportedFileTypes = supportedFileTypes
         self.maxFileSizeMB = maxFileSizeMB
-        self.selectedDocumentType = defaultDocumentType
+        self.selectedDocumentType = nil
     }
     
     // MARK: - Public Actions
@@ -191,8 +190,7 @@ class DocumentPickerStore {
 extension DocumentPickerStore {
     static func forAllDocuments() -> DocumentPickerStore {
         DocumentPickerStore(
-            documentTypes: DocumentType.allCases,
-            defaultDocumentType: .prescription
+            documentTypes: DocumentType.allCases
         )
     }
 }
