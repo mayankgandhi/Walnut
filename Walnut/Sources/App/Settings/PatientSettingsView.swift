@@ -34,11 +34,6 @@ struct PatientSettingsView: View {
                     items: viewModel.getAppSettingsItems()
                 )
                 
-                // Export Progress (if exporting)
-                if viewModel.isExporting {
-                    exportProgressView
-                }
-                
                 Spacer(minLength: Spacing.xl)
             }
             .padding(.horizontal, Spacing.medium)
@@ -60,14 +55,13 @@ struct PatientSettingsView: View {
         .sheet(isPresented: $viewModel.showICloudSync, onDismiss: {
             viewModel.dismissICloudSync()
         }) {
-            iCloudSyncSettingsView()
-        }
-        .alert("Export Complete", isPresented: $viewModel.exportCompleted) {
-            Button("OK") {
-                viewModel.resetExportState()
+            DSBottomSheet(title: "iCloud Sync"){
+                iCloudSyncBottomSheetContent
+            } content: {
+                iCloudSyncSettingsView()
             }
-        } message: {
-            Text("Patient data has been successfully exported.")
+            .presentationDetents([.height(600), .large])
+            .presentationDragIndicator(.visible)
         }
         .alert("Error", isPresented: $viewModel.showErrorAlert) {
             Button("OK") {
@@ -104,26 +98,21 @@ struct PatientSettingsView: View {
         }
     }
     
-    private var exportProgressView: some View {
+    private var iCloudSyncBottomSheetContent: some View {
         VStack(spacing: Spacing.medium) {
-            Text("Exporting Data...")
-                .font(.headline)
-                .foregroundStyle(.secondary)
-            
-            ProgressView(value: viewModel.exportProgress)
-                .progressViewStyle(LinearProgressViewStyle())
-                .scaleEffect(1.2)
-            
-            Text("\(Int(viewModel.exportProgress * 100))%")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            // Header
+            VStack(spacing: Spacing.xs) {
+                Text("iCloud Sync")
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(.primary)
+                
+                Text("Keep your medical data synchronized across all your devices")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.top, Spacing.small)
         }
-        .padding(Spacing.medium)
-        .background(
-            RoundedRectangle(cornerRadius: Spacing.medium)
-                .fill(.regularMaterial)
-        )
-        .padding(.horizontal, Spacing.medium)
     }
 }
 

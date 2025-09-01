@@ -29,14 +29,6 @@ class PatientSettingsViewModel {
     var error: Error?
     var showErrorAlert = false
     
-    // Export Progress
-    var isExporting = false
-    var exportProgress: Double = 0.0
-    var exportCompleted = false
-    
-    // iCloud Sync
-    var iCloudSyncService = iCloudSyncService()
-    
     // MARK: - Private Properties
     let patient: Patient
     private let modelContext: ModelContext?
@@ -104,46 +96,6 @@ class PatientSettingsViewModel {
         showICloudSync = false
     }
     
-    // MARK: - Data Operations
-    
-    @MainActor
-    func exportPatientData() async {
-        guard !isExporting else { return }
-        
-        isExporting = true
-        exportProgress = 0.0
-        error = nil
-        
-        do {
-            // Simulate export process with progress updates
-            for progress in stride(from: 0.0, through: 1.0, by: 0.1) {
-                exportProgress = progress
-                try await Task.sleep(for: .milliseconds(200))
-            }
-            
-            // TODO: Implement actual export functionality
-            // This would involve:
-            // 1. Gathering patient data from medical cases
-            // 2. Formatting data (PDF, JSON, etc.)
-            // 3. Presenting share sheet or saving to files
-            
-            exportCompleted = true
-            exportProgress = 1.0
-            
-        } catch {
-            self.error = error
-            showErrorAlert = true
-        }
-        
-        isExporting = false
-    }
-    
-    func resetExportState() {
-        exportCompleted = false
-        exportProgress = 0.0
-        isExporting = false
-    }
-    
     // MARK: - Settings Menu Items
     
     func getPatientSettingsItems() -> [SettingsMenuItem] {
@@ -166,17 +118,7 @@ class PatientSettingsViewModel {
                     self?.showNotifications()
                 }
             ),
-            SettingsMenuItem(
-                icon: "doc.fill",
-                title: "Export Data",
-                subtitle: "Export medical records",
-                iconColor: .blue,
-                action: { [weak self] in
-                    Task {
-                        await self?.exportPatientData()
-                    }
-                }
-            ),
+           
             SettingsMenuItem(
                 icon: "shield.fill",
                 title: "Privacy & Security",
@@ -191,15 +133,6 @@ class PatientSettingsViewModel {
     
     func getAppSettingsItems() -> [SettingsMenuItem] {
         return [
-            SettingsMenuItem(
-                icon: "icloud.fill",
-                title: "iCloud Sync",
-                subtitle: iCloudSyncService.isEnabled ? "Enabled - \(iCloudSyncService.syncStatus.displayText)" : "Keep your data in sync across devices",
-                iconColor: .blue,
-                action: { [weak self] in
-                    self?.showICloudSyncScreen()
-                }
-            ),
             SettingsMenuItem(
                 icon: "paintbrush.fill",
                 title: "Appearance",

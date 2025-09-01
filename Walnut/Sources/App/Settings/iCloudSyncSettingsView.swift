@@ -86,10 +86,10 @@ struct iCloudSyncSettingsView: View {
                     
                     if syncService.isAccountAvailable {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.healthSuccess)
+                            .foregroundStyle(Color.healthSuccess)
                     } else {
                         Image(systemName: "exclamationmark.circle.fill")
-                            .foregroundStyle(.healthError)
+                            .foregroundStyle(Color.healthError)
                     }
                 }
                 
@@ -149,7 +149,7 @@ struct iCloudSyncSettingsView: View {
                     showStatusView = true
                 }
                 .font(.subheadline)
-                .foregroundStyle(.healthPrimary)
+                .foregroundStyle(Color.healthPrimary)
             }
             
             HealthCard {
@@ -272,7 +272,7 @@ struct iCloudSyncSettingsView: View {
         HStack(spacing: Spacing.medium) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundStyle(.healthPrimary)
+                .foregroundStyle(Color.healthPrimary)
                 .frame(width: 24, height: 24)
             
             VStack(alignment: .leading, spacing: Spacing.xs) {

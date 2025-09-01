@@ -22,7 +22,7 @@ struct iCloudSyncStatusView: View {
                     VStack(spacing: Spacing.medium) {
                         Image(systemName: "icloud")
                             .font(.system(size: 48, weight: .light))
-                            .foregroundStyle(.healthPrimary)
+                            .foregroundStyle(Color.healthPrimary)
                         
                         Text("Sync Status")
                             .font(.largeTitle.weight(.bold))
@@ -140,11 +140,11 @@ struct iCloudSyncStatusView: View {
             if let errorMessage = syncService.errorMessage {
                 HStack {
                     Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.healthError)
+                        .foregroundStyle(Color.healthError)
                     
                     Text(errorMessage)
                         .font(.caption)
-                        .foregroundStyle(.healthError)
+                        .foregroundStyle(Color.healthError)
                     
                     Spacer()
                 }
