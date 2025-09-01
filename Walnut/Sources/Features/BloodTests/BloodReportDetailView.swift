@@ -44,10 +44,8 @@ struct BloodReportDetailView: View {
                         viewButtonText: "View Report"
                     )
                 }
-                
             }
             .padding(.horizontal, Spacing.medium)
-
         }
     }
     

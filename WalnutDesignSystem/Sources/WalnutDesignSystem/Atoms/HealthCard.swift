@@ -27,33 +27,6 @@ public struct HealthCard<Content: View>: View {
     }
 }
 
-/// Patient avatar component
-public struct PatientAvatar: View {
-    private let name: String
-    private let color: Color
-    private let size: CGFloat
-    
-    public init(
-        name: String,
-        color: Color = .healthPrimary,
-        size: CGFloat = Size.avatarMedium
-    ) {
-        self.name = name
-        self.color = color
-        self.size = size
-    }
-    
-    public var body: some View {
-        Circle()
-            .fill(color.opacity(0.2))
-            .overlay(
-                Text(name.prefix(2))
-                    .font(.headline.weight(.semibold))
-                    .foregroundStyle(color)
-            )
-            .frame(width: size, height: size)
-    }
-}
 
 // MARK: - Preview
 

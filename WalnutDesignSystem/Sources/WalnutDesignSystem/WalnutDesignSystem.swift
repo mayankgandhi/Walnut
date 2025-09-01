@@ -29,17 +29,8 @@ import SwiftUI
 /// - Performance: Lightweight, native animations
 /// - Modern iOS: iOS 17+ patterns with native materials
 /// 
-/// Usage:
-/// ```swift
-/// import WalnutDesignSystem
-/// 
-/// // Use individual components
-/// GlucoseCard(value: "3.2", unit: "mmol/L", status: "Normal")
-/// DSButton("Save", style: .primary) { /* action */ }
-/// 
-/// // Or use complete dashboard
-/// HealthDashboard()
-/// ```
+
+
 //public struct WalnutDesignSystem {
 //    public static let version = "1.0.0"
 //    

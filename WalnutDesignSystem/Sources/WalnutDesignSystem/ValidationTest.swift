@@ -18,7 +18,6 @@ struct ValidationTest: View {
                 
                 PatientAvatar(name: "JD", size: Size.avatarMedium)
                             
-                
                 DSItemCard(
                     name: "Test Food",
                     calories: "250",
@@ -38,11 +37,6 @@ struct ValidationTest: View {
                     unit: "mmol/L",
                     status: "Perfect!"
                 )
-                
-                
-                // Test molecules
-                HealthDashboard()
-                    .frame(height: 400)
                 
                 // Test colors
                 HStack {

@@ -63,14 +63,7 @@ public struct ComponentShowcase: View {
 //                                    .fontWeight(.bold)
 //                                    .frame(maxWidth: .infinity, alignment: .leading)
 //                                
-//                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.medium), count: 3), spacing: Spacing.medium) {
-//                                    FolderIcon(caseType: .consultation, documentCount: 3)
-//                                    FolderIcon(caseType: .surgery, documentCount: 7)
-//                                    FolderIcon(caseType: .healthCheckup, documentCount: 0)
-//                                    FolderIcon(caseType: .immunisation, documentCount: 1)
-//                                    FolderIcon(caseType: .followUp, documentCount: 12)
-//                                    FolderIcon(caseType: .treatment, documentCount: 5)
-//                                }
+//                               
 //                                
 //                                Text("Document Files")
 //                                    .font(.title2)

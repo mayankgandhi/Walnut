@@ -1,5 +1,5 @@
 //
-//  StatusIndicator 2.swift
+//  HealthStatusIndicator.swift
 //  Walnut
 //
 //  Created by Mayank Gandhi on 01/09/25.
