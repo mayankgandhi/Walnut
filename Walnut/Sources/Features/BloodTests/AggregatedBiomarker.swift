@@ -36,12 +36,6 @@ struct AggregatedBiomarker: Identifiable, Hashable {
     let latestBloodReport: BloodReport
     let testCount: Int
     
-    enum HealthStatus: Int, CaseIterable {
-        case optimal = 0
-        case good = 1
-        case warning = 2
-        case critical = 3
-    }
     
     var currentNumericValue: Double {
         Double(currentValue) ?? 0.0

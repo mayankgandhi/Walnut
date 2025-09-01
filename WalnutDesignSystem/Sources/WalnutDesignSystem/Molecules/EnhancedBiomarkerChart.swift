@@ -226,4 +226,3 @@ public struct EnhancedBiomarkerChart: View {
         return value >= range.min && value <= range.max
     }
 }
-

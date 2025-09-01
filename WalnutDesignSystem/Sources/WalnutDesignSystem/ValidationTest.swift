@@ -17,9 +17,7 @@ struct ValidationTest: View {
                 DSButton("Test Button", style: .primary) {}
                 
                 PatientAvatar(name: "JD", size: Size.avatarMedium)
-                
-                StatusIndicator(status: .good)
-               
+                            
                 
                 DSItemCard(
                     name: "Test Food",

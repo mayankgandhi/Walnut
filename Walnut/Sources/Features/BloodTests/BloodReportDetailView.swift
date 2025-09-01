@@ -18,42 +18,39 @@ struct BloodReportDetailView: View {
     @State private var showAllTests = false
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: Spacing.medium) {
-                    // Enhanced Hero Header
-                    enhancedHeaderCard
-                    
-                    // Test Results Grid
-                    if !(bloodReport.testResults?.isEmpty ?? true) {
-                        enhancedTestResultsGrid
-                    } else {
-                        // Show empty state if no test results
-                        emptyTestResultsCard
-                    }
-                    
-                    // Enhanced Document & Metadata Section
-                    VStack(spacing: Spacing.large) {
-                        if bloodReport.notes != nil,
-                           !bloodReport.notes!.isEmpty {
-                            enhancedNotesCard
-                        }
-                        
-                        if bloodReport.document != nil {
-                            DocumentCard(
-                                document: bloodReport.document!,
-                                title: "Lab Report Document",
-                                viewButtonText: "View Report"
-                            )
-                        }
-                        
-                    }
+        ScrollView {
+            VStack(spacing: Spacing.large) {
+                // Enhanced Hero Header
+                enhancedHeaderCard
+                
+                // Test Results Grid
+                if !(bloodReport.testResults?.isEmpty ?? true) {
+                    enhancedTestResultsGrid
+                } else {
+                    // Show empty state if no test results
+                    emptyTestResultsCard
                 }
-                .padding(.horizontal, Spacing.medium)
+                
+                // Enhanced Document & Metadata Section
+                if bloodReport.notes != nil,
+                   !bloodReport.notes!.isEmpty {
+                    enhancedNotesCard
+                }
+                
+                if bloodReport.document != nil {
+                    DocumentCard(
+                        document: bloodReport.document!,
+                        title: "Lab Report Document",
+                        viewButtonText: "View Report"
+                    )
+                }
+                
             }
-            .navigationBarTitleDisplayMode(.inline)
+            .padding(.horizontal, Spacing.medium)
+
         }
     }
+    
     
     // MARK: - Enhanced Header Card
     private var enhancedHeaderCard: some View {
@@ -175,7 +172,7 @@ struct BloodReportDetailView: View {
                         .foregroundStyle(.primary)
                     
                     Text(
-                        "\(bloodReport.testResults?.count) biomarkers measured"
+                        "\(bloodReport.testResults?.count ?? 0) biomarkers measured"
                     )
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -183,9 +180,9 @@ struct BloodReportDetailView: View {
                 
                 Spacer()
                 
-                let abnormalCount = bloodReport.testResults?.filter{
+                let abnormalCount = bloodReport.testResults?.filter {
                     $0.isAbnormal ?? false
-                }.count
+                }.count ?? 0
                 if abnormalCount > 0 {
                     HStack(spacing: Spacing.xs) {
                         Circle()
@@ -204,68 +201,99 @@ struct BloodReportDetailView: View {
             }
             .padding(.horizontal, Spacing.small)
             
-            // Grid of BioMarker Items
-            ForEach(convertToBioMarkers(), id: \.id) { biomarker in
-                BioMarkerGridItemView(
-                    biomarker: biomarker
-                )
+            // Grid of Aggregated Biomarkers
+            LazyVGrid(columns: [
+                GridItem(.flexible())
+            ], spacing: Spacing.medium) {
+                ForEach(convertToAggregatedBiomarkers(), id: \.id) { biomarker in
+                    NavigationLink(destination: createBiomarkerDetailView(for: biomarker)) {
+                        BiomarkerListItemView(
+                            data: biomarker.historicalValues,
+                            color: biomarker.healthStatusColor,
+                            biomarkerInfo: BiomarkerInfo(
+                                name: biomarker.testName,
+                                description: biomarker.description,
+                                normalRange: biomarker.referenceRange,
+                                unit: biomarker.unit
+                            ),
+                            biomarkerTrends: BiomarkerTrends(
+                                currentValue: biomarker.currentNumericValue,
+                                currentValueText: biomarker.currentValue,
+                                comparisonText: biomarker.trendText,
+                                comparisonPercentage: biomarker.trendPercentage,
+                                trendDirection: biomarker.trendDirection,
+                                normalRange: biomarker.referenceRange
+                            )
+                        )
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
             }
+            .padding(.horizontal, Spacing.small)
         }
     }
     
-    // Convert BloodTestResult to BioMarker
-    private func convertToBioMarkers() -> [BioMarker] {
+    // Convert BloodTestResult to AggregatedBiomarker
+    private func convertToAggregatedBiomarkers() -> [AggregatedBiomarker] {
+        guard let testResults = bloodReport.testResults else { return [] }
         
-//        let biomarkers: [BioMarker?] = bloodReport.testResults.map { testResult in
-//            
-//            guard let testName = testResult.testName,
-//                  let value = testResult.value,
-//                  let unit = testResult.unit else {
-//                return nil
-//            }
-//            
-//            let healthStatus: HealthStatus? = testResult.isAbnormal ?? false ? .warning : .good
-//            
-//            return BioMarker(
-//                name: testName,
-//                currentValue: value,
-//                unit: unit,
-//                referenceRange: testResult.referenceRange,
-//                healthStatus: healthStatus,
-//                iconName: iconForTestName(testName),
-//                lastUpdated: bloodReport.resultDate
-//            )
-//        }
-//        
-//        return biomarkers.compactMap { $0 }
-        return []
+        let biomarkers: [AggregatedBiomarker?] = testResults.map { testResult in
+            guard let testName = testResult.testName,
+                  let value = testResult.value,
+                  let unit = testResult.unit else {
+                return nil
+            }
+            
+            let numericValue = Double(value) ?? 0.0
+            let healthStatus: HealthStatus = (testResult.isAbnormal ?? false) ? .warning : .good
+            
+            return AggregatedBiomarker(
+                id: UUID(),
+                testName: testName,
+                currentValue: value,
+                unit: unit,
+                referenceRange: testResult.referenceRange ?? "N/A",
+                category: bloodReport.category ?? "General",
+                latestDate: bloodReport.resultDate ?? Date(),
+                historicalValues: [numericValue], // Single value for this report
+                healthStatus: healthStatus,
+                trendDirection: .stable, // No trend available for single report
+                trendText: "--",
+                trendPercentage: "--",
+                latestBloodReport: bloodReport,
+                testCount: 1
+            )
+        }
+        
+        return biomarkers.compactMap { $0 }
     }
     
-    // Helper function to get appropriate icon for test name
-    private func iconForTestName(_ testName: String) -> String {
-        let name = testName.lowercased()
+    // Helper function to create BiomarkerDetailView with proper DataPoint conversion
+    private func createBiomarkerDetailView(for biomarker: AggregatedBiomarker) -> some View {
+        let dataPoints = biomarker.historicalValues.enumerated().map { index, value in
+            DataPoint(
+                date: Calendar.current.date(byAdding: .day, value: -index, to: biomarker.latestDate) ?? biomarker.latestDate,
+                value: value,
+                isAbnormal: biomarker.healthStatus == .warning || biomarker.healthStatus == .critical,
+                bloodReport: biomarker.latestBloodReport.labName ?? "Lab Report"
+            )
+        }.reversed()
         
-        if name.contains("hemoglobin") || name.contains("hematocrit") || name.contains("rbc") || name.contains("red blood") {
-            return "drop.fill"
-        } else if name.contains("wbc") || name.contains("white blood") || name.contains("neutrophil") || name.contains("lymphocyte") {
-            return "shield.fill"
-        } else if name.contains("platelet") || name.contains("plt") {
-            return "circle.dotted"
-        } else if name.contains("glucose") || name.contains("sugar") {
-            return "cube.fill"
-        } else if name.contains("cholesterol") || name.contains("hdl") || name.contains("ldl") || name.contains("triglyceride") {
-            return "heart.fill"
-        } else if name.contains("liver") || name.contains("alt") || name.contains("ast") || name.contains("bilirubin") {
-            return "rectangle.fill"
-        } else if name.contains("kidney") || name.contains("creatinine") || name.contains("urea") || name.contains("bun") {
-            return "oval.fill"
-        } else if name.contains("thyroid") || name.contains("tsh") || name.contains("t3") || name.contains("t4") {
-            return "bolt.fill"
-        } else if name.contains("pressure") || name.contains("bp") {
-            return "waveform.path.ecg"
-        } else {
-            return "testtube.2"
-        }
+        return BiomarkerDetailView(
+            biomarkerName: biomarker.testName,
+            unit: biomarker.unit,
+            normalRange: biomarker.referenceRange,
+            description: biomarker.description,
+            dataPoints: Array(dataPoints).map { point in
+                BiomarkerDetailView.BiomarkerDataPoint(
+                    date: point.date,
+                    value: point.value,
+                    isAbnormal: point.isAbnormal,
+                    bloodReport: point.bloodReport
+                )
+            },
+            color: biomarker.healthStatusColor
+        )
     }
     
     // Empty Test Results Card

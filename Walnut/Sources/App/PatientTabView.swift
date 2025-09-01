@@ -11,36 +11,49 @@ import WalnutDesignSystem
 
 struct PatientTabView: View {
     
+    @Environment(\.modelContext) private var modelContext
     let patient: Patient
     
     var body: some View {
         TabView {
-            Tab("Medications", systemImage: "pills.fill") {
+
+            Tab("Meds", systemImage: "pills.fill") {
                 NavigationStack {
                     MedicationsTrackerView(patient: patient)
                 }
             }
+
             
             Tab("Cases", systemImage: "document.on.document") {
                 NavigationStack {
-                    MedicalCasesView(patient: patient)
+                    MedicalCasesView(
+                        viewModel: MedicalCasesViewModel(
+                            patient: patient,
+                            modelContext: modelContext
+                        )
+                    )
                 }
             }
             
             Tab("Blood Tests", systemImage: "testtube.2") {
                 NavigationStack {
-                    BloodTestsView(patient: patient)
+                    BloodTestsView(
+                        viewModel: BloodTestsViewModel(
+                            patient: patient,
+                            modelContext: modelContext
+                        )
+                    )
                 }
             }
             
-            Tab("Settings", systemImage: "gear") {
+            Tab("Account", systemImage: "person.2.badge.gearshape.fill") {
                 NavigationStack {
                     PatientSettingsView(patient: patient)
                 }
             }
+            
         }
-        .navigationTitle(patient.name ?? "")
-        .navigationBarTitleDisplayMode(.inline)
+        
     }
 }
 
@@ -48,4 +61,9 @@ struct PatientTabView: View {
     NavigationStack {
         PatientTabView(patient: .samplePatient)
     }
+}
+
+#Preview {
+    
+    
 }

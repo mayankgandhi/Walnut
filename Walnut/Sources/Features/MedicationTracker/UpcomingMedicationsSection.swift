@@ -84,7 +84,7 @@ struct UpcomingMedicationsSection: View {
     private var emptyStateView: some View {
         HealthCard {
             VStack(spacing: Spacing.medium) {
-                WalnutDesignSystem.StatusIndicator(status: HealthStatus.good, showIcon: true)
+                HealthStatusIndicator(status: HealthStatus.good, showIcon: true)
                     .scaleEffect(2.0)
                 
                 VStack(spacing: Spacing.xs) {

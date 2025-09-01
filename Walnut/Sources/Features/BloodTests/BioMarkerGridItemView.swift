@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import WalnutDesignSystem
 
 public struct BioMarkerGridItemView: View {
     let biomarker: BioMarker

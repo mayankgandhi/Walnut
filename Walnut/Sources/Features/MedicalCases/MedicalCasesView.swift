@@ -12,50 +12,11 @@ import WalnutDesignSystem
 
 struct MedicalCasesView: View {
     
-    @Environment(\.modelContext) private var modelContext
+    @State private var viewModel: MedicalCasesViewModel
     
-    @Query private var medicalCases: [MedicalCase]
-    
-    private let patient: Patient
-    
-    @State private var selectedCase: MedicalCase? = nil
-    @State private var searchText = ""
-    
-    @State private var showCreateView = false
-    @State private var caseToEdit: MedicalCase? = nil
-    @State private var showDeleteAlert = false
-    @State private var caseToDelete: MedicalCase? = nil
-    
-    init(patient: Patient) {
-        self.patient = patient
-        self._medicalCases = Query(
-            filter: MedicalCase.predicate(patientID: patient.id!),
-            sort: \.updatedAt,
-            order: .reverse
-        )
+    init(viewModel: MedicalCasesViewModel) {
+        self.viewModel = viewModel
     }
-    
-    // MARK: - Computed Properties
-    
-    private var filteredAndSortedCases: [MedicalCase] {
-        var cases = medicalCases
-        
-        // Apply search filter
-        if !searchText.isEmpty {
-            cases = cases.filter { medicalCase in
-                medicalCase.title?
-                    .localizedCaseInsensitiveContains(searchText) ?? false ||
-                medicalCase.notes?
-                    .localizedCaseInsensitiveContains(searchText) ?? false ||
-                medicalCase.patient?.name?
-                    .localizedCaseInsensitiveContains(searchText) ?? false
-            }
-        }
-        
-        return cases
-    }
-    
-    // MARK: - Subviews
     
     private var emptyStateView: some View {
         HealthCard {
@@ -74,7 +35,7 @@ struct MedicalCasesView: View {
                         .font(.title2.weight(.semibold))
                         .foregroundStyle(.primary)
                     
-                    Text(medicalCases.isEmpty ?
+                    Text(viewModel.isEmpty == true ?
                          "Create your first medical case to get started" :
                             "No cases match your search or filter criteria")
                     .font(.body)
@@ -82,9 +43,9 @@ struct MedicalCasesView: View {
                     .multilineTextAlignment(.center)
                 }
                 
-                if medicalCases.isEmpty {
+                if viewModel.isEmpty == true {
                     Button("Create Medical Case") {
-                        showCreateView = true
+                        viewModel.showCreateMedicalCase()
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
@@ -100,60 +61,96 @@ struct MedicalCasesView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if filteredAndSortedCases.isEmpty {
+                if viewModel.isLoading {
+                    loadingView
+                } else if !viewModel.hasFilteredResults {
                     emptyStateView
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                 } else {
-                    ScrollView {
-                        LazyVGrid(
-                            columns: [.init(), .init()],
-                            alignment: .leading,
-                            spacing: Spacing.xs
-                        ) {
-                            ForEach(filteredAndSortedCases) { medicalCase in
-                                Button {
-                                    selectedCase = medicalCase
-                                } label: {
-                                    MedicalCaseListItem(medicalCase: medicalCase)
-                                }
-                                .buttonStyle(.plain)
-                                .contextMenu {
-                                    contextMenuItems(for: medicalCase)
-                                }
-                            }
-                        }
-                    }
+                    medicalCasesList(viewModel: viewModel)
                 }
             }
             .navigationTitle("Medical Cases")
             .navigationBarTitleDisplayMode(.large)
-            .searchable(text: $searchText, prompt: "Search cases, patients, or notes")
+            .searchable(text: Binding(
+                get: { viewModel.searchText ?? "" },
+                set: { viewModel.updateSearchText($0) }
+            ), prompt: "Search cases, patients, or notes")
             .toolbar {
                 toolbarContent
             }
-            .navigationDestination(item: $selectedCase) { medicalCase in
-                MedicalCaseDetailView(
-                    medicalCase: medicalCase
-                )
+            .navigationDestination(item: $viewModel.selectedCase) { medicalCase in
+                MedicalCaseDetailView(medicalCase: medicalCase)
             }
-            .sheet(isPresented: $showCreateView, content: {
-                MedicalCaseEditor(patient: patient)
-            })
-            .sheet(item: $caseToEdit) { medicalCase in
+            .sheet(isPresented: $viewModel.showCreateView, onDismiss: {
+                viewModel.dismissCreateSheet()
+            }) {
+                MedicalCaseEditor(patient: viewModel.patient)
+            }
+            .sheet(item: $viewModel.caseToEdit, onDismiss: {
+                viewModel.dismissEditSheet()
+            }) { medicalCase in
                 MedicalCaseEditor(
                     medicalCase: medicalCase,
                     patient: medicalCase.patient
                 )
             }
-            .alert("Delete Medical Case", isPresented: $showDeleteAlert) {
-                Button("Cancel", role: .cancel) { }
+            .alert("Delete Medical Case", isPresented: $viewModel.showDeleteAlert) {
+                Button("Cancel", role: .cancel) {
+                    viewModel.cancelDelete()
+                }
                 Button("Delete", role: .destructive) {
-                    // TODO: Handle deletion
+                    Task {
+                        await viewModel.deleteCase()
+                    }
                 }
             } message: {
                 Text("Are you sure you want to delete this medical case? This action cannot be undone.")
             }
+            .task {
+                await viewModel.refreshData()
+            }
+            .refreshable {
+                await viewModel.refreshData()
+            }
+        }
+    }
+    
+    // MARK: - View Components
+    
+    private var loadingView: some View {
+        VStack(spacing: Spacing.medium) {
+            ProgressView()
+                .scaleEffect(1.2)
+            
+            Text("Loading medical cases...")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    private func medicalCasesList(viewModel: MedicalCasesViewModel) -> some View {
+        ScrollView {
+            LazyVGrid(
+                columns: [.init(), .init()],
+                alignment: .leading,
+                spacing: Spacing.xs
+            ) {
+                ForEach(viewModel.filteredAndSortedCases) { medicalCase in
+                    Button {
+                        viewModel.selectCase(medicalCase)
+                    } label: {
+                        MedicalCaseListItem(medicalCase: medicalCase)
+                    }
+                    .buttonStyle(.plain)
+                    .contextMenu {
+                        contextMenuItems(for: medicalCase, viewModel: viewModel)
+                    }
+                }
+            }
+            .padding(.horizontal, Spacing.medium)
         }
     }
     
@@ -163,34 +160,28 @@ struct MedicalCasesView: View {
     private var toolbarContent: some ToolbarContent {
         ToolbarItemGroup(placement: .primaryAction) {
             Button("Add Medical Case", systemImage: "plus") {
-                showCreateView = true
+                viewModel.showCreateMedicalCase()
             }
         }
     }
     
     @ViewBuilder
-    private func contextMenuItems(for medicalCase: MedicalCase) -> some View {
+    private func contextMenuItems(for medicalCase: MedicalCase, viewModel: MedicalCasesViewModel) -> some View {
         Button {
-            selectedCase = medicalCase
+            viewModel.selectCase(medicalCase)
         } label: {
             Label("View Details", systemImage: "doc.text")
         }
-        
         Button {
-            caseToEdit = medicalCase
+            viewModel.editCase(medicalCase)
         } label: {
             Label("Edit", systemImage: "pencil")
         }
-        
         Divider()
-        
         Button(role: .destructive) {
-            caseToDelete = medicalCase
-            showDeleteAlert = true
+            viewModel.confirmDeleteCase(medicalCase)
         } label: {
             Label("Delete", systemImage: "trash")
         }
     }
-    
-    
 }

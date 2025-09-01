@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Charts
+import WalnutDesignSystem
 
 /// Compact biomarker display component for list views
 public struct BiomarkerListItemView: View {

@@ -21,7 +21,7 @@ public struct FolderSpecialtyIcon: View {
             .resizable()
             .scaledToFit()
             .foregroundStyle(
-                type.foregroundColor
+                Color.healthPrimary.opacity(0.75)
             )
             .overlay {
                 Image(specialty.icon)
@@ -41,8 +41,26 @@ public struct FolderSpecialtyIcon: View {
             spacing: Spacing.xs
         ) {
             ForEach(MedicalSpecialty.allCases, id: \.rawValue) { specialty in
-                ForEach(MedicalCaseType.allCases, id: \.rawValue) { caseType in
-                    FolderSpecialtyIcon(specialty: specialty, type: caseType)
+                FolderSpecialtyIcon(specialty: specialty, type: .consultation)
+            }
+        }
+    }
+}
+
+#Preview {
+    ScrollView {
+        LazyVGrid(
+            columns: [.init(), .init(), .init()],
+            alignment: .leading,
+            spacing: Spacing.xs
+        ) {
+            ForEach(MedicalSpecialty.allCases, id: \.rawValue) { specialty in
+                VStack {
+                    Image(specialty.icon)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 60, height: 60, alignment: .bottom)
+                    Text(specialty.rawValue)
                 }
             }
         }

@@ -75,16 +75,11 @@ public struct PatientAvatar: View {
                         
                         Spacer()
                         
-                        StatusIndicator(status: .good)
                     }
                     
                     Divider()
                     
-                    HealthMetric(
-                        value: "120/80",
-                        unit: "mmHg",
-                        label: "Blood Pressure"
-                    )
+                  
                 }
             }
             

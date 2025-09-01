@@ -127,7 +127,7 @@ struct ActiveMedicationsSection: View {
                     
                     Spacer()
                     
-                    WalnutDesignSystem.StatusIndicator(status: .good, showIcon: false)
+                    HealthStatusIndicator(status: .good, showIcon: false)
                 }
                 
                 // Medications in this time period

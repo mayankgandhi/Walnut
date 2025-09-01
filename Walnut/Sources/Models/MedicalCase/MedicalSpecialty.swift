@@ -27,6 +27,7 @@ enum MedicalSpecialty: String, CaseIterable, Hashable, Codable, Sendable {
     case gynecologist = "Gynecologist"
     case rheumatologist = "Rheumatologist"
     case dentist = "Dentist"
+    case ent = "ENT"
     
     var icon: String {
         switch self {
@@ -55,13 +56,15 @@ enum MedicalSpecialty: String, CaseIterable, Hashable, Codable, Sendable {
         case .neurologist:
             return "neurologist"
         case .gynecologist:
-            return "gynecology"
+            return "gynacology"
         case .orthopedicSurgeon:
             return "orthopaedic"
         case .gastroenterologist:
             return "gastroenterelogist"
         case .psychiatrist:
             return "psychology"
+        case .ent:
+            return "ent"
         }
     }
     
@@ -99,6 +102,8 @@ enum MedicalSpecialty: String, CaseIterable, Hashable, Codable, Sendable {
             return .white
         case .generalPractitioner:
             return .blue
+        case .ent:
+            return .black
         }
     }
 }

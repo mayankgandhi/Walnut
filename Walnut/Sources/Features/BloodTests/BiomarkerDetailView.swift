@@ -8,10 +8,14 @@
 
 import SwiftUI
 import Charts
+import WalnutDesignSystem
 
 /// Full-screen biomarker detail view with chart and metrics
 public struct BiomarkerDetailView: View {
-    // Historical data model
+    
+    @State var viewModel: BiomarkerDetailViewModel
+    
+    // Historical data model - keeping for compatibility
     public struct BiomarkerDataPoint: Identifiable {
         public let id = UUID()
         public let date: Date
@@ -27,60 +31,31 @@ public struct BiomarkerDetailView: View {
         }
     }
     
-    // Time frame options
-    public enum TimeFrame: String, CaseIterable {
-        case oneMonth = "1M"
-        case threeMonths = "3M"
-        case sixMonths = "6M"
-        case oneYear = "1Y"
-        case all = "All"
-        
-        public var displayName: String {
-            switch self {
-            case .oneMonth: return "1 Month"
-            case .threeMonths: return "3 Months"
-            case .sixMonths: return "6 Months"
-            case .oneYear: return "1 Year"
-            case .all: return "All Time"
-            }
-        }
-        
-        public var dateRange: TimeInterval? {
-            switch self {
-            case .oneMonth: return 30 * 24 * 60 * 60
-            case .threeMonths: return 90 * 24 * 60 * 60
-            case .sixMonths: return 180 * 24 * 60 * 60
-            case .oneYear: return 365 * 24 * 60 * 60
-            case .all: return nil
-            }
-        }
-    }
-    
-    private let biomarkerName: String
-    private let unit: String
-    private let normalRange: String
-    private let description: String
-    private let dataPoints: [BiomarkerDataPoint]
-    private let color: Color
-    
-    @State private var animateChart = false
-    @State private var selectedDataPoint: BiomarkerDataPoint?
-    @State private var selectedTimeFrame: TimeFrame = .all
-    
     public init(
         biomarkerName: String,
         unit: String,
         normalRange: String,
         description: String,
         dataPoints: [BiomarkerDataPoint],
-        color: Color = .healthPrimary
+        color: Color = Color.healthPrimary
     ) {
-        self.biomarkerName = biomarkerName
-        self.unit = unit
-        self.normalRange = normalRange
-        self.description = description
-        self.dataPoints = dataPoints.sorted { $0.date < $1.date }
-        self.color = color
+        let vmDataPoints = dataPoints.map { point in
+            DataPoint(
+                date: point.date,
+                value: point.value,
+                isAbnormal: point.isAbnormal,
+                bloodReport: point.bloodReport
+            )
+        }
+        
+        self._viewModel = State(wrappedValue: BiomarkerDetailViewModel(
+            biomarkerName: biomarkerName,
+            unit: unit,
+            normalRange: normalRange,
+            description: description,
+            dataPoints: vmDataPoints,
+            color: color
+        ))
     }
     
     // Convenience initializer for BloodTestResults
@@ -89,44 +64,17 @@ public struct BiomarkerDetailView: View {
         bloodTestResults: [Any], // BloodTestResult array - using Any to avoid import issues
         color: Color = .healthPrimary
     ) {
-        self.biomarkerName = testName
-        self.unit = "" // Will be extracted from first result
-        self.normalRange = "" // Will be extracted from first result  
-        self.description = "Blood test biomarker for health monitoring"
-        self.dataPoints = [] // Will be populated from results
-        self.color = color
-        
-        // Note: In real implementation, would convert bloodTestResults to BiomarkerDataPoint
-        // This is a placeholder for the structure
+        // Note: In real implementation, would convert bloodTestResults to DataPoint
+        self._viewModel = State(wrappedValue: BiomarkerDetailViewModel(
+            biomarkerName: testName,
+            unit: "",
+            normalRange: "",
+            description: "Blood test biomarker for health monitoring",
+            dataPoints: [],
+            color: color
+        ))
     }
     
-    // Computed properties for filtered data
-    private var filteredDataPoints: [BiomarkerDataPoint] {
-        guard let timeRange = selectedTimeFrame.dateRange else {
-            return dataPoints
-        }
-        
-        let cutoffDate = Date().addingTimeInterval(-timeRange)
-        return dataPoints.filter { $0.date >= cutoffDate }
-    }
-    
-    private var currentValue: BiomarkerDataPoint? {
-        filteredDataPoints.last
-    }
-    
-    private var availableTimeFrames: [TimeFrame] {
-        guard let oldestDate = dataPoints.first?.date else { return [.all] }
-        
-        let daysSinceOldest = Calendar.current.dateComponents([.day], from: oldestDate, to: Date()).day ?? 0
-        
-        var frames: [TimeFrame] = [.all]
-        if daysSinceOldest >= 30 { frames.append(.oneMonth) }
-        if daysSinceOldest >= 90 { frames.append(.threeMonths) }
-        if daysSinceOldest >= 180 { frames.append(.sixMonths) }
-        if daysSinceOldest >= 365 { frames.append(.oneYear) }
-        
-        return frames.reversed()
-    }
     
     public var body: some View {
         ScrollView {
@@ -147,7 +95,7 @@ public struct BiomarkerDetailView: View {
                 informationSection
                 
                 // Historical data section
-                if filteredDataPoints.count > 1 {
+                if viewModel.filteredDataPoints.count > 1 {
                     historicalDataSection
                 }
             }
@@ -155,12 +103,10 @@ public struct BiomarkerDetailView: View {
             .padding(.bottom, Spacing.xl)
         }
         .background(Color(UIColor.systemGroupedBackground))
-        .navigationTitle(biomarkerName)
+        .navigationTitle(viewModel.biomarkerTitle)
         .navigationBarTitleDisplayMode(.large)
         .onAppear {
-            withAnimation(.easeInOut(duration: 1.0)) {
-                animateChart = true
-            }
+            viewModel.startChartAnimation()
         }
     }
     
@@ -176,7 +122,7 @@ public struct BiomarkerDetailView: View {
                             .foregroundStyle(.secondary)
                         
                         HStack(alignment: .center, spacing: Spacing.xs) {
-                            Text(currentValue?.value.formatted(.number.precision(.fractionLength(1))) ?? "--")
+                            Text(viewModel.formattedCurrentValue)
                                 .font(
                                     .system(
                                         .title,
@@ -184,10 +130,10 @@ public struct BiomarkerDetailView: View {
                                         weight: .black
                                     )
                                 )
-                                .foregroundStyle(color)
+                                .foregroundStyle(viewModel.primaryColor)
                                 .contentTransition(.numericText())
                             
-                            Text(unit)
+                            Text(viewModel.unitText)
                                 .font(
                                     .system(
                                         .subheadline,
@@ -204,33 +150,33 @@ public struct BiomarkerDetailView: View {
                     // Health status indicator
                     VStack(spacing: Spacing.xs) {
                         Circle()
-                            .fill(healthStatusColor)
+                            .fill(viewModel.healthStatusColor)
                             .frame(width: 24, height: 24)
                             .overlay {
-                                Image(systemName: healthStatusIcon)
+                                Image(systemName: viewModel.healthStatusIcon)
                                     .font(.caption.weight(.bold))
                                     .foregroundStyle(.white)
                             }
                         
-                        Text(healthStatusText)
+                        Text(viewModel.healthStatusText)
                             .font(.caption.weight(.semibold))
-                            .foregroundStyle(healthStatusColor)
+                            .foregroundStyle(viewModel.healthStatusColor)
                     }
                 }
                 
                 // Trend information
-                if let trendInfo = calculateTrend() {
+                if viewModel.filteredDataPoints.count >= 2 {
                     HStack {
                         HStack(spacing: Spacing.xs) {
-                            Image(systemName: trendInfo.direction.iconName)
+                            Image(systemName: viewModel.trendDirection.iconName)
                                 .font(.caption.weight(.medium))
-                                .foregroundStyle(trendInfo.direction.color)
+                                .foregroundStyle(viewModel.trendColor)
                             
-                            Text(trendInfo.changeText)
+                            Text(String(format: "%.1f", abs(viewModel.currentValue - (viewModel.filteredDataPoints.count >= 2 ? viewModel.filteredDataPoints[viewModel.filteredDataPoints.count - 2].value : 0))))
                                 .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(trendInfo.direction.color)
+                                .foregroundStyle(viewModel.trendColor)
                             
-                            Text("(\(trendInfo.percentageText))")
+                            Text("(\(viewModel.formattedTrendPercentage))")
                                 .font(.caption.weight(.medium))
                                 .foregroundStyle(.secondary)
                             
@@ -256,29 +202,29 @@ public struct BiomarkerDetailView: View {
                 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: Spacing.small) {
-                        ForEach(availableTimeFrames, id: \.self) { timeFrame in
+                        ForEach(viewModel.availableTimeFrames, id: \.self) { timeFrame in
                             Button(action: {
                                 withAnimation(.easeInOut(duration: 0.3)) {
-                                    selectedTimeFrame = timeFrame
+                                    viewModel.updateTimeFrame(timeFrame)
                                 }
                             }) {
                                 VStack(spacing: 2) {
                                     Text(timeFrame.rawValue)
                                         .font(.caption.weight(.semibold))
-                                        .foregroundStyle(selectedTimeFrame == timeFrame ? .white : color)
+                                        .foregroundStyle(viewModel.selectedTimeFrame == timeFrame ? .white : viewModel.primaryColor)
                                     
                                     Text(timeFrame.displayName)
                                         .font(.caption2)
-                                        .foregroundStyle(selectedTimeFrame == timeFrame ? .white.opacity(0.8) : .secondary)
+                                        .foregroundStyle(viewModel.selectedTimeFrame == timeFrame ? .white.opacity(0.8) : .secondary)
                                 }
                                 .padding(.horizontal, Spacing.small)
                                 .padding(.vertical, 6)
                                 .background(
                                     RoundedRectangle(cornerRadius: 6)
-                                        .fill(selectedTimeFrame == timeFrame ? color : Color.clear)
+                                        .fill(viewModel.selectedTimeFrame == timeFrame ? viewModel.primaryColor : Color.clear)
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 6)
-                                                .stroke(color.opacity(0.3), lineWidth: 1)
+                                                .stroke(viewModel.primaryColor.opacity(0.3), lineWidth: 1)
                                         )
                                 )
                             }
@@ -288,8 +234,8 @@ public struct BiomarkerDetailView: View {
                     .padding(.horizontal, 1)
                 }
                 
-                if !filteredDataPoints.isEmpty {
-                    Text("\(filteredDataPoints.count) readings")
+                if !viewModel.filteredDataPoints.isEmpty {
+                    Text("\(viewModel.filteredDataPoints.count) readings")
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                 }
@@ -308,7 +254,7 @@ public struct BiomarkerDetailView: View {
                             .font(.headline.weight(.bold))
                             .foregroundStyle(.primary)
                         
-                        Text("\(dataPoints.count) readings over time")
+                        Text("\(viewModel.filteredDataPoints.count) readings over time")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -328,7 +274,7 @@ public struct BiomarkerDetailView: View {
                         
                         HStack(spacing: 4) {
                             Circle()
-                                .fill(color)
+                                .fill(viewModel.primaryColor)
                                 .frame(width: 8, height: 8)
                             Text("Your Values")
                                 .font(.caption)
@@ -339,7 +285,7 @@ public struct BiomarkerDetailView: View {
                 
                 // Enhanced chart
                 EnhancedBiomarkerChart(
-                    dataPoints: filteredDataPoints.map { point in
+                    dataPoints: viewModel.filteredDataPoints.map { point in
                         EnhancedBiomarkerChart.BiomarkerDataPoint(
                             date: point.date,
                             value: point.value,
@@ -347,11 +293,11 @@ public struct BiomarkerDetailView: View {
                             bloodReport: point.bloodReport
                         )
                     },
-                    color: color,
-                    normalRange: normalRange,
+                    color: viewModel.primaryColor,
+                    normalRange: viewModel.normalRangeText,
                     selectedDataPoint: Binding<EnhancedBiomarkerChart.BiomarkerDataPoint?>(
                         get: {
-                            guard let selected = selectedDataPoint else { return nil }
+                            guard let selected = viewModel.selectedDataPoint else { return nil }
                             return EnhancedBiomarkerChart.BiomarkerDataPoint(
                                 date: selected.date,
                                 value: selected.value,
@@ -362,22 +308,23 @@ public struct BiomarkerDetailView: View {
                         set: { newValue in
                             if let chartPoint = newValue {
                                 // Find the corresponding dataPoint in our array
-                                selectedDataPoint = filteredDataPoints.first { point in
+                                let dataPoint = viewModel.filteredDataPoints.first { point in
                                     point.date == chartPoint.date && 
                                     point.value == chartPoint.value &&
                                     point.bloodReport == chartPoint.bloodReport
                                 }
+                                viewModel.selectDataPoint(dataPoint)
                             } else {
-                                selectedDataPoint = nil
+                                viewModel.selectDataPoint(nil)
                             }
                         }
                     ),
-                    animateChart: animateChart
+                    animateChart: viewModel.animateChart
                 )
                 .frame(height: 280)
                 
                 // Chart insights
-                if let selectedDataPoint = selectedDataPoint {
+                if let selectedDataPoint = viewModel.selectedDataPoint {
                     chartInsights(for: selectedDataPoint)
                 } else {
                     defaultChartInsights
@@ -401,12 +348,12 @@ public struct BiomarkerDetailView: View {
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.secondary)
                     
-                    Text(normalRange)
+                    Text(viewModel.normalRangeText)
                         .font(.subheadline.weight(.bold))
                         .foregroundStyle(.primary)
                         .multilineTextAlignment(.center)
                     
-                    Text(unit)
+                    Text(viewModel.unitText)
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                 }
@@ -418,11 +365,11 @@ public struct BiomarkerDetailView: View {
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.secondary)
                     
-                    Text(healthStatusText)
+                    Text(viewModel.healthStatusText)
                         .font(.subheadline.weight(.bold))
-                        .foregroundStyle(healthStatusColor)
+                        .foregroundStyle(viewModel.healthStatusColor)
                     
-                    Text(healthStatusSubtext)
+                    Text("needs attention")
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                         .multilineTextAlignment(.center)
@@ -435,7 +382,7 @@ public struct BiomarkerDetailView: View {
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.secondary)
                     
-                    Text("\(filteredDataPoints.count)")
+                    Text("\(viewModel.filteredDataPoints.count)")
                         .font(.subheadline.weight(.bold))
                         .foregroundStyle(.primary)
                     
@@ -451,11 +398,11 @@ public struct BiomarkerDetailView: View {
     private var informationSection: some View {
         HealthCard {
             VStack(alignment: .leading, spacing: Spacing.medium) {
-                Text("About \(biomarkerName)")
+                Text("About \(viewModel.biomarkerTitle)")
                     .font(.headline.weight(.bold))
                     .foregroundStyle(.primary)
                 
-                Text(description)
+                Text(viewModel.descriptionText)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -473,7 +420,7 @@ public struct BiomarkerDetailView: View {
                             .font(.caption.weight(.medium))
                             .foregroundStyle(.secondary)
                         
-                        Text("\(normalRange) \(unit)")
+                        Text("\(viewModel.normalRangeText) \(viewModel.unitText)")
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(.primary)
                     }
@@ -506,9 +453,9 @@ public struct BiomarkerDetailView: View {
                     .foregroundStyle(.primary)
                 
                 VStack(spacing: Spacing.small) {
-                    ForEach(Array(filteredDataPoints.reversed().prefix(5))) { dataPoint in
-                        let isInRange = isValueInNormalRange(dataPoint.value, normalRange: parseNormalRange(normalRange))
-                        let isLatest = dataPoint.id == filteredDataPoints.last?.id
+                    ForEach(Array(viewModel.filteredDataPoints.reversed().prefix(5))) { dataPoint in
+                        let isInRange = isValueInNormalRange(dataPoint.value, normalRange: parseNormalRange(viewModel.normalRangeText))
+                        let isLatest = dataPoint.id == viewModel.filteredDataPoints.last?.id
                         
                         HStack {
                             Circle()
@@ -537,16 +484,16 @@ public struct BiomarkerDetailView: View {
                             
                             Spacer()
                             
-                            Text("\(String(format: "%.1f", dataPoint.value)) \(unit)")
+                            Text("\(String(format: "%.1f", dataPoint.value)) \(viewModel.unitText)")
                                 .font(.subheadline.weight(.bold))
                                 .foregroundStyle(.primary)
                         }
                         .padding(.vertical, 2)
                     }
                     
-                    if filteredDataPoints.count > 5 {
+                    if viewModel.filteredDataPoints.count > 5 {
                         HStack {
-                            Text("And \(filteredDataPoints.count - 5) more readings in this timeframe...")
+                            Text("And \(viewModel.filteredDataPoints.count - 5) more readings in this timeframe...")
                                 .font(.caption)
                                 .foregroundStyle(.tertiary)
                             Spacer()
@@ -560,8 +507,8 @@ public struct BiomarkerDetailView: View {
     
     // MARK: - Chart Insights
     
-    private func chartInsights(for dataPoint: BiomarkerDataPoint) -> some View {
-        let normalRange = parseNormalRange(normalRange)
+    private func chartInsights(for dataPoint: DataPoint) -> some View {
+        let normalRange = parseNormalRange(viewModel.normalRangeText)
         let isInRange = isValueInNormalRange(dataPoint.value, normalRange: normalRange)
         
         return VStack(spacing: Spacing.xs) {
@@ -572,7 +519,7 @@ public struct BiomarkerDetailView: View {
                 
                 Spacer()
                 
-                Text("\(String(format: "%.1f", dataPoint.value)) \(unit)")
+                Text("\(String(format: "%.1f", dataPoint.value)) \(viewModel.unitText)")
                     .font(.caption.weight(.bold))
                     .foregroundStyle(.primary)
             }
@@ -613,102 +560,7 @@ public struct BiomarkerDetailView: View {
         .padding(.top, Spacing.xs)
     }
     
-    // MARK: - Helper Functions & Computed Properties
-    
-    // Trend direction enum
-    private enum TrendDirection {
-        case up, down, stable
-        
-        var iconName: String {
-            switch self {
-            case .up: return "arrow.up.right"
-            case .down: return "arrow.down.right"
-            case .stable: return "arrow.right"
-            }
-        }
-        
-        var color: Color {
-            switch self {
-            case .up: return .healthSuccess
-            case .down: return .healthError
-            case .stable: return .secondary
-            }
-        }
-    }
-    
-    // Trend calculation
-    private struct TrendInfo {
-        let direction: TrendDirection
-        let changeText: String
-        let percentageText: String
-    }
-    
-    private func calculateTrend() -> TrendInfo? {
-        guard filteredDataPoints.count >= 2 else { return nil }
-        
-        let current = filteredDataPoints.last!.value
-        let previous = filteredDataPoints[filteredDataPoints.count - 2].value
-        let change = current - previous
-        let percentageChange = abs(change / previous * 100)
-        
-        let direction: TrendDirection
-        if abs(change) < 0.01 {
-            direction = .stable
-        } else if change > 0 {
-            direction = .up
-        } else {
-            direction = .down
-        }
-        
-        let changeText = String(format: "%.1f", abs(change))
-        let percentageText = String(format: "%.0f%%", percentageChange)
-        
-        return TrendInfo(direction: direction, changeText: changeText, percentageText: percentageText)
-    }
-    
-    private var healthStatusColor: Color {
-        guard let currentValue = currentValue else { return Color.healthPrimary }
-        let normalRange = parseNormalRange(normalRange)
-        
-        if isValueInNormalRange(currentValue.value, normalRange: normalRange) {
-            return Color.healthSuccess
-        } else {
-            return Color.healthError
-        }
-    }
-    
-    private var healthStatusIcon: String {
-        guard let currentValue = currentValue else { return "questionmark" }
-        let normalRange = parseNormalRange(normalRange)
-        
-        if isValueInNormalRange(currentValue.value, normalRange: normalRange) {
-            return "checkmark"
-        } else {
-            return "exclamationmark"
-        }
-    }
-    
-    private var healthStatusText: String {
-        guard let currentValue = currentValue else { return "Unknown" }
-        let normalRange = parseNormalRange(normalRange)
-        
-        if isValueInNormalRange(currentValue.value, normalRange: normalRange) {
-            return "Normal"
-        } else {
-            return "Abnormal"
-        }
-    }
-    
-    private var healthStatusSubtext: String {
-        guard let currentValue = currentValue else { return "no data" }
-        let normalRange = parseNormalRange(normalRange)
-        
-        if isValueInNormalRange(currentValue.value, normalRange: normalRange) {
-            return "within range"
-        } else {
-            return "needs attention"
-        }
-    }
+    // MARK: - Helper Functions
     
     // Helper function to parse normal range string (reused from BiomarkerListItemView)
     private func parseNormalRange(_ rangeString: String) -> (min: Double, max: Double)? {

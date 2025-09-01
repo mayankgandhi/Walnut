@@ -10,7 +10,7 @@ import Foundation
 import SwiftData
 
 @Model
-class BloodReport: Identifiable, Sendable {
+class BloodReport: Identifiable, Sendable, Equatable {
     
     var id: UUID?
     

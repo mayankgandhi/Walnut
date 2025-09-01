@@ -50,22 +50,3 @@ public struct BiomarkerTrends {
     }
 }
 
-public enum TrendDirection {
-    case up, down, stable
-    
-    var iconName: String {
-        switch self {
-        case .up: return "arrow.up.circle.fill"
-        case .down: return "arrow.down.circle.fill"
-        case .stable: return "minus.circle.fill"
-        }
-    }
-    
-    var color: Color {
-        switch self {
-        case .up: return .green
-        case .down: return .orange
-        case .stable: return .gray
-        }
-    }
-}

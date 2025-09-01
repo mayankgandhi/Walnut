@@ -208,7 +208,7 @@ struct PrescriptionEditor: View {
                                     
                                     OptionalView(medicalCase.isActive) { isActive in
                                         HStack(spacing: Spacing.xs) {
-                                            WalnutDesignSystem.StatusIndicator(
+                                            HealthStatusIndicator(
                                                 status: isActive ? .good : .warning,
                                                 showIcon: false
                                             )
