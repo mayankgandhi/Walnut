@@ -106,7 +106,12 @@ public struct BiomarkerDetailView: View {
         .navigationTitle(viewModel.biomarkerTitle)
         .navigationBarTitleDisplayMode(.large)
         .onAppear {
-            viewModel.startChartAnimation()
+            Task {
+                try await Task.sleep(nanoseconds: 2_000_000_000)
+                withAnimation(.easeInOut(duration: 1.0)) {
+                    viewModel.animateChart = true
+                }
+            }
         }
     }
     

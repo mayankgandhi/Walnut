@@ -121,12 +121,6 @@ public class BiomarkerDetailViewModel {
         selectedDataPoint = dataPoint
     }
     
-    func startChartAnimation() {
-        withAnimation(.easeInOut(duration: 1.0)) {
-            animateChart = true
-        }
-    }
-    
     // MARK: - Public Computed Properties
     
     var biomarkerTitle: String {
