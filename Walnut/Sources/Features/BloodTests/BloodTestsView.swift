@@ -45,8 +45,7 @@ struct BloodTestsView: View {
                     biomarkerName: biomarker.testName,
                     unit: biomarker.unit.isEmpty ? "N/A" : biomarker.unit,
                     normalRange: biomarker.referenceRange.isEmpty ? "N/A" : biomarker.referenceRange,
-                    description: biomarker.description,
-                    dataPoints: [],
+                    dataPoints: biomarker.historicalValues,
                     color: biomarker.healthStatusColor
                 )
             }
@@ -70,11 +69,10 @@ struct BloodTestsView: View {
             LazyVStack(spacing: Spacing.small) {
                 ForEach(viewModel.filteredBiomarkers, id: \.id) { biomarker in
                     BiomarkerListItemView(
-                        data: biomarker.historicalValues,
+                        data: biomarker.historicalValues.map(\.value),
                         color: biomarker.healthStatusColor,
                         biomarkerInfo: BiomarkerInfo(
                             name: biomarker.testName,
-                            description: biomarker.description,
                             normalRange: biomarker.referenceRange.isEmpty ? "N/A" : biomarker.referenceRange,
                             unit: biomarker.unit.isEmpty ? "" : biomarker.unit
                         ),

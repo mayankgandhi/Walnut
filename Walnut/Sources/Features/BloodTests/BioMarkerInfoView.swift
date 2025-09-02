@@ -23,12 +23,6 @@ public struct BiomarkerInfoView: View {
                 .font(.headline)
                 .foregroundColor(.primary)
             
-            // Description
-            Text(biomarkerInfo.description)
-                .font(.body)
-                .foregroundColor(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            
             // Normal range and units
             HStack {
                 VStack(alignment: .leading, spacing: 4) {

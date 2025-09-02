@@ -213,9 +213,18 @@ class BloodTestsViewModel {
         
         // Calculate historical values for trend analysis
         let sortedResults = validResults.sorted { $0.1 < $1.1 }
-        let historicalValues = sortedResults.compactMap { result, _ -> Double? in
-            guard let value = result.value else { return nil }
-            return Double(value)
+        let historicalValues: [BiomarkerDataPoint] = sortedResults.compactMap { result, _ -> BiomarkerDataPoint? in
+            guard let stringValue = result.value,
+                  let value = Double(stringValue),
+                  let resultDate = result.bloodReport?.resultDate else {
+                return nil
+            }
+            return BiomarkerDataPoint(
+                date: resultDate,
+                value: Double(value),
+                bloodReport: result.bloodReport?.labName,
+                bloodReportURLPath: result.bloodReport?.document?.fileURL
+            )
         }
         
         // Calculate trend
@@ -242,13 +251,20 @@ class BloodTestsViewModel {
         )
     }
     
-    private func calculateTrend(from values: [Double]) -> (TrendDirection, String, String) {
-        guard values.count >= 2 else {
+    private func calculateTrend(from dataPoints: [BiomarkerDataPoint]) -> (TrendDirection, String, String) {
+        // Filter out data points with nil values and sort by date
+        let validDataPoints = dataPoints
+            .compactMap { dataPoint -> (Date, Double)? in
+                return (dataPoint.date, dataPoint.value)
+            }
+            .sorted { $0.0 < $1.0 } // Sort by date ascending
+        
+        guard validDataPoints.count >= 2 else {
             return (.stable, "No comparison", "--")
         }
         
-        let current = values.last!
-        let previous = values[values.count - 2]
+        let current = validDataPoints.last!.1 // Get the value from the last tuple
+        let previous = validDataPoints[validDataPoints.count - 2].1 // Get the value from the second-to-last tuple
         let change = current - previous
         let percentageChange = abs(change / previous * 100)
         
@@ -267,22 +283,33 @@ class BloodTestsViewModel {
         return (direction, changeText, percentageText)
     }
     
-    private func determineHealthStatus(for result: BloodTestResult, from historicalValues: [Double]) -> HealthStatus {
+    private func determineHealthStatus(for result: BloodTestResult, from dataPoints: [BiomarkerDataPoint]) -> HealthStatus {
         let isAbnormal = result.isAbnormal ?? false
         
         if isAbnormal {
+            // Filter valid data points and sort by date
+            let validDataPoints = dataPoints
+                .compactMap { dataPoint -> (Date, Double)? in
+                    return (dataPoint.date, dataPoint.value)
+                }
+                .sorted { $0.0 < $1.0 } // Sort by date ascending
+            
             // Check if it's consistently abnormal (critical) or just recent (warning)
-            let recentAbnormalCount = historicalValues.suffix(3).filter { _ in
-                // This is a simplified check - in reality you'd parse reference ranges properly
-                // For now, we'll just check if the current result is abnormal
-                isAbnormal
-            }.count
+            // Take the last 3 values for recent trend analysis
+            let recentValues = Array(validDataPoints.suffix(3).map { $0.1 })
+            
+            // This is a simplified check - in reality you'd need to check each value against reference ranges
+            // For now, we'll assume that having 2 or more recent abnormal readings indicates critical status
+            let recentAbnormalCount = recentValues.count >= 2 ? 2 : 1 // Simplified logic
             
             return recentAbnormalCount >= 2 ? .critical : .warning
         }
         
+        // Filter valid data points for optimal status check
+        let validValues = dataPoints.compactMap { $0.value }
+        
         // Check for consistently good values
-        if historicalValues.count >= 3 {
+        if validValues.count >= 3 {
             return .optimal
         }
         

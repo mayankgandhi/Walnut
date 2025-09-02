@@ -11,6 +11,7 @@ import Charts
 import WalnutDesignSystem
 
 struct BloodReportDetailView: View {
+    
     let bloodReport: BloodReport
     @Environment(\.dismiss) private var dismiss
     
@@ -199,99 +200,36 @@ struct BloodReportDetailView: View {
             }
             .padding(.horizontal, Spacing.small)
             
-            // Grid of Aggregated Biomarkers
-            LazyVGrid(columns: [
-                GridItem(.flexible())
-            ], spacing: Spacing.medium) {
-                ForEach(convertToAggregatedBiomarkers(), id: \.id) { biomarker in
-                    NavigationLink(destination: createBiomarkerDetailView(for: biomarker)) {
-                        BiomarkerListItemView(
-                            data: biomarker.historicalValues,
-                            color: biomarker.healthStatusColor,
-                            biomarkerInfo: BiomarkerInfo(
-                                name: biomarker.testName,
-                                description: biomarker.description,
-                                normalRange: biomarker.referenceRange,
-                                unit: biomarker.unit
-                            ),
-                            biomarkerTrends: BiomarkerTrends(
-                                currentValue: biomarker.currentNumericValue,
-                                currentValueText: biomarker.currentValue,
-                                comparisonText: biomarker.trendText,
-                                comparisonPercentage: biomarker.trendPercentage,
-                                trendDirection: biomarker.trendDirection,
-                                normalRange: biomarker.referenceRange
-                            )
-                        )
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-            }
-            .padding(.horizontal, Spacing.small)
+//            // Grid of Aggregated Biomarkers
+//            LazyVGrid(columns: [
+//                GridItem(.flexible())
+//            ], spacing: Spacing.medium) {
+//                ForEach(convertToAggregatedBiomarkers(), id: \.id) { biomarker in
+//                    NavigationLink(destination: createBiomarkerDetailView(for: biomarker)) {
+//                        BiomarkerListItemView(
+//                            data: biomarker.historicalValues,
+//                            color: biomarker.healthStatusColor,
+//                            biomarkerInfo: BiomarkerInfo(
+//                                name: biomarker.testName,
+//                                description: biomarker.description,
+//                                normalRange: biomarker.referenceRange,
+//                                unit: biomarker.unit
+//                            ),
+//                            biomarkerTrends: BiomarkerTrends(
+//                                currentValue: biomarker.currentNumericValue,
+//                                currentValueText: biomarker.currentValue,
+//                                comparisonText: biomarker.trendText,
+//                                comparisonPercentage: biomarker.trendPercentage,
+//                                trendDirection: biomarker.trendDirection,
+//                                normalRange: biomarker.referenceRange
+//                            )
+//                        )
+//                    }
+//                    .buttonStyle(PlainButtonStyle())
+//                }
+//            }
+//            .padding(.horizontal, Spacing.small)
         }
-    }
-    
-    // Convert BloodTestResult to AggregatedBiomarker
-    private func convertToAggregatedBiomarkers() -> [AggregatedBiomarker] {
-        guard let testResults = bloodReport.testResults else { return [] }
-        
-        let biomarkers: [AggregatedBiomarker?] = testResults.map { testResult in
-            guard let testName = testResult.testName,
-                  let value = testResult.value,
-                  let unit = testResult.unit else {
-                return nil
-            }
-            
-            let numericValue = Double(value) ?? 0.0
-            let healthStatus: HealthStatus = (testResult.isAbnormal ?? false) ? .warning : .good
-            
-            return AggregatedBiomarker(
-                id: UUID(),
-                testName: testName,
-                currentValue: value,
-                unit: unit,
-                referenceRange: testResult.referenceRange ?? "N/A",
-                category: bloodReport.category ?? "General",
-                latestDate: bloodReport.resultDate ?? Date(),
-                historicalValues: [numericValue], // Single value for this report
-                healthStatus: healthStatus,
-                trendDirection: .stable, // No trend available for single report
-                trendText: "--",
-                trendPercentage: "--",
-                latestBloodReport: bloodReport,
-                testCount: 1
-            )
-        }
-        
-        return biomarkers.compactMap { $0 }
-    }
-    
-    // Helper function to create BiomarkerDetailView with proper DataPoint conversion
-    private func createBiomarkerDetailView(for biomarker: AggregatedBiomarker) -> some View {
-        let dataPoints = biomarker.historicalValues.enumerated().map { index, value in
-            DataPoint(
-                date: Calendar.current.date(byAdding: .day, value: -index, to: biomarker.latestDate) ?? biomarker.latestDate,
-                value: value,
-                isAbnormal: biomarker.healthStatus == .warning || biomarker.healthStatus == .critical,
-                bloodReport: biomarker.latestBloodReport.labName ?? "Lab Report"
-            )
-        }.reversed()
-        
-        return BiomarkerDetailView(
-            biomarkerName: biomarker.testName,
-            unit: biomarker.unit,
-            normalRange: biomarker.referenceRange,
-            description: biomarker.description,
-            dataPoints: Array(dataPoints).map { point in
-                BiomarkerDetailView.BiomarkerDataPoint(
-                    date: point.date,
-                    value: point.value,
-                    isAbnormal: point.isAbnormal,
-                    bloodReport: point.bloodReport
-                )
-            },
-            color: biomarker.healthStatusColor
-        )
     }
     
     // Empty Test Results Card

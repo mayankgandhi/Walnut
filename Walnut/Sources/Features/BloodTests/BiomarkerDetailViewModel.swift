@@ -10,28 +10,13 @@ import SwiftUI
 import Foundation
 import Observation
 
-public struct DataPoint: Identifiable {
-    public let id = UUID()
-    public let date: Date
-    public let value: Double
-    public let isAbnormal: Bool
-    public let bloodReport: String
-    
-    public init(date: Date, value: Double, isAbnormal: Bool, bloodReport: String) {
-        self.date = date
-        self.value = value
-        self.isAbnormal = isAbnormal
-        self.bloodReport = bloodReport
-    }
-}
-
 @Observable
 public class BiomarkerDetailViewModel {
     
     // MARK: - Published Properties
     var selectedTimeFrame: TimeFrame = .all
-    var filteredDataPoints: [DataPoint] = []
-    var selectedDataPoint: DataPoint?
+    var filteredDataPoints: [BiomarkerDataPoint] = []
+    var selectedDataPoint: BiomarkerDataPoint?
     var currentValue: Double = 0.0
     var trendPercentage: Double = 0.0
     var trendDirection: TrendDirection = .stable
@@ -42,8 +27,7 @@ public class BiomarkerDetailViewModel {
     private let biomarkerName: String
     private let unit: String
     private let normalRange: String
-    private let description: String
-    private let allDataPoints: [DataPoint]
+    private let allDataPoints: [BiomarkerDataPoint]
     private let color: Color
     
     // MARK: - Computed Properties
@@ -93,14 +77,12 @@ public class BiomarkerDetailViewModel {
         biomarkerName: String,
         unit: String,
         normalRange: String,
-        description: String,
-        dataPoints: [DataPoint],
+        dataPoints: [BiomarkerDataPoint],
         color: Color
     ) {
         self.biomarkerName = biomarkerName
         self.unit = unit
         self.normalRange = normalRange
-        self.description = description
         self.allDataPoints = dataPoints.sorted { $0.date < $1.date }
         self.color = color
         
@@ -117,7 +99,7 @@ public class BiomarkerDetailViewModel {
         calculateCurrentMetrics()
     }
     
-    func selectDataPoint(_ dataPoint: DataPoint?) {
+    func selectDataPoint(_ dataPoint: BiomarkerDataPoint?) {
         selectedDataPoint = dataPoint
     }
     
@@ -135,15 +117,11 @@ public class BiomarkerDetailViewModel {
         normalRange
     }
     
-    var descriptionText: String {
-        description
-    }
-    
     var primaryColor: Color {
         color
     }
     
-    var currentDataPoint: DataPoint? {
+    var currentDataPoint: BiomarkerDataPoint? {
         filteredDataPoints.last
     }
     
@@ -193,14 +171,14 @@ public class BiomarkerDetailViewModel {
             return
         }
         
-        currentValue = latestPoint.value
-        healthStatus = determineHealthStatus(for: latestPoint.value)
+        currentValue = latestPoint.value ?? 0
+        healthStatus = determineHealthStatus(for: latestPoint.value ?? 0)
         
         // Calculate trend
         if filteredDataPoints.count >= 2 {
             let previousPoint = filteredDataPoints[filteredDataPoints.count - 2]
-            let change = currentValue - previousPoint.value
-            let percentageChange = abs(change / previousPoint.value * 100)
+            let change = currentValue - (previousPoint.value ?? 0)
+            let percentageChange = abs(change / (previousPoint.value ?? 0) * 100)
             
             trendPercentage = percentageChange
             

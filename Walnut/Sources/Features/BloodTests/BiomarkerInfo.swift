@@ -12,13 +12,11 @@ import SwiftUI
 /// Biomarker information model
 public struct BiomarkerInfo {
     let name: String
-    let description: String
     let normalRange: String
     let unit: String
     
-    public init(name: String, description: String, normalRange: String, unit: String) {
+    public init(name: String, normalRange: String, unit: String) {
         self.name = name
-        self.description = description
         self.normalRange = normalRange
         self.unit = unit
     }

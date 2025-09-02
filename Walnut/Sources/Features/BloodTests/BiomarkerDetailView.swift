@@ -14,46 +14,19 @@ import WalnutDesignSystem
 public struct BiomarkerDetailView: View {
     
     @State var viewModel: BiomarkerDetailViewModel
-    
-    // Historical data model - keeping for compatibility
-    public struct BiomarkerDataPoint: Identifiable {
-        public let id = UUID()
-        public let date: Date
-        public let value: Double
-        public let isAbnormal: Bool
-        public let bloodReport: String // Lab name for context
-        
-        public init(date: Date, value: Double, isAbnormal: Bool, bloodReport: String) {
-            self.date = date
-            self.value = value
-            self.isAbnormal = isAbnormal
-            self.bloodReport = bloodReport
-        }
-    }
-    
+
     public init(
         biomarkerName: String,
         unit: String,
         normalRange: String,
-        description: String,
         dataPoints: [BiomarkerDataPoint],
         color: Color = Color.healthPrimary
     ) {
-        let vmDataPoints = dataPoints.map { point in
-            DataPoint(
-                date: point.date,
-                value: point.value,
-                isAbnormal: point.isAbnormal,
-                bloodReport: point.bloodReport
-            )
-        }
-        
         self._viewModel = State(wrappedValue: BiomarkerDetailViewModel(
             biomarkerName: biomarkerName,
             unit: unit,
             normalRange: normalRange,
-            description: description,
-            dataPoints: vmDataPoints,
+            dataPoints: dataPoints,
             color: color
         ))
     }
@@ -69,7 +42,6 @@ public struct BiomarkerDetailView: View {
             biomarkerName: testName,
             unit: "",
             normalRange: "",
-            description: "Blood test biomarker for health monitoring",
             dataPoints: [],
             color: color
         ))
@@ -300,7 +272,7 @@ public struct BiomarkerDetailView: View {
                     },
                     color: viewModel.primaryColor,
                     normalRange: viewModel.normalRangeText,
-                    selectedDataPoint: Binding<EnhancedBiomarkerChart.BiomarkerDataPoint?>(
+                    selectedDataPoint: Binding<BiomarkerDataPoint?>(
                         get: {
                             guard let selected = viewModel.selectedDataPoint else { return nil }
                             return EnhancedBiomarkerChart.BiomarkerDataPoint(
@@ -403,17 +375,7 @@ public struct BiomarkerDetailView: View {
     private var informationSection: some View {
         HealthCard {
             VStack(alignment: .leading, spacing: Spacing.medium) {
-                Text("About \(viewModel.biomarkerTitle)")
-                    .font(.headline.weight(.bold))
-                    .foregroundStyle(.primary)
-                
-                Text(viewModel.descriptionText)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                
-                Divider()
-                
+                               
                 VStack(alignment: .leading, spacing: Spacing.small) {
                     HStack {
                         Image(systemName: "ruler")
@@ -472,9 +434,12 @@ public struct BiomarkerDetailView: View {
                                     .font(.subheadline.weight(.medium))
                                     .foregroundStyle(.primary)
                                 
-                                Text(dataPoint.bloodReport)
-                                    .font(.caption)
-                                    .foregroundStyle(.tertiary)
+                                if let bloodReport = dataPoint.bloodReport {
+                                    Text(bloodReport)
+                                        .font(.caption)
+                                        .foregroundStyle(.tertiary)
+                                }
+                                
                             }
                             
                             if isLatest {
@@ -512,7 +477,7 @@ public struct BiomarkerDetailView: View {
     
     // MARK: - Chart Insights
     
-    private func chartInsights(for dataPoint: DataPoint) -> some View {
+    private func chartInsights(for dataPoint: BiomarkerDataPoint) -> some View {
         let normalRange = parseNormalRange(viewModel.normalRangeText)
         let isInRange = isValueInNormalRange(dataPoint.value, normalRange: normalRange)
         
@@ -607,49 +572,55 @@ public struct BiomarkerDetailView: View {
             biomarkerName: "Hemoglobin",
             unit: "g/dL",
             normalRange: "12.0-15.5",
-            description: "Hemoglobin carries oxygen in red blood cells and is essential for transporting oxygen throughout the body.",
             dataPoints: [
-                BiomarkerDetailView.BiomarkerDataPoint(
+                BiomarkerDataPoint(
                     date: Calendar.current.date(byAdding: .month, value: -6, to: Date()) ?? Date(),
                     value: 13.8,
-                    isAbnormal: false,
-                    bloodReport: "LabCorp"
+                    
+                    bloodReport: "LabCorp",
+                    bloodReportURLPath: nil
                 ),
-                BiomarkerDetailView.BiomarkerDataPoint(
+                BiomarkerDataPoint(
                     date: Calendar.current.date(byAdding: .month, value: -5, to: Date()) ?? Date(),
                     value: 12.5,
-                    isAbnormal: false,
-                    bloodReport: "Quest Diagnostics"
+                    
+                    bloodReport: "Quest Diagnostics",
+                    bloodReportURLPath: nil
                 ),
-                BiomarkerDetailView.BiomarkerDataPoint(
+                BiomarkerDataPoint(
                     date: Calendar.current.date(byAdding: .month, value: -4, to: Date()) ?? Date(),
                     value: 14.5,
-                    isAbnormal: false,
-                    bloodReport: "LabCorp"
+                    
+                    bloodReport: "LabCorp",
+                    bloodReportURLPath: nil
                 ),
-                BiomarkerDetailView.BiomarkerDataPoint(
+                BiomarkerDataPoint(
                     date: Calendar.current.date(byAdding: .month, value: -3, to: Date()) ?? Date(),
                     value: 14.1,
-                    isAbnormal: false,
-                    bloodReport: "Hospital Lab"
+                    
+                    bloodReport: "Hospital Lab",
+                    bloodReportURLPath: nil
                 ),
-                BiomarkerDetailView.BiomarkerDataPoint(
+                BiomarkerDataPoint(
                     date: Calendar.current.date(byAdding: .month, value: -2, to: Date()) ?? Date(),
                     value: 14.3,
-                    isAbnormal: false,
-                    bloodReport: "Quest Diagnostics"
+                    
+                    bloodReport: "Quest Diagnostics",
+                    bloodReportURLPath: nil
                 ),
-                BiomarkerDetailView.BiomarkerDataPoint(
+                BiomarkerDataPoint(
                     date: Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date(),
                     value: 13.8,
-                    isAbnormal: false,
-                    bloodReport: "LabCorp"
+                    
+                    bloodReport: "LabCorp",
+                    bloodReportURLPath: nil
                 ),
-                BiomarkerDetailView.BiomarkerDataPoint(
+                BiomarkerDataPoint(
                     date: Date(),
                     value: 14.2,
-                    isAbnormal: false,
-                    bloodReport: "LabCorp"
+                    
+                    bloodReport: "LabCorp",
+                    bloodReportURLPath: nil
                 )
             ],
             color: .healthPrimary

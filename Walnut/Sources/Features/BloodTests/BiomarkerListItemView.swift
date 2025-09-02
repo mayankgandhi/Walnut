@@ -244,7 +244,6 @@ public struct BiomarkerListItemView: View {
                 color: .healthSuccess,
                 biomarkerInfo: BiomarkerInfo(
                     name: "Hemoglobin",
-                    description: "Hemoglobin carries oxygen in red blood cells",
                     normalRange: "12.0-15.5",
                     unit: "g/dL"
                 ),
@@ -265,7 +264,6 @@ public struct BiomarkerListItemView: View {
                 color: .healthWarning,
                 biomarkerInfo: BiomarkerInfo(
                     name: "Blood Glucose",
-                    description: "Blood sugar levels",
                     normalRange: "70-100",
                     unit: "mg/dL"
                 ),
@@ -286,7 +284,6 @@ public struct BiomarkerListItemView: View {
                 color: .healthError,
                 biomarkerInfo: BiomarkerInfo(
                     name: "Systolic Blood Pressure",
-                    description: "Systolic blood pressure",
                     normalRange: "90-120",
                     unit: "mmHg"
                 ),
@@ -307,7 +304,6 @@ public struct BiomarkerListItemView: View {
                 color: .healthPrimary,
                 biomarkerInfo: BiomarkerInfo(
                     name: "Total Cholesterol",
-                    description: "Total cholesterol levels",
                     normalRange: "< 200",
                     unit: "mg/dL"
                 ),
@@ -328,7 +324,6 @@ public struct BiomarkerListItemView: View {
                 color: .healthSuccess,
                 biomarkerInfo: BiomarkerInfo(
                     name: "White Blood Cell Count",
-                    description: "Immune system cells count",
                     normalRange: "4.5-11.0",
                     unit: "K/μL"
                 ),
@@ -349,7 +344,6 @@ public struct BiomarkerListItemView: View {
                 color: .orange,
                 biomarkerInfo: BiomarkerInfo(
                     name: "Vitamin D",
-                    description: "Essential vitamin for bone health",
                     normalRange: "30-100",
                     unit: "ng/mL"
                 ),

@@ -8,25 +8,10 @@
 
 import SwiftUI
 import Charts
+import WalnutDesignSystem
 
 /// Enhanced interactive chart for biomarker data visualization
 public struct EnhancedBiomarkerChart: View {
-    
-    // MARK: - Data Point Model
-    public struct BiomarkerDataPoint: Identifiable {
-        public let id = UUID()
-        public let date: Date
-        public let value: Double
-        public let isAbnormal: Bool
-        public let bloodReport: String
-        
-        public init(date: Date, value: Double, isAbnormal: Bool, bloodReport: String) {
-            self.date = date
-            self.value = value
-            self.isAbnormal = isAbnormal
-            self.bloodReport = bloodReport
-        }
-    }
     
     // MARK: - Properties
     
