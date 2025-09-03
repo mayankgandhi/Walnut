@@ -13,6 +13,7 @@ public struct HealthCardHeader: View {
     // MARK: - Properties
     
     private let icon: String?
+    private let iconName: String?
     private let iconColor: Color
     private let iconSize: CGFloat
     private let iconBackgroundSize: CGFloat
@@ -27,6 +28,7 @@ public struct HealthCardHeader: View {
     
     public init(
         icon: String? = nil,
+        iconName: String? = nil,
         iconColor: Color = .healthPrimary,
         iconSize: CGFloat = 16,
         iconBackgroundSize: CGFloat = 36,
@@ -37,6 +39,7 @@ public struct HealthCardHeader: View {
         onActionTap: (() -> Void)? = nil
     ) {
         self.icon = icon
+        self.iconName = iconName
         self.iconColor = iconColor
         self.iconSize = iconSize
         self.iconBackgroundSize = iconBackgroundSize
@@ -54,6 +57,10 @@ public struct HealthCardHeader: View {
             // Dynamic icon with gradient background (optional)
             if let icon = icon {
                 iconView(icon)
+            }
+            
+            if let iconName = iconName {
+                iconImageView(iconName)
             }
             
             // Title and subtitle content
@@ -93,6 +100,30 @@ public struct HealthCardHeader: View {
         }
     }
     
+    @ViewBuilder
+    private func iconImageView(_ iconName: String) -> some View {
+        ZStack {
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            iconColor.opacity(0.2),
+                            iconColor.opacity(0.05)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(width: iconBackgroundSize, height: iconBackgroundSize)
+                .shadow(color: iconColor.opacity(0.2), radius: 4, x: 0, y: 2)
+            
+            Image(iconName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: iconBackgroundSize, height: iconBackgroundSize)
+        }
+    }
+    
     private var contentView: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
@@ -127,7 +158,7 @@ public extension HealthCardHeader {
         count: Int,
     ) -> HealthCardHeader {
         HealthCardHeader(
-            icon: "heart.text.square.fill",
+            iconName: "health-journal",
             title: "Medical Documents",
             subtitle: "\(count) documents",
         )
@@ -157,68 +188,6 @@ public extension HealthCardHeader {
             subtitle: subtitle
         )
     }
-    
-    /// Standard prescriptions header
-    static func prescriptions(
-        count: Int,
-        abnormalCount: Int? = nil,
-        onAddTap: @escaping () -> Void
-    ) -> HealthCardHeader {
-        var subtitle = "\(count) documents"
-        
-        if let abnormalCount = abnormalCount, abnormalCount > 0 {
-            subtitle += " • \(abnormalCount) need attention"
-        }
-        
-        return HealthCardHeader(
-            icon: "doc.text.fill",
-            title: "Prescriptions",
-            subtitle: subtitle,
-            actionIcon: "plus.circle.fill",
-            onActionTap: onAddTap
-        )
-    }
-    
-    /// Standard blood reports header
-    static func bloodReports(
-        count: Int,
-        abnormalCount: Int? = nil,
-        isAddPressed: Bool = false,
-        onAddTap: @escaping () -> Void
-    ) -> HealthCardHeader {
-        var subtitle = "\(count) reports"
-        
-        if let abnormalCount = abnormalCount, abnormalCount > 0 {
-            subtitle += " • \(abnormalCount) abnormal"
-        }
-        
-        return HealthCardHeader(
-            icon: "testtube.2",
-            iconColor: .healthError,
-            title: "Blood Reports",
-            subtitle: subtitle,
-            actionIcon: "plus.circle.fill",
-            actionColor: .healthError,
-            onActionTap: onAddTap
-        )
-    }
-    
-    /// Standard failed documents header
-    static func failedDocuments(
-        count: Int,
-        onAddTap: (() -> Void)? = nil
-    ) -> HealthCardHeader {
-        HealthCardHeader(
-            icon: "exclamationmark.triangle.fill",
-            iconColor: .orange,
-            title: "Failed Documents",
-            subtitle: "\(count) documents need attention",
-            actionIcon: onAddTap != nil ? "plus.circle.fill" : nil,
-            actionColor: .orange,
-            onActionTap: onAddTap
-        )
-    }
-    
     /// Custom header with flexible parameters
     static func custom(
         icon: String?,
@@ -246,30 +215,19 @@ public extension HealthCardHeader {
 #Preview("Standard Headers") {
     ScrollView {
         VStack(spacing: Spacing.xl) {
+            
+            // Minimal header (title only)
+            HealthCardHeader(
+                iconName: "pills",
+                title: "Patient Summary"
+            )
+            
             HealthCardHeader.medicalDocuments(
                 count: 12,
             )
+            
             // Timeline Header
             HealthCardHeader.timeline()
-            // Clinical Notes Header
-            HealthCardHeader.clinicalNotes(characterCount: 245)
-            // Prescriptions Header
-            HealthCardHeader.prescriptions(
-                count: 8,
-                onAddTap: {
-                    print("Add prescription tapped")
-                }
-            )
-            // Blood Reports Header
-            HealthCardHeader.bloodReports(
-                count: 5,
-                abnormalCount: 2,
-                onAddTap: {
-                    print("Add blood report tapped")
-                }
-            )
-            // Failed Documents Header
-            HealthCardHeader.failedDocuments(count: 3)
         }
     }
 }
@@ -295,11 +253,7 @@ public extension HealthCardHeader {
                     
                     
                     
-                    // Minimal header (title only)
-                    HealthCardHeader.custom(
-                        icon: nil,
-                        title: "Patient Summary"
-                    )
+                   
                     
                     
                     

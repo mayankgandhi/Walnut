@@ -410,15 +410,15 @@ final class JSONResponseParserTests: XCTestCase {
     ) {
         do {
             let result = try JSONResponseParser.parseJSONString(jsonResponse, as: model)
-            print("✅ Successfully parsed \\(String(describing: model))")
-            print("   Result: \\(result)")
+            print("✅ Successfully parsed \(String(describing: model))")
+            print("   Result: \(result)")
             
             if let expected = expectedResult {
                 XCTAssertEqual(result, expected, "Parsed result should match expected", file: file, line: line)
             }
         } catch {
-            print("❌ Failed to parse \\(String(describing: model)): \\(error)")
-            XCTFail("Should successfully parse \\(String(describing: model))", file: file, line: line)
+            print("❌ Failed to parse \(String(describing: model)): \\(error)")
+            XCTFail("Should successfully parse \(String(describing: model))", file: file, line: line)
         }
     }
     

@@ -61,7 +61,7 @@ struct UpcomingMedicationsSection: View {
         VStack(alignment: .leading, spacing: Spacing.small) {
             
             HealthCardHeader(
-                icon: "pills.fill",
+                iconName: "pills",
                 iconColor: Color.healthPrimary,
                 title: "Upcoming Medications",
                 actionIcon: "cross.case.fill",

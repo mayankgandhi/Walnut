@@ -18,18 +18,17 @@ struct PatientHeaderCard: View {
             VStack(spacing: Spacing.large) {
                 // Patient identity section
                 HStack(spacing: Spacing.medium) {
-                    PatientAvatar(
-                        name: patient.name ?? "",
-                        color: patient.primaryColor,
-                        size: 64
-                    )
+                    
+                    Image("card-stethoscope")
+                        .resizable()
+                        .frame(width: 64, height: 64)
                     
                     VStack(alignment: .leading, spacing: Spacing.xs) {
                         Text(patient.name ?? "")
                             .font(.title3)
                             .fontWeight(.semibold)
                         
-                        Text("\(patient.age) years old • \(String(describing: patient.gender))")
+                        Text("\(patient.age) years old • \(patient.gender ?? "")")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -49,12 +48,15 @@ struct PatientHeaderCard: View {
                         color: .red
                     )
                     
-                    MedicalInfoRow(
-                        icon: "phone.fill",
-                        title: "Emergency Contact",
-                        value: patient.emergencyContactName ?? "Not Set",
-                        color: .blue
-                    )
+                    if patient.emergencyContactName != "" {
+                        MedicalInfoRow(
+                            icon: "phone.fill",
+                            title: "Emergency Contact",
+                            value: patient.emergencyContactName ?? "Not Set",
+                            color: .blue
+                        )
+                    }
+                    
                     OptionalView(patient.dateOfBirth) { dob in
                         MedicalInfoRow(
                             icon: "calendar",
@@ -67,23 +69,23 @@ struct PatientHeaderCard: View {
                 
                 // Notes section (if available)
                 OptionalView(patient.notes) { notes in
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("Notes")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundStyle(.secondary)
-                        
-                        Text(notes)
-                            .font(.footnote)
-                            .lineLimit(3)
-                            .multilineTextAlignment(.leading)
+                    if notes != "" {
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text("Notes")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundStyle(.secondary)
+                            
+                            Text(notes)
+                                .font(.footnote)
+                                .lineLimit(3)
+                                .multilineTextAlignment(.leading)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                
             }
         }
-        .padding(.horizontal, Spacing.medium)
     }
 }
 

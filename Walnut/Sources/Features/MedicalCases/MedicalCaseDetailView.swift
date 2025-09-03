@@ -61,7 +61,7 @@ struct MedicalCaseDetailView: View {
                         .font(.title2.weight(.bold))
                         .foregroundStyle(.primary)
                         .lineLimit(2)
-                        .multilineTextAlignment(.leading)                    
+                        .multilineTextAlignment(.leading)
                     
                     OptionalView(medicalCase.specialty) { specialty in
                         HStack {
