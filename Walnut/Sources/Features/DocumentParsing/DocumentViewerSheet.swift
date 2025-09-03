@@ -239,7 +239,7 @@ private struct UnsupportedDocumentView: View {
     var body: some View {
         DocumentErrorView(
             title: "Unsupported Format",
-            message: "This document format (\(document.fileURL) is not supported for preview.",
+            message: "This document format (\(String(describing: document.fileURL)) is not supported for preview.",
             systemImage: "doc.questionmark.fill"
         )
     }

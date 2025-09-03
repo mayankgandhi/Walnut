@@ -37,9 +37,9 @@ struct AddDocumentsButton: View {
             viewModel.showHealthRecordSelector = true
         }) {
             Image(systemName: "plus")
-                .font(.system(size: 20, weight: .bold))
+                .font(.system(.headline, design: .rounded, weight: .black))
         }
-        .padding()
+        .padding(Spacing.xs)
         .background(Color.secondary)
         .foregroundColor(.white)
         .clipShape(Circle())
@@ -67,10 +67,35 @@ struct AddDocumentsButton: View {
                     store: store,
                     processingService: processingService
                 )
+                .presentationCornerRadius(Spacing.large)
+                .presentationDetents([.medium])
             }
         )
     }
 }
 
-
-
+#Preview("Add Documents Button") {
+    let schema = Schema([
+        Patient.self,
+        MedicalCase.self,
+        Prescription.self,
+        BloodReport.self,
+        Document.self
+    ])
+    let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: schema, configurations: [modelConfiguration])
+    
+    VStack(spacing: 20) {
+        Text("Add Documents Button")
+            .font(.title2)
+        
+        AddDocumentsButton(
+            modelContext: container.mainContext,
+            medicalCase: .sampleCase
+        )
+        
+        Spacer()
+    }
+    .padding()
+    .modelContainer(container)
+}

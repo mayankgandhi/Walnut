@@ -1,8 +1,8 @@
 //
-//  PrescriptionEditor.swift
+//  BloodReportEditor.swift
 //  Walnut
 //
-//  Created by Mayank Gandhi on 11/08/25.
+//  Created by Mayank Gandhi on 03/09/25.
 //  Copyright © 2025 m. All rights reserved.
 //
 
@@ -10,32 +10,30 @@ import SwiftUI
 import SwiftData
 import WalnutDesignSystem
 
-struct PrescriptionEditor: View {
+struct BloodReportEditor: View {
     
-    let prescription: Prescription?
+    let bloodReport: BloodReport?
     let medicalCase: MedicalCase
     
-    init(prescription: Prescription? = nil, medicalCase: MedicalCase) {
-        self.prescription = prescription
+    init(bloodReport: BloodReport? = nil, medicalCase: MedicalCase) {
+        self.bloodReport = bloodReport
         self.medicalCase = medicalCase
     }
     
     private var editorTitle: String {
-        prescription == nil ? "Add Prescription" : "Edit Prescription"
+        bloodReport == nil ? "Add Blood Report" : "Edit Blood Report"
     }
     
-    @State private var doctorName = ""
-    @State private var facilityName = ""
-    @State private var dateIssued = Date()
-    @State private var followUpDate: Date? = nil
-    @State private var hasFollowUp = false
-    @State private var followUpTests = ""
+    @State private var testName = ""
+    @State private var labName = ""
+    @State private var category = ""
+    @State private var resultDate = Date()
     @State private var notes = ""
-    @State private var medications: [Medication] = []
+    @State private var testResults: [BloodTestResult] = []
     
-    // Medication editor sheet states
-    @State private var showMedicationEditor = false
-    @State private var medicationToEdit: Medication? = nil
+    // Blood test result editor sheet states
+    @State private var showTestResultEditor = false
+    @State private var testResultToEdit: BloodTestResult? = nil
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -44,9 +42,9 @@ struct PrescriptionEditor: View {
     @FocusState private var focusedField: FormField?
     
     private enum FormField: Hashable, CaseIterable {
-        case doctorName
-        case facilityName
-        case followUpTests
+        case testName
+        case labName
+        case category
         case notes
         
         private enum NextFieldType {
@@ -56,12 +54,12 @@ struct PrescriptionEditor: View {
         
         private var nextFieldInUI: NextFieldType {
             switch self {
-            case .doctorName:
-                return .textField(.facilityName)
-            case .facilityName:
+            case .testName:
+                return .textField(.labName)
+            case .labName:
+                return .textField(.category)
+            case .category:
                 return .nonTextFieldOrEnd  // Next: Date picker
-            case .followUpTests:
-                return .textField(.notes)
             case .notes:
                 return .nonTextFieldOrEnd  // Last field
             }
@@ -91,8 +89,8 @@ struct PrescriptionEditor: View {
     }
     
     private var isFormValid: Bool {
-        !doctorName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        !facilityName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !testName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+        !labName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
     // Focus navigation helpers
@@ -121,51 +119,66 @@ struct PrescriptionEditor: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: Spacing.large) {
-                    // Prescription Information Section
+                    // Blood Report Information Section
                     VStack(alignment: .leading, spacing: Spacing.small) {
                         
-                        Text("Prescription Information")
+                        Text("Blood Report Information")
                             .font(.headline)
                             .foregroundStyle(.secondary)
                             .padding(.horizontal, Spacing.medium)
 
                         VStack(spacing: Spacing.medium) {
                             TextFieldItem(
-                                icon: "person.fill.badge.plus",
-                                title: "Doctor Name",
-                                text: $doctorName,
-                                placeholder: "Enter doctor's name",
+                                icon: "heart.text.square.fill",
+                                title: "Test Name",
+                                text: $testName,
+                                placeholder: "Enter test name",
                                 iconColor: .healthPrimary,
-                                contentType: .name,
-                                submitLabel: FormField.doctorName.appropriateSubmitLabel,
+                                contentType: .none,
+                                submitLabel: FormField.testName.appropriateSubmitLabel,
                                 onSubmit: {
-                                    focusNextField(after: .doctorName)
+                                    focusNextField(after: .testName)
                                 }
                             )
-                            .focused($focusedField, equals: .doctorName)
+                            .focused($focusedField, equals: .testName)
                             
                             TextFieldItem(
                                 icon: "building.2.fill",
-                                title: "Medical Facility",
-                                text: $facilityName,
-                                placeholder: "Enter medical facility name",
+                                title: "Laboratory Name",
+                                text: $labName,
+                                placeholder: "Enter laboratory name",
                                 iconColor: .blue,
                                 contentType: .organizationName,
-                                submitLabel: FormField.facilityName.appropriateSubmitLabel,
+                                submitLabel: FormField.labName.appropriateSubmitLabel,
                                 onSubmit: {
-                                    focusNextField(after: .facilityName)
+                                    focusNextField(after: .labName)
                                 }
                             )
-                            .focused($focusedField, equals: .facilityName)
+                            .focused($focusedField, equals: .labName)
+                            
+                            TextFieldItem(
+                                icon: "folder.fill",
+                                title: "Category",
+                                text: $category,
+                                placeholder: "e.g., Hematology, Chemistry, Immunology",
+                                helperText: "Test category or panel type",
+                                iconColor: .purple,
+                                contentType: .none,
+                                submitLabel: FormField.category.appropriateSubmitLabel,
+                                onSubmit: {
+                                    focusNextField(after: .category)
+                                }
+                            )
+                            .focused($focusedField, equals: .category)
                             
                             DatePickerItem(
                                 icon: "calendar",
-                                title: "Date Issued",
+                                title: "Result Date",
                                 selectedDate: Binding(
-                                    get: { dateIssued },
-                                    set: { dateIssued = $0 ?? Date() }
+                                    get: { resultDate },
+                                    set: { resultDate = $0 ?? Date() }
                                 ),
-                                helperText: "When the prescription was issued",
+                                helperText: "When the test results were issued",
                                 iconColor: .green,
                                 isRequired: false
                             )
@@ -173,7 +186,6 @@ struct PrescriptionEditor: View {
                     }
                     
                     // Medical Case Information Section
-                    
                     VStack(alignment: .leading, spacing: Spacing.small) {
                         Text("Medical Case")
                             .font(.headline)
@@ -214,7 +226,6 @@ struct PrescriptionEditor: View {
                                                 showIcon: false
                                             )
                                             
-                                            
                                             Text(isActive ? "Active" : "Inactive")
                                                 .font(.caption2.weight(.medium))
                                                 .foregroundStyle(isActive ? Color.healthSuccess : Color.healthWarning)
@@ -223,53 +234,6 @@ struct PrescriptionEditor: View {
                                     
                                     Spacer()
                                 }
-                            }
-                        }
-                    }
-                    
-                    // Follow-up Information Section
-                    VStack(alignment: .leading, spacing: Spacing.small) {
-                        Text("Follow-up Information")
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                            .padding(.horizontal, Spacing.medium)
-                        
-                        VStack(spacing: Spacing.medium) {
-                            ToggleItem(
-                                icon: hasFollowUp ? "calendar.badge.clock" : "calendar.badge.minus",
-                                title: "Schedule Follow-up",
-                                subtitle: "Set follow-up appointment",
-                                isOn: $hasFollowUp,
-                                helperText: "Enable to set follow-up date and tests",
-                                iconColor: hasFollowUp ? .orange : .secondary
-                            )
-                            
-                            if hasFollowUp {
-                                DatePickerItem(
-                                    icon: "calendar.badge.plus",
-                                    title: "Follow-up Date",
-                                    selectedDate: Binding(
-                                        get: { followUpDate ?? Date().addingTimeInterval(7 * 24 * 60 * 60) },
-                                        set: { followUpDate = $0 }
-                                    ),
-                                    helperText: "When to schedule the follow-up",
-                                    iconColor: .orange,
-                                    isRequired: false
-                                )
-                                
-                                TextFieldItem(
-                                    icon: "testtube.2",
-                                    title: "Follow-up Tests",
-                                    text: $followUpTests,
-                                    placeholder: "Blood test, X-ray, etc. (comma-separated)",
-                                    helperText: "Tests to be performed during follow-up",
-                                    iconColor: .purple,
-                                    submitLabel: FormField.followUpTests.appropriateSubmitLabel,
-                                    onSubmit: {
-                                        focusNextField(after: .followUpTests)
-                                    }
-                                )
-                                .focused($focusedField, equals: .followUpTests)
                             }
                         }
                     }
@@ -283,10 +247,10 @@ struct PrescriptionEditor: View {
                         
                         TextFieldItem(
                             icon: "note.text",
-                            title: "Prescription Notes",
+                            title: "Report Notes",
                             text: $notes,
-                            placeholder: "Additional notes or instructions",
-                            helperText: "Any additional prescription details",
+                            placeholder: "Additional notes about the blood report",
+                            helperText: "Any additional report details or observations",
                             iconColor: .gray,
                             submitLabel: FormField.notes.appropriateSubmitLabel,
                             onSubmit: {
@@ -296,18 +260,18 @@ struct PrescriptionEditor: View {
                         .focused($focusedField, equals: .notes)
                     }
                     
-                    // Medications Section
+                    // Test Results Section
                     VStack(alignment: .leading, spacing: Spacing.small) {
                         HStack {
-                            Text("Medications")
+                            Text("Test Results")
                                 .font(.headline)
                                 .foregroundStyle(.secondary)
                             
                             Spacer()
                             
                             Button {
-                                medicationToEdit = nil
-                                showMedicationEditor = true
+                                testResultToEdit = nil
+                                showTestResultEditor = true
                             } label: {
                                 HStack(spacing: Spacing.small) {
                                     Image(systemName: "plus.circle.fill")
@@ -320,24 +284,24 @@ struct PrescriptionEditor: View {
                         }
                         .padding(.horizontal, Spacing.medium)
                         
-                        if medications.isEmpty {
+                        if testResults.isEmpty {
                             HealthCard {
                                 VStack(spacing: Spacing.medium) {
                                     Circle()
                                         .fill(Color.secondary.opacity(0.15))
                                         .frame(width: Size.avatarLarge, height: Size.avatarLarge)
                                         .overlay {
-                                            Image(systemName: "pills")
+                                            Image(systemName: "testtube.2")
                                                 .font(.system(size: 24, weight: .semibold))
                                                 .foregroundStyle(.secondary)
                                         }
                                     
                                     VStack(spacing: Spacing.small) {
-                                        Text("No Medications Added")
+                                        Text("No Test Results Added")
                                             .font(.headline.weight(.semibold))
                                             .foregroundStyle(.primary)
                                         
-                                        Text("Tap the Add button to add medications to this prescription")
+                                        Text("Tap the Add button to add individual test results to this blood report")
                                             .font(.body)
                                             .foregroundStyle(.secondary)
                                             .multilineTextAlignment(.center)
@@ -348,8 +312,8 @@ struct PrescriptionEditor: View {
                             }
                         } else {
                             VStack(spacing: Spacing.medium) {
-                                ForEach(medications) { medication in
-                                    medicationListItem(medication: medication)
+                                ForEach(testResults) { testResult in
+                                    testResultListItem(testResult: testResult)
                                 }
                             }
                         }
@@ -379,20 +343,20 @@ struct PrescriptionEditor: View {
                 }
             }
             .onAppear {
-                if let prescription {
-                    loadPrescriptionData(prescription)
+                if let bloodReport {
+                    loadBloodReportData(bloodReport)
                 }
             }
-            .sheet(isPresented: $showMedicationEditor) {
-                if let medicationToEdit = medicationToEdit {
-                    MedicationEditor(
-                        medication: medicationToEdit,
-                        onSave: handleMedicationSave
+            .sheet(isPresented: $showTestResultEditor) {
+                if let testResultToEdit = testResultToEdit {
+                    BloodTestResultEditor(
+                        bloodTestResult: testResultToEdit,
+                        onSave: handleTestResultSave
                     )
                 } else {
-                    MedicationEditor(
-                        medication: nil,
-                        onSave: handleMedicationSave
+                    BloodTestResultEditor(
+                        bloodTestResult: nil,
+                        onSave: handleTestResultSave
                     )
                 }
             }
@@ -401,66 +365,66 @@ struct PrescriptionEditor: View {
         .presentationDragIndicator(.visible)
     }
     
-    
     @ViewBuilder
-    private func medicationListItem(medication: Medication) -> some View {
+    private func testResultListItem(testResult: BloodTestResult) -> some View {
         HealthCard {
             HStack(spacing: Spacing.medium) {
-                // Medication icon
+                // Test result icon
                 Circle()
-                    .fill(Color.healthPrimary.opacity(0.15))
+                    .fill(testResult.isAbnormal == true ? Color.healthError.opacity(0.15) : Color.healthSuccess.opacity(0.15))
                     .frame(width: Size.avatarMedium, height: Size.avatarMedium)
                     .overlay {
-                        Text(String(medication.name?.prefix(1).uppercased() ?? "P"))
+                        Image(systemName: testResult.isAbnormal == true ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
                             .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(Color.healthPrimary)
+                            .foregroundStyle(testResult.isAbnormal == true ? Color.healthError : Color.healthSuccess)
                     }
                 
-                // Medication details
+                // Test result details
                 VStack(alignment: .leading, spacing: Spacing.small) {
-                    OptionalView(medication.name) { name in
+                    OptionalView(testResult.testName) { name in
                         Text(name)
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(.primary)
                     }
                     
-                    
                     HStack(spacing: Spacing.small) {
-                        if let dosage = medication.dosage {
-                            Text(dosage)
+                        if let value = testResult.value {
+                            Text(value)
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(.primary)
+                        }
+                        
+                        if testResult.value != nil && testResult.unit != nil {
+                            Text(testResult.unit!)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                         
-                        if medication.dosage != nil && medication.numberOfDays > 0 {
+                        if testResult.value != nil && testResult.referenceRange != nil {
                             Text("•")
                                 .font(.caption)
                                 .foregroundStyle(.tertiary)
                         }
                         
-                        if medication.numberOfDays > 0 {
-                            Text("\(medication.numberOfDays) days")
+                        if let referenceRange = testResult.referenceRange {
+                            Text("Ref: \(referenceRange)")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
                     
-                    // Frequency display
-                    if let frequency = medication.frequency,
-                       frequency.isEmpty {
+                    // Status badge
+                    if let isAbnormal = testResult.isAbnormal {
                         HStack(spacing: Spacing.small) {
-                            ForEach(frequency.prefix(3), id: \.mealTime) { schedule in
-                                frequencyBadge(for: schedule)
-                            }
-                            
-                            if frequency.count > 3 {
-                                Text("+\(frequency.count - 3)")
-                                    .font(.caption2.weight(.medium))
-                                    .foregroundStyle(.secondary)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(Color.secondary.opacity(0.1), in: Capsule())
-                            }
+                            Text(isAbnormal ? "Abnormal" : "Normal")
+                                .font(.caption2.weight(.medium))
+                                .foregroundStyle(isAbnormal ? Color.healthError : Color.healthSuccess)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(
+                                    (isAbnormal ? Color.healthError : Color.healthSuccess).opacity(0.1),
+                                    in: Capsule()
+                                )
                         }
                     }
                 }
@@ -469,8 +433,8 @@ struct PrescriptionEditor: View {
                 
                 // Edit button
                 Button {
-                    medicationToEdit = medication
-                    showMedicationEditor = true
+                    testResultToEdit = testResult
+                    showTestResultEditor = true
                 } label: {
                     Image(systemName: "pencil.circle.fill")
                         .font(.system(size: 20, weight: .medium))
@@ -481,123 +445,85 @@ struct PrescriptionEditor: View {
         }
     }
     
-    @ViewBuilder
-    private func frequencyBadge(for schedule: MedicationSchedule) -> some View {
-        let timePeriod = mapMealTimeToTimePeriod(schedule.mealTime)
-        
-        HStack(spacing: 2) {
-            Image(systemName: timePeriod.icon)
-                .font(.caption2)
-            
-            Text(schedule.mealTime.rawValue.prefix(1).uppercased())
-                .font(.caption2.weight(.medium))
-        }
-        .foregroundStyle(timePeriod.color)
-        .padding(.horizontal, 6)
-        .padding(.vertical, 2)
-        .background(timePeriod.color.opacity(0.1), in: Capsule())
-    }
-    
-    private func mapMealTimeToTimePeriod(_ mealTime: MedicationSchedule.MealTime) -> MedicationTracker.TimePeriod {
-        switch mealTime {
-        case .breakfast:
-            return .morning
-        case .lunch:
-            return .afternoon
-        case .dinner:
-            return .evening
-        case .bedtime:
-            return .night
-        }
-    }
-    
-    private func handleMedicationSave(_ medication: Medication) {
-        if let index = medications.firstIndex(where: { $0.id == medication.id }) {
-            // Update existing medication
-            medications[index] = medication
+    private func handleTestResultSave(_ testResult: BloodTestResult) {
+        if let index = testResults.firstIndex(where: { $0.id == testResult.id }) {
+            // Update existing test result
+            testResults[index] = testResult
         } else {
-            // Add new medication
-            medications.append(medication)
+            // Add new test result
+            testResults.append(testResult)
         }
     }
     
-    private func loadPrescriptionData(_ prescription: Prescription) {
-        doctorName = prescription.doctorName ?? ""
-        facilityName = prescription.facilityName ?? ""
-        if let dateIssued = prescription.dateIssued {
-            self.dateIssued = dateIssued
+    private func loadBloodReportData(_ bloodReport: BloodReport) {
+        testName = bloodReport.testName ?? ""
+        labName = bloodReport.labName ?? ""
+        category = bloodReport.category ?? ""
+        if let resultDate = bloodReport.resultDate {
+            self.resultDate = resultDate
         }
-        followUpDate = prescription.followUpDate
-        hasFollowUp = prescription.followUpDate != nil
-        followUpTests = prescription.followUpTests?.joined(separator: ", ") ?? ""
-        notes = prescription.notes ?? ""
-        medications = prescription.medications ?? []
+        notes = bloodReport.notes ?? ""
+        testResults = bloodReport.testResults ?? []
     }
     
     private func save() {
         let now = Date()
         
-        // Parse follow-up tests
-        let testsArray = followUpTests
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .isEmpty ? [] : followUpTests
-            .components(separatedBy: ",")
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-        
-        if let prescription {
-            // Edit existing prescription
-            prescription.doctorName = doctorName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : doctorName.trimmingCharacters(in: .whitespacesAndNewlines)
-            prescription.facilityName = facilityName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : facilityName.trimmingCharacters(in: .whitespacesAndNewlines)
-            prescription.dateIssued = dateIssued
-            prescription.followUpDate = hasFollowUp ? followUpDate : nil
-            prescription.followUpTests = testsArray.isEmpty ? nil : testsArray
-            prescription.notes = notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : notes.trimmingCharacters(in: .whitespacesAndNewlines)
-            prescription.medications = medications
-            prescription.updatedAt = now
+        if let bloodReport {
+            // Edit existing blood report
+            bloodReport.testName = testName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : testName.trimmingCharacters(in: .whitespacesAndNewlines)
+            bloodReport.labName = labName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : labName.trimmingCharacters(in: .whitespacesAndNewlines)
+            bloodReport.category = category.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : category.trimmingCharacters(in: .whitespacesAndNewlines)
+            bloodReport.resultDate = resultDate
+            bloodReport.notes = notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : notes.trimmingCharacters(in: .whitespacesAndNewlines)
+            bloodReport.testResults = testResults
+            bloodReport.updatedAt = now
         } else {
-            // Create new prescription
-            let newPrescription = Prescription(
+            // Create new blood report
+            let newBloodReport = BloodReport(
                 id: UUID(),
-                followUpDate: hasFollowUp ? followUpDate : nil,
-                followUpTests: testsArray.isEmpty ? [] : testsArray,
-                dateIssued: dateIssued,
-                doctorName: doctorName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : doctorName.trimmingCharacters(in: .whitespacesAndNewlines),
-                facilityName: facilityName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : facilityName.trimmingCharacters(in: .whitespacesAndNewlines),
+                testName: testName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : testName.trimmingCharacters(in: .whitespacesAndNewlines),
+                labName: labName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : labName.trimmingCharacters(in: .whitespacesAndNewlines),
+                category: category.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : category.trimmingCharacters(in: .whitespacesAndNewlines),
+                resultDate: resultDate,
                 notes: notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : notes.trimmingCharacters(in: .whitespacesAndNewlines),
-                document: nil,
+                createdAt: now,
+                updatedAt: now,
                 medicalCase: medicalCase,
-                medications: medications
+                document: nil,
+                testResults: testResults
             )
-            modelContext.insert(newPrescription)
+            
+            // Set bloodReport relationship for all test results
+            for testResult in testResults {
+                testResult.bloodReport = newBloodReport
+            }
+            
+            modelContext.insert(newBloodReport)
         }
     }
 }
 
-#Preview("Add Prescription") {
-    PrescriptionEditor(prescription: nil, medicalCase: .sampleCase)
-        .modelContainer(for: Prescription.self, inMemory: true)
+#Preview("Add Blood Report") {
+    BloodReportEditor(bloodReport: nil, medicalCase: .sampleCase)
+        .modelContainer(for: BloodReport.self, inMemory: true)
 }
 
-#Preview("Edit Prescription") {
-    let samplePrescription = Prescription(
+#Preview("Edit Blood Report") {
+    let sampleBloodReport = BloodReport(
         id: UUID(),
-        followUpDate: Date().addingTimeInterval(7 * 24 * 60 * 60),
-        followUpTests: ["Blood test", "X-ray"],
-        dateIssued: Date(),
-        doctorName: "Dr. John Smith",
-        facilityName: "General Hospital",
-        notes: "Take with food",
-        document: Document(
-            fileName: "Sample_Prescription",
-            fileURL: "pas.pasd",
-            documentType: .prescription,
-            fileSize: 0
-        ),
+        testName: "Complete Blood Count",
+        labName: "LabCorp",
+        category: "Hematology",
+        resultDate: Date().addingTimeInterval(-86400 * 2),
+        notes: "All values within normal range",
+        createdAt: Date(),
+        updatedAt: Date(),
         medicalCase: .sampleCase,
-        medications: []
+        document: nil,
+        testResults: []
     )
     
-    PrescriptionEditor(prescription: samplePrescription, medicalCase: .sampleCase)
-        .modelContainer(for: Prescription.self, inMemory: true)
+    BloodReportEditor(bloodReport: sampleBloodReport, medicalCase: .sampleCase)
+        .modelContainer(for: BloodReport.self, inMemory: true)
 }

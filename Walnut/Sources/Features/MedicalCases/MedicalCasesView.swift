@@ -74,7 +74,7 @@ struct MedicalCasesView: View {
             .navigationTitle("Medical Cases")
             .navigationBarTitleDisplayMode(.large)
             .searchable(text: Binding(
-                get: { viewModel.searchText ?? "" },
+                get: { viewModel.searchText },
                 set: { viewModel.updateSearchText($0) }
             ), prompt: "Search cases, patients, or notes")
             .toolbar {

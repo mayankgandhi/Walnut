@@ -28,7 +28,7 @@ class BloodTestResult: Identifiable, Sendable {
          unit: String,
          referenceRange: String,
          isAbnormal: Bool = false,
-         bloodReport: BloodReport) {
+         bloodReport: BloodReport? = nil) {
         self.id = id
         self.testName = testName
         self.value = value

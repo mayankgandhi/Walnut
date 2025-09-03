@@ -7,54 +7,85 @@
 //
 
 import SwiftUI
+import WalnutDesignSystem
 import UniformTypeIdentifiers
 import PhotosUI
 
 struct DocumentSourcePicker: View {
     
-    @Environment(DocumentPickerStore.self) private var store
+    let medicalCase: MedicalCase
+    @State var store: DocumentPickerStore
     @State private var showingActionSheet = false
     
     var body: some View {
-        @Bindable var bindableStore = store
-        
-        Button {
-            showingActionSheet = true
-        } label: {
-            DocumentUploadArea()
-        }
-        .confirmationDialog("Select Document Source", isPresented: $showingActionSheet, titleVisibility: .visible) {
-            Button("Files") {
-                store.presentDocumentPicker()
-            }
+        VStack(spacing: Spacing.large) {
             
-            Button("Photo Library") {
-                store.presentPhotosPicker()
+            Button {
+                showingActionSheet = true
+            } label: {
+                DocumentUploadArea(store: store)
             }
+            .confirmationDialog("Select Document Source", isPresented: $showingActionSheet, titleVisibility: .visible) {
+                Button("Files") {
+                    store.presentDocumentPicker()
+                }
+                
+                Button("Photo Library") {
+                    store.presentPhotosPicker()
+                }
+                
+                if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                    Button("Camera") {
+                        store.presentCamera()
+                    }
+                }
+                
+                Button("Cancel", role: .cancel) { }
+            }            
             
-            if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                Button("Camera") {
-                    store.presentCamera()
+            if let selectedDocumentType = store.selectedDocumentType {
+                switch selectedDocumentType {
+                case .prescription, .labResult:
+                    
+                    HStack {
+                        Rectangle()
+                            .frame(height: 1)
+                            .foregroundColor(.secondary.opacity(0.3))
+                        
+                        Text("or")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 12)
+                        
+                        Rectangle()
+                            .frame(height: 1)
+                            .foregroundColor(.secondary.opacity(0.3))
+                    }
+                    
+                    AddManuallyButton(medicalCase: medicalCase,
+                                      store: store)
+                    
+                default:
+                    EmptyView()
                 }
             }
             
-            Button("Cancel", role: .cancel) { }
         }
         .fileImporter(
-            isPresented: $bindableStore.isDocumentPickerPresented,
+            isPresented: $store.isDocumentPickerPresented,
             allowedContentTypes: store.supportedFileTypes,
             allowsMultipleSelection: false
         ) { result in
             store.handleDocumentSelection(result)
         }
         .photosPicker(
-            isPresented: $bindableStore.isPhotosPickerPresented,
-            selection: $bindableStore.selectedPhotos,
+            isPresented: $store.isPhotosPickerPresented,
+            selection: $store.selectedPhotos,
             maxSelectionCount: 1,
             matching: .images
         )
-        .sheet(isPresented: $bindableStore.isCameraPresented) {
-            CameraPickerView()
+        .sheet(isPresented: $store.isCameraPresented) {
+            CameraPickerView(store: store)
         }
         .onChange(of: store.selectedPhotos) { _, newValue in
             store.handlePhotosSelection(newValue)
@@ -64,9 +95,13 @@ struct DocumentSourcePicker: View {
 
 // MARK: - Supporting Views
 
-private struct DocumentUploadArea: View {
+struct DocumentUploadArea: View {
     
-    @Environment(DocumentPickerStore.self) private var store
+    @State private var store: DocumentPickerStore
+    
+    init(store: DocumentPickerStore) {
+        self.store = store
+    }
     
     var body: some View {
         VStack(spacing: 16) {
@@ -107,20 +142,22 @@ private struct DocumentUploadArea: View {
         .cornerRadius(16)
     }
 }
+ 
+struct CameraPickerView: View {
+    
+    @State private var store: DocumentPickerStore
+    
+    init(store: DocumentPickerStore) {
+        self.store = store
+    }
 
-private struct CameraPickerView: View {
-    
-    @Environment(DocumentPickerStore.self) private var store
-    
     var body: some View {
-        @Bindable var bindableStore = store
-        
         ImagePickerRepresentable(
             selectedImage: Binding(
                 get: { store.selectedImage },
                 set: { store.handleCameraSelection($0) }
             ),
-            isPresented: $bindableStore.isCameraPresented,
+            isPresented: $store.isCameraPresented,
             sourceType: .camera
         )
     }
@@ -132,8 +169,8 @@ private struct CameraPickerView: View {
     @Previewable @State var store = DocumentPickerStore.forAllDocuments()
     
     VStack {
-        DocumentSourcePicker()
-            .environment(store)
+        DocumentSourcePicker(medicalCase: .sampleCase,
+                             store: store)
             .padding()
         
         Spacer()

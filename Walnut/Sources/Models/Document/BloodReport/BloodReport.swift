@@ -32,11 +32,11 @@ class BloodReport: Identifiable, Sendable, Equatable {
     var testResults: [BloodTestResult]? = []
     
     init(id: UUID = UUID(),
-         testName: String,
-         labName: String,
-         category: String,
+         testName: String? = nil,
+         labName: String? = nil,
+         category: String? = nil,
          resultDate: Date,
-         notes: String = "",
+         notes: String? = nil,
          createdAt: Date = Date(),
          updatedAt: Date = Date(),
          medicalCase: MedicalCase,

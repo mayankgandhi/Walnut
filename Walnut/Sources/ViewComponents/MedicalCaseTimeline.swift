@@ -90,15 +90,16 @@ struct MedicalCaseTimelineEventProvider: TimelineEventProvider {
         // Prescription events
         if let prescriptionEvents = medicalCase.prescriptions?
             .sorted(by: { $0.dateIssued < $1.dateIssued })
-            .map { prescription in
+            .map({ prescription in
                 TimelineEvent(
                     icon: "pills.fill",
                     color: .blue,
                     title: "Prescription Added",
-                    subtitle: prescription.doctorName.map { "\($0)" } ?? "New medication prescribed",
+                    subtitle: prescription.doctorName
+                        .map { "\($0)" } ?? "New medication prescribed",
                     date: prescription.dateIssued
                 )
-        } {
+            }) {
             events.append(contentsOf: prescriptionEvents)
         }
         
@@ -106,12 +107,12 @@ struct MedicalCaseTimelineEventProvider: TimelineEventProvider {
         // Blood report events
         if let bloodReportEvents = medicalCase.bloodReports?
             .sorted(by: { $0.resultDate < $1.resultDate })
-            .map { bloodReport in
-            let abnormalCount = bloodReport.testResults?.filter(
-                { $0.isAbnormal ?? false }).count
+            .map({ bloodReport in
+                let abnormalCount = bloodReport.testResults?.filter(
+                    { $0.isAbnormal ?? false }).count
                 let subtitle = abnormalCount > 0 ?
-                    "\(bloodReport.testName) - \(abnormalCount) abnormal results" : 
-                    "\(bloodReport.testName) - All normal"
+                "\(String(describing: bloodReport.testName)) - \(String(describing: abnormalCount)) abnormal results" : 
+                "\(String(describing: bloodReport.testName)) - All normal"
                 
                 return TimelineEvent(
                     icon: "drop.fill",
@@ -120,7 +121,7 @@ struct MedicalCaseTimelineEventProvider: TimelineEventProvider {
                     subtitle: subtitle,
                     date: bloodReport.resultDate
                 )
-        } {
+            }) {
             events.append(contentsOf: bloodReportEvents)
         }
         

@@ -48,31 +48,10 @@ struct MedicalCaseDetailView: View {
             HStack(spacing: Spacing.medium) {
                 // Specialty Icon with Modern Design
                 OptionalView(medicalCase.specialty) { specialty in
-                    ZStack {
-                        // Background circle with gradient
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        specialty.color.opacity(0.15),
-                                        specialty.color.opacity(0.05)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(width: 72, height: 72)
-                        
-                        // Animated pulse ring
-                        Circle()
-                            .stroke(specialty.color.opacity(0.3), lineWidth: 1.5)
-                            .frame(width: 80, height: 80)
-                        
-                        // Specialty icon
-                        Image(systemName: specialty.icon)
-                            .font(.system(size: 28, weight: .medium, design: .rounded))
-                            .foregroundStyle(specialty.color)
-                    }
+                    Image(specialty.icon)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 96, height: 96, alignment: .center)
                 }
                 
                 // Content Section
@@ -82,24 +61,7 @@ struct MedicalCaseDetailView: View {
                         .font(.title2.weight(.bold))
                         .foregroundStyle(.primary)
                         .lineLimit(2)
-                        .multilineTextAlignment(.leading)
-                    
-                    // Patient Info
-                    HStack {
-                        if let fullName = medicalCase.patient?.name,
-                           let specialty = medicalCase.specialty {
-                            PatientAvatar(
-                                name: String(fullName.prefix(2)),
-                                color: specialty.color
-                            )
-                        }
-                        
-                        if let fullName = medicalCase.patient?.name {
-                            Text(fullName)
-                                .font(.callout.weight(.medium))
-                                .foregroundStyle(.primary)
-                        }
-                    }
+                        .multilineTextAlignment(.leading)                    
                     
                     OptionalView(medicalCase.specialty) { specialty in
                         HStack {

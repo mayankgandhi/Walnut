@@ -75,7 +75,7 @@ public struct FileIcon: View {
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityLabel(
-            "\(filename), \(documentType?.accessibilityDescription)"
+            "\(filename), \(String(describing: documentType?.accessibilityDescription))"
         )
         .accessibilityHint("Double tap to open document")
         .accessibilityAddTraits(.isButton)

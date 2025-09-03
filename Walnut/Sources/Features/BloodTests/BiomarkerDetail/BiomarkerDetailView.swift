@@ -31,23 +31,6 @@ public struct BiomarkerDetailView: View {
         ))
     }
     
-    // Convenience initializer for BloodTestResults
-    public init(
-        testName: String,
-        bloodTestResults: [Any], // BloodTestResult array - using Any to avoid import issues
-        color: Color = .healthPrimary
-    ) {
-        // Note: In real implementation, would convert bloodTestResults to DataPoint
-        self._viewModel = State(wrappedValue: BiomarkerDetailViewModel(
-            biomarkerName: testName,
-            unit: "",
-            normalRange: "",
-            dataPoints: [],
-            color: color
-        ))
-    }
-    
-    
     public var body: some View {
         ScrollView {
             VStack(spacing: Spacing.large) {
@@ -507,7 +490,7 @@ public struct BiomarkerDetailView: View {
             }
             
             HStack {
-                Text("Lab: \(dataPoint.bloodReport)")
+                Text("Lab: \(String(describing: dataPoint.bloodReport))")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
                 

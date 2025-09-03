@@ -48,8 +48,7 @@ struct ModularDocumentPickerView: View {
                     )
                 } else if store.selectedDocumentType != nil {
                     // Document Source Picker
-                    DocumentSourcePicker()
-                        .environment(store)
+                    DocumentSourcePicker(medicalCase: medicalCase, store: store)
                         .padding(.horizontal)
                     
                     // Clear selection button
@@ -96,8 +95,6 @@ struct ModularDocumentPickerView: View {
                     }
                 }
             }
-            .presentationCornerRadius(Spacing.large)
-            .presentationDetents([.medium])
         }
         
     }

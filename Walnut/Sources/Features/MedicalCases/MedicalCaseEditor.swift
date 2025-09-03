@@ -183,7 +183,9 @@ struct MedicalCaseEditor: View {
                                         .font(.headline.weight(.semibold))
                                         .foregroundStyle(.primary)
                                     
-                                    Text("\(patient?.age) years old • \(patient?.gender)")
+                                    Text(
+                                        "\(String(describing: patient?.age)) years old • \(String(describing: patient?.gender))"
+                                    )
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                 }

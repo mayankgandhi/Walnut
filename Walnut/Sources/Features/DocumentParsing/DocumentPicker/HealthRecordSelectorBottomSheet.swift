@@ -29,9 +29,7 @@ struct HealthRecordSelectorBottomSheet: View {
                     } label: {
                         Image(systemName: "xmark")
                     }
-                    
                 }
-                
             })
             .toolbar(content: {
                 if store.selectedDocumentType != nil {
