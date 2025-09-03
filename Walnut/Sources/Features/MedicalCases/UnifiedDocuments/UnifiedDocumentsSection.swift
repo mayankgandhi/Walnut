@@ -12,11 +12,9 @@ import SwiftData
 
 struct UnifiedDocumentsSection: View {
     
-    private var modelContext: ModelContext
+    @Environment(\.modelContext) var modelContext
     let medicalCase: MedicalCase
-    @State private var store: DocumentPickerStore
-    @State private var processingService: DocumentProcessingService
-   
+    
     @State private var viewModel = UnifiedDocumentsSectionViewModel()
     
     init(
@@ -24,12 +22,8 @@ struct UnifiedDocumentsSection: View {
         medicalCase: MedicalCase,
         viewModel: UnifiedDocumentsSectionViewModel = UnifiedDocumentsSectionViewModel()
     ) {
-        self.modelContext = modelContext
         self.medicalCase = medicalCase
-        self._store = State(initialValue: DocumentPickerStore())
-        self.processingService = DocumentProcessingService.createWithAIKit(
-            modelContext: modelContext
-        )
+
         self.viewModel = viewModel
     }
     
@@ -39,13 +33,13 @@ struct UnifiedDocumentsSection: View {
             spacing: Spacing.medium
         ) {
             
-            HealthCardHeader.medicalDocuments(
-                count: viewModel.totalDocumentCount,
-                onAddTap: {
-                    store.resetState()
-                    viewModel.showAddDocumentSheet()
-                }
-            )
+            HStack {
+                HealthCardHeader.medicalDocuments(
+                    count: viewModel.totalDocumentCount
+                )
+            
+                AddDocumentsButton(modelContext: modelContext, medicalCase: medicalCase)
+            }
             
             Group {
                 if viewModel.isLoading {
@@ -62,32 +56,7 @@ struct UnifiedDocumentsSection: View {
             .animation(.easeInOut(duration: 0.3), value: viewModel.isLoading)
             .animation(.easeInOut(duration: 0.3), value: viewModel.isEmpty)
         }
-        .sheet(
-            isPresented: $viewModel.showHealthRecordSelector,
-            onDismiss: {
-                viewModel.showHealthRecordSelector = false
-            },
-            content: {
-                HealthRecordSelectorBottomSheet(
-                    medicalCase: medicalCase,
-                    store: store,
-                    showModularDocumentPicker: $viewModel.showModularDocumentPicker
-                )
-            }
-        )
-        .sheet(
-            isPresented: $viewModel.showModularDocumentPicker,
-            onDismiss: {
-                viewModel.showModularDocumentPicker = false
-            },
-            content: {
-                ModularDocumentPickerView(
-                    medicalCase: medicalCase,
-                    store: store,
-                    processingService: processingService
-                )
-            }
-        )
+       
         .navigationDestination(item: $viewModel.navigationState.selectedPrescription) { prescription in
             PrescriptionDetailView(prescription: prescription)
         }

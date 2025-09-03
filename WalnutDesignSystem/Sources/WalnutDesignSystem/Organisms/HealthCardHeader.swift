@@ -125,14 +125,11 @@ public extension HealthCardHeader {
     /// Standard medical documents header
     static func medicalDocuments(
         count: Int,
-        onAddTap: @escaping () -> Void
     ) -> HealthCardHeader {
         HealthCardHeader(
             icon: "heart.text.square.fill",
             title: "Medical Documents",
             subtitle: "\(count) documents",
-            actionIcon: "plus.circle.fill",
-            onActionTap: onAddTap
         )
     }
     
@@ -251,9 +248,6 @@ public extension HealthCardHeader {
         VStack(spacing: Spacing.xl) {
             HealthCardHeader.medicalDocuments(
                 count: 12,
-                onAddTap: {
-                    print("Add document tapped")
-                }
             )
             // Timeline Header
             HealthCardHeader.timeline()

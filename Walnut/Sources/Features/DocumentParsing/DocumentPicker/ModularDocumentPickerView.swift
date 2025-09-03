@@ -96,6 +96,8 @@ struct ModularDocumentPickerView: View {
                     }
                 }
             }
+            .presentationCornerRadius(Spacing.large)
+            .presentationDetents([.medium])
         }
         
     }
