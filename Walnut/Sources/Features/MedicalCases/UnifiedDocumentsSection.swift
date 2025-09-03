@@ -41,7 +41,10 @@ struct UnifiedDocumentsSection: View {
             
             HealthCardHeader.medicalDocuments(
                 count: viewModel.totalDocumentCount,
-                onAddTap: viewModel.showAddDocumentSheet
+                onAddTap: {
+                    store.resetState()
+                    viewModel.showAddDocumentSheet()
+                }
             )
             
             Group {

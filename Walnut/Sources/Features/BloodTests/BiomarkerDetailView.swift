@@ -14,7 +14,7 @@ import WalnutDesignSystem
 public struct BiomarkerDetailView: View {
     
     @State var viewModel: BiomarkerDetailViewModel
-
+    
     public init(
         biomarkerName: String,
         unit: String,
@@ -54,18 +54,18 @@ public struct BiomarkerDetailView: View {
                 // Hero section with current value and trend
                 heroSection
                 
-                // Time frame selector
-                timeFrameSelector
+                // Information section
+                informationSection
                 
                 // Chart section with enhanced visualization
                 chartSection
                 
+                // Time frame selector
+                timeFrameSelector
+
                 // Metrics cards
                 metricsSection
-                
-                // Information section
-                informationSection
-                
+                                
                 // Historical data section
                 if viewModel.filteredDataPoints.count > 1 {
                     historicalDataSection
@@ -223,6 +223,47 @@ public struct BiomarkerDetailView: View {
     // MARK: - Chart Section
     private var chartSection: some View {
         HealthCard {
+            
+            // Enhanced chart
+            EnhancedBiomarkerChart(
+                dataPoints: viewModel.filteredDataPoints.map { point in
+                    BiomarkerDataPoint(
+                        date: point.date,
+                        value: point.value,
+                        bloodReport: point.bloodReport,
+                        bloodReportURLPath: nil
+                    )
+                },
+                color: viewModel.primaryColor,
+                normalRange: viewModel.normalRangeText,
+                selectedDataPoint: Binding<BiomarkerDataPoint?>(
+                    get: {
+                        guard let selected = viewModel.selectedDataPoint else { return nil }
+                        return BiomarkerDataPoint(
+                            date: selected.date,
+                            value: selected.value,
+                            bloodReport: selected.bloodReport,
+                            bloodReportURLPath: nil
+                        )
+                    },
+                    set: { newValue in
+                        if let chartPoint = newValue {
+                            // Find the corresponding dataPoint in our array
+                            let dataPoint = viewModel.filteredDataPoints.first { point in
+                                point.date == chartPoint.date &&
+                                point.value == chartPoint.value &&
+                                point.bloodReport == chartPoint.bloodReport
+                            }
+                            viewModel.selectDataPoint(dataPoint)
+                        } else {
+                            viewModel.selectDataPoint(nil)
+                        }
+                    }
+                ),
+                animateChart: viewModel.animateChart
+            )
+            .frame(height: 280)
+            
             VStack(alignment: .leading, spacing: Spacing.medium) {
                 // Chart header
                 HStack {
@@ -259,46 +300,6 @@ public struct BiomarkerDetailView: View {
                         }
                     }
                 }
-                
-                // Enhanced chart
-                EnhancedBiomarkerChart(
-                    dataPoints: viewModel.filteredDataPoints.map { point in
-                        EnhancedBiomarkerChart.BiomarkerDataPoint(
-                            date: point.date,
-                            value: point.value,
-                            isAbnormal: point.isAbnormal,
-                            bloodReport: point.bloodReport
-                        )
-                    },
-                    color: viewModel.primaryColor,
-                    normalRange: viewModel.normalRangeText,
-                    selectedDataPoint: Binding<BiomarkerDataPoint?>(
-                        get: {
-                            guard let selected = viewModel.selectedDataPoint else { return nil }
-                            return EnhancedBiomarkerChart.BiomarkerDataPoint(
-                                date: selected.date,
-                                value: selected.value,
-                                isAbnormal: selected.isAbnormal,
-                                bloodReport: selected.bloodReport
-                            )
-                        },
-                        set: { newValue in
-                            if let chartPoint = newValue {
-                                // Find the corresponding dataPoint in our array
-                                let dataPoint = viewModel.filteredDataPoints.first { point in
-                                    point.date == chartPoint.date && 
-                                    point.value == chartPoint.value &&
-                                    point.bloodReport == chartPoint.bloodReport
-                                }
-                                viewModel.selectDataPoint(dataPoint)
-                            } else {
-                                viewModel.selectDataPoint(nil)
-                            }
-                        }
-                    ),
-                    animateChart: viewModel.animateChart
-                )
-                .frame(height: 280)
                 
                 // Chart insights
                 if let selectedDataPoint = viewModel.selectedDataPoint {
@@ -374,41 +375,40 @@ public struct BiomarkerDetailView: View {
     // MARK: - Information Section
     private var informationSection: some View {
         HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-                               
-                VStack(alignment: .leading, spacing: Spacing.small) {
-                    HStack {
-                        Image(systemName: "ruler")
-                            .font(.caption)
-                            .foregroundStyle(Color.healthPrimary)
-                            .frame(width: 20)
-                        
-                        Text("Reference Range:")
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(.secondary)
-                        
-                        Text("\(viewModel.normalRangeText) \(viewModel.unitText)")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.primary)
-                    }
+            
+            VStack(alignment: .leading, spacing: Spacing.small) {
+                HStack {
+                    Image(systemName: "ruler")
+                        .font(.caption)
+                        .foregroundStyle(Color.healthPrimary)
+                        .frame(width: 20)
                     
-                    HStack {
-                        Image(systemName: "calendar")
-                            .font(.caption)
-                            .foregroundStyle(Color.healthPrimary)
-                            .frame(width: 20)
-                        
-                        Text("Frequency:")
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(.secondary)
-                        
-                        Text("Regular monitoring recommended")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.primary)
-                    }
+                    Text("Reference Range:")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    
+                    Text("\(viewModel.normalRangeText) \(viewModel.unitText)")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.primary)
+                }
+                
+                HStack {
+                    Image(systemName: "calendar")
+                        .font(.caption)
+                        .foregroundStyle(Color.healthPrimary)
+                        .frame(width: 20)
+                    
+                    Text("Frequency:")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    
+                    Text("Regular monitoring recommended")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.primary)
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     // MARK: - Historical Data Section

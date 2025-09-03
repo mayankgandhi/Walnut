@@ -27,7 +27,7 @@ struct HealthRecordSelectorBottomSheet: View {
                     Button {
                         dismiss()
                     } label: {
-                        Text("Dismiss")
+                        Image(systemName: "xmark")
                     }
                     
                 }

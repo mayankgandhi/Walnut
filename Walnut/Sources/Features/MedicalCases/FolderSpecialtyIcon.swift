@@ -21,7 +21,7 @@ public struct FolderSpecialtyIcon: View {
             .resizable()
             .scaledToFit()
             .foregroundStyle(
-                Color.healthPrimary.opacity(0.75)
+                Color.blue.opacity(0.75)
             )
             .overlay {
                 Image(specialty.icon)

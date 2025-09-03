@@ -24,7 +24,6 @@ class Patient: Identifiable, Sendable, Hashable {
     var emergencyContactPhone: String?
     
     var notes: String?
-    var isActive: Bool?
     
     // Primary color for theming - stored as hex string
     var primaryColorHex: String?
@@ -35,7 +34,7 @@ class Patient: Identifiable, Sendable, Hashable {
     @Relationship(deleteRule: .cascade, inverse: \MedicalCase.patient)
     var medicalCases: [MedicalCase]?
     
-    init(id: UUID, name: String, dateOfBirth: Date, gender: String, bloodType: String, emergencyContactName: String, emergencyContactPhone: String, notes: String, isActive: Bool, primaryColorHex: String? = nil, createdAt: Date, updatedAt: Date, medicalCases: [MedicalCase]) {
+    init(id: UUID, name: String, dateOfBirth: Date, gender: String, bloodType: String, emergencyContactName: String, emergencyContactPhone: String, notes: String, primaryColorHex: String? = nil, createdAt: Date, updatedAt: Date, medicalCases: [MedicalCase]) {
         self.id = id
         self.name = name
         self.dateOfBirth = dateOfBirth
@@ -44,7 +43,6 @@ class Patient: Identifiable, Sendable, Hashable {
         self.emergencyContactName = emergencyContactName
         self.emergencyContactPhone = emergencyContactPhone
         self.notes = notes
-        self.isActive = isActive
         self.primaryColorHex = primaryColorHex ?? Self.generateRandomColorHex()
         self.createdAt = createdAt
         self.updatedAt = updatedAt
@@ -101,7 +99,6 @@ extension Patient {
         emergencyContactName: "Jane Doe",
         emergencyContactPhone: "(555) 123-4567",
         notes: "Patient has mild allergies to penicillin.",
-        isActive: true,
         primaryColorHex: "#4ECDC4",
         createdAt: Date(),
         updatedAt: Date(),
@@ -119,7 +116,6 @@ extension Patient {
             emergencyContactName: "Robert Wilson",
             emergencyContactPhone: "(555) 987-6543",
             notes: "Patient with diabetes and hypertension. Regular monitoring required.",
-            isActive: true,
             primaryColorHex: "#FF6B6B",
             createdAt: Date(),
             updatedAt: Date(),

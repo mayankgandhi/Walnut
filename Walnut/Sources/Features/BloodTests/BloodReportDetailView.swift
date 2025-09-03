@@ -200,35 +200,14 @@ struct BloodReportDetailView: View {
             }
             .padding(.horizontal, Spacing.small)
             
-//            // Grid of Aggregated Biomarkers
-//            LazyVGrid(columns: [
-//                GridItem(.flexible())
-//            ], spacing: Spacing.medium) {
-//                ForEach(convertToAggregatedBiomarkers(), id: \.id) { biomarker in
-//                    NavigationLink(destination: createBiomarkerDetailView(for: biomarker)) {
-//                        BiomarkerListItemView(
-//                            data: biomarker.historicalValues,
-//                            color: biomarker.healthStatusColor,
-//                            biomarkerInfo: BiomarkerInfo(
-//                                name: biomarker.testName,
-//                                description: biomarker.description,
-//                                normalRange: biomarker.referenceRange,
-//                                unit: biomarker.unit
-//                            ),
-//                            biomarkerTrends: BiomarkerTrends(
-//                                currentValue: biomarker.currentNumericValue,
-//                                currentValueText: biomarker.currentValue,
-//                                comparisonText: biomarker.trendText,
-//                                comparisonPercentage: biomarker.trendPercentage,
-//                                trendDirection: biomarker.trendDirection,
-//                                normalRange: biomarker.referenceRange
-//                            )
-//                        )
-//                    }
-//                    .buttonStyle(PlainButtonStyle())
-//                }
-//            }
-//            .padding(.horizontal, Spacing.small)
+            LazyVStack {
+                ForEach(
+                    (bloodReport.testResults ?? []).map({ BioMarker.init(from: $0) }),
+                    id: \.id
+                ) { biomarker in
+                    BioMarkerGridItemView(biomarker: biomarker)
+                }
+            }
         }
     }
     

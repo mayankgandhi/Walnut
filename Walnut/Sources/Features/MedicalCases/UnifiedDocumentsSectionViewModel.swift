@@ -173,6 +173,7 @@ class UnifiedDocumentsSectionViewModel {
     }
     
     func showAddDocumentSheet() {
+        
         showHealthRecordSelector = true
     }
     

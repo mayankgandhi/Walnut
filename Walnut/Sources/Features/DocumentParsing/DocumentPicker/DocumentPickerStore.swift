@@ -74,6 +74,11 @@ class DocumentPickerStore {
         errorMessage = nil
     }
     
+    func resetState() {
+        selectedDocumentType = nil
+        clearSelection()
+    }
+    
     func selectDocumentType(_ type: DocumentType) {
         selectedDocumentType = type
     }

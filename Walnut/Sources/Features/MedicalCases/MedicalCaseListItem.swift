@@ -29,7 +29,6 @@ struct MedicalCaseListItem: View {
                 .foregroundStyle(.primary)
                 .lineLimit(2)
             
-            VStack(alignment: .leading, spacing: Spacing.xs) {
                 OptionalView(medicalCase.type) { medicalCaseType in
                     Text(medicalCaseType.displayName)
                         .font(
@@ -47,10 +46,8 @@ struct MedicalCaseListItem: View {
                         .font(.system(.caption2, design: .default, weight: .regular))
                         .foregroundStyle(.tertiary)
                 }
-            }
             
         }
-        .padding(Spacing.medium)
     }
 }
 

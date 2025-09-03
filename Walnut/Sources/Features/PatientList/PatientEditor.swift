@@ -307,7 +307,6 @@ struct PatientEditor: View {
         emergencyContactName = patient.emergencyContactName ?? emergencyContactName
         emergencyContactPhone = patient.emergencyContactPhone ?? emergencyContactPhone
         notes = patient.notes ?? notes
-        isActive = patient.isActive ?? isActive
         selectedColorHex = patient.primaryColorHex ?? Patient.generateRandomColorHex()
     }
     
@@ -325,7 +324,6 @@ struct PatientEditor: View {
             patient.emergencyContactName = emergencyContactName.trimmingCharacters(in: .whitespacesAndNewlines)
             patient.emergencyContactPhone = emergencyContactPhone.trimmingCharacters(in: .whitespacesAndNewlines)
             patient.notes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
-            patient.isActive = isActive
             patient.primaryColorHex = selectedColorHex
             patient.updatedAt = now
         } else {
@@ -339,7 +337,6 @@ struct PatientEditor: View {
                 emergencyContactName: emergencyContactName.trimmingCharacters(in: .whitespacesAndNewlines),
                 emergencyContactPhone: emergencyContactPhone.trimmingCharacters(in: .whitespacesAndNewlines),
                 notes: notes.trimmingCharacters(in: .whitespacesAndNewlines),
-                isActive: isActive,
                 primaryColorHex: selectedColorHex,
                 createdAt: now,
                 updatedAt: now,

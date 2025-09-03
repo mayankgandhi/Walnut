@@ -134,7 +134,7 @@ struct MedicalCasesView: View {
     private func medicalCasesList(viewModel: MedicalCasesViewModel) -> some View {
         ScrollView {
             LazyVGrid(
-                columns: [.init(), .init()],
+                columns: [.init(), .init(), .init()],
                 alignment: .leading,
                 spacing: Spacing.xs
             ) {
@@ -185,3 +185,88 @@ struct MedicalCasesView: View {
         }
     }
 }
+
+#Preview("Medical Cases with 4 Cases") {
+    let schema = Schema([
+        Patient.self,
+        MedicalCase.self,
+        Prescription.self,
+        BloodReport.self,
+        Document.self
+    ])
+    let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: schema, configurations: [modelConfiguration])
+    
+    let patient = Patient(
+        id: UUID(),
+        name: "Alice Johnson",
+        dateOfBirth: Calendar.current.date(byAdding: .year, value: -28, to: Date()) ?? Date(),
+        gender: "Female",
+        bloodType: "B+",
+        emergencyContactName: "Bob Johnson",
+        emergencyContactPhone: "(555) 234-5678",
+        notes: "No known allergies",
+        primaryColorHex: "#4ECDC4",
+        createdAt: Date(),
+        updatedAt: Date(),
+        medicalCases: []
+    )
+    
+    let medicalCase1 = MedicalCase(
+        id: UUID(),
+        title: "Annual Physical Exam",
+        notes: "Routine annual check-up. All vitals normal, blood work pending. Patient reports feeling healthy with no concerns.",
+        type: .healthCheckup,
+        specialty: .generalPractitioner,
+        isActive: true,
+        createdAt: Date().addingTimeInterval(-86400 * 14),
+        updatedAt: Date().addingTimeInterval(-86400 * 2),
+        patient: patient
+    )
+    
+    let medicalCase2 = MedicalCase(
+        id: UUID(),
+        title: "Skin Rash Consultation",
+        notes: "Patient presents with persistent rash on arms. Diagnosed as contact dermatitis. Prescribed topical corticosteroid.",
+        type: .consultation,
+        specialty: .dermatologist,
+        isActive: true,
+        createdAt: Date().addingTimeInterval(-86400 * 7),
+        updatedAt: Date().addingTimeInterval(-86400 * 1),
+        patient: patient
+    )
+    
+    let medicalCase3 = MedicalCase(
+        id: UUID(),
+        title: "Knee Injury Follow-up",
+        notes: "Follow-up for previous knee injury from sports. Physical therapy progressing well. Patient reports 80% improvement.",
+        type: .followUp,
+        specialty: .orthopedicSurgeon,
+        isActive: false,
+        createdAt: Date().addingTimeInterval(-86400 * 30),
+        updatedAt: Date().addingTimeInterval(-86400 * 5),
+        patient: patient
+    )
+    
+    let medicalCase4 = MedicalCase(
+        id: UUID(),
+        title: "COVID-19 Vaccination",
+        notes: "Annual COVID-19 booster vaccination administered. No adverse reactions reported. Patient tolerated well.",
+        type: .immunisation,
+        specialty: .generalPractitioner,
+        isActive: false,
+        createdAt: Date().addingTimeInterval(-86400 * 21),
+        updatedAt: Date().addingTimeInterval(-86400 * 21),
+        patient: patient
+    )
+    
+    patient.medicalCases = [medicalCase1, medicalCase2, medicalCase3, medicalCase4]
+    
+    container.mainContext.insert(patient)
+    
+    return NavigationStack {
+        MedicalCasesView(viewModel: MedicalCasesViewModel(patient: patient, modelContext: container.mainContext))
+    }
+    .modelContainer(container)
+}
+
