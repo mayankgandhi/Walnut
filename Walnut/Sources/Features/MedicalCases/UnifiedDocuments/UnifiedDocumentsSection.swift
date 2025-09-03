@@ -56,7 +56,6 @@ struct UnifiedDocumentsSection: View {
             .animation(.easeInOut(duration: 0.3), value: viewModel.isLoading)
             .animation(.easeInOut(duration: 0.3), value: viewModel.isEmpty)
         }
-       
         .navigationDestination(item: $viewModel.navigationState.selectedPrescription) { prescription in
             PrescriptionDetailView(prescription: prescription)
         }
@@ -91,38 +90,17 @@ struct UnifiedDocumentsSection: View {
     
     private var emptyStateView: some View {
         VStack(alignment: .center, spacing: Spacing.large) {
-            ZStack {
-                Circle()
-                    .fill(Color.healthPrimary.opacity(0.1))
-                    .frame(width: 80, height: 80)
-                
-                Image(systemName: "doc.badge.plus")
-                    .font(.system(size: 32, weight: .light))
-                    .foregroundStyle(Color.healthPrimary.opacity(0.6))
-            }
             
-            VStack(alignment: .center, spacing: Spacing.small) {
-                Text("No documents yet")
-                    .font(.headline.weight(.semibold))
-                    .foregroundStyle(.primary)
-                
+            ContentUnavailableView {
+                Label("No Documents", systemImage: "folder.fill")
+               
+            } description: {
                 Text("Add medical documents to track prescriptions, lab results, and more")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .lineLimit(nil)
             }
-            
-            Button {
-                viewModel.showAddDocumentSheet()
-            } label: {
-                Text("Add First Document")
-                    .font(.body)
-                    .foregroundStyle(.primary)
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(Color.healthPrimary)
-            .controlSize(.large)
         }
         .padding(.vertical, Spacing.xl)
     }
@@ -141,3 +119,138 @@ struct UnifiedDocumentsSection: View {
     
 }
 
+#Preview("Unified Documents - With Documents") {
+    let schema = Schema([
+        Patient.self,
+        MedicalCase.self,
+        Prescription.self,
+        BloodReport.self,
+        BloodTestResult.self,
+        Document.self,
+        Medication.self
+    ])
+    let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: schema, configurations: [modelConfiguration])
+    
+    let patient = Patient.samplePatient
+    let medicalCase = MedicalCase.sampleCase
+    
+    // Create sample prescription
+    let prescription = Prescription(
+        id: UUID(),
+        followUpDate: Date().addingTimeInterval(86400 * 30),
+        followUpTests: ["Blood work", "Follow-up consultation"],
+        dateIssued: Date().addingTimeInterval(-86400 * 7),
+        doctorName: "Dr. Sarah Johnson",
+        facilityName: "City Medical Center",
+        notes: "Continue current medication regimen",
+        document: nil,
+        medicalCase: medicalCase,
+        medications: [
+            Medication(
+                id: UUID(),
+                name: "Metformin",
+                frequency: [MedicationSchedule(mealTime: .breakfast, timing: .after, dosage: "500mg")],
+                numberOfDays: 30,
+                dosage: "500mg",
+                instructions: "Take with breakfast"
+            )
+        ]
+    )
+    
+    // Create sample blood report
+    let bloodReport = BloodReport(
+        id: UUID(),
+        testName: "Complete Blood Count",
+        labName: "LabCorp",
+        category: "Hematology",
+        resultDate: Date().addingTimeInterval(-86400 * 3),
+        notes: "All values within normal range",
+        createdAt: Date().addingTimeInterval(-86400 * 3),
+        updatedAt: Date().addingTimeInterval(-86400 * 3),
+        medicalCase: medicalCase,
+        testResults: [
+            BloodTestResult(
+                testName: "Hemoglobin",
+                value: "14.2",
+                unit: "g/dL",
+                referenceRange: "12.0-15.5",
+                isAbnormal: false
+            )
+        ]
+    )
+    
+    // Create sample document
+    let document = Document(
+        id: UUID(),
+        fileName: "Medical_Report_2024.pdf",
+        fileURL:  "file://document.pdf",
+        documentType: .unknown,
+        fileSize: 100,
+        createdAt: Date().addingTimeInterval(-86400 * 5),
+        updatedAt: Date().addingTimeInterval(-86400 * 5),
+    )
+    
+    medicalCase.prescriptions = [prescription]
+    medicalCase.bloodReports = [bloodReport]
+    medicalCase.otherDocuments = [document]
+    
+    container.mainContext.insert(patient)
+    container.mainContext.insert(medicalCase)
+    container.mainContext.insert(prescription)
+    container.mainContext.insert(bloodReport)
+    container.mainContext.insert(document)
+    
+    return NavigationStack {
+        ScrollView {
+            UnifiedDocumentsSection(
+                modelContext: container.mainContext,
+                medicalCase: medicalCase
+            )
+            .padding()
+        }
+    }
+    .modelContainer(container)
+}
+
+#Preview("Unified Documents - Empty State") {
+    let schema = Schema([
+        Patient.self,
+        MedicalCase.self,
+        Prescription.self,
+        BloodReport.self,
+        Document.self
+    ])
+    let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: schema, configurations: [modelConfiguration])
+    
+    let patient = Patient.samplePatient
+    let medicalCase = MedicalCase(
+        id: UUID(),
+        title: "Empty Case",
+        notes: "No documents yet",
+        type: .consultation,
+        specialty: .generalPractitioner,
+        isActive: true,
+        createdAt: Date(),
+        updatedAt: Date(),
+        patient: patient,
+        prescriptions: [],
+        bloodReports: [],
+        unparsedDocuments: []
+    )
+    
+    container.mainContext.insert(patient)
+    container.mainContext.insert(medicalCase)
+    
+    return NavigationStack {
+        ScrollView {
+            UnifiedDocumentsSection(
+                modelContext: container.mainContext,
+                medicalCase: medicalCase
+            )
+            .padding()
+        }
+    }
+    .modelContainer(container)
+}
