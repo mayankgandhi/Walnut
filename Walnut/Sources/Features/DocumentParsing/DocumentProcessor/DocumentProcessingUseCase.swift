@@ -216,9 +216,8 @@ actor DocumentProcessingUseCase {
         return try await repository.saveDocument(document, to: medicalCase)
     }
     
-    @MainActor
-    private func updateProgress(_ progress: Double, _ status: String) {
-//        progressDelegate?.didUpdateProgress(progress, status: status)
+    private func updateProgress(_ progress: Double, _ status: String) async {
+        await progressDelegate?.didUpdateProgress(progress, status: status)
     }
     
 }

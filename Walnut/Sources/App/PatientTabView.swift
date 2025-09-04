@@ -16,13 +16,13 @@ struct PatientTabView: View {
     
     var body: some View {
         TabView {
-
+            
             Tab("Meds", systemImage: "pills.fill") {
                 NavigationStack {
                     MedicationsTrackerView(patient: patient)
                 }
             }
-
+            
             
             Tab("Cases", systemImage: "document.on.document") {
                 NavigationStack {
@@ -53,7 +53,12 @@ struct PatientTabView: View {
             }
             
         }
-        
+        .tabBarMinimizeBehavior(.automatic)
+        .conditionalModifier(when: false, apply: {
+            $0.tabViewBottomAccessory {
+                UploadViewBottomAccessory(documentType: .imaging, state: .completed)
+            }
+        })
     }
 }
 
@@ -61,9 +66,4 @@ struct PatientTabView: View {
     NavigationStack {
         PatientTabView(patient: .samplePatient)
     }
-}
-
-#Preview {
-    
-    
 }
