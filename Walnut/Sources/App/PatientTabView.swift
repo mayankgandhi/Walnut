@@ -13,6 +13,7 @@ struct PatientTabView: View {
     
     @Environment(\.modelContext) private var modelContext
     let patient: Patient
+    @State var showAccessory: Bool = false
     
     var body: some View {
         TabView {
@@ -54,7 +55,7 @@ struct PatientTabView: View {
             
         }
         .tabBarMinimizeBehavior(.automatic)
-        .conditionalModifier(when: false, apply: {
+        .conditionalModifier(when: showAccessory, apply: {
             $0.tabViewBottomAccessory {
                 UploadViewBottomAccessory(documentType: .imaging, state: .completed)
             }
