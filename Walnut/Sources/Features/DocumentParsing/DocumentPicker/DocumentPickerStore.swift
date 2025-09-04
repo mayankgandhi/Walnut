@@ -48,7 +48,6 @@ class DocumentPickerStore {
     var canUpload: Bool {
         hasSelection && !isProcessing
     }
-    private let documentFileManager: DocumentFileManager
 
     // MARK: - Initialization
     
@@ -61,13 +60,11 @@ class DocumentPickerStore {
         self.supportedFileTypes = supportedFileTypes
         self.maxFileSizeMB = maxFileSizeMB
         self.selectedDocumentType = nil
-        self.documentFileManager = DocumentFileManager()
     }
     
     // MARK: - Public Actions
     
     func clearSelection() {
-        selectedDocument?.stopAccessingSecurityScopedResource()
         selectedDocument = nil
         selectedImage = nil
         selectedPhotos.removeAll()
@@ -107,23 +104,11 @@ class DocumentPickerStore {
         switch result {
         case .success(let urls):
             guard let url = urls.first else { return }
-           
-            if url.startAccessingSecurityScopedResource() {
-                let coordinator = NSFileCoordinator()
-                var error: NSError?
-                coordinator.coordinate(readingItemAt: url, options: [], error: &error) { newURL in
-                    do {
-                        let savedURL = try documentFileManager.saveDocument(from: url)
-                        selectedDocument = savedURL
-                    } catch {
-                        dump(error)
-                        errorMessage = "Unable to read file information"
-                    }
-                }
-                url.stopAccessingSecurityScopedResource()
-            } else {
-                errorMessage = "Failed to select and copy document."
-            }
+            
+            // Store the selected document URL directly
+            // File saving will be handled by the DocumentProcessingUseCase
+            selectedDocument = url
+            errorMessage = nil
             
         case .failure(let error):
             errorMessage = "Failed to select document: \(error.localizedDescription)"
@@ -134,8 +119,7 @@ class DocumentPickerStore {
         guard let photo = photos.first else { return }
         
         // Clear existing selections
-        selectedDocument?.stopAccessingSecurityScopedResource()
-        selectedDocument = nil
+        clearSelection()
         
         photo.loadTransferable(type: Data.self) { result in
             DispatchQueue.main.async {
@@ -157,8 +141,7 @@ class DocumentPickerStore {
     func handleCameraSelection(_ image: UIImage?) {
         if let image = image {
             // Clear existing selections
-            selectedDocument?.stopAccessingSecurityScopedResource()
-            selectedDocument = nil
+            clearSelection()
             
             selectedImage = image
             errorMessage = nil

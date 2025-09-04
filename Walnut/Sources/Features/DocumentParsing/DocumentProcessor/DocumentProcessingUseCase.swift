@@ -12,112 +12,64 @@ import AIKit
 
 // MARK: - Use Case Implementation
 
-/// Encapsulates the business logic for document processing
-struct DocumentProcessingUseCase {
+/// Encapsulates the business logic for document processing with clear separation of concerns
+actor DocumentProcessingUseCase {
     
     private let aiService: UnifiedDocumentParsingService
     private let repository: DocumentRepositoryProtocol
-    private let documentFileManager: DocumentFileManager
+    private let fileInputHandler: FileInputHandling
     private weak var progressDelegate: DocumentProcessingProgressDelegate?
     
     init(
         aiService: UnifiedDocumentParsingService,
         repository: DocumentRepositoryProtocol,
-        documentFileManager: DocumentFileManager = DocumentFileManager(),
+        fileInputHandler: FileInputHandling = FileInputHandler(),
         progressDelegate: DocumentProcessingProgressDelegate?
     ) {
         self.aiService = aiService
         self.repository = repository
-        self.documentFileManager = documentFileManager
+        self.fileInputHandler = fileInputHandler
         self.progressDelegate = progressDelegate
     }
     
+    /// Primary execute method with clean data input (no UI dependencies)
+    func execute(
+        input: DocumentProcessingInput
+    ) async throws -> ProcessingResult {
+        
+        do {
+            // Step 1: File Preparation
+            let preparedFile = try await prepareFile(from: input)
+            
+            // Step 2: Document Processing  
+            let stageData = DocumentProcessingStageData(
+                preparedFile: preparedFile,
+                medicalCase: input.medicalCase,
+                documentType: input.documentType
+            )
+            
+            let result = try await processDocument(stageData: stageData)
+            return result
+            
+        } catch {
+            throw mapError(error)
+        }
+    }
+    
+    /// Legacy method for backward compatibility with DocumentPickerStore
     func execute(
         from store: DocumentPickerStore,
         for medicalCase: MedicalCase,
         selectedDocumentType: DocumentType
     ) async throws -> ProcessingResult {
         
-        var tempFileURL: URL?
+        let input = try DocumentProcessingInput.from(
+            store: store,
+            medicalCase: medicalCase,
+            documentType: selectedDocumentType
+        )
         
-        do {
-            // Step 1: Prepare file for processing and save locally
-            await updateProgress(0.1, "Preparing file...")
-            
-            // Create local file URL based on selection type and save the file
-            if let selectedDocument = store.selectedDocument {
-                // Handle document file selection - save using URL method
-                tempFileURL = selectedDocument
-            } else if let selectedImage = store.selectedImage {
-                // Handle image selection - convert to data and save using Data method
-                guard let imageData = selectedImage.jpegData(compressionQuality: 0.8) else {
-                    throw DocumentProcessingError.filePreparationFailed(
-                        NSError(
-                            domain: "DocumentProcessing",
-                            code: -1,
-                            userInfo: [NSLocalizedDescriptionKey: "Failed to convert image to data"]
-                        )
-                    )
-                }
-                
-                let fileName = "image_\(Int(Date().timeIntervalSince1970)).jpg"
-                let localFileURL = try documentFileManager.saveDocument(
-                    data: imageData,
-                    date: Date(),
-                    fileName: fileName
-                )
-                // Use the local file as temp file for AI processing
-                tempFileURL = localFileURL
-                
-            } else {
-                throw DocumentProcessingError.filePreparationFailed(
-                    NSError(domain: "DocumentProcessing", code: -1, 
-                           userInfo: [NSLocalizedDescriptionKey: "No file selected"])
-                )
-            }
-            
-            // Step 3: Parse document using AI service
-            await updateProgress(0.4, "Parsing document...")
-            
-            do {
-                let modelId = try await parseAndSaveDocument(
-                    tempFileURL: tempFileURL!,
-                    documentType: selectedDocumentType,
-                    medicalCase: medicalCase
-                )
-                
-                
-                await updateProgress(1.0, "Complete!")
-                
-                return ProcessingResult(
-                    documentType: selectedDocumentType,
-                    modelId: modelId,
-                    originalFileName: tempFileURL?.lastPathComponent ?? "Unknown File"
-                )
-                
-            } catch {
-                // Step 4: If parsing fails, save as unparsed document
-                await updateProgress(0.6, "Parsing failed, saving as unparsed document...")
-                
-                let modelId = try await saveUnparsedDocument(
-                    tempFileURL: tempFileURL!,
-                    medicalCase: medicalCase,
-                    documentType: selectedDocumentType
-                )
-                
-                await updateProgress(1.0, "Document saved as unparsed!")
-                
-                return ProcessingResult(
-                    documentType: .unknown, // We'll add this case
-                    modelId: modelId,
-                    originalFileName: tempFileURL?.lastPathComponent ?? "Unknown File"
-                )
-            }
-            
-        } catch {
-            // Re-throw with context
-            throw mapError(error)
-        }
+        return try await execute(input: input)
     }
     
     // MARK: - Error Handling
@@ -132,88 +84,141 @@ struct DocumentProcessingUseCase {
         return .parsingFailed(error)
     }
     
+    // MARK: - Sequential Processing Chain
+    
+    private func prepareFile(from input: DocumentProcessingInput) async throws -> PreparedFileInput {
+        await updateProgress(0.1, "Preparing file...")
+        
+        return try await fileInputHandler.prepareFile(
+            from: input.fileSource,
+            documentType: input.documentType,
+            processingDate: input.processingDate
+        )
+    }
+    
+    private func processDocument(stageData: DocumentProcessingStageData) async throws -> ProcessingResult {
+        await updateProgress(0.5, "Processing document...")
+        
+        do {
+            let modelId = try await parseAndSaveDocument(
+                fileURL: stageData.preparedFile.fileURL,
+                documentType: stageData.documentType,
+                medicalCase: stageData.medicalCase
+            )
+            
+            await updateProgress(1.0, "Complete!")
+            
+            return ProcessingResult(
+                documentType: stageData.documentType,
+                modelId: modelId,
+                originalFileName: stageData.preparedFile.originalFileName
+            )
+            
+        } catch {
+            // Fallback: Save as unparsed document
+            return try await handleParsingFailure(
+                stageData: stageData,
+                error: error
+            )
+        }
+    }
+    
+    private func handleParsingFailure(
+        stageData: DocumentProcessingStageData,
+        error: Error
+    ) async throws -> ProcessingResult {
+        await updateProgress(0.8, "Parsing failed, saving as unparsed document...")
+        
+        let modelId = try await saveUnparsedDocument(
+            fileURL: stageData.preparedFile.fileURL,
+            medicalCase: stageData.medicalCase,
+            documentType: stageData.documentType
+        )
+        
+        await updateProgress(1.0, "Document saved as unparsed!")
+        
+        return ProcessingResult(
+            documentType: .unknown,
+            modelId: modelId,
+            originalFileName: stageData.preparedFile.originalFileName
+        )
+    }
+    
     // MARK: - Private Methods
     
     private func parseAndSaveDocument(
-        tempFileURL: URL,
+        fileURL: URL,
         documentType: DocumentType,
         medicalCase: MedicalCase
     ) async throws -> PersistentIdentifier {
         switch documentType {
         case .prescription:
-            let parsedPrescription = try await aiService.parseDocument(from: tempFileURL, as: ParsedPrescription.self)
+            let parsedPrescription = try await aiService.parseDocument(from: fileURL, as: ParsedPrescription.self)
             
-            // File is already saved locally in the prepare step, just use the same URL
             return try await repository.savePrescription(
                 parsedPrescription,
                 to: medicalCase,
-                fileURL: tempFileURL
+                fileURL: fileURL
             )
             
         case .labResult:
-            let parsedBloodReport = try await aiService.parseDocument(from: tempFileURL, as: ParsedBloodReport.self)
+            let parsedBloodReport = try await aiService.parseDocument(from: fileURL, as: ParsedBloodReport.self)
             
-            // File is already saved locally in the prepare step, just use the same URL
             return try await repository.saveBloodReport(
                 parsedBloodReport,
                 to: medicalCase,
-                fileURL: tempFileURL
+                fileURL: fileURL
             )
             
         default:
-            // This case is for non parsing documents, where we are just sharing
-            return try await saveDocument(
-                tempFileURL: tempFileURL,
+            // For non-parsing documents, save them directly as documents
+            return try await saveAsDocument(
+                fileURL: fileURL,
                 medicalCase: medicalCase,
                 documentType: documentType
             )
-            
         }
     }
     
-    private func saveDocument(
-        tempFileURL: URL,
+    private func saveUnparsedDocument(
+        fileURL: URL,
         medicalCase: MedicalCase,
         documentType: DocumentType
     ) async throws -> PersistentIdentifier {
-        // File is already saved locally in the prepare step
-        // Create a Document record for unparsed document
-        let fileSize = (try? FileManager.default.attributesOfItem(atPath: tempFileURL.path)[.size] as? Int64) ?? 0
+        let documentFileManager = DocumentFileManager()
+        let fileSize = try await documentFileManager.fileSize(at: fileURL)
         
         let document = Document(
-            fileName: tempFileURL.lastPathComponent,
-            fileURL: tempFileURL.lastPathComponent,
+            fileName: fileURL.lastPathComponent,
+            fileURL: fileURL.lastPathComponent,
             documentType: documentType,
             fileSize: fileSize
         )
         
-        // Add document to medical case's unparsed documents
-        return try await repository.saveDocument(document, to: medicalCase)
+        return try await repository.saveUnparsedDocument(document, to: medicalCase)
     }
     
-    private func saveUnparsedDocument(
-        tempFileURL: URL,
+    private func saveAsDocument(
+        fileURL: URL,
         medicalCase: MedicalCase,
         documentType: DocumentType
     ) async throws -> PersistentIdentifier {
-        // File is already saved locally in the prepare step
-        // Create a Document record for unparsed document
-        let fileSize = (try? FileManager.default.attributesOfItem(atPath: tempFileURL.path)[.size] as? Int64) ?? 0
+        let documentFileManager = DocumentFileManager()
+        let fileSize = try await documentFileManager.fileSize(at: fileURL)
         
         let document = Document(
-            fileName: tempFileURL.lastPathComponent,
-            fileURL: tempFileURL.lastPathComponent,
+            fileName: fileURL.lastPathComponent,
+            fileURL: fileURL.lastPathComponent,
             documentType: documentType,
             fileSize: fileSize
         )
         
-        // Add document to medical case's unparsed documents
-        return try await repository.saveUnparsedDocument(document, to: medicalCase)
+        return try await repository.saveDocument(document, to: medicalCase)
     }
     
     @MainActor
     private func updateProgress(_ progress: Double, _ status: String) {
-        progressDelegate?.didUpdateProgress(progress, status: status)
+//        progressDelegate?.didUpdateProgress(progress, status: status)
     }
     
 }

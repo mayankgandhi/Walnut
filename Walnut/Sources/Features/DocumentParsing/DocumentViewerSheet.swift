@@ -14,6 +14,9 @@ struct DocumentViewer: View {
     let document: Document
     @Environment(\.dismiss) private var dismiss
     @State private var shareSheetPresented = false
+    @State private var resolvedFileURL: URL?
+    
+    private let documentFileManager = DocumentFileManager()
     
     var body: some View {
         documentContentView()
@@ -26,35 +29,39 @@ struct DocumentViewer: View {
                     }) {
                         Image(systemName: "square.and.arrow.up")
                     }
+                    .disabled(resolvedFileURL == nil)
                 }
             }
             .sheet(isPresented: $shareSheetPresented) {
-                ShareSheet(items: [document.fileURL])
+                if let fileURL = resolvedFileURL {
+                    ShareSheet(items: [fileURL])
+                }
+            }
+            .task {
+                await resolveFileURL()
             }
     }
     
     @ViewBuilder
     private func documentContentView() -> some View {
-        switch documentFileType {
-        case .pdf:
-            guard let fileURL = document.fileURL else {
-                return AnyView(UnsupportedDocumentView(document: document))
+        if let fileURL = resolvedFileURL {
+            switch documentFileType {
+            case .pdf:
+                PDFDocumentView(url: fileURL)
+            case .image:
+                ImageDocumentView(url: fileURL)
+            case .unsupported:
+                UnsupportedDocumentView(document: document)
             }
-            let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-                .appendingPathComponent("WalnutMedicalRecords")
-                .appendingPathComponent(fileURL)
-            return AnyView(PDFDocumentView(url: url))
-        case .image:
-            guard let fileURL = document.fileURL else {
-                return AnyView(UnsupportedDocumentView(document: document))
-            }
-            let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-                .appendingPathComponent("WalnutMedicalRecords")
-                .appendingPathComponent(fileURL)
-            return AnyView(ImageDocumentView(url: url))
-        case .unsupported:
-            return AnyView(UnsupportedDocumentView(document: document))
+        } else {
+            ProgressView("Loading document...")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+    }
+    
+    private func resolveFileURL() async {
+        guard let fileName = document.fileURL else { return }
+        resolvedFileURL = await documentFileManager.resolveFileURL(from: fileName)
     }
     
     private var documentFileType: DocumentFileType {
