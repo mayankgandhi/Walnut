@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import WalnutDesignSystem
 
 public struct FileIcon: View {
     // Required properties
@@ -39,13 +40,25 @@ public struct FileIcon: View {
         HStack(spacing: 12) {
             // Icon container
             ZStack {
+                
                 RoundedRectangle(cornerRadius: 12)
                     .fill(effectiveBackgroundColor.opacity(0.1))
                     .frame(width: iconContainerSize, height: iconContainerSize)
                 
-                Image(systemName: documentType?.typeIcon ?? "stethoscope")
-                    .font(.system(size: iconSize, weight: .semibold))
-                    .foregroundStyle(effectiveIconColor)
+                if let iconImage = documentType?.iconImage {
+                    Image(iconImage)
+                        .resizable()
+                        .frame(width: 48, height: 48, alignment: .center)
+                } else if let typeIcon = documentType?.typeIcon {
+                    Image(systemName: typeIcon)
+                        .font(.system(size: iconSize, weight: .semibold))
+                        .foregroundStyle(effectiveIconColor)
+                } else {
+                    Image("stethoscope")
+                        .font(.system(size: iconSize, weight: .semibold))
+                        .foregroundStyle(effectiveIconColor)
+                }
+                
             }
             
             // File information
@@ -53,20 +66,20 @@ public struct FileIcon: View {
                 Text(filename)
                     .font(.system(.body, design: .rounded, weight: .medium))
                     .foregroundColor(.primary)
-                    .lineLimit(1)
                     .truncationMode(.middle)
+                    .multilineTextAlignment(.leading)
                 
                 Text(subtitle)
                     .font(.system(.caption, design: .rounded, weight: .regular))
                     .foregroundColor(.secondary)
-                    .lineLimit(1)
                     .truncationMode(.tail)
+                    .multilineTextAlignment(.leading)
             }
             
             Spacer()
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.horizontal, Spacing.xs)
+        .padding(.vertical, Spacing.xs)
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(.systemGray6))

@@ -11,47 +11,70 @@ import WalnutDesignSystem
 
 struct PrescriptionDetailView: View {
     
-    let prescription: Prescription
-    
+    @State var prescription: Prescription
     @Environment(\.dismiss) private var dismiss
-    @State private var showingMedicationEditor = false
+    
+    @State var showEditor: Bool = false
     
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-                // Enhanced Hero Header with Prescription Focus
-                enhancedHeaderCard
-                
-                // Medications Section - Most Important
-                if !(prescription.medications?.isEmpty ?? true) {
-                    PrescriptionMedicationsCard(
-                        medications: prescription.medications ?? []
+        NavigationView {
+            ScrollView {
+                VStack(alignment: .leading, spacing: Spacing.medium) {
+                    // Enhanced Hero Header with Prescription Focus
+                    enhancedHeaderCard
+                    
+                    // Medications Section - Most Important
+                    if !(prescription.medications?.isEmpty ?? true) {
+                        PrescriptionMedicationsCard(
+                            medications: prescription.medications ?? []
+                        )
+                    }
+                    
+                    // Follow-up Section
+                    if prescription.followUpDate != nil || !(prescription.followUpTests?.isEmpty ?? false) {
+                        enhancedFollowUpCard
+                    }
+                    
+                    // Clinical Notes Section
+                    if let notes = prescription.notes, !notes.isEmpty {
+                        enhancedNotesCard
+                    }
+                    
+                    // Document Section
+                    if prescription.document != nil {
+                        DocumentCard(
+                            document: prescription.document!,
+                            title: "Prescription Document",
+                            viewButtonText: "View Document"
+                        )
+                    }
+                }
+                .padding(.horizontal, Spacing.medium)
+            }
+            .sheet(isPresented: $showEditor) {
+                if prescription.medicalCase == nil {
+                    ContentUnavailableView(
+                        "Unable to edit this prescription.",
+                        systemImage: "exclamationmark.triangle.fill"
                     )
-                }
-                
-                // Follow-up Section
-                if prescription.followUpDate != nil || !(prescription.followUpTests?.isEmpty ?? false) {
-                    enhancedFollowUpCard
-                }
-                
-                // Clinical Notes Section
-                if let notes = prescription.notes, !notes.isEmpty {
-                    enhancedNotesCard
-                }
-                
-                // Document Section
-                if prescription.document != nil {
-                    DocumentCard(
-                        document: prescription.document!,
-                        title: "Prescription Document",
-                        viewButtonText: "View Document"
+                } else {
+                    PrescriptionEditor(
+                        prescription: prescription,
+                        medicalCase: prescription.medicalCase!
                     )
                 }
             }
-            .padding(.horizontal, Spacing.medium)
-        }
-        .sheet(isPresented: $showingMedicationEditor) {
-            PrescriptionMedicationEditor(prescription: prescription)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu("", systemImage: "ellipsis") {
+                        Button {
+                            showEditor = true
+                        } label: {
+                            Label("Edit", systemImage: "pencil")
+                        }
+                    }
+                }
+            }
         }
     }
     
@@ -80,13 +103,13 @@ struct PrescriptionDetailView: View {
                         
                         // Subtle pulse ring
                         Circle()
-                            .stroke(Color.healthSuccess.opacity(0.2), lineWidth: 2)
+                            .stroke(DocumentType.prescription.backgroundColor.opacity(0.2), lineWidth: 2)
                             .frame(width: 88, height: 88)
                             
                         // Main icon with enhanced styling
-                        Image(systemName: "cross.fill")
-                            .font(.system(size: 32, weight: .semibold, design: .rounded))
-                            .foregroundStyle(Color.healthSuccess)
+                        Image(DocumentType.prescription.iconImage)
+                            .resizable()
+                            .frame(width: 72, height: 72)
                             .scaleEffect(1.0)
                     }
                     
@@ -121,19 +144,22 @@ struct PrescriptionDetailView: View {
                             }
                         }
                         
-                        // Enhanced status with medication count
-                        HStack(spacing: Spacing.xs) {
-                            Circle()
-                                .fill(Color.healthSuccess)
-                                .frame(width: 8, height: 8)
-                                .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: prescription.medications?.isEmpty)
-                            
-                            Text(
-                                "\(String(describing: prescription.medications?.count)) Medications Prescribed"
-                            )
+                        if let medicationCount = prescription.medications?.count {
+                            // Enhanced status with medication count
+                            HStack(spacing: Spacing.xs) {
+                                Circle()
+                                    .fill(Color.healthSuccess)
+                                    .frame(width: 8, height: 8)
+                                    .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: prescription.medications?.isEmpty)
+                                
+                                Text(
+                                    "\(medicationCount) Medications Prescribed"
+                                )
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(Color.healthSuccess)
+                            }
                         }
+                        
                     }
                     
                 }

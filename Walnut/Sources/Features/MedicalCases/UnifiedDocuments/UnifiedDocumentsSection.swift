@@ -23,7 +23,6 @@ struct UnifiedDocumentsSection: View {
         viewModel: UnifiedDocumentsSectionViewModel = UnifiedDocumentsSectionViewModel()
     ) {
         self.medicalCase = medicalCase
-
         self.viewModel = viewModel
     }
     
@@ -56,21 +55,33 @@ struct UnifiedDocumentsSection: View {
             .animation(.easeInOut(duration: 0.3), value: viewModel.isLoading)
             .animation(.easeInOut(duration: 0.3), value: viewModel.isEmpty)
         }
-        .navigationDestination(item: $viewModel.navigationState.selectedPrescription) { prescription in
-            PrescriptionDetailView(prescription: prescription)
+        .refreshable {
+            await viewModel.refresh(from: medicalCase)
         }
-        .navigationDestination(item: $viewModel.navigationState.selectedBloodReport) { bloodReport in
-            BloodReportDetailView(bloodReport: bloodReport)
+        .sheet(item: $viewModel.navigationState.selectedPrescription) { prescription in
+                PrescriptionDetailView(prescription: prescription)
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(Spacing.large)
         }
-        .navigationDestination(item: $viewModel.navigationState.selectedDocument) { document in
-            DocumentViewer(document: document)
+        .sheet(item: $viewModel.navigationState.selectedBloodReport) { bloodReport in
+            NavigationView {
+                BloodReportDetailView(bloodReport: bloodReport)
+                    .padding(.top, Spacing.large)
+            }
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(Spacing.large)
+        }
+        .sheet(item: $viewModel.navigationState.selectedDocument) { document in
+            NavigationView {
+                DocumentViewer(document: document)
+            }
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(Spacing.large)
         }
         .task {
             viewModel.loadDocuments(from: medicalCase)
         }
-        .refreshable {
-            await viewModel.refresh(from: medicalCase)
-        }
+        
     }
     
     // MARK: - View Components

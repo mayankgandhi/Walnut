@@ -13,6 +13,7 @@ struct HealthRecordSelectorBottomSheet: View {
     
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    
     let medicalCase: MedicalCase
     @State var store: DocumentPickerStore
     @Binding var showModularDocumentPicker: Bool
@@ -23,7 +24,7 @@ struct HealthRecordSelectorBottomSheet: View {
                 DocumentTypeSelector(store: store)
             }
             .toolbar(content: {
-                ToolbarItem(placement: .destructiveAction) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button {
                         dismiss()
                     } label: {
@@ -33,12 +34,12 @@ struct HealthRecordSelectorBottomSheet: View {
             })
             .toolbar(content: {
                 if store.selectedDocumentType != nil {
-                    ToolbarItem(placement: .confirmationAction) {
+                    ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             dismiss()
                             showModularDocumentPicker  = true
                         } label: {
-                            Text("Confirm")
+                            Label("Next", systemImage: "checkmark")
                         }
                         
                     }
