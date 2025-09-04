@@ -105,14 +105,38 @@ class DocumentPickerStore {
         case .success(let urls):
             guard let url = urls.first else { return }
             
-            // Store the selected document URL directly
-            // File saving will be handled by the DocumentProcessingUseCase
-            selectedDocument = url
-            errorMessage = nil
+            // Handle security-scoped access for File Provider URLs
+            if url.startAccessingSecurityScopedResource() {
+                defer { url.stopAccessingSecurityScopedResource() }
+                
+                do {
+                    // Create a temporary copy in our app's tmp directory
+                    let tempURL = createTemporaryFileURL(for: url)
+                    try FileManager.default.copyItem(at: url, to: tempURL)
+                    
+                    selectedDocument = tempURL
+                    errorMessage = nil
+                    
+                } catch {
+                    errorMessage = "Failed to access selected document: \(error.localizedDescription)"
+                }
+            } else {
+                // For non-security-scoped URLs (like files already in our sandbox)
+                selectedDocument = url
+                errorMessage = nil
+            }
             
         case .failure(let error):
             errorMessage = "Failed to select document: \(error.localizedDescription)"
         }
+    }
+    
+    private func createTemporaryFileURL(for originalURL: URL) -> URL {
+        let tempDir = FileManager.default.temporaryDirectory
+        let fileName = originalURL.lastPathComponent
+        let timestamp = Int(Date().timeIntervalSince1970)
+        let tempFileName = "\(timestamp)_\(fileName)"
+        return tempDir.appendingPathComponent(tempFileName)
     }
     
     func handlePhotosSelection(_ photos: [PhotosPickerItem]) {
