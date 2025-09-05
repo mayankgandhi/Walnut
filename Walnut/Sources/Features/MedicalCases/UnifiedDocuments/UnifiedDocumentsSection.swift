@@ -160,8 +160,10 @@ struct UnifiedDocumentsSection: View {
             Medication(
                 id: UUID(),
                 name: "Metformin",
-                frequency: [MedicationSchedule(mealTime: .breakfast, timing: .after, dosage: "500mg")],
-                numberOfDays: 30,
+                frequency: [
+                        .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
+                ],
+                duration: .days(30),
                 dosage: "500mg",
                 instructions: "Take with breakfast"
             )

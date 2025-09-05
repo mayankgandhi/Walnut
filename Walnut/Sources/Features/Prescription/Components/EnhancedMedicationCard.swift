@@ -164,14 +164,14 @@ struct MedicationListItem: View {
     }
     
     private var durationBadge: some View {
-        OptionalView(medication.numberOfDays) { numberOfDays in
+        OptionalView(medication.duration?.totalDays) { totalDays in
             VStack(spacing: 1) {
-                Text("\(numberOfDays)")
+                Text("\(totalDays)")
                     .font(.headline.weight(.black))
                     .foregroundStyle(Color.healthSuccess)
                     .scaleEffect(1.1)
                 
-                Text(numberOfDays == 1 ? "day" : "days")
+                Text(totalDays == 1 ? "day" : "days")
                     .font(.caption2.weight(.medium))
                     .foregroundStyle(.secondary)
             }
@@ -205,7 +205,7 @@ struct MedicationListItem: View {
                 
                 Spacer()
                 
-                Text("Day \(currentDay) of \(medication.numberOfDays ?? 0)")
+                Text("Day \(currentDay) of \(medication.duration?.totalDays ?? 0)")
                     .font(.caption2.weight(.medium))
                     .foregroundStyle(.tertiary)
             }
@@ -284,15 +284,15 @@ struct MedicationListItem: View {
     
     private func frequencyChip(schedule: MedicationSchedule) -> some View {
         Label(
-            schedule.timing == nil ? "\(schedule.mealTime.rawValue.capitalized)" : "\(schedule.timing!.rawValue.capitalized) \(schedule.mealTime.rawValue.capitalized)",
+            schedule.displayText,
             systemImage: schedule.icon
         )
         .font(.caption.weight(.bold))
-        .foregroundStyle(schedule.mealTime.color)
+        .foregroundStyle(schedule.frequency.color)
         .frame(maxWidth: .infinity, alignment: .center)
         .padding(.horizontal, Spacing.xs)
         .padding(.vertical, Spacing.xs)
-        .background(schedule.mealTime.color.opacity(0.1))
+        .background(schedule.frequency.color.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 6))
         .overlay(
             RoundedRectangle(cornerRadius: 8)
@@ -382,98 +382,13 @@ struct MedicationListItem: View {
     private var currentDay: Int {
         // For demo purposes, show a random day between 1 and total days
         // In real implementation, this would be calculated based on start date
-        return min(Int.random(in: 1...5), medication.numberOfDays ?? 1)
+        return min(Int.random(in: 1...5), medication.duration?.totalDays ?? 1)
     }
     
     private var progressPercentage: Double {
-        guard let totalDays = medication.numberOfDays, totalDays > 0 else {
+        guard let totalDays = medication.duration?.totalDays, totalDays > 0 else {
             return 0
         }
         return Double(currentDay) / Double(totalDays)
     }
-}
-
-// MARK: - Previews
-
-#Preview("Rich 2-Column Medication Grid") {
-    ScrollView {
-        LazyVGrid(columns: [
-            GridItem(.flexible(), spacing: Spacing.medium),
-            GridItem(.flexible(), spacing: Spacing.medium)
-        ], spacing: Spacing.medium) {
-            
-            MedicationListItem(
-                medication: Medication(
-                    id: UUID(),
-                    name: "Lisinopril Blood Pressure",
-                    frequency: [.init(mealTime: .breakfast, timing: .before, dosage: "10mg")],
-                    numberOfDays: 30,
-                    instructions: "Take consistently at the same time each day for best results"
-                )
-            )
-            
-            MedicationListItem(
-                medication: Medication(
-                    id: UUID(),
-                    name: "Amoxicillin Antibiotic",
-                    frequency: [
-                        .init(mealTime: .breakfast, timing: .before, dosage: "500mg"),
-                        .init(mealTime: .lunch, timing: .before, dosage: "500mg"),
-                        .init(mealTime: .dinner, timing: .before, dosage: "500mg")
-                    ],
-                    numberOfDays: 10,
-                    instructions: "Complete entire course. Take on empty stomach 1 hour before meals."
-                )
-            )
-            
-            MedicationListItem(
-                medication: Medication(
-                    id: UUID(),
-                    name: "Vitamin D3 Supplement",
-                    frequency: [.init(mealTime: .breakfast, timing: .after, dosage: "2000 IU")],
-                    numberOfDays: 90,
-                    instructions: "Take with fatty meal for better absorption"
-                )
-            )
-            
-            MedicationListItem(
-                medication: Medication(
-                    id: UUID(),
-                    name: "Acetaminophen Pain Relief",
-                    frequency: [
-                        .init(mealTime: .breakfast, timing: .after, dosage: "650mg"),
-                        .init(mealTime: .bedtime, timing: nil, dosage: "650mg")
-                    ],
-                    numberOfDays: 5,
-                    instructions: "Do not exceed 4000mg in 24 hours. Can cause liver damage."
-                )
-            )
-            
-            MedicationListItem(
-                medication: Medication(
-                    id: UUID(),
-                    name: "Metformin",
-                    frequency: [
-                        .init(mealTime: .breakfast, timing: .after, dosage: "500mg"),
-                        .init(mealTime: .dinner, timing: .after, dosage: "500mg")
-                    ],
-                    numberOfDays: 30,
-                    instructions: "Take with meals to reduce stomach upset and improve absorption"
-                )
-            )
-            
-            MedicationListItem(
-                medication: Medication(
-                    id: UUID(),
-                    name: "Atorvastatin",
-                    frequency: [.init(mealTime: .bedtime, timing: nil, dosage: "20mg")],
-                    numberOfDays: 30,
-                    instructions: "Take at bedtime. Avoid grapefruit and grapefruit juice."
-                )
-            )
-            
-        }
-        .padding()
-    }
-    .background(Color(UIColor.systemGroupedBackground))
 }

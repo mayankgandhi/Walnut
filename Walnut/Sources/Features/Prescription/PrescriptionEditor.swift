@@ -424,7 +424,6 @@ struct PrescriptionEditor: View {
                             .foregroundStyle(.primary)
                     }
                     
-                    
                     HStack(spacing: Spacing.small) {
                         if let dosage = medication.dosage {
                             Text(dosage)
@@ -432,35 +431,16 @@ struct PrescriptionEditor: View {
                                 .foregroundStyle(.secondary)
                         }
                         
-                        if medication.dosage != nil && medication.numberOfDays > 0 {
+                        if medication.dosage != nil && medication.duration != nil {
                             Text("•")
                                 .font(.caption)
                                 .foregroundStyle(.tertiary)
                         }
                         
-                        if medication.numberOfDays > 0 {
-                            Text("\(medication.numberOfDays) days")
+                        if let duration = medication.duration {
+                            Text(duration.displayText)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
-                        }
-                    }
-                    
-                    // Frequency display
-                    if let frequency = medication.frequency,
-                       frequency.isEmpty {
-                        HStack(spacing: Spacing.small) {
-                            ForEach(frequency.prefix(3), id: \.mealTime) { schedule in
-                                frequencyBadge(for: schedule)
-                            }
-                            
-                            if frequency.count > 3 {
-                                Text("+\(frequency.count - 3)")
-                                    .font(.caption2.weight(.medium))
-                                    .foregroundStyle(.secondary)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(Color.secondary.opacity(0.1), in: Capsule())
-                            }
                         }
                     }
                 }
@@ -480,22 +460,7 @@ struct PrescriptionEditor: View {
             }
         }
     }
-    
-    @ViewBuilder
-    private func frequencyBadge(for schedule: MedicationSchedule) -> some View {
-        HStack(spacing: 2) {
-            Image(systemName: schedule.mealTime.icon)
-                .font(.caption2)
-            
-            Text(schedule.mealTime.rawValue.prefix(1).uppercased())
-                .font(.caption2.weight(.medium))
-        }
-        .foregroundStyle(schedule.mealTime.color)
-        .padding(.horizontal, 6)
-        .padding(.vertical, 2)
-        .background(schedule.mealTime.color.opacity(0.1), in: Capsule())
-    }
-    
+
     private func handleMedicationSave(_ medication: Medication) {
         if let index = medications.firstIndex(where: { $0.id == medication.id }) {
             // Update existing medication

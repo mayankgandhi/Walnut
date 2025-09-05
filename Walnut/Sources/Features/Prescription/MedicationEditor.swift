@@ -15,6 +15,15 @@ struct MedicationEditor: View {
     let medication: Medication?
     let onSave: (Medication) -> Void
     
+    // Common duration options for easy selection
+    static let durationOptions: [MedicationDuration] = [
+        .days(1), .days(3), .days(5), .days(7), .days(10), .days(14),
+        .days(21), .days(30), .days(45), .days(60), .days(90),
+        .weeks(1), .weeks(2), .weeks(4), .weeks(8), .weeks(12),
+        .months(1), .months(2), .months(3), .months(6), .months(12),
+        .ongoing, .asNeeded
+    ]
+    
     init(medication: Medication? = nil, onSave: @escaping (Medication) -> Void) {
         self.medication = medication
         self.onSave = onSave
@@ -27,7 +36,7 @@ struct MedicationEditor: View {
     @State private var medicationName = ""
     @State private var dosage = ""
     @State private var instructions = ""
-    @State private var numberOfDays: Int? = 7
+    @State private var duration: MedicationDuration? = .days(7)
     @State private var selectedFrequencies: [MedicationSchedule] = []
     
     // Frequency selection states
@@ -92,8 +101,7 @@ struct MedicationEditor: View {
     private var isFormValid: Bool {
         !medicationName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
         !dosage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        numberOfDays != nil &&
-        !buildFrequencyArray().isEmpty
+        duration != nil
     }
     
     // Focus navigation helpers
@@ -163,11 +171,11 @@ struct MedicationEditor: View {
                             
                             MenuPickerItem(
                                 icon: "calendar.day.timeline.left",
-                                title: "Duration (Days)",
-                                selectedOption: $numberOfDays,
-                                options: Array(1...90),
+                                title: "Duration",
+                                selectedOption: $duration,
+                                options: Self.durationOptions,
                                 placeholder: "Select duration",
-                                helperText: "Number of days to take medication",
+                                helperText: "How long to take this medication",
                                 iconColor: .blue,
                                 isRequired: true
                             )
@@ -348,81 +356,53 @@ struct MedicationEditor: View {
         medicationName = medication.name ?? ""
         dosage = medication.dosage ?? ""
         instructions = medication.instructions ?? ""
-        numberOfDays = medication.numberOfDays
+        duration = medication.duration
         
-        // Load frequency data
+        // Load frequency data (only handle meal-based frequencies in this editor)
         for schedule in medication.frequency ?? [] {
-            switch schedule.mealTime {
-            case .breakfast:
-                if schedule.timing == .before {
-                    breakfastBefore = true
-                } else {
-                    breakfastAfter = true
-                }
-            case .lunch:
-                if schedule.timing == .before {
-                    lunchBefore = true
-                } else {
-                    lunchAfter = true
-                }
-            case .dinner:
-                if schedule.timing == .before {
-                    dinnerBefore = true
-                } else {
-                    dinnerAfter = true
-                }
-            case .bedtime:
-                if schedule.timing == .before {
-                    bedtimeBefore = true
-                } else {
-                    bedtimeAfter = true
+            // Only process meal-based schedules in this editor
+            if case .mealBased(let mealTime, let timing) = schedule.frequency {
+                switch mealTime {
+                case .breakfast:
+                    if timing == .before {
+                        breakfastBefore = true
+                    } else {
+                        breakfastAfter = true
+                    }
+                case .lunch:
+                    if timing == .before {
+                        lunchBefore = true
+                    } else {
+                        lunchAfter = true
+                    }
+                case .dinner:
+                    if timing == .before {
+                        dinnerBefore = true
+                    } else {
+                        dinnerAfter = true
+                    }
+                case .bedtime:
+                    if timing == .before {
+                        bedtimeBefore = true
+                    } else {
+                        bedtimeAfter = true
+                    }
                 }
             }
         }
     }
     
-    private func buildFrequencyArray() -> [MedicationSchedule] {
-        var frequencies: [MedicationSchedule] = []
-        
-        if breakfastBefore {
-            frequencies.append(MedicationSchedule(mealTime: .breakfast, timing: .before, dosage: nil))
-        }
-        if breakfastAfter {
-            frequencies.append(MedicationSchedule(mealTime: .breakfast, timing: .after, dosage: nil))
-        }
-        if lunchBefore {
-            frequencies.append(MedicationSchedule(mealTime: .lunch, timing: .before, dosage: nil))
-        }
-        if lunchAfter {
-            frequencies.append(MedicationSchedule(mealTime: .lunch, timing: .after, dosage: nil))
-        }
-        if dinnerBefore {
-            frequencies.append(MedicationSchedule(mealTime: .dinner, timing: .before, dosage: nil))
-        }
-        if dinnerAfter {
-            frequencies.append(MedicationSchedule(mealTime: .dinner, timing: .after, dosage: nil))
-        }
-        if bedtimeBefore {
-            frequencies.append(MedicationSchedule(mealTime: .bedtime, timing: .before, dosage: nil))
-        }
-        if bedtimeAfter {
-            frequencies.append(MedicationSchedule(mealTime: .bedtime, timing: .after, dosage: nil))
-        }
-        
-        return frequencies
-    }
     
     private func save() {
-        let frequencies = buildFrequencyArray()
-        guard let daysCount = numberOfDays else { return }
+        guard let medicationDuration = duration else { return }
         
         if let medication {
             // Edit existing medication - update properties but don't perform modelContext operations
             medication.name = medicationName.trimmingCharacters(in: .whitespacesAndNewlines)
             medication.dosage = dosage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : dosage.trimmingCharacters(in: .whitespacesAndNewlines)
             medication.instructions = instructions.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : instructions.trimmingCharacters(in: .whitespacesAndNewlines)
-            medication.numberOfDays = daysCount
-            medication.frequency = frequencies
+            medication.duration = medicationDuration
+            medication.frequency = nil
             medication.updatedAt = Date()
             
             onSave(medication)
@@ -431,8 +411,8 @@ struct MedicationEditor: View {
             let newMedication = Medication(
                 id: UUID(),
                 name: medicationName.trimmingCharacters(in: .whitespacesAndNewlines),
-                frequency: frequencies,
-                numberOfDays: daysCount,
+                frequency: [],
+                duration: medicationDuration,
                 dosage: dosage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : dosage.trimmingCharacters(in: .whitespacesAndNewlines),
                 instructions: instructions.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : instructions.trimmingCharacters(in: .whitespacesAndNewlines)
             )
@@ -454,10 +434,9 @@ struct MedicationEditor: View {
         id: UUID(),
         name: "Lisinopril",
         frequency: [
-            MedicationSchedule(mealTime: .breakfast, timing: .before, dosage: nil),
-            MedicationSchedule(mealTime: .dinner, timing: .after, dosage: nil)
+            .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
         ],
-        numberOfDays: 30,
+        duration: .days(30),
         dosage: "10mg",
         instructions: "Take with water"
     )

@@ -133,13 +133,7 @@ struct ActiveMedicationsSection: View {
                 // Medications in this time period
                 VStack(spacing: Spacing.small) {
                     ForEach(medications, id: \.medication.id) { medicationInfo in
-                        MedicationCard.display(
-                            medicationName: medicationInfo.medication.name ?? "",
-                            dosage: medicationInfo.dosageText,
-                            timing: medicationInfo.displayTime,
-                            instructions: medicationInfo.medication.instructions,
-                            accentColor: timePeriod.color
-                        )
+                        MedicationCard(medication: medicationInfo.medication)
                     }
                 }
             }

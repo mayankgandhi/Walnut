@@ -90,7 +90,7 @@ class Prescription {
                     id: medication.id,
                     name: medication.name,
                     frequency: medication.frequency,
-                    numberOfDays: medication.numberOfDays,
+                    duration: medication.duration,
                     dosage: medication.dosage,
                     instructions: medication.instructions
                 )
@@ -114,10 +114,9 @@ extension Prescription {
                 id: UUID(),
                 name: "Amoxicillin",
                 frequency: [
-                    MedicationSchedule(mealTime: .breakfast, timing: .after, dosage: "500mg"),
-                    MedicationSchedule(mealTime: .dinner, timing: .after, dosage: "500mg")
+                        .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
                 ],
-                numberOfDays: 7,
+                duration: .days(7),
                 dosage: "500mg",
                 instructions: "Take with food to reduce stomach upset"
             ),
@@ -125,11 +124,9 @@ extension Prescription {
                 id: UUID(),
                 name: "Ibuprofen",
                 frequency: [
-                    MedicationSchedule(mealTime: .breakfast, timing: .after, dosage: "400mg"),
-                    MedicationSchedule(mealTime: .lunch, timing: .after, dosage: "400mg"),
-                    MedicationSchedule(mealTime: .dinner, timing: .after, dosage: "400mg")
+                        .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
                 ],
-                numberOfDays: 5,
+                duration: .days(5),
                 dosage: "400mg",
                 instructions: "Take as needed for pain. Do not exceed 1200mg per day"
             )
@@ -165,9 +162,9 @@ extension Prescription {
                 id: UUID(),
                 name: "Lisinopril",
                 frequency: [
-                    MedicationSchedule(mealTime: .breakfast, timing: .before, dosage: "10mg")
+                    .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
                 ],
-                numberOfDays: 90,
+                duration: .days(90),
                 dosage: "10mg",
                 instructions: "Take at the same time each day for blood pressure control"
             ),
@@ -175,10 +172,9 @@ extension Prescription {
                 id: UUID(),
                 name: "Metformin",
                 frequency: [
-                    MedicationSchedule(mealTime: .breakfast, timing: .after, dosage: "500mg"),
-                    MedicationSchedule(mealTime: .dinner, timing: .after, dosage: "500mg")
+                    .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
                 ],
-                numberOfDays: 90,
+                duration: .days(90),
                 dosage: "500mg",
                 instructions: "Take with meals to control blood sugar levels"
             )

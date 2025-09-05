@@ -164,10 +164,9 @@ extension Patient {
                     id: UUID(),
                     name: "Metformin",
                     frequency: [
-                        MedicationSchedule(mealTime: .breakfast, timing: .after, dosage: "500mg"),
-                        MedicationSchedule(mealTime: .dinner, timing: .after, dosage: "500mg")
+                        .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
                     ],
-                    numberOfDays: 90,
+                    duration: .days(90),
                     dosage: "500mg",
                     instructions: "Take with meals to control blood sugar"
                 ),
@@ -175,9 +174,9 @@ extension Patient {
                     id: UUID(),
                     name: "Insulin Glargine",
                     frequency: [
-                        MedicationSchedule(mealTime: .bedtime, timing: .before, dosage: "20 units")
+                        .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
                     ],
-                    numberOfDays: 90,
+                    duration: .days(90),
                     dosage: "20 units",
                     instructions: "Inject subcutaneously at bedtime"
                 )
@@ -199,9 +198,9 @@ extension Patient {
                     id: UUID(),
                     name: "Lisinopril",
                     frequency: [
-                        MedicationSchedule(mealTime: .breakfast, timing: .before, dosage: "10mg")
+                        .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
                     ],
-                    numberOfDays: 90,
+                    duration: .days(90),
                     dosage: "10mg",
                     instructions: "Take at the same time each morning"
                 ),
@@ -209,9 +208,9 @@ extension Patient {
                     id: UUID(),
                     name: "Amlodipine",
                     frequency: [
-                        MedicationSchedule(mealTime: .breakfast, timing: .after, dosage: "5mg")
+                        .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
                     ],
-                    numberOfDays: 90,
+                    duration: .days(90),
                     dosage: "5mg",
                     instructions: "Take once daily with breakfast"
                 )
@@ -224,6 +223,86 @@ extension Patient {
         
         // Add medical cases to patient
         patient.medicalCases = [diabetesCase, hypertensionCase]
+        
+        return patient
+    }()
+    
+    @MainActor
+    static let samplePatientWithComplexMedications: Patient = {
+        let patient = Patient(
+            id: UUID(),
+            name: "Michael Chen",
+            dateOfBirth: Calendar.current.date(byAdding: .year, value: -55, to: Date()) ?? Date(),
+            gender: "Male",
+            bloodType: "A+",
+            emergencyContactName: "Lisa Chen",
+            emergencyContactPhone: "(555) 456-7890",
+            notes: "Complex medication regimen including injections, drops, and as-needed medications.",
+            primaryColorHex: "#6C5CE7",
+            createdAt: Date(),
+            updatedAt: Date(),
+            medicalCases: []
+        )
+        
+        // Create medical case for rheumatoid arthritis
+        let arthritisCase = MedicalCase(
+            id: UUID(),
+            title: "Rheumatoid Arthritis Treatment",
+            notes: "Patient requires bi-weekly methotrexate injections and daily medications.",
+            type: .treatment,
+            specialty: .rheumatologist,
+            isActive: true,
+            createdAt: Date().addingTimeInterval(-86400 * 60),
+            updatedAt: Date(),
+            patient: patient
+        )
+        
+        // Create medical case for glaucoma
+        let glaucomaCase = MedicalCase(
+            id: UUID(),
+            title: "Glaucoma Management",
+            notes: "Requires regular eye drops every 12 hours.",
+            type: .treatment,
+            specialty: .ophthalmologist,
+            isActive: true,
+            createdAt: Date().addingTimeInterval(-86400 * 30),
+            updatedAt: Date(),
+            patient: patient
+        )
+        
+        // Prescription with complex frequencies
+        let arthritisPrescription = Prescription(
+            id: UUID(),
+            followUpDate: Date().addingTimeInterval(86400 * 14),
+            followUpTests: ["ESR", "CRP", "Liver function"],
+            dateIssued: Date().addingTimeInterval(-86400 * 3),
+            doctorName: "Dr. Sarah Kim",
+            facilityName: "Rheumatology Center",
+            notes: "Monitor liver function tests bi-weekly. Injectable methotrexate self-administered.",
+            document: nil,
+            medicalCase: arthritisCase,
+            medications: [ ]
+        )
+        
+        let glaucomaPrescription = Prescription(
+            id: UUID(),
+            followUpDate: Date().addingTimeInterval(86400 * 30),
+            followUpTests: ["IOP measurement", "Visual field test"],
+            dateIssued: Date().addingTimeInterval(-86400 * 5),
+            doctorName: "Dr. Robert Martinez",
+            facilityName: "Eye Care Specialists",
+            notes: "Continue current eye drop regimen. Check IOP in 4 weeks.",
+            document: nil,
+            medicalCase: glaucomaCase,
+            medications: [ ]
+        )
+        
+        // Add prescriptions to medical cases
+        arthritisCase.prescriptions = [arthritisPrescription]
+        glaucomaCase.prescriptions = [glaucomaPrescription]
+        
+        // Add medical cases to patient
+        patient.medicalCases = [arthritisCase, glaucomaCase]
         
         return patient
     }()

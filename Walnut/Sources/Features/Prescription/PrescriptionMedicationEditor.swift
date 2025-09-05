@@ -112,7 +112,7 @@ struct PrescriptionMedicationEditor: View {
                     Spacer()
                     
                     VStack(alignment: .trailing, spacing: 2) {
-                        Text("\(medication.numberOfDays) days")
+                        Text(medication.duration?.displayText ?? "Unknown duration")
                             .font(.caption)
                             .fontWeight(.medium)
                             .padding(.horizontal, 8)
@@ -171,18 +171,18 @@ struct PrescriptionMedicationEditor: View {
     
     private func schedulePreviewChip(schedule: MedicationSchedule) -> some View {
         HStack(spacing: 2) {
-            Image(systemName: mealTimeIcon(for: schedule.mealTime))
+            Image(systemName: schedule.icon)
                 .font(.caption2)
-                .foregroundColor(.orange)
+                .foregroundColor(schedule.frequency.color)
             
-            Text(schedule.mealTime.rawValue.prefix(1).capitalized)
+            Text(schedule.displayText)
                 .font(.caption2)
                 .fontWeight(.medium)
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 2)
-        .background(Color.orange.opacity(0.1))
-        .foregroundColor(.orange)
+        .background(schedule.frequency.color.opacity(0.1))
+        .foregroundColor(schedule.frequency.color)
         .clipShape(Capsule())
     }
     
@@ -212,7 +212,7 @@ struct PrescriptionMedicationEditor: View {
             id: UUID(),
             name: lastMedication.name ?? "",
             frequency: lastMedication.frequency ?? [],
-            numberOfDays: lastMedication.numberOfDays ?? 0,
+            duration: lastMedication.duration ?? .days(7),
             dosage: lastMedication.dosage,
             instructions: lastMedication.instructions,
             prescription: prescription
@@ -226,7 +226,8 @@ struct PrescriptionMedicationEditor: View {
     }
     
     // MARK: - Helper Functions
-    private func mealTimeIcon(for mealTime: MealTime) -> String {
+    private func mealTimeIcon(for mealTime: MealTime?) -> String {
+        guard let mealTime = mealTime else { return "clock.fill" }
         switch mealTime {
         case .breakfast: return "sunrise.fill"
         case .lunch: return "sun.max.fill"

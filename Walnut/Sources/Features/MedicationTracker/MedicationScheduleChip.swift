@@ -27,29 +27,41 @@ struct MedicationScheduleChip: View {
     }
     
     private var premiumChip: some View {
-        let mealTimeColor: [Color] = {
-            switch schedule.mealTime {
-            case .breakfast: return [.orange, .yellow]
-            case .lunch: return [.yellow, .orange]
-            case .dinner: return [.purple, .pink]
-            case .bedtime: return [.indigo, .purple]
+        let frequencyColor: [Color] = {
+            switch schedule.frequency {
+            case .mealBased(let mealTime, _):
+                switch mealTime {
+                case .breakfast: return [.orange, .yellow]
+                case .lunch: return [.yellow, .orange]
+                case .dinner: return [.purple, .pink]
+                case .bedtime: return [.indigo, .purple]
+                }
+            case .daily:
+                return [.blue, .cyan]
+            case .hourly:
+                return [.green, .mint]
+            case .weekly, .biweekly:
+                return [.orange, .yellow]
+            case .monthly:
+                return [.purple, .pink]
             }
         }()
         
         return VStack(spacing: 6) {
             HStack(spacing: 6) {
-                Image(systemName: schedule.mealTime.icon)
+                Image(systemName: schedule.icon)
                     .font(.subheadline)
-                    .foregroundColor(mealTimeColor[0])
+                    .foregroundColor(frequencyColor[0])
                 
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(schedule.mealTime.rawValue.capitalized)
+                    Text(schedule.displayText)
                         .font(.caption)
                         .fontWeight(.semibold)
                         .foregroundColor(.primary)
                     
-                    if let timing = schedule.timing {
-                        Text(timing.rawValue)
+                    // Show additional timing information for meal-based schedules
+                    if case .mealBased(_, let timing) = schedule.frequency, let timing = timing {
+                        Text(timing.displayName)
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }
@@ -62,33 +74,35 @@ struct MedicationScheduleChip: View {
                 Text(dosage)
                     .font(.caption2)
                     .fontWeight(.medium)
-                    .foregroundColor(mealTimeColor[0])
+                    .foregroundColor(frequencyColor[0])
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
         .padding(10)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(mealTimeColor[0].opacity(0.08))
+                .fill(frequencyColor[0].opacity(0.08))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(mealTimeColor[0].opacity(0.2), lineWidth: 1)
+                .stroke(frequencyColor[0].opacity(0.2), lineWidth: 1)
         )
     }
     
     private var compactChip: some View {
         HStack(spacing: 4) {
-            Image(systemName: schedule.mealTime.icon)
+            Image(systemName: schedule.icon)
                 .font(.caption2)
+                .foregroundColor(schedule.frequency.color)
             
             VStack(alignment: .leading, spacing: 1) {
-                Text(schedule.mealTime.rawValue.capitalized)
+                Text(schedule.displayText)
                     .font(.caption2)
                     .fontWeight(.medium)
                 
-                if let timing = schedule.timing {
-                    Text(timing.rawValue)
+                // Show additional timing information for meal-based schedules
+                if case .mealBased(_, let timing) = schedule.frequency, let timing = timing {
+                    Text(timing.displayName)
                         .font(.system(size: 9))
                         .foregroundColor(.secondary)
                 }
@@ -102,30 +116,7 @@ struct MedicationScheduleChip: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(Color(.tertiarySystemGroupedBackground))
+        .background(schedule.frequency.color.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 6))
     }
-}
-
-#Preview {
-    VStack(spacing: 16) {
-        MedicationScheduleChip(
-            schedule: MedicationSchedule(
-                mealTime: .breakfast,
-                timing: .before,
-                dosage: "1 tablet"
-            ),
-            style: .premium
-        )
-        
-        MedicationScheduleChip(
-            schedule: MedicationSchedule(
-                mealTime: .dinner,
-                timing: .after,
-                dosage: "2 tablets"
-            ),
-            style: .compact
-        )
-    }
-    .padding()
 }

@@ -63,7 +63,7 @@ struct MedicationDetailCard: View {
             
             Spacer()
             
-            Text("\(String(describing: medication.numberOfDays)) days")
+            Text(medication.duration?.displayText ?? "Unknown duration")
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.green)

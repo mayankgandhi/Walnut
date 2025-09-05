@@ -20,18 +20,15 @@ struct MedicationsTrackerView: View {
     }
     
     var body: some View {
-        ScrollView {            
-            AllMedicationsView(patient: patient)
-        }
+        AllMedicationsView(patient: patient)
     }
 }
 
 
 
-struct MedicationsTrackerView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationView {
-            MedicationsTrackerView(patient: Patient.samplePatient)
-        }
+#Preview {
+    NavigationStack {
+        MedicationsTrackerView(patient: .samplePatient)
     }
+    .modelContainer(for: Patient.self, inMemory: true)
 }

@@ -15,7 +15,7 @@ struct ParsedPrescription: ParseableModel, OpenAISchemaDefinable {
         var id: UUID
         var name: String
         var frequency: [MedicationSchedule]
-        var numberOfDays: Int
+        var duration: MedicationDuration
         var dosage: String?
         var instructions: String?
     }
@@ -36,9 +36,11 @@ struct ParsedPrescription: ParseableModel, OpenAISchemaDefinable {
         """
         Swift prescription parsing model: ParsedPrescription
         ParsedPrescription: dateIssued(Date), doctorName(String?), facilityName(String?), followUpDate(Date?), followUpTests([String]), notes(String?), medications([Medication])
-        Medication: id(UUID), name(String), frequency([MedicationSchedule]), numberOfDays(Int), dosage(String?), instructions(String?)
+        Medication: id(UUID), name(String), frequency([MedicationSchedule]), duration(MedicationDuration), dosage(String?), instructions(String?)
         MedicationSchedule: mealTime(MealTime), timing(MedicationTime?), dosage(String?)
-        Enums: MealTime(.breakfast/.lunch/.dinner/.bedtime), MedicationTime(.before/.after) 
+        MedicationDuration: days(Int) | weeks(Int) | months(Int) | ongoing | asNeeded | untilFollowUp(Date)
+        Enums: MealTime(.breakfast/.lunch/.dinner/.bedtime), MedicationTime(.before/.after)
+        Duration Examples: days(7), weeks(2), months(3), ongoing, asNeeded, untilFollowUp("2024-01-15T00:00:00Z")
         Strictly Follow: Expected date strings to be ISO8601-format.
         """
     }
@@ -111,9 +113,62 @@ struct ParsedPrescription: ParseableModel, OpenAISchemaDefinable {
                                     "additionalProperties": false
                                 ]
                             ],
-                            "numberOfDays": [
-                                "type": "integer",
-                                "description": "Number of days to take the medication"
+                            "duration": [
+                                "type": "object",
+                                "description": "Duration of the medication treatment",
+                                "oneOf": [
+                                    [
+                                        "type": "object",
+                                        "properties": [
+                                            "days": ["type": "integer"]
+                                        ],
+                                        "required": ["days"],
+                                        "additionalProperties": false
+                                    ],
+                                    [
+                                        "type": "object",
+                                        "properties": [
+                                            "weeks": ["type": "integer"]
+                                        ],
+                                        "required": ["weeks"],
+                                        "additionalProperties": false
+                                    ],
+                                    [
+                                        "type": "object",
+                                        "properties": [
+                                            "months": ["type": "integer"]
+                                        ],
+                                        "required": ["months"],
+                                        "additionalProperties": false
+                                    ],
+                                    [
+                                        "type": "object",
+                                        "properties": [
+                                            "ongoing": ["type": "boolean"]
+                                        ],
+                                        "required": ["ongoing"],
+                                        "additionalProperties": false
+                                    ],
+                                    [
+                                        "type": "object",
+                                        "properties": [
+                                            "asNeeded": ["type": "boolean"]
+                                        ],
+                                        "required": ["asNeeded"],
+                                        "additionalProperties": false
+                                    ],
+                                    [
+                                        "type": "object",
+                                        "properties": [
+                                            "untilFollowUp": [
+                                                "type": "string",
+                                                "format": "date-time"
+                                            ]
+                                        ],
+                                        "required": ["untilFollowUp"],
+                                        "additionalProperties": false
+                                    ]
+                                ]
                             ],
                             "dosage": [
                                 "type": ["string", "null"],
@@ -124,7 +179,7 @@ struct ParsedPrescription: ParseableModel, OpenAISchemaDefinable {
                                 "description": "Special instructions for the medication"
                             ]
                         ],
-                        "required": ["id", "name", "frequency", "numberOfDays", "dosage", "instructions"],
+                        "required": ["id", "name", "frequency", "duration", "dosage", "instructions"],
                         "additionalProperties": false
                     ]
                 ]

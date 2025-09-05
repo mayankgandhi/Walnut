@@ -13,31 +13,61 @@ import WalnutDesignSystem
 struct AllMedicationsView: View {
     
     let patient: Patient
+    @Environment(\.modelContext) private var modelContext
     @State private var medicationTracker = MedicationTracker()
     @State private var showMedicationEditor = false
     @State private var medicationToEdit: Medication? = nil
+    @State private var groupedMedications: [MealTime: [MedicationTracker.MedicationScheduleInfo]] = [:]
     
+    // SwiftData query for active prescriptions to automatically update UI
+    @Query private var allPrescriptions: [Prescription]
+    
+    // Computed property optimized with caching
     private var activeMedications: [Medication] {
-        let activeMedicalCases = patient.medicalCases?
-            .filter { $0.isActive ?? false }
-        let activeMedicalCasesPrescriptions: [Prescription] = (activeMedicalCases ?? []).compactMap(\.prescriptions)
-            .reduce([], +)
-        let activeMedications: [Medication] = activeMedicalCasesPrescriptions
-            .compactMap(\.medications).reduce([], +)
-        return activeMedications
+        // Filter for active medical cases and get their prescriptions
+        let activePrescriptions = allPrescriptions.filter { prescription in
+            guard let medicalCase = prescription.medicalCase else { return false }
+            return medicalCase.patient?.id == patient.id && (medicalCase.isActive ?? false)
+        }
+        
+        // Flatten medications from active prescriptions
+        return activePrescriptions.compactMap { $0.medications }.reduce([], +)
     }
     
-    private func groupedActiveMedications() -> [MealTime: [MedicationTracker.MedicationScheduleInfo]] {
-        medicationTracker.groupMedicationsByMealTime(activeMedications)
+    // Background task for grouping medications
+    @MainActor
+    private func updateGroupedMedications() {
+        Task {
+            let medications = activeMedications
+            let grouped = await withTaskGroup(of: (MealTime, [MedicationTracker.MedicationScheduleInfo]).self) { group in
+                var result: [MealTime: [MedicationTracker.MedicationScheduleInfo]] = [:]
+                
+                for mealTime in MealTime.allCases {
+                    group.addTask {
+                        let filteredInfo = await medicationTracker.getMedicationInfoForMealTime(medications, mealTime: mealTime)
+                        return (mealTime, filteredInfo)
+                    }
+                }
+                
+                for await (mealTime, infos) in group {
+                    result[mealTime] = infos
+                }
+                
+                return result
+            }
+            
+            groupedMedications = grouped
+        }
     }
     
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.medium) {
                 // Active Medications Section
-                if !activeMedications.isEmpty {
+                if !groupedMedications.isEmpty {
                     ForEach(MealTime.allCases, id: \.self) { timePeriod in
-                        if let medications = groupedActiveMedications()[timePeriod], !medications.isEmpty {
+                        if let medications = groupedMedications[timePeriod],
+                         !medications.isEmpty {
                             timePeriodSection(timePeriod: timePeriod, medications: medications)
                         }
                     }
@@ -51,6 +81,12 @@ struct AllMedicationsView: View {
                 }
             }
             .padding(.horizontal, Spacing.medium)
+        }
+        .onAppear {
+            updateGroupedMedications()
+        }
+        .onChange(of: allPrescriptions) { _, _ in
+            updateGroupedMedications()
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -96,25 +132,29 @@ struct AllMedicationsView: View {
     
     @ViewBuilder
     private func medicationScheduleRow(medicationInfo: MedicationTracker.MedicationScheduleInfo) -> some View {
-        MedicationCard(
-            medicationName: medicationInfo.medication.name ?? "Medication",
-            dosage: medicationInfo.dosageText,
-            timing: medicationInfo.displayTime,
-            timePeriod: medicationInfo.timePeriod,
-            accentColor: medicationInfo.timePeriod.color,
-        )
+        MedicationCard(medication: medicationInfo.medication)
     }
     
     private func handleMedicationSave(_ medication: Medication) {
-        // Find the prescription that contains this medication and update it
-        for medicalCase in patient.medicalCases ?? [] {
-            for prescription in medicalCase.prescriptions ?? [] {
-                if let medicationIndex = prescription.medications?.firstIndex(
-                    where: { $0.id == medication.id
-                    }) {
-                    // Update the medication in the prescription
+        Task { @MainActor in
+            // Find the prescription that contains this medication and update it
+            let relevantPrescriptions = allPrescriptions.filter { prescription in
+                prescription.medications?.contains(where: { $0.id == medication.id }) == true
+            }
+            
+            for prescription in relevantPrescriptions {
+                if let medicationIndex = prescription.medications?.firstIndex(where: { $0.id == medication.id }) {
+                    // Update the medication in the prescription using SwiftData
                     prescription.medications?[medicationIndex] = medication
                     prescription.updatedAt = Date()
+                    
+                    // Save context
+                    do {
+                        try modelContext.save()
+                        // UI will automatically update due to @Query
+                    } catch {
+                        print("Error saving medication: \(error)")
+                    }
                     return
                 }
             }

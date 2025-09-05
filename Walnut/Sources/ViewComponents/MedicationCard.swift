@@ -13,25 +13,30 @@ import WalnutDesignSystem
 
 /// Professional medication card component for healthcare apps
 struct MedicationCard: View {
+    private let medication: Medication?
     private let medicationName: String
     private let dosage: String?
     private let timing: String?
+    private let duration: String?
     private let timePeriod: MealTime?
     private let accentColor: Color
     
+    // Initializer for Medication model
     init(
-        medicationName: String,
-        dosage: String? = nil,
-        timing: String? = nil,
-        timePeriod: MealTime? = nil,
-        accentColor: Color = .healthPrimary,
+        medication: Medication,
     ) {
-        self.medicationName = medicationName
-        self.dosage = dosage
-        self.timing = timing
-        self.timePeriod = timePeriod
-        self.accentColor = accentColor
+        self.medication = medication
+        self.medicationName = medication.name ?? "Unknown Medication"
+        self.dosage = medication.dosage
+        self.duration = medication.duration?.displayText
+        
+        self.timing = nil
+        self.timePeriod = nil
+                
+        self.accentColor = self.timePeriod?.color ?? Color.healthPrimary
     }
+    
+    
     
     public var body: some View {
         HealthCard {
@@ -42,10 +47,8 @@ struct MedicationCard: View {
                 // Medication content
                 VStack(alignment: .leading, spacing: Spacing.small) {
                     medicationDetails
-                    
                     timingSection
-                    
-                    
+                    durationSection
                 }
             }
         }
@@ -85,7 +88,6 @@ struct MedicationCard: View {
                 Image(systemName: timePeriod.icon)
                     .font(.system(size: 20, weight: .semibold))
                     .foregroundStyle(.white)
-                    .symbolEffect(.pulse.wholeSymbol, options: .repeating.speed(0.6))
             } else {
                 Text(String(medicationName.prefix(1).uppercased()))
                     .font(.system(size: 20, weight: .black))
@@ -155,146 +157,25 @@ struct MedicationCard: View {
         }
     }
     
-}
-
-// MARK: - Convenience Initializers
-
-extension MedicationCard {
-    /// Create a medication card for upcoming medications
-    static func upcoming(
-        medicationName: String,
-        dosage: String,
-        timing: String,
-        timePeriod: MealTime,
-    ) -> MedicationCard {
-        MedicationCard(
-            medicationName: medicationName,
-            dosage: dosage,
-            timing: timing,
-            timePeriod: timePeriod,
-            accentColor: timePeriod.color,
-            
-        )
-    }
-    
-    /// Create a medication card for general display
-    static func display(
-        medicationName: String,
-        dosage: String? = nil,
-        timing: String? = nil,
-        instructions: String? = nil,
-        accentColor: Color = .healthPrimary
-    ) -> MedicationCard {
-        MedicationCard(
-            medicationName: medicationName,
-            dosage: dosage,
-            timing: timing,
-            accentColor: accentColor,
-        )
-    }
-}
-
-// MARK: - Preview
-
-#Preview("Single Rich Card") {
-    VStack {
-        MedicationCard.upcoming(
-            medicationName: "Lisinopril",
-            dosage: "10mg",
-            timing: "Before Breakfast",
-            timePeriod: .breakfast,
-        )
-        
-        Spacer()
-    }
-    .padding()
-    .background(Color(UIColor.systemGroupedBackground))
-}
-
-#Preview("Rich 2-Column Dynamic Grid") {
-    ScrollView {
-        VStack(alignment: .leading, spacing: Spacing.large) {
-            
-            Text("Rich Dynamic Medication Cards")
-                .font(.title.weight(.bold))
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            LazyVGrid(columns: [
-                GridItem(.flexible(), spacing: Spacing.medium),
-                GridItem(.flexible(), spacing: Spacing.medium)
-            ], spacing: Spacing.medium) {
+    @ViewBuilder
+    private var durationSection: some View {
+        if let duration = duration, !duration.isEmpty {
+            HStack(spacing: 6) {
+                Image(systemName: "calendar.badge.clock")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 
-                MedicationCard.upcoming(
-                    medicationName: "Lisinopril",
-                    dosage: "10mg",
-                    timing: "Before Breakfast",
-                    timePeriod: .breakfast,
-                )
+                Text(duration)
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 2)
+                    .background(Color.secondary.opacity(0.1))
+                    .clipShape(Capsule())
                 
-                MedicationCard.upcoming(
-                    medicationName: "Metformin",
-                    dosage: "500mg",
-                    timing: "After Dinner",
-                    timePeriod: .dinner,
-                )
-                
-                MedicationCard.upcoming(
-                    medicationName: "Vitamin D3",
-                    dosage: "2000 IU",
-                    timing: "After Breakfast",
-                    timePeriod: .breakfast,
-                )
-                
-                MedicationCard.upcoming(
-                    medicationName: "Atorvastatin",
-                    dosage: "20mg",
-                    timing: "At Bedtime",
-                    timePeriod: .bedtime,
-                )
-                
-                MedicationCard.upcoming(
-                    medicationName: "Omeprazole",
-                    dosage: "40mg",
-                    timing: "Before Lunch",
-                    timePeriod: .lunch,
-                )
-                
-                MedicationCard.upcoming(
-                    medicationName: "Aspirin",
-                    dosage: "81mg",
-                    timing: "After Breakfast",
-                    timePeriod: .breakfast,
-                )
-                
-            }
-            
-            Text("Display Mode Cards")
-                .font(.title2.weight(.semibold))
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, Spacing.large)
-            
-            LazyVGrid(columns: [
-                GridItem(.flexible(), spacing: Spacing.medium),
-                GridItem(.flexible(), spacing: Spacing.medium)
-            ], spacing: Spacing.medium) {
-                
-                MedicationCard.display(
-                    medicationName: "Ibuprofen",
-                    dosage: "200mg",
-                    timing: "As needed",
-                    accentColor: .red
-                )
-                
-                MedicationCard.display(
-                    medicationName: "Multivitamin",
-                    dosage: "1 tablet",
-                    timing: "Daily with breakfast",
-                    accentColor: .green
-                )
-                
+                Spacer()
             }
         }
-        .padding()
     }
-    .background(Color(UIColor.systemGroupedBackground))
+    
 }

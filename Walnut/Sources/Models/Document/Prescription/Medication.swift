@@ -16,7 +16,7 @@ class Medication {
     var id: UUID?
     var name: String?
     var frequency: [MedicationSchedule]?
-    var numberOfDays: Int?
+    var duration: MedicationDuration? // Replaces numberOfDays with more flexibility
     var dosage: String?
     var instructions: String?
     
@@ -25,26 +25,64 @@ class Medication {
     
     var prescription: Prescription?
     
-    init(id: UUID, name: String, frequency: [MedicationSchedule], numberOfDays: Int, dosage: String? = nil, instructions: String? = nil, createdAt: Date = Date(), updatedAt: Date = Date(), prescription: Prescription? = nil) {
+    init(
+        id: UUID,
+        name: String,
+        frequency: [MedicationSchedule],
+        duration: MedicationDuration? = nil,
+        dosage: String? = nil,
+        instructions: String? = nil,
+        createdAt: Date = Date(),
+        updatedAt: Date = Date(),
+        prescription: Prescription? = nil
+    ) {
         self.id = id
         self.name = name
         self.frequency = frequency
-        self.numberOfDays = numberOfDays
         self.dosage = dosage
         self.instructions = instructions
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.prescription = prescription
     }
+    
 }
 
-struct MedicationSchedule: Codable {
-    let mealTime: MealTime
-    let timing: MedicationTime? // before/after
-    let dosage: String?
+enum Weekday: Int, Codable, CaseIterable {
+    case sunday = 1, monday, tuesday, wednesday, thursday, friday, saturday
     
-    var icon: String {
-        mealTime.icon + (timing?.icon ?? "")
+    var displayName: String {
+        switch self {
+        case .sunday: return "Sunday"
+        case .monday: return "Monday"
+        case .tuesday: return "Tuesday"
+        case .wednesday: return "Wednesday"
+        case .thursday: return "Thursday"
+        case .friday: return "Friday"
+        case .saturday: return "Saturday"
+        }
+    }
+}
+
+enum Month: Int, Codable, CaseIterable {
+    case january = 1, february, march, april, may, june
+    case july, august, september, october, november, december
+    
+    var displayName: String {
+        switch self {
+        case .january: return "January"
+        case .february: return "February"
+        case .march: return "March"
+        case .april: return "April"
+        case .may: return "May"
+        case .june: return "June"
+        case .july: return "July"
+        case .august: return "August"
+        case .september: return "September"
+        case .october: return "October"
+        case .november: return "November"
+        case .december: return "December"
+        }
     }
 }
 
@@ -106,7 +144,6 @@ enum MealTime: String, Codable, CaseIterable {
 }
 
 enum MedicationTime: String, Codable, CaseIterable {
-
     case before, after
     
     var icon: String {
@@ -117,5 +154,13 @@ enum MedicationTime: String, Codable, CaseIterable {
                 ".fill"
         }
     }
+    
+    var displayName: String {
+        switch self {
+        case .before:
+            return "Before"
+        case .after:
+            return "After"
+        }
+    }
 }
-
