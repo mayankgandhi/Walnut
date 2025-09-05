@@ -10,6 +10,7 @@ import SwiftUI
 import SwiftData
 import Foundation
 import AIKit
+import PostHog
 
 // MARK: - Protocols
 /// Protocol for progress tracking
@@ -48,8 +49,6 @@ class DocumentProcessingService {
         self.aiService = aiService
         self.repository = repository
     }
-    
-    // MARK: - Public Interface
     
     @MainActor
     func processDocument(
@@ -163,7 +162,13 @@ extension DocumentProcessingService {
     static func createWithAIKit(
         modelContext: ModelContext
     ) -> DocumentProcessingService {
-        let aiService = AIKitFactory.createUnifiedService()
+        var claudeKey: String = PostHogSDK.shared.getFeatureFlagPayload("anthropic-api-key") as? String ?? ""
+        var openAIKey: String = PostHogSDK.shared.getFeatureFlagPayload("openai-api-key") as? String ?? ""
+                
+        let aiService = AIKitFactory.createUnifiedService(
+            claudeKey: claudeKey,
+            openAIKey: openAIKey
+        )
         let repository = DefaultDocumentRepository(modelContext: modelContext)
         
         return DocumentProcessingService(

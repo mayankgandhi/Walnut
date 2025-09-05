@@ -13,8 +13,14 @@ import Foundation
 public struct AIKitFactory {
     
     /// Create a unified document parsing service with OpenAI
-    public static func createUnifiedService() -> UnifiedDocumentParsingService {
-        return UnifiedDocumentParsingService()
+    public static func createUnifiedService(
+        claudeKey: String,
+        openAIKey: String
+    ) -> UnifiedDocumentParsingService {
+        return UnifiedDocumentParsingService(
+            openAIKey: openAIKey,
+            claudeKey: claudeKey
+        )
     }
-
+    
 }

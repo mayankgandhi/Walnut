@@ -17,7 +17,10 @@ public final class UnifiedDocumentParsingService: DocumentParsingService, Observ
     
     // MARK: - Initialization
     
-    public init() {
+    public init(
+        openAIKey: String,
+        claudeKey: String
+    ) {
         self.parser = DocumentParser(openAIKey: openAIKey, claudeKey: claudeKey)
     }
     
