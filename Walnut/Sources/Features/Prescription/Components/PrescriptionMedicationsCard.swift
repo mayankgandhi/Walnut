@@ -36,7 +36,7 @@ struct PrescriptionMedicationsCard: View {
                 LazyVStack(spacing: Spacing.medium) {
                     ForEach(medications, id: \.id) { medication in
                         HealthCard {
-                            EnhancedMedicationCard(medication: medication)
+                            MedicationListItem(medication: medication)
                         }
                     }
                 }

@@ -1,5 +1,5 @@
 //
-//  EnhancedMedicationCard.swift
+//  MedicationListItem.swift
 //  Walnut
 //
 //  Created by Mayank Gandhi on 03/09/25.
@@ -9,33 +9,39 @@
 import SwiftUI
 import WalnutDesignSystem
 
-struct EnhancedMedicationCard: View {
+struct MedicationListItem: View {
     
     let medication: Medication
     
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.medium) {
-            medicationHeaderSection
-            
-            if !(medication.frequency ?? []).isEmpty {
-                frequencySection
-            }
-            
-            if let instructions = medication.instructions, !instructions.isEmpty {
-                instructionsSection(instructions)
+        HealthCard {
+            VStack(alignment: .leading, spacing: Spacing.small) {
+                medicationHeaderSection
+                
+                if !(medication.frequency ?? []).isEmpty {
+                    frequencySection
+                }
+                
+                if let instructions = medication.instructions, !instructions.isEmpty {
+                    instructionsSection(instructions)
+                }
             }
         }
-        
     }
     
     // MARK: - Subviews
     
     private var medicationHeaderSection: some View {
-        HStack(spacing: Spacing.medium) {
-            medicationStatusIcon
+        VStack(alignment: .leading, spacing: Spacing.small) {
+            HStack {
+                medicationStatusIcon
+                
+                Spacer()
+                
+                durationBadge
+            }
+            
             medicationInfoSection
-            Spacer()
-            durationBadge
         }
     }
     
@@ -51,12 +57,13 @@ struct EnhancedMedicationCard: View {
     }
     
     private var medicationInfoSection: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
             if let name = medication.name, !name.isEmpty {
                 Text(name)
-                    .font(.subheadline.weight(.semibold))
+                    .font(.headline.weight(.semibold))
                     .foregroundStyle(.primary)
                     .lineLimit(2)
+                    .multilineTextAlignment(.leading)
             }
             
             if let dosage = medication.dosage, !dosage.isEmpty {
@@ -96,10 +103,17 @@ struct EnhancedMedicationCard: View {
     }
     
     private var frequencySection: some View {
-        VStack(alignment: .leading, spacing: Spacing.small) {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
             frequencyHeader
             frequencyGrid
         }
+        .padding(Spacing.small)
+        .background(Color.healthWarning.opacity(0.05))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.healthWarning.opacity(0.1), lineWidth: 1)
+        )
     }
     
     private var frequencyHeader: some View {
@@ -174,25 +188,18 @@ struct EnhancedMedicationCard: View {
         Text(instructions)
             .font(.caption)
             .foregroundStyle(.primary)
-            .lineSpacing(2)
+            .lineSpacing(1)
+            .multilineTextAlignment(.leading)
             .padding(Spacing.small)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.healthPrimary.opacity(0.05))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipShape(RoundedRectangle(cornerRadius: 6))
             .overlay(
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: 6)
                     .stroke(Color.healthPrimary.opacity(0.1), lineWidth: 1)
             )
     }
     
-    private var cardBackground: some View {
-        RoundedRectangle(cornerRadius: 12)
-            .fill(Color(UIColor.secondarySystemGroupedBackground))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(medicationStatusColor.opacity(0.1), lineWidth: 1)
-            )
-    }
     
     // MARK: - Helper Properties
     
@@ -218,13 +225,13 @@ struct EnhancedMedicationCard: View {
 
 // MARK: - Previews
 
-#Preview("Basic Medication") {
+#Preview("Single Medication Card") {
     VStack(spacing: Spacing.medium) {
-        EnhancedMedicationCard(
+        MedicationListItem(
             medication: Medication(
                 id: UUID(),
                 name: "Ibuprofen",
-                frequency: [.init(mealTime: .bedtime, timing: .after, dosage: "100mg")],
+                frequency: [.init(mealTime: .breakfast, timing: .after, dosage: "200mg")],
                 numberOfDays: 5,
                 instructions: "Take with food to avoid stomach upset"
             )

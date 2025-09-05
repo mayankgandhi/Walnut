@@ -40,9 +40,7 @@ struct UpcomingMedicationsSection: View {
                         instructions: medicationInfo.medication.instructions,
                         timePeriod: medicationInfo.timePeriod,
                         timeUntilDue: medicationInfo.timeUntilDue.map { medicationTracker.formatTimeUntilDue($0) } ?? ""
-                    ) {
-                        
-                    }
+                    )
                 }
             }
         }
