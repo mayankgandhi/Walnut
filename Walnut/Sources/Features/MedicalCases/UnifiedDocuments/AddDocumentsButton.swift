@@ -15,7 +15,6 @@ struct AddDocumentsButton: View {
     @Environment(\.modelContext) var modelContext
     let medicalCase: MedicalCase
     @State private var store: DocumentPickerStore
-    @State private var processingService: DocumentProcessingService
     @State private var viewModel: AddDocumentsButtonViewModel
     
     init(
@@ -25,9 +24,6 @@ struct AddDocumentsButton: View {
     ) {
         self.medicalCase = medicalCase
         self._store = State(initialValue: DocumentPickerStore())
-        self.processingService = DocumentProcessingService.createWithAIKit(
-            modelContext: modelContext
-        )
         self.viewModel = viewModel
     }
     
@@ -64,8 +60,7 @@ struct AddDocumentsButton: View {
             content: {
                 ModularDocumentPickerView(
                     medicalCase: medicalCase,
-                    store: store,
-                    processingService: processingService
+                    store: store
                 )
                 .presentationCornerRadius(Spacing.large)
                 .presentationDetents([.medium])

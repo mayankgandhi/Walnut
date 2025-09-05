@@ -130,11 +130,19 @@ extension DocumentProcessingService: DocumentProcessingProgressDelegate {
     func didUpdateProgress(_ progress: Double, status: String) {
         processingProgress = progress
         processingStatus = status
+        
+        // Update global upload state manager
+        DocumentUploadStateManager.shared.updateProgress(progress, status: status)
     }
     
     @MainActor
     func didCompleteProcessing(with result: Result<ProcessingResult, Error>) {
-        // Additional handling can be added here if needed
+        switch result {
+        case .success:
+            DocumentUploadStateManager.shared.completeUpload()
+        case .failure(let error):
+            DocumentUploadStateManager.shared.setError(error)
+        }
     }
 }
 

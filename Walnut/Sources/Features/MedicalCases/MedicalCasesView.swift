@@ -19,41 +19,16 @@ struct MedicalCasesView: View {
     }
     
     private var emptyStateView: some View {
-        HealthCard {
-            VStack(spacing: Spacing.large) {
-                Circle()
-                    .fill(Color.healthPrimary.opacity(0.15))
-                    .frame(width: 80, height: 80)
-                    .overlay {
-                        Image(systemName: "doc.text.magnifyingglass")
-                            .font(.system(size: 32, weight: .semibold))
-                            .foregroundStyle(Color.healthPrimary)
-                    }
-                
-                VStack(spacing: Spacing.small) {
-                    Text("No Medical Cases")
-                        .font(.title2.weight(.semibold))
-                        .foregroundStyle(.primary)
-                    
-                    Text(viewModel.isEmpty == true ?
-                         "Create your first medical case to get started" :
-                            "No cases match your search or filter criteria")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                }
-                
-                if viewModel.isEmpty == true {
-                    Button("Create Medical Case") {
-                        viewModel.showCreateMedicalCase()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                }
+        ContentUnavailableView {
+            Label("No Medical Cases", systemImage: "doc.text.magnifyingglass")
+        } description: {
+            Text("Create your first medical case to get started/No cases match your search or filter criteria")
+        } actions: {
+            Button("Create Medical Case") {
+                viewModel.showCreateMedicalCase()
             }
-            .frame(maxWidth: .infinity)
+            .buttonStyle(.borderedProminent)
         }
-        .padding(.horizontal, Spacing.medium)
     }
     
     // MARK: - Body

@@ -13,7 +13,7 @@ struct PatientTabView: View {
     
     @Environment(\.modelContext) private var modelContext
     let patient: Patient
-    @State var showAccessory: Bool = false
+    @State private var uploadStateManager = DocumentUploadStateManager.shared
     
     var body: some View {
         TabView {
@@ -55,9 +55,19 @@ struct PatientTabView: View {
             
         }
         .tabBarMinimizeBehavior(.automatic)
-        .conditionalModifier(when: showAccessory, apply: {
+        .onAppear {
+            uploadStateManager.initializeProcessingService(modelContext: modelContext)
+        }
+        .conditionalModifier(when: uploadStateManager.isUploading, apply: {
             $0.tabViewBottomAccessory {
-                UploadViewBottomAccessory(documentType: .imaging, state: .completed)
+                if let documentType = uploadStateManager.documentType {
+                    UploadViewBottomAccessory(
+                        documentType: documentType,
+                        state: uploadStateManager.uploadState,
+                        progress: uploadStateManager.progress,
+                        customStatusText: uploadStateManager.statusText
+                    )
+                }
             }
         })
     }

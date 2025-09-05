@@ -12,6 +12,7 @@ import WalnutDesignSystem
 struct UploadViewBottomAccessory: View {
     
     enum UploadViewBottomAccessoryState {
+        case preparing
         case uploading
         case parsing
         case completed
@@ -19,6 +20,8 @@ struct UploadViewBottomAccessory: View {
         
         var iconImage: String {
             switch self {
+                case .preparing:
+                    "upload-icon"
                 case .uploading:
                     "upload-icon"
                 case .parsing:
@@ -32,12 +35,14 @@ struct UploadViewBottomAccessory: View {
         
         var stateText: String {
             switch self {
+                case .preparing:
+                    "Preparing file..."
                 case .uploading:
                     "Uploading..."
                 case .parsing:
-                    "Parsing..."
+                    "Processing, This may take a while..."
                 case .completed:
-                    "Completed"
+                    "Complete!"
                 case .failed:
                     "Failed"
             }
@@ -47,6 +52,20 @@ struct UploadViewBottomAccessory: View {
     
     let documentType: DocumentType
     let state: UploadViewBottomAccessoryState
+    let progress: Double
+    let customStatusText: String?
+    
+    init(
+        documentType: DocumentType,
+        state: UploadViewBottomAccessoryState,
+        progress: Double = 0.0,
+        customStatusText: String? = nil
+    ) {
+        self.documentType = documentType
+        self.state = state
+        self.progress = progress
+        self.customStatusText = customStatusText
+    }
     
     var body: some View {
         HStack {
@@ -61,17 +80,19 @@ struct UploadViewBottomAccessory: View {
                     .truncationMode(.middle)
                     .multilineTextAlignment(.leading)
                 
-                Text(state.stateText)
+                Text(customStatusText ?? state.stateText)
                     .font(.system(.caption, design: .rounded, weight: .regular))
                     .foregroundColor(.secondary)
                     .truncationMode(.tail)
                     .multilineTextAlignment(.leading)
+                
+                
             }
             
             Spacer()
             
             CombinedPulseView(iconImage: state.iconImage)
-            
+
         }
         .padding(.horizontal)
     }
@@ -89,7 +110,8 @@ struct UploadViewBottomAccessory: View {
     .tabViewBottomAccessory {
         UploadViewBottomAccessory(
             documentType: .imaging,
-            state: .uploading
+            state: .uploading,
+            progress: 0.3
         )
     }
 }
@@ -104,7 +126,8 @@ struct UploadViewBottomAccessory: View {
     .tabViewBottomAccessory {
         UploadViewBottomAccessory(
             documentType: .imaging,
-            state: .parsing
+            state: .parsing,
+            progress: 0.7
         )
     }
 }

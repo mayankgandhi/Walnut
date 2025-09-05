@@ -10,6 +10,7 @@ import Foundation
 
 enum DocumentProcessingError: LocalizedError {
     case noSelection
+    case configurationError(String)
     case imageProcessingFailed
     case unsupportedDocumentType
     case filePreparationFailed(Error)
@@ -22,6 +23,8 @@ enum DocumentProcessingError: LocalizedError {
         switch self {
         case .noSelection:
             return "No document or image selected"
+        case .configurationError(let message):
+            return "Configuration error: \(message)"
         case .imageProcessingFailed:
             return "Failed to process the selected image"
         case .unsupportedDocumentType:
@@ -43,6 +46,8 @@ enum DocumentProcessingError: LocalizedError {
         switch self {
         case .noSelection:
             return "Please select a document or image before processing"
+        case .configurationError:
+            return "Please restart the app and try again"
         case .imageProcessingFailed:
             return "Try selecting a different image or check image format"
         case .unsupportedDocumentType:

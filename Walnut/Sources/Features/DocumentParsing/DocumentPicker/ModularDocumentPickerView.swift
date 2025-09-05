@@ -19,19 +19,14 @@ struct ModularDocumentPickerView: View {
     // MARK: - Environment
     @Environment(\.dismiss) private var dismiss
     @State private var store: DocumentPickerStore
-    @State private var processingService: DocumentProcessingService
     // MARK: - State
-
-    @State private var showingProcessingStatus = false
     
     init(
         medicalCase: MedicalCase,
-        store: DocumentPickerStore,
-        processingService: DocumentProcessingService,
+        store: DocumentPickerStore
     ) {
         self.medicalCase = medicalCase
         self.store = store
-        self.processingService = processingService
     }
     
     // MARK: - Body
@@ -39,14 +34,7 @@ struct ModularDocumentPickerView: View {
         NavigationView {
             VStack(alignment: .leading, spacing: Spacing.large) {
                 
-                if showingProcessingStatus {
-                    DocumentProcessingStatusView(
-                        isProcessing: $store.isProcessing,
-                        processingProgress: $processingService.processingProgress,
-                        processingStatus: $processingService.processingStatus,
-                        lastError: $processingService.lastError
-                    )
-                } else if store.selectedDocumentType != nil {
+                if store.selectedDocumentType != nil {
                     // Document Source Picker
                     DocumentSourcePicker(medicalCase: medicalCase, store: store)
                         .padding(.horizontal)
@@ -69,9 +57,7 @@ struct ModularDocumentPickerView: View {
                     }
                     
                     // Upload button
-                    if store.canUpload &&
-                        !processingService.isProcessing &&
-                        store.selectedDocumentType != nil {
+                    if store.canUpload && store.selectedDocumentType != nil {
                         Button("Upload \(store.selectedDocument != nil ? "Document" : "Image")") {
                             processDocument()
                         }
@@ -102,24 +88,17 @@ struct ModularDocumentPickerView: View {
     // MARK: - Actions
     
     private func processDocument() {
-        showingProcessingStatus = true
-        processingService
-            .processDocument(
-                from: store,
-                for: medicalCase,
-                selectedDocumentType: store.selectedDocumentType!
-            ) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success:
-                    showingProcessingStatus = false
-                    dismiss()
-                case .failure(let error):
-                    store.errorMessage = error.localizedDescription
-                    showingProcessingStatus = false
-                }
-            }
-        }
+        guard let documentType = store.selectedDocumentType else { return }
+        
+        // Start document processing through the upload state manager
+        DocumentUploadStateManager.shared.processDocument(
+            from: store,
+            for: medicalCase,
+            selectedDocumentType: documentType
+        )
+        
+        // Dismiss picker immediately after starting upload
+        dismiss()
     }
 }
 

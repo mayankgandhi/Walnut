@@ -19,7 +19,7 @@ struct CombinedPulseView: View {
             .scaleEffect(isPulsating ? 1.0 : 0.9)
             .opacity(isPulsating ? 0.7 : 1.0)
             .animation(
-                Animation.easeInOut(duration: 1.2)
+                Animation.spring(duration: 0.4)
                     .repeatForever(autoreverses: true),
                 value: isPulsating
             )
