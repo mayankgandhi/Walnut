@@ -7,8 +7,8 @@ let package = Package(
     platforms: [.iOS(.v17)],
     dependencies: [        
         // Analytics
-        .package(url: "git@github.com:PostHog/posthog-ios.git", from: "3.25.0"),
-
-        .package(url:"https://github.com/ProxymanApp/atlantis", from: "1.29.2")
+        .package(url: "git@github.com:PostHog/posthog-ios.git", from: "3.31.0"),
+        // Network Debugging
+        .package(url:"https://github.com/ProxymanApp/atlantis", from: "1.30.1")
     ]
 )
