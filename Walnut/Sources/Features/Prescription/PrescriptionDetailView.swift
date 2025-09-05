@@ -7,11 +7,12 @@
 //
 
 import SwiftUI
+import SwiftData
 import WalnutDesignSystem
 
 struct PrescriptionDetailView: View {
     
-    @State var prescription: Prescription
+    @Bindable var prescription: Prescription
     @Environment(\.dismiss) private var dismiss
     
     @State var showEditor: Bool = false
@@ -321,5 +322,6 @@ struct PrescriptionDetailView: View {
     NavigationStack {
         PrescriptionDetailView(prescription: .samplePrescription(for: .sampleCase))
     }
+    .modelContainer(for: Prescription.self, inMemory: true)
 }
 

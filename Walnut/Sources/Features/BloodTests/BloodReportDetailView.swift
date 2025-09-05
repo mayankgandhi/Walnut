@@ -7,16 +7,18 @@
 //
 
 import SwiftUI
+import SwiftData
 import Charts
 import WalnutDesignSystem
 
 struct BloodReportDetailView: View {
     
-    let bloodReport: BloodReport
+    @Bindable var bloodReport: BloodReport
     @Environment(\.dismiss) private var dismiss
     
     @State private var selectedCategory: String?
     @State private var showAllTests = false
+    @State private var showEditor = false
     
     var body: some View {
         ScrollView {
@@ -47,6 +49,30 @@ struct BloodReportDetailView: View {
                 }
             }
             .padding(.horizontal, Spacing.medium)
+        }
+        .sheet(isPresented: $showEditor) {
+            if bloodReport.medicalCase == nil {
+                ContentUnavailableView(
+                    "Unable to edit this blood report.",
+                    systemImage: "exclamationmark.triangle.fill"
+                )
+            } else {
+                BloodReportEditor(
+                    bloodReport: bloodReport,
+                    medicalCase: bloodReport.medicalCase!
+                )
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu("", systemImage: "ellipsis") {
+                    Button {
+                        showEditor = true
+                    } label: {
+                        Label("Edit", systemImage: "pencil")
+                    }
+                }
+            }
         }
     }
     
@@ -378,5 +404,6 @@ struct BloodReportDetailView: View {
     return NavigationStack {
         BloodReportDetailView(bloodReport: sampleBloodReport)
     }
+    .modelContainer(for: BloodReport.self, inMemory: true)
 }
 

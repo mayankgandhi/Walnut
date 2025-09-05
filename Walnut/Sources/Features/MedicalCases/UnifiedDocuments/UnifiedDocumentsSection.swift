@@ -66,7 +66,6 @@ struct UnifiedDocumentsSection: View {
         .sheet(item: $viewModel.navigationState.selectedBloodReport) { bloodReport in
             NavigationView {
                 BloodReportDetailView(bloodReport: bloodReport)
-                    .padding(.top, Spacing.large)
             }
             .presentationDragIndicator(.visible)
             .presentationCornerRadius(Spacing.large)

@@ -33,7 +33,6 @@ struct BloodTestsView: View {
                     emptyStateView
                 }
             }
-            .background(Color(UIColor.systemGroupedBackground))
             .navigationTitle("Blood Tests")
             .navigationBarTitleDisplayMode(.large)
             .searchable(text: Binding(

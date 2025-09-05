@@ -109,16 +109,22 @@ struct MedicalCaseTimelineEventProvider: TimelineEventProvider {
             .sorted(by: { $0.resultDate < $1.resultDate })
             .map({ bloodReport in
                 let abnormalCount = bloodReport.testResults?.filter(
-                    { $0.isAbnormal ?? false }).count
-                let subtitle = abnormalCount > 0 ?
-                "\(String(describing: bloodReport.testName)) - \(String(describing: abnormalCount)) abnormal results" : 
-                "\(String(describing: bloodReport.testName)) - All normal"
+                    { $0.isAbnormal ?? false }).count ?? 0
                 
+                var subtitle: [String?] = []
+                subtitle.append(bloodReport.testName)
+                
+                if abnormalCount > 0 {
+                    subtitle.append("\(abnormalCount) abnormal results")
+                } else {
+                    subtitle.append("All normal")
+                }
+                            
                 return TimelineEvent(
                     icon: "drop.fill",
                     color: abnormalCount > 0 ? .healthError : .healthSuccess,
                     title: "Blood Report Added",
-                    subtitle: subtitle,
+                    subtitle: subtitle.compactMap({ $0 }).joined(separator: " - "),
                     date: bloodReport.resultDate
                 )
             }) {
