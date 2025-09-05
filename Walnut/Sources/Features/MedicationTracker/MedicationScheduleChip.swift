@@ -38,7 +38,7 @@ struct MedicationScheduleChip: View {
         
         return VStack(spacing: 6) {
             HStack(spacing: 6) {
-                Image(systemName: mealIcon(for: schedule.mealTime))
+                Image(systemName: schedule.mealTime.icon)
                     .font(.subheadline)
                     .foregroundColor(mealTimeColor[0])
                 
@@ -79,7 +79,7 @@ struct MedicationScheduleChip: View {
     
     private var compactChip: some View {
         HStack(spacing: 4) {
-            Image(systemName: mealIcon(for: schedule.mealTime))
+            Image(systemName: schedule.mealTime.icon)
                 .font(.caption2)
             
             VStack(alignment: .leading, spacing: 1) {
@@ -104,19 +104,6 @@ struct MedicationScheduleChip: View {
         .padding(.vertical, 4)
         .background(Color(.tertiarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 6))
-    }
-    
-    private func mealIcon(for mealTime: MedicationSchedule.MealTime) -> String {
-        switch mealTime {
-        case .breakfast:
-            return "sun.rise"
-        case .lunch:
-            return "sun.max"
-        case .dinner:
-            return "moon"
-        case .bedtime:
-            return "bed.double"
-        }
     }
 }
 

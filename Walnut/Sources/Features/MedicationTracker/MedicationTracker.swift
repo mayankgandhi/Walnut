@@ -153,7 +153,7 @@ class MedicationTracker {
     }
     
     // MARK: - Private Helper Methods
-    private func mapMealTimeToTimePeriod(_ mealTime: MedicationSchedule.MealTime) -> TimePeriod {
+    private func mapMealTimeToTimePeriod(_ mealTime: MealTime) -> TimePeriod {
         switch mealTime {
         case .breakfast:
             return .morning

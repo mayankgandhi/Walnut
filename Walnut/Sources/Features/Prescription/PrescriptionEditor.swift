@@ -498,7 +498,7 @@ struct PrescriptionEditor: View {
         .background(timePeriod.color.opacity(0.1), in: Capsule())
     }
     
-    private func mapMealTimeToTimePeriod(_ mealTime: MedicationSchedule.MealTime) -> MedicationTracker.TimePeriod {
+    private func mapMealTimeToTimePeriod(_ mealTime: MealTime) -> MedicationTracker.TimePeriod {
         switch mealTime {
         case .breakfast:
             return .morning

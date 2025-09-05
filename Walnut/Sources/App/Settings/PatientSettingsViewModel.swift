@@ -70,7 +70,10 @@ class PatientSettingsViewModel {
     
     func showNotifications() {
         showNotificationSettings = true
-        // TODO: Implement notification settings navigation
+    }
+    
+    func dismissNotificationSettings() {
+        showNotificationSettings = false
     }
     
     func showAppearance() {

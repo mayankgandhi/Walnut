@@ -78,33 +78,28 @@ struct EnhancedMedicationCard: View {
     }
     
     private var durationBadge: some View {
-        VStack(spacing: 2) {
-            Text("\(String(describing: medication.numberOfDays))")
-                .font(.caption.weight(.bold))
-                .foregroundStyle(Color.healthSuccess)
-            
-            Text(medication.numberOfDays == 1 ? "day" : "days")
-                .font(.caption2.weight(.medium))
-                .foregroundStyle(.secondary)
+        OptionalView(medication.numberOfDays) { numberOfDays in
+            VStack(spacing: 2) {
+                Text("\(numberOfDays)")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Color.healthSuccess)
+                
+                Text(medication.numberOfDays == 1 ? "day" : "days")
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, Spacing.small)
+            .padding(.vertical, 4)
+            .background(Color.healthSuccess.opacity(0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 6))
         }
-        .padding(.horizontal, Spacing.small)
-        .padding(.vertical, 4)
-        .background(Color.healthSuccess.opacity(0.1))
-        .clipShape(RoundedRectangle(cornerRadius: 6))
     }
     
     private var frequencySection: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
+        VStack(alignment: .leading, spacing: Spacing.small) {
             frequencyHeader
             frequencyGrid
         }
-        .padding(Spacing.small)
-        .background(Color.healthWarning.opacity(0.05))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.healthWarning.opacity(0.1), lineWidth: 1)
-        )
     }
     
     private var frequencyHeader: some View {
@@ -139,25 +134,25 @@ struct EnhancedMedicationCard: View {
     }
     
     private func frequencyChip(schedule: MedicationSchedule) -> some View {
-        HStack(spacing: Spacing.xs) {
-            if let timing = schedule.timing {
-                Text(timing.rawValue.capitalized)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(Color.healthWarning)
-            }
-            Text(schedule.mealTime.rawValue.capitalized)
-                .font(.caption.weight(.bold))
-                .foregroundStyle(Color.healthWarning)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        Label(
+            schedule.timing == nil ? "\(schedule.mealTime.rawValue.capitalized)" : "\(schedule.timing!.rawValue.capitalized) \(schedule.mealTime.rawValue.capitalized)",
+            systemImage: schedule.icon
+        )
+        .font(.caption.weight(.bold))
+        .foregroundStyle(schedule.mealTime.color)
+        .frame(maxWidth: .infinity, alignment: .center)
         .padding(.horizontal, Spacing.xs)
-        .padding(.vertical, 4)
-        .background(Color.healthWarning.opacity(0.1))
+        .padding(.vertical, Spacing.xs)
+        .background(schedule.mealTime.color.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 6))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.healthPrimary.opacity(0.1), lineWidth: 1)
+        )
     }
     
     private func instructionsSection(_ instructions: String) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
+        VStack(alignment: .leading, spacing: Spacing.small) {
             instructionsHeader
             instructionsContent(instructions)
         }
@@ -219,4 +214,24 @@ struct EnhancedMedicationCard: View {
             return "pills.fill"
         }
     }
+}
+
+// MARK: - Previews
+
+#Preview("Basic Medication") {
+    VStack(spacing: Spacing.medium) {
+        EnhancedMedicationCard(
+            medication: Medication(
+                id: UUID(),
+                name: "Ibuprofen",
+                frequency: [.init(mealTime: .bedtime, timing: .after, dosage: "100mg")],
+                numberOfDays: 5,
+                instructions: "Take with food to avoid stomach upset"
+            )
+        )
+        .padding()
+        
+        Spacer()
+    }
+    .background(Color(UIColor.systemGroupedBackground))
 }

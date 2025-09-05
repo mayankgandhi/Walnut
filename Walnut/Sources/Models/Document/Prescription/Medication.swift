@@ -8,6 +8,7 @@
 
 import SwiftData
 import Foundation
+import SwiftUI
 
 @Model
 class Medication {
@@ -38,16 +39,55 @@ class Medication {
 }
 
 struct MedicationSchedule: Codable {
-    
-    enum MealTime: String, Codable, CaseIterable {
-        case breakfast, lunch, dinner, bedtime
-    }
-    
-    enum MedicationTime: String, Codable, CaseIterable {
-        case before, after
-    }
-    
     let mealTime: MealTime
     let timing: MedicationTime? // before/after
     let dosage: String?
+    
+    var icon: String {
+        mealTime.icon + (timing?.icon ?? "")
+    }
 }
+
+enum MealTime: String, Codable, CaseIterable {
+    case breakfast, lunch, dinner, bedtime
+    
+    var icon: String {
+        switch self {
+            case .breakfast:
+                "sunrise"
+            case .lunch:
+                "sun.max"
+            case .dinner:
+                "sunset"
+            case .bedtime:
+                "moon"
+        }
+    }
+    
+    var color: Color {
+        switch self {
+            case .breakfast:
+                    .orange
+            case .lunch:
+                    .yellow
+            case .dinner:
+                    .purple
+            case .bedtime:
+                    .indigo
+        }
+    }
+}
+
+enum MedicationTime: String, Codable, CaseIterable {
+    case before, after
+    
+    var icon: String {
+        switch self {
+            case .before:
+                ""
+            case .after:
+                ".fill"
+        }
+    }
+}
+

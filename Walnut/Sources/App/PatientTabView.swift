@@ -24,7 +24,6 @@ struct PatientTabView: View {
                 }
             }
             
-            
             Tab("Cases", systemImage: "document.on.document") {
                 NavigationStack {
                     MedicalCasesView(
@@ -54,7 +53,7 @@ struct PatientTabView: View {
             }
             
         }
-        .tabBarMinimizeBehavior(.automatic)
+        .tabBarMinimizeBehavior(.onScrollDown)
         .onAppear {
             uploadStateManager.initializeProcessingService(modelContext: modelContext)
         }

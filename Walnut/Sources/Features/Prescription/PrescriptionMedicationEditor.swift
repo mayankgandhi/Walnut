@@ -226,7 +226,7 @@ struct PrescriptionMedicationEditor: View {
     }
     
     // MARK: - Helper Functions
-    private func mealTimeIcon(for mealTime: MedicationSchedule.MealTime) -> String {
+    private func mealTimeIcon(for mealTime: MealTime) -> String {
         switch mealTime {
         case .breakfast: return "sunrise.fill"
         case .lunch: return "sun.max.fill"

@@ -63,6 +63,17 @@ struct PatientSettingsView: View {
             .presentationDetents([.height(600), .large])
             .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $viewModel.showNotificationSettings, onDismiss: {
+            viewModel.dismissNotificationSettings()
+        }) {
+            DSBottomSheet(title: "Notifications"){
+                notificationSettingsBottomSheetContent
+            } content: {
+                NotificationSettingsView()
+            }
+            .presentationDetents([.height(700), .large])
+            .presentationDragIndicator(.visible)
+        }
         .alert("Error", isPresented: $viewModel.showErrorAlert) {
             Button("OK") {
                 viewModel.dismissError()
@@ -107,6 +118,23 @@ struct PatientSettingsView: View {
                     .foregroundStyle(.primary)
                 
                 Text("Keep your medical data synchronized across all your devices")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.top, Spacing.small)
+        }
+    }
+    
+    private var notificationSettingsBottomSheetContent: some View {
+        VStack(spacing: Spacing.medium) {
+            // Header
+            VStack(spacing: Spacing.xs) {
+                Text("Medication Reminders")
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(.primary)
+                
+                Text("Configure notifications and alarms for your medication schedule")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)

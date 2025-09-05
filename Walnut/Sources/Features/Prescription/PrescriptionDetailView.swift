@@ -76,6 +76,7 @@ struct PrescriptionDetailView: View {
                     }
                 }
             }
+            .navigationTitle(Text("Prescription"))
         }
     }
     
@@ -319,9 +320,7 @@ struct PrescriptionDetailView: View {
 // MARK: - Comprehensive Preview
 
 #Preview("Complete Prescription") {
-    NavigationStack {
-        PrescriptionDetailView(prescription: .samplePrescription(for: .sampleCase))
-    }
-    .modelContainer(for: Prescription.self, inMemory: true)
+    PrescriptionDetailView(prescription: .samplePrescription(for: .sampleCase))
+        .modelContainer(for: Prescription.self, inMemory: true)
 }
 

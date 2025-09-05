@@ -191,7 +191,7 @@ struct MedicationEditor: View {
                                 
                                 VStack(spacing: Spacing.small) {
                                     ToggleItem(
-                                        icon: "sunrise.fill",
+                                        icon: "sunrise",
                                         title: "Before Breakfast",
                                         subtitle: "Take before eating",
                                         isOn: $breakfastBefore,
@@ -199,7 +199,7 @@ struct MedicationEditor: View {
                                     )
                                     
                                     ToggleItem(
-                                        icon: "sunrise",
+                                        icon: "sunrise.fill",
                                         title: "After Breakfast",
                                         subtitle: "Take after eating",
                                         isOn: $breakfastAfter,
@@ -217,7 +217,7 @@ struct MedicationEditor: View {
                                 
                                 VStack(spacing: Spacing.small) {
                                     ToggleItem(
-                                        icon: "sun.max.fill",
+                                        icon: "sun.max",
                                         title: "Before Lunch",
                                         subtitle: "Take before eating",
                                         isOn: $lunchBefore,
@@ -225,7 +225,7 @@ struct MedicationEditor: View {
                                     )
                                     
                                     ToggleItem(
-                                        icon: "sun.max",
+                                        icon: "sun.max.fill",
                                         title: "After Lunch",
                                         subtitle: "Take after eating",
                                         isOn: $lunchAfter,
@@ -243,7 +243,7 @@ struct MedicationEditor: View {
                                 
                                 VStack(spacing: Spacing.small) {
                                     ToggleItem(
-                                        icon: "sunset.fill",
+                                        icon: "sunset",
                                         title: "Before Dinner",
                                         subtitle: "Take before eating",
                                         isOn: $dinnerBefore,
@@ -251,7 +251,7 @@ struct MedicationEditor: View {
                                     )
                                     
                                     ToggleItem(
-                                        icon: "sunset",
+                                        icon: "sunset.fill",
                                         title: "After Dinner",
                                         subtitle: "Take after eating",
                                         isOn: $dinnerAfter,
@@ -269,7 +269,7 @@ struct MedicationEditor: View {
                                 
                                 VStack(spacing: Spacing.small) {
                                     ToggleItem(
-                                        icon: "moon.fill",
+                                        icon: "moon",
                                         title: "Before Bed",
                                         subtitle: "Take before sleeping",
                                         isOn: $bedtimeBefore,
@@ -277,7 +277,7 @@ struct MedicationEditor: View {
                                     )
                                     
                                     ToggleItem(
-                                        icon: "moon",
+                                        icon: "moon.fill",
                                         title: "At Bedtime",
                                         subtitle: "Take when going to bed",
                                         isOn: $bedtimeAfter,

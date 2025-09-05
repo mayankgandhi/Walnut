@@ -74,6 +74,8 @@ struct BloodReportDetailView: View {
                 }
             }
         }
+        .navigationTitle(Text("Blood Test"))
+        .navigationBarTitleDisplayMode(.inline)
     }
     
     

@@ -82,24 +82,11 @@ struct UpcomingMedicationsSection: View {
     }
     
     private var emptyStateView: some View {
-        HealthCard {
-            VStack(spacing: Spacing.medium) {
-                HealthStatusIndicator(status: HealthStatus.good, showIcon: true)
-                    .scaleEffect(2.0)
-                
-                VStack(spacing: Spacing.xs) {
-                    Text("All caught up!")
-                        .font(.headline.weight(.semibold))
-                        .foregroundStyle(.primary)
-                    
-                    Text("No medications due in the next 6 hours")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                }
-            }
-            .frame(maxWidth: .infinity)
-        }
+        ContentUnavailableView(
+            "All caught up!",
+            systemImage: "checkmark.circle.fill",
+            description: Text("No medications due in the next 6 hours")
+        )
     }
     
     private func loadActiveMedications() {
