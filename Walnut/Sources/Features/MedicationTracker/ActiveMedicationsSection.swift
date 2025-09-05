@@ -17,8 +17,18 @@ struct ActiveMedicationsSection: View {
     @State private var activeMedications: [Medication] = []
     @State private var medicationTracker = MedicationTracker()
     
-    private var groupedMedications: [MealTime: [MedicationTracker.MedicationScheduleInfo]] {
-        medicationTracker.groupMedicationsByMealTime(activeMedications)
+    private var groupedMedications: [MealTime: [MedicationTracker.MedicationScheduleInfo]] = [:]
+    
+    init(
+        patient: Patient,
+        activeMedications: [Medication],
+        medicationTracker: MedicationTracker = MedicationTracker(),
+        groupedMedications: [MealTime : [MedicationTracker.MedicationScheduleInfo]]
+    ) {
+        self.patient = patient
+        self.activeMedications = activeMedications
+        self.medicationTracker = medicationTracker
+        self.groupedMedications = groupedMedications
     }
     
     var body: some View {
@@ -154,14 +164,4 @@ struct ActiveMedicationsSection: View {
         self.activeMedications = medications
     }
 
-}
-
-#Preview("With Active Medications") {
-    ActiveMedicationsSection(patient: .samplePatientWithMedications)
-        .modelContainer(for: Patient.self, inMemory: true)
-}
-
-#Preview("Empty State") {
-    ActiveMedicationsSection(patient: .samplePatient)
-        .modelContainer(for: Patient.self, inMemory: true)
 }

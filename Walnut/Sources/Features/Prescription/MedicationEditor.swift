@@ -37,7 +37,7 @@ struct MedicationEditor: View {
     @State private var dosage = ""
     @State private var instructions = ""
     @State private var duration: MedicationDuration? = .days(7)
-    @State private var selectedFrequencies: [MedicationSchedule] = []
+    @State private var selectedFrequencies: [MedicationFrequency] = []
     
     // Frequency selection states
     @State private var breakfastBefore = false
@@ -358,38 +358,7 @@ struct MedicationEditor: View {
         instructions = medication.instructions ?? ""
         duration = medication.duration
         
-        // Load frequency data (only handle meal-based frequencies in this editor)
-        for schedule in medication.frequency ?? [] {
-            // Only process meal-based schedules in this editor
-            if case .mealBased(let mealTime, let timing) = schedule.frequency {
-                switch mealTime {
-                case .breakfast:
-                    if timing == .before {
-                        breakfastBefore = true
-                    } else {
-                        breakfastAfter = true
-                    }
-                case .lunch:
-                    if timing == .before {
-                        lunchBefore = true
-                    } else {
-                        lunchAfter = true
-                    }
-                case .dinner:
-                    if timing == .before {
-                        dinnerBefore = true
-                    } else {
-                        dinnerAfter = true
-                    }
-                case .bedtime:
-                    if timing == .before {
-                        bedtimeBefore = true
-                    } else {
-                        bedtimeAfter = true
-                    }
-                }
-            }
-        }
+       
     }
     
     
@@ -433,9 +402,7 @@ struct MedicationEditor: View {
     let sampleMedication = Medication(
         id: UUID(),
         name: "Lisinopril",
-        frequency: [
-            .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
-        ],
+        frequency: [],
         duration: .days(30),
         dosage: "10mg",
         instructions: "Take with water"

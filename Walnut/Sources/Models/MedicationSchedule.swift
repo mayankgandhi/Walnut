@@ -9,24 +9,6 @@
 import Foundation
 import SwiftUI
 
-struct MedicationSchedule: Codable {
-    let frequency: MedicationFrequency
-    let dosage: String?
-    
-    var icon: String {
-        frequency.icon
-    }
-    
-    var displayText: String {
-        frequency.displayText
-    }
-    
-    init(frequency: MedicationFrequency, dosage: String?) {
-        self.frequency = frequency
-        self.dosage = dosage
-    }
-}
-
 // MARK: - Medication Frequency System
 
 enum MedicationFrequency: Codable, Hashable {
@@ -36,8 +18,6 @@ enum MedicationFrequency: Codable, Hashable {
     case weekly(dayOfWeek: Weekday, time: DateComponents) // e.g., every Monday at 9 AM
     case biweekly(dayOfWeek: Weekday, time: DateComponents) // e.g., every other Monday at 9 AM
     case monthly(dayOfMonth: Int, time: DateComponents) // e.g., 1st of every month at 10 AM
-    
-    // Meal-based frequencies (backward compatibility)
     case mealBased(mealTime: MealTime, timing: MedicationTime?)
     
     var icon: String {

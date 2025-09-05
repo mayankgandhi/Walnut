@@ -14,7 +14,7 @@ struct ParsedPrescription: ParseableModel, OpenAISchemaDefinable {
     struct Medication: Codable {
         var id: UUID
         var name: String
-        var frequency: [MedicationSchedule]
+        var frequency: [MedicationFrequency]
         var duration: MedicationDuration
         var dosage: String?
         var instructions: String?

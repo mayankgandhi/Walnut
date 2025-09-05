@@ -14,119 +14,20 @@ class MedicationTracker {
     
     // MARK: - Medication Schedule Info
     struct MedicationScheduleInfo: Identifiable {
-        
         var id: String {
-            "\(medication.name ?? "").\(schedule.frequency.displayText).\(medication.dosage ?? "")"
+            "\(medication.name ?? "").\(schedule.displayText).\(medication.dosage ?? "")"
         }
         
         let medication: Medication
-        let schedule: MedicationSchedule
+        let schedule: MedicationFrequency
         let timePeriod: MealTime // Used for backward compatibility grouping
         let timeUntilDue: TimeInterval?
-        
-        var displayTime: String {
-            // Handle both new frequency system and legacy meal-based
-            switch schedule.frequency {
-            case .mealBased(let mealTime, let timing):
-                let mealName = mealTime.displayName
-                if let timing = timing {
-                    return "\(timing.displayName) \(mealName)"
-                } else {
-                    return "With \(mealName)"
-                }
-            default:
-                return schedule.frequency.displayText
-            }
-        }
-        
-        var dosageText: String {
-            if let scheduleDosage = schedule.dosage, !scheduleDosage.isEmpty {
-                return scheduleDosage
-            }
-            return medication.dosage ?? "As prescribed"
-        }
     }
     
     // MARK: - Current Time
     private var currentDate = Date()
     
     // MARK: - Public Methods
-    
-    /// Optimized background processing for grouping medications by meal time (backward compatibility)
-    func groupMedicationsByMealTime(_ medications: [Medication]) -> [MealTime: [MedicationScheduleInfo]] {
-        var grouped: [MealTime: [MedicationScheduleInfo]] = [:]
-        
-        for medication in medications {
-            for schedule in medication.frequency ?? [] {
-                // Only group meal-based medications
-                if case .mealBased(let mealTime, _) = schedule.frequency {
-                    let info = MedicationScheduleInfo(
-                        medication: medication,
-                        schedule: schedule,
-                        timePeriod: mealTime,
-                        timeUntilDue: calculateTimeUntilDue(for: schedule)
-                    )
-                    
-                    if grouped[mealTime] == nil {
-                        grouped[mealTime] = []
-                    }
-                    grouped[mealTime]?.append(info)
-                }
-            }
-        }
-        
-        return grouped
-    }
-    
-    /// Background task for getting medication info for specific meal time
-    func getMedicationInfoForMealTime(_ medications: [Medication], mealTime: MealTime) async -> [MedicationScheduleInfo] {
-        await Task.detached {
-            var result: [MedicationScheduleInfo] = []
-            
-            for medication in medications {
-                for schedule in medication.frequency ?? [] {
-                    // Check if this schedule matches the meal time (for backward compatibility)
-                    if case .mealBased(let scheduleMealTime, _) = schedule.frequency,
-                       scheduleMealTime == mealTime {
-                        let info = MedicationScheduleInfo(
-                            medication: medication,
-                            schedule: schedule,
-                            timePeriod: mealTime,
-                            timeUntilDue: self.calculateTimeUntilDue(for: schedule)
-                        )
-                        result.append(info)
-                    }
-                }
-            }
-            
-            return result
-        }.value
-    }
-    
-    /// Get all medications grouped by frequency type
-    func groupMedicationsByFrequencyType(_ medications: [Medication]) -> [String: [MedicationScheduleInfo]] {
-        var grouped: [String: [MedicationScheduleInfo]] = [:]
-        
-        for medication in medications {
-            for schedule in medication.frequency ?? [] {
-                let frequencyType = getFrequencyTypeDisplayName(schedule.frequency)
-                let info = MedicationScheduleInfo(
-                    medication: medication,
-                    schedule: schedule,
-                    timePeriod: .breakfast, // Default, not used for non-meal based
-                    timeUntilDue: calculateTimeUntilDue(for: schedule)
-                )
-                
-                if grouped[frequencyType] == nil {
-                    grouped[frequencyType] = []
-                }
-                grouped[frequencyType]?.append(info)
-            }
-        }
-        
-        return grouped
-    }
-    
     func formatTimeUntilDue(_ timeInterval: TimeInterval) -> String {
         let hours = Int(timeInterval / 3600)
         let minutes = Int((timeInterval.truncatingRemainder(dividingBy: 3600)) / 60)
@@ -147,24 +48,7 @@ class MedicationTracker {
         }
     }
     
-    /// Calculate time until medication is due based on schedule
-    private func calculateTimeUntilDue(for schedule: MedicationSchedule) -> TimeInterval? {
-        let calendar = Calendar.current
-        
-        switch schedule.frequency {
-        case .daily(let times):
-            return calculateNextDailyDose(times: times, calendar: calendar)
-        case .hourly(let interval, let startTime):
-            return calculateNextHourlyDose(interval: interval, startTime: startTime, calendar: calendar)
-        case .weekly(_, let time), .biweekly(_, let time):
-            return calculateNextWeeklyDose(time: time, calendar: calendar)
-        case .monthly(_, let time):
-            return calculateNextMonthlyDose(time: time, calendar: calendar)
-        case .mealBased(let mealTime, let timing):
-            return calculateMealBasedDose(mealTime: mealTime, timing: timing, calendar: calendar)
-        }
-    }
-    
+   
     private func calculateNextDailyDose(times: [DateComponents], calendar: Calendar) -> TimeInterval? {
         guard let nextTime = times.compactMap({ timeComponent in
             calendar.nextDate(after: currentDate, matching: timeComponent, matchingPolicy: .nextTime)

@@ -113,9 +113,7 @@ extension Prescription {
             Medication(
                 id: UUID(),
                 name: "Amoxicillin",
-                frequency: [
-                        .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
-                ],
+                frequency: [],
                 duration: .days(7),
                 dosage: "500mg",
                 instructions: "Take with food to reduce stomach upset"
@@ -123,9 +121,7 @@ extension Prescription {
             Medication(
                 id: UUID(),
                 name: "Ibuprofen",
-                frequency: [
-                        .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
-                ],
+                frequency: [],
                 duration: .days(5),
                 dosage: "400mg",
                 instructions: "Take as needed for pain. Do not exceed 1200mg per day"
@@ -161,9 +157,7 @@ extension Prescription {
             Medication(
                 id: UUID(),
                 name: "Lisinopril",
-                frequency: [
-                    .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
-                ],
+                frequency: [],
                 duration: .days(90),
                 dosage: "10mg",
                 instructions: "Take at the same time each day for blood pressure control"
@@ -171,9 +165,7 @@ extension Prescription {
             Medication(
                 id: UUID(),
                 name: "Metformin",
-                frequency: [
-                    .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
-                ],
+                frequency: [],
                 duration: .days(90),
                 dosage: "500mg",
                 instructions: "Take with meals to control blood sugar levels"

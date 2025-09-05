@@ -15,8 +15,8 @@ class Medication {
     
     var id: UUID?
     var name: String?
-    var frequency: [MedicationSchedule]?
-    var duration: MedicationDuration? // Replaces numberOfDays with more flexibility
+    var frequency: [MedicationFrequency]?
+    var duration: MedicationDuration?
     var dosage: String?
     var instructions: String?
     
@@ -26,19 +26,20 @@ class Medication {
     var prescription: Prescription?
     
     init(
-        id: UUID,
-        name: String,
-        frequency: [MedicationSchedule],
+        id: UUID? = nil,
+        name: String? = nil,
+        frequency: [MedicationFrequency]? = nil,
         duration: MedicationDuration? = nil,
         dosage: String? = nil,
         instructions: String? = nil,
-        createdAt: Date = Date(),
-        updatedAt: Date = Date(),
+        createdAt: Date? = nil,
+        updatedAt: Date? = nil,
         prescription: Prescription? = nil
     ) {
         self.id = id
         self.name = name
         self.frequency = frequency
+        self.duration = duration
         self.dosage = dosage
         self.instructions = instructions
         self.createdAt = createdAt

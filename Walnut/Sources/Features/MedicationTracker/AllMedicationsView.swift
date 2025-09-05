@@ -34,31 +34,6 @@ struct AllMedicationsView: View {
         return activePrescriptions.compactMap { $0.medications }.reduce([], +)
     }
     
-    // Background task for grouping medications
-    @MainActor
-    private func updateGroupedMedications() {
-        Task {
-            let medications = activeMedications
-            let grouped = await withTaskGroup(of: (MealTime, [MedicationTracker.MedicationScheduleInfo]).self) { group in
-                var result: [MealTime: [MedicationTracker.MedicationScheduleInfo]] = [:]
-                
-                for mealTime in MealTime.allCases {
-                    group.addTask {
-                        let filteredInfo = await medicationTracker.getMedicationInfoForMealTime(medications, mealTime: mealTime)
-                        return (mealTime, filteredInfo)
-                    }
-                }
-                
-                for await (mealTime, infos) in group {
-                    result[mealTime] = infos
-                }
-                
-                return result
-            }
-            
-            groupedMedications = grouped
-        }
-    }
     
     var body: some View {
         ScrollView {
@@ -82,12 +57,7 @@ struct AllMedicationsView: View {
             }
             .padding(.horizontal, Spacing.medium)
         }
-        .onAppear {
-            updateGroupedMedications()
-        }
-        .onChange(of: allPrescriptions) { _, _ in
-            updateGroupedMedications()
-        }
+        
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {

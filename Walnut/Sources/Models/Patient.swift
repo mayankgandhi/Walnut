@@ -163,9 +163,7 @@ extension Patient {
                 Medication(
                     id: UUID(),
                     name: "Metformin",
-                    frequency: [
-                        .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
-                    ],
+                    frequency: [],
                     duration: .days(90),
                     dosage: "500mg",
                     instructions: "Take with meals to control blood sugar"
@@ -173,9 +171,7 @@ extension Patient {
                 Medication(
                     id: UUID(),
                     name: "Insulin Glargine",
-                    frequency: [
-                        .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
-                    ],
+                    frequency: [],
                     duration: .days(90),
                     dosage: "20 units",
                     instructions: "Inject subcutaneously at bedtime"
@@ -197,9 +193,7 @@ extension Patient {
                 Medication(
                     id: UUID(),
                     name: "Lisinopril",
-                    frequency: [
-                        .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
-                    ],
+                    frequency: [],
                     duration: .days(90),
                     dosage: "10mg",
                     instructions: "Take at the same time each morning"
@@ -207,9 +201,7 @@ extension Patient {
                 Medication(
                     id: UUID(),
                     name: "Amlodipine",
-                    frequency: [
-                        .init(frequency: .daily(times: [.init()]), dosage: "1000mg")
-                    ],
+                    frequency: [],
                     duration: .days(90),
                     dosage: "5mg",
                     instructions: "Take once daily with breakfast"

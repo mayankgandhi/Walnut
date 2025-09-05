@@ -282,17 +282,15 @@ struct MedicationListItem: View {
         }
     }
     
-    private func frequencyChip(schedule: MedicationSchedule) -> some View {
+    private func frequencyChip(schedule: MedicationFrequency) -> some View {
         Label(
             schedule.displayText,
             systemImage: schedule.icon
         )
         .font(.caption.weight(.bold))
-        .foregroundStyle(schedule.frequency.color)
         .frame(maxWidth: .infinity, alignment: .center)
         .padding(.horizontal, Spacing.xs)
         .padding(.vertical, Spacing.xs)
-        .background(schedule.frequency.color.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 6))
         .overlay(
             RoundedRectangle(cornerRadius: 8)
