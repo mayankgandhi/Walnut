@@ -15,15 +15,6 @@ struct MedicationEditor: View {
     let medication: Medication?
     let onSave: (Medication) -> Void
     
-    // Removed durationOptions array - now using MedicationDurationPickerItem
-    // static let durationOptions: [MedicationDuration] = [
-        .days(1), .days(3), .days(5), .days(7), .days(10), .days(14),
-        .days(21), .days(30), .days(45), .days(60), .days(90),
-        .weeks(1), .weeks(2), .weeks(4), .weeks(8), .weeks(12),
-        .months(1), .months(2), .months(3), .months(6), .months(12),
-        .ongoing, .asNeeded
-    ]
-    
     init(medication: Medication? = nil, onSave: @escaping (Medication) -> Void) {
         self.medication = medication
         self.onSave = onSave
@@ -38,6 +29,7 @@ struct MedicationEditor: View {
     @State private var instructions = ""
     @State private var duration: MedicationDuration? = .days(7)
     @State private var selectedFrequencies: [MedicationFrequency] = []
+    @State private var showFrequencyBottomSheet = false
     
     @Environment(\.dismiss) private var dismiss
     
@@ -90,6 +82,83 @@ struct MedicationEditor: View {
                                 contentType: .none,
                                 
                             )
+                        }
+                    }
+                    
+                    // Frequency Schedule Section
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        Text("Frequency Schedule")
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, Spacing.medium)
+                        
+                        VStack(spacing: Spacing.medium) {
+                            // Frequency selector button
+                            Button {
+                                showFrequencyBottomSheet = true
+                            } label: {
+                                HStack(spacing: Spacing.medium) {
+                                    // Icon section
+                                    Circle()
+                                        .fill(Color.green.opacity(0.15))
+                                        .frame(width: 36, height: 36)
+                                        .overlay {
+                                            Image(systemName: "clock.badge.checkmark")
+                                                .font(.system(size: 16, weight: .semibold))
+                                                .foregroundStyle(.green)
+                                        }
+                                    
+                                    // Content section
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        HStack(spacing: 4) {
+                                            Text("Frequency")
+                                                .font(.system(.subheadline, design: .rounded, weight: .medium))
+                                                .foregroundStyle(.secondary)
+                                            
+                                            Spacer()
+                                        }
+                                        
+                                        HStack {
+                                            Text(selectedFrequencies.isEmpty ? "Add frequency schedule" : "\(selectedFrequencies.count) schedule\(selectedFrequencies.count == 1 ? "" : "s")")
+                                                .font(.system(.body, design: .rounded))
+                                                .foregroundStyle(selectedFrequencies.isEmpty ? .secondary : .primary)
+                                            
+                                            Spacer()
+                                            
+                                            Image(systemName: "plus.circle")
+                                                .font(.caption)
+                                                .foregroundStyle(.green)
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal, Spacing.medium)
+                                .padding(.vertical, Spacing.small + 4)
+                                .background(Color(.systemBackground))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color(.systemGray5), lineWidth: 1)
+                                )
+                                .shadow(
+                                    color: Color.black.opacity(0.05),
+                                    radius: 2,
+                                    x: 0,
+                                    y: 1
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            
+                            // Display selected frequencies
+                            if !selectedFrequencies.isEmpty {
+                                LazyVStack(spacing: Spacing.xs) {
+                                    ForEach(Array(selectedFrequencies.enumerated()), id: \.offset) { index, frequency in
+                                        FrequencyChip(frequency: frequency) {
+                                            selectedFrequencies.remove(at: index)
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal, Spacing.medium)
+                            }
                             
                             MedicationDurationPickerItem(
                                 icon: "calendar.day.timeline.left",
@@ -103,13 +172,7 @@ struct MedicationEditor: View {
                         }
                     }
                     
-                    // Frequency Schedule Section
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("Frequency Schedule")
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                            .padding(.horizontal, Spacing.medium)
-                    }
+                    
                     
                     // Additional Information Section
                     VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -160,6 +223,9 @@ struct MedicationEditor: View {
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
+        .sheet(isPresented: $showFrequencyBottomSheet) {
+            MedicationFrequencyBottomSheet(selectedFrequencies: $selectedFrequencies)
+        }
     }
     
     
@@ -168,8 +234,7 @@ struct MedicationEditor: View {
         dosage = medication.dosage ?? ""
         instructions = medication.instructions ?? ""
         duration = medication.duration
-        
-       
+        selectedFrequencies = medication.frequency ?? []
     }
     
     
@@ -182,7 +247,7 @@ struct MedicationEditor: View {
             medication.dosage = dosage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : dosage.trimmingCharacters(in: .whitespacesAndNewlines)
             medication.instructions = instructions.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : instructions.trimmingCharacters(in: .whitespacesAndNewlines)
             medication.duration = medicationDuration
-            medication.frequency = nil
+            medication.frequency = selectedFrequencies.isEmpty ? nil : selectedFrequencies
             medication.updatedAt = Date()
             
             onSave(medication)
@@ -191,7 +256,7 @@ struct MedicationEditor: View {
             let newMedication = Medication(
                 id: UUID(),
                 name: medicationName.trimmingCharacters(in: .whitespacesAndNewlines),
-                frequency: [],
+                frequency: selectedFrequencies.isEmpty ? nil : selectedFrequencies,
                 duration: medicationDuration,
                 dosage: dosage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : dosage.trimmingCharacters(in: .whitespacesAndNewlines),
                 instructions: instructions.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : instructions.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -201,6 +266,46 @@ struct MedicationEditor: View {
         }
     }
 }
+
+// MARK: - Frequency Chip Component
+
+struct FrequencyChip: View {
+    let frequency: MedicationFrequency
+    let onRemove: () -> Void
+    
+    var body: some View {
+        HStack(spacing: Spacing.small) {
+            Image(systemName: frequency.icon)
+                .font(.caption2)
+                .foregroundStyle(frequency.color)
+            
+            Text(frequency.displayText)
+                .font(.system(.caption, design: .rounded, weight: .medium))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+            
+            Button {
+                onRemove()
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(PlainButtonStyle())
+        }
+        .padding(.horizontal, Spacing.small)
+        .padding(.vertical, 4)
+        .background(frequency.color.opacity(0.1))
+        .clipShape(Capsule())
+        .overlay(
+            Capsule()
+                .stroke(frequency.color.opacity(0.3), lineWidth: 1)
+        )
+    }
+}
+
+// MARK: - Medication Frequency Bottom Sheet
+
 
 // MARK: - Previews
 

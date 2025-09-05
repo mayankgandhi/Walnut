@@ -49,7 +49,7 @@ class Medication {
     
 }
 
-enum Weekday: Int, Codable, CaseIterable {
+enum Weekday: Int, Codable, CaseIterable, CustomStringConvertible {
     case sunday = 1, monday, tuesday, wednesday, thursday, friday, saturday
     
     var displayName: String {
@@ -62,6 +62,10 @@ enum Weekday: Int, Codable, CaseIterable {
         case .friday: return "Friday"
         case .saturday: return "Saturday"
         }
+    }
+    
+    var description: String {
+        return displayName
     }
 }
 
@@ -87,7 +91,7 @@ enum Month: Int, Codable, CaseIterable {
     }
 }
 
-enum MealTime: String, Codable, CaseIterable {
+enum MealTime: String, Codable, CaseIterable, CustomStringConvertible {
     case breakfast, lunch, dinner, bedtime
     
     var icon: String {
@@ -142,9 +146,13 @@ enum MealTime: String, Codable, CaseIterable {
         }
     }
     
+    var description: String {
+        return displayName
+    }
+    
 }
 
-enum MedicationTime: String, Codable, CaseIterable {
+enum MedicationTime: String, Codable, CaseIterable, CustomStringConvertible {
     case before, after
     
     var icon: String {
@@ -163,5 +171,9 @@ enum MedicationTime: String, Codable, CaseIterable {
         case .after:
             return "After"
         }
+    }
+    
+    var description: String {
+        return displayName
     }
 }
