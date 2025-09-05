@@ -39,18 +39,29 @@ enum MedicationFrequency: Codable, Hashable {
         switch self {
         case .daily(let times):
             if times.count == 1 {
-                return "Once daily"
+                let timeString = formatTime(times[0])
+                return "Daily at \(timeString)"
             } else {
-                return "\(times.count) times daily"
+                let timeStrings = times.map { formatTime($0) }
+                return "Daily at \(timeStrings.joined(separator: ", "))"
             }
-        case .hourly(let interval, _):
-            return "Every \(interval) hour\(interval == 1 ? "" : "s")"
-        case .weekly:
-            return "Weekly"
-        case .biweekly:
-            return "Every 2 weeks"
-        case .monthly:
-            return "Monthly"
+        case .hourly(let interval, let startTime):
+            if let startTime = startTime {
+                let timeString = formatTime(startTime)
+                return "Every \(interval) hour\(interval == 1 ? "" : "s") starting at \(timeString)"
+            } else {
+                return "Every \(interval) hour\(interval == 1 ? "" : "s")"
+            }
+        case .weekly(let dayOfWeek, let time):
+            let timeString = formatTime(time)
+            return "Every \(dayOfWeek.displayName) at \(timeString)"
+        case .biweekly(let dayOfWeek, let time):
+            let timeString = formatTime(time)
+            return "Every other \(dayOfWeek.displayName) at \(timeString)"
+        case .monthly(let dayOfMonth, let time):
+            let timeString = formatTime(time)
+            let dayString = formatDayOfMonth(dayOfMonth)
+            return "Monthly on the \(dayString) at \(timeString)"
         case .mealBased(let mealTime, let timing):
             let mealName = mealTime.displayName
             if let timing = timing {
@@ -74,5 +85,21 @@ enum MedicationFrequency: Codable, Hashable {
         case .mealBased(let mealTime, _):
             return mealTime.color
         }
+    }
+    
+    // Helper methods for formatting
+    private func formatTime(_ dateComponents: DateComponents) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        
+        let calendar = Calendar.current
+        let date = calendar.date(from: dateComponents) ?? Date()
+        return formatter.string(from: date)
+    }
+    
+    private func formatDayOfMonth(_ day: Int) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .ordinal
+        return formatter.string(from: NSNumber(value: day)) ?? "\(day)"
     }
 }
