@@ -7,48 +7,12 @@
 //
 
 import SwiftUI
-
-// MARK: - Time Period Support
-
-/// Time period for medication scheduling
-public enum MealTime: CaseIterable {
-    case morning
-    case afternoon
-    case evening
-    case night
-    
-    public var icon: String {
-        switch self {
-        case .morning: return "sunrise.fill"
-        case .afternoon: return "sun.max.fill"
-        case .evening: return "sunset.fill"
-        case .night: return "moon.fill"
-        }
-    }
-    
-    public var color: Color {
-        switch self {
-        case .morning: return .orange
-        case .afternoon: return .yellow
-        case .evening: return .purple
-        case .night: return .indigo
-        }
-    }
-    
-    public var displayName: String {
-        switch self {
-        case .morning: return "Morning"
-        case .afternoon: return "Afternoon"
-        case .evening: return "Evening"
-        case .night: return "Night"
-        }
-    }
-}
+import WalnutDesignSystem
 
 // MARK: - Medication Card Component
 
 /// Professional medication card component for healthcare apps
-public struct MedicationCard: View {
+struct MedicationCard: View {
     private let medicationName: String
     private let dosage: String?
     private let timing: String?
@@ -65,7 +29,7 @@ public struct MedicationCard: View {
     
     @State private var isPressed = false
     
-    public init(
+    init(
         medicationName: String,
         dosage: String? = nil,
         timing: String? = nil,
@@ -228,7 +192,7 @@ public struct MedicationCard: View {
 
 // MARK: - Convenience Initializers
 
-public extension MedicationCard {
+extension MedicationCard {
     /// Create a medication card for upcoming medications
     static func upcoming(
         medicationName: String,
@@ -297,7 +261,7 @@ public extension MedicationCard {
                 dosage: "10mg",
                 timing: "Before Breakfast",
                 instructions: "Take with water on empty stomach",
-                timePeriod: .morning,
+                timePeriod: .breakfast,
                 timeUntilDue: "2h 30m"
             ) {
                 print("Marked as taken")
@@ -307,7 +271,7 @@ public extension MedicationCard {
                 medicationName: "Metformin",
                 dosage: "500mg",
                 timing: "After Dinner",
-                timePeriod: .evening,
+                timePeriod: .dinner,
                 timeUntilDue: "5h 15m"
             ) {
                 print("Marked as taken")

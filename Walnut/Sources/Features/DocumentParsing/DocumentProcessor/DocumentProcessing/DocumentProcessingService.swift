@@ -13,10 +13,14 @@ import AIKit
 import PostHog
 
 // MARK: - Protocols
+
 /// Protocol for progress tracking
 protocol DocumentProcessingProgressDelegate: AnyObject {
-    @MainActor func didUpdateProgress(_ progress: Double, status: String)
-    @MainActor func didCompleteProcessing(with result: Result<ProcessingResult, Error>)
+    @MainActor
+    func didUpdateProgress(_ progress: Double, status: String)
+    
+    @MainActor
+    func didCompleteProcessing(with result: Result<ProcessingResult, Error>)
 }
 
 // MARK: - Main Service
@@ -125,6 +129,7 @@ class DocumentProcessingService {
 // MARK: - Progress Delegate Implementation
 
 extension DocumentProcessingService: DocumentProcessingProgressDelegate {
+    
     @MainActor
     func didUpdateProgress(_ progress: Double, status: String) {
         processingProgress = progress
@@ -143,6 +148,7 @@ extension DocumentProcessingService: DocumentProcessingProgressDelegate {
             DocumentUploadStateManager.shared.setError(error)
         }
     }
+    
 }
 
 

@@ -38,7 +38,7 @@ struct UpcomingMedicationsSection: View {
                         dosage: medicationInfo.dosageText,
                         timing: medicationInfo.displayTime,
                         instructions: medicationInfo.medication.instructions,
-                        timePeriod: mapToDesignSystemTimePeriod(medicationInfo.timePeriod),
+                        timePeriod: medicationInfo.timePeriod,
                         timeUntilDue: medicationInfo.timeUntilDue.map { medicationTracker.formatTimeUntilDue($0) } ?? ""
                     ) {
                         
@@ -97,19 +97,6 @@ struct UpcomingMedicationsSection: View {
         let activeMedications: [Medication] = activeMedicalCasesPrescriptions
             .compactMap(\.medications).reduce([], +)
         self.activeMedications = activeMedications
-    }
-    
-    private func mapToDesignSystemTimePeriod(_ timePeriod: MedicationTracker.TimePeriod) -> MedicationTimePeriod {
-        switch timePeriod {
-        case .morning:
-            return .morning
-        case .afternoon:
-            return .afternoon
-        case .evening:
-            return .evening
-        case .night:
-            return .night
-        }
     }
     
 }

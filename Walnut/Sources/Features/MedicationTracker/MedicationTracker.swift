@@ -12,46 +12,11 @@ import Foundation
 @Observable
 class MedicationTracker {
     
-    // MARK: - Time Periods
-    enum TimePeriod: String, CaseIterable {
-        case morning = "Morning"
-        case afternoon = "Afternoon" 
-        case evening = "Evening"
-        case night = "Night"
-        
-        var icon: String {
-            switch self {
-            case .morning: return "sunrise.fill"
-            case .afternoon: return "sun.max.fill"
-            case .evening: return "sunset.fill"
-            case .night: return "moon.fill"
-            }
-        }
-        
-        var color: Color {
-            switch self {
-            case .morning: return .orange
-            case .afternoon: return .yellow
-            case .evening: return .purple
-            case .night: return .indigo
-            }
-        }
-        
-        var gradientColors: [Color] {
-            switch self {
-            case .morning: return [.orange, .yellow]
-            case .afternoon: return [.yellow, .orange]
-            case .evening: return [.purple, .pink]
-            case .night: return [.indigo, .purple]
-            }
-        }
-    }
-    
     // MARK: - Medication Schedule Info
     struct MedicationScheduleInfo {
         let medication: Medication
         let schedule: MedicationSchedule
-        let timePeriod: TimePeriod
+        let timePeriod: MealTime
         let isUpcoming: Bool
         let timeUntilDue: TimeInterval?
         
@@ -75,12 +40,12 @@ class MedicationTracker {
     private var currentDate = Date()
     
     // MARK: - Public Methods
-    func groupMedicationsByTimePeriod(_ medications: [Medication]) -> [TimePeriod: [MedicationScheduleInfo]] {
-        var grouped: [TimePeriod: [MedicationScheduleInfo]] = [:]
+    func groupMedicationsByMealTime(_ medications: [Medication]) -> [MealTime: [MedicationScheduleInfo]] {
+        var grouped: [MealTime: [MedicationScheduleInfo]] = [:]
         
         for medication in medications {
             for schedule in medication.frequency ?? [] {
-                let timePeriod = mapMealTimeToTimePeriod(schedule.mealTime)
+                let timePeriod = schedule.mealTime
                 let info = MedicationScheduleInfo(
                     medication: medication,
                     schedule: schedule,
@@ -108,8 +73,8 @@ class MedicationTracker {
         
         for medication in medications {
             for schedule in medication.frequency ?? [] {
-                let timePeriod = mapMealTimeToTimePeriod(schedule.mealTime)
-                let scheduleHour = getHourForTimePeriod(timePeriod)
+                let timePeriod = schedule.mealTime
+                let scheduleHour = getHourForMealTime(timePeriod)
                 
                 // Check if medication is due within the next few hours
                 let isUpcoming = isTimeWithinRange(currentHour: currentHour, 
@@ -152,26 +117,12 @@ class MedicationTracker {
         }
     }
     
-    // MARK: - Private Helper Methods
-    private func mapMealTimeToTimePeriod(_ mealTime: MealTime) -> TimePeriod {
-        switch mealTime {
-        case .breakfast:
-            return .morning
-        case .lunch:
-            return .afternoon
-        case .dinner:
-            return .evening
-        case .bedtime:
-            return .night
-        }
-    }
-    
-    private func getHourForTimePeriod(_ timePeriod: TimePeriod) -> Int {
+    private func getHourForMealTime(_ timePeriod: MealTime) -> Int {
         switch timePeriod {
-        case .morning: return 8   // 8 AM
-        case .afternoon: return 13 // 1 PM
-        case .evening: return 19   // 7 PM
-        case .night: return 22     // 10 PM
+            case .breakfast: return 8   // 8 AM
+            case .lunch: return 13 // 1 PM
+            case .dinner: return 19   // 7 PM
+            case .bedtime: return 22     // 10 PM
         }
     }
     

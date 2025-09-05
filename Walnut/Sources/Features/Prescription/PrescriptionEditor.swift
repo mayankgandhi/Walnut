@@ -483,32 +483,17 @@ struct PrescriptionEditor: View {
     
     @ViewBuilder
     private func frequencyBadge(for schedule: MedicationSchedule) -> some View {
-        let timePeriod = mapMealTimeToTimePeriod(schedule.mealTime)
-        
         HStack(spacing: 2) {
-            Image(systemName: timePeriod.icon)
+            Image(systemName: schedule.mealTime.icon)
                 .font(.caption2)
             
             Text(schedule.mealTime.rawValue.prefix(1).uppercased())
                 .font(.caption2.weight(.medium))
         }
-        .foregroundStyle(timePeriod.color)
+        .foregroundStyle(schedule.mealTime.color)
         .padding(.horizontal, 6)
         .padding(.vertical, 2)
-        .background(timePeriod.color.opacity(0.1), in: Capsule())
-    }
-    
-    private func mapMealTimeToTimePeriod(_ mealTime: MealTime) -> MedicationTracker.TimePeriod {
-        switch mealTime {
-        case .breakfast:
-            return .morning
-        case .lunch:
-            return .afternoon
-        case .dinner:
-            return .evening
-        case .bedtime:
-            return .night
-        }
+        .background(schedule.mealTime.color.opacity(0.1), in: Capsule())
     }
     
     private func handleMedicationSave(_ medication: Medication) {

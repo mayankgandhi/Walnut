@@ -27,8 +27,8 @@ struct AllMedicationsView: View {
         return activeMedications
     }
 
-    private func groupedActiveMedications() -> [MedicationTracker.TimePeriod: [MedicationTracker.MedicationScheduleInfo]] {
-        medicationTracker.groupMedicationsByTimePeriod(activeMedications)
+    private func groupedActiveMedications() -> [MealTime: [MedicationTracker.MedicationScheduleInfo]] {
+        medicationTracker.groupMedicationsByMealTime(activeMedications)
     }
     
     var body: some View {
@@ -36,7 +36,7 @@ struct AllMedicationsView: View {
             // Active Medications Section
             if !activeMedications.isEmpty {
                 Section {
-                    ForEach(MedicationTracker.TimePeriod.allCases, id: \.self) { timePeriod in
+                    ForEach(MealTime.allCases, id: \.self) { timePeriod in
                         if let medications = groupedActiveMedications()[timePeriod], !medications.isEmpty {
                             timePeriodSection(timePeriod: timePeriod, medications: medications)
                         }
@@ -86,7 +86,7 @@ struct AllMedicationsView: View {
     
     @ViewBuilder
     private func timePeriodSection(
-        timePeriod: MedicationTracker.TimePeriod,
+        timePeriod: MealTime,
         medications: [MedicationTracker.MedicationScheduleInfo]
     ) -> some View {
         VStack(alignment: .leading, spacing: Spacing.small) {

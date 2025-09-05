@@ -64,6 +64,19 @@ enum MealTime: String, Codable, CaseIterable {
         }
     }
     
+    var iconString: String {
+        switch self {
+            case .breakfast:
+                "sunrise"
+            case .lunch:
+                "sun.max"
+            case .dinner:
+                "sunset"
+            case .bedtime:
+                "night"
+        }
+    }
+    
     var color: Color {
         switch self {
             case .breakfast:
@@ -76,9 +89,24 @@ enum MealTime: String, Codable, CaseIterable {
                     .indigo
         }
     }
+    
+    var displayName: String {
+        switch self {
+            case .breakfast:
+                "Breakfast"
+            case .lunch:
+                "Lunch"
+            case .dinner:
+                "Dinner"
+            case .bedtime:
+                "Bedtime"
+        }
+    }
+    
 }
 
 enum MedicationTime: String, Codable, CaseIterable {
+
     case before, after
     
     var icon: String {

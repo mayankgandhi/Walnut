@@ -17,8 +17,8 @@ struct ActiveMedicationsSection: View {
     @State private var activeMedications: [Medication] = []
     @State private var medicationTracker = MedicationTracker()
     
-    private var groupedMedications: [MedicationTracker.TimePeriod: [MedicationTracker.MedicationScheduleInfo]] {
-        medicationTracker.groupMedicationsByTimePeriod(activeMedications)
+    private var groupedMedications: [MealTime: [MedicationTracker.MedicationScheduleInfo]] {
+        medicationTracker.groupMedicationsByMealTime(activeMedications)
     }
     
     var body: some View {
@@ -32,7 +32,7 @@ struct ActiveMedicationsSection: View {
                         .listRowSeparator(.hidden)
                 } else {
                     // Time Period Groups
-                    ForEach(MedicationTracker.TimePeriod.allCases, id: \.self) { timePeriod in
+                    ForEach(MealTime.allCases, id: \.self) { timePeriod in
                         if let medicationsForPeriod = groupedMedications[timePeriod], !medicationsForPeriod.isEmpty {
                             timePeriodSection(timePeriod: timePeriod, medications: medicationsForPeriod)
                                 .listRowBackground(Color.clear)
@@ -101,22 +101,22 @@ struct ActiveMedicationsSection: View {
         }
     }
     
-    private func timePeriodSection(timePeriod: MedicationTracker.TimePeriod, medications: [MedicationTracker.MedicationScheduleInfo]) -> some View {
+    private func timePeriodSection(timePeriod: MealTime, medications: [MedicationTracker.MedicationScheduleInfo]) -> some View {
         HealthCard {
             VStack(alignment: .leading, spacing: Spacing.medium) {
                 // Time Period Header
                 HStack(spacing: Spacing.small) {
                     Circle()
-                        .fill(mapToDesignSystemTimePeriod(timePeriod).color.opacity(0.15))
+                        .fill(timePeriod.color.opacity(0.15))
                         .frame(width: Size.avatarMedium, height: Size.avatarMedium)
                         .overlay {
-                            Image(systemName: mapToDesignSystemTimePeriod(timePeriod).icon)
+                            Image(systemName: timePeriod.icon)
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(mapToDesignSystemTimePeriod(timePeriod).color)
+                                .foregroundStyle(timePeriod.color)
                         }
                     
                     VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text(mapToDesignSystemTimePeriod(timePeriod).displayName)
+                        Text(timePeriod.displayName)
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(.primary)
                         
@@ -138,7 +138,7 @@ struct ActiveMedicationsSection: View {
                             dosage: medicationInfo.dosageText,
                             timing: medicationInfo.displayTime,
                             instructions: medicationInfo.medication.instructions,
-                            accentColor: mapToDesignSystemTimePeriod(timePeriod).color
+                            accentColor: timePeriod.color
                         )
                     }
                 }
@@ -159,19 +159,7 @@ struct ActiveMedicationsSection: View {
         
         self.activeMedications = medications
     }
-    
-    private func mapToDesignSystemTimePeriod(_ timePeriod: MedicationTracker.TimePeriod) -> MedicationTimePeriod {
-        switch timePeriod {
-        case .morning:
-            return .morning
-        case .afternoon:
-            return .afternoon
-        case .evening:
-            return .evening
-        case .night:
-            return .night
-        }
-    }
+
 }
 
 #Preview("With Active Medications") {
