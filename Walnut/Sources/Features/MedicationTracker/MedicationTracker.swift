@@ -13,11 +13,15 @@ import Foundation
 class MedicationTracker {
     
     // MARK: - Medication Schedule Info
-    struct MedicationScheduleInfo {
+    struct MedicationScheduleInfo: Identifiable {
+        
+        var id: String {
+            "\(medication.name).\(schedule.timing?.rawValue ?? "").\(schedule.mealTime).\(medication.dosage)"
+        }
+        
         let medication: Medication
         let schedule: MedicationSchedule
         let timePeriod: MealTime
-        let isUpcoming: Bool
         let timeUntilDue: TimeInterval?
         
         var displayTime: String {
@@ -50,7 +54,6 @@ class MedicationTracker {
                     medication: medication,
                     schedule: schedule,
                     timePeriod: timePeriod,
-                    isUpcoming: false,
                     timeUntilDue: nil
                 )
                 
@@ -62,48 +65,6 @@ class MedicationTracker {
         }
         
         return grouped
-    }
-    
-    func getUpcomingMedications(_ medications: [Medication], withinHours hours: Int = 4) -> [MedicationScheduleInfo] {
-        let calendar = Calendar.current
-        let currentHour = calendar.component(.hour, from: currentDate)
-        let targetHour = (currentHour + hours) % 24
-        
-        var upcomingMedications: [MedicationScheduleInfo] = []
-        
-        for medication in medications {
-            for schedule in medication.frequency ?? [] {
-                let timePeriod = schedule.mealTime
-                let scheduleHour = getHourForMealTime(timePeriod)
-                
-                // Check if medication is due within the next few hours
-                let isUpcoming = isTimeWithinRange(currentHour: currentHour, 
-                                                 targetHour: targetHour, 
-                                                 scheduleHour: scheduleHour)
-                
-                if isUpcoming {
-                    let timeUntilDue = calculateTimeUntilDue(currentHour: currentHour, 
-                                                           scheduleHour: scheduleHour)
-                    
-                    let info = MedicationScheduleInfo(
-                        medication: medication,
-                        schedule: schedule,
-                        timePeriod: timePeriod,
-                        isUpcoming: true,
-                        timeUntilDue: timeUntilDue
-                    )
-                    upcomingMedications.append(info)
-                }
-            }
-        }
-        
-        // Sort by time until due
-        return upcomingMedications.sorted { med1, med2 in
-            guard let time1 = med1.timeUntilDue, let time2 = med2.timeUntilDue else {
-                return false
-            }
-            return time1 < time2
-        }
     }
     
     func formatTimeUntilDue(_ timeInterval: TimeInterval) -> String {
@@ -123,16 +84,6 @@ class MedicationTracker {
             case .lunch: return 13 // 1 PM
             case .dinner: return 19   // 7 PM
             case .bedtime: return 22     // 10 PM
-        }
-    }
-    
-    private func isTimeWithinRange(currentHour: Int, targetHour: Int, scheduleHour: Int) -> Bool {
-        if targetHour > currentHour {
-            // Same day range
-            return scheduleHour >= currentHour && scheduleHour <= targetHour
-        } else {
-            // Cross midnight range
-            return scheduleHour >= currentHour || scheduleHour <= targetHour
         }
     }
     

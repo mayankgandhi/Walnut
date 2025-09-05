@@ -21,7 +21,7 @@ struct MedicationsTrackerView: View {
     
     var body: some View {
         ScrollView {            
-            UpcomingMedicationsSection(patient: patient)
+            AllMedicationsView(patient: patient)
         }
     }
 }
