@@ -15,8 +15,8 @@ struct MedicationEditor: View {
     let medication: Medication?
     let onSave: (Medication) -> Void
     
-    // Common duration options for easy selection
-    static let durationOptions: [MedicationDuration] = [
+    // Removed durationOptions array - now using MedicationDurationPickerItem
+    // static let durationOptions: [MedicationDuration] = [
         .days(1), .days(3), .days(5), .days(7), .days(10), .days(14),
         .days(21), .days(30), .days(45), .days(60), .days(90),
         .weeks(1), .weeks(2), .weeks(4), .weeks(8), .weeks(12),
@@ -39,84 +39,14 @@ struct MedicationEditor: View {
     @State private var duration: MedicationDuration? = .days(7)
     @State private var selectedFrequencies: [MedicationFrequency] = []
     
-    // Frequency selection states
-    @State private var breakfastBefore = false
-    @State private var breakfastAfter = false
-    @State private var lunchBefore = false
-    @State private var lunchAfter = false
-    @State private var dinnerBefore = false
-    @State private var dinnerAfter = false
-    @State private var bedtimeBefore = false
-    @State private var bedtimeAfter = false
-    
     @Environment(\.dismiss) private var dismiss
     
     // Focus management for keyboard navigation
-    @FocusState private var focusedField: FormField?
-    
-    private enum FormField: Hashable, CaseIterable {
-        case medicationName
-        case dosage
-        case instructions
-        
-        private enum NextFieldType {
-            case textField(FormField)
-            case nonTextFieldOrEnd
-        }
-        
-        private var nextFieldInUI: NextFieldType {
-            switch self {
-            case .medicationName:
-                return .textField(.dosage)
-            case .dosage:
-                return .nonTextFieldOrEnd  // Next: Number input
-            case .instructions:
-                return .nonTextFieldOrEnd  // Last field
-            }
-        }
-        
-        var shouldDismissKeyboard: Bool {
-            switch nextFieldInUI {
-            case .nonTextFieldOrEnd:
-                return true
-            case .textField:
-                return false
-            }
-        }
-        
-        var nextTextField: FormField? {
-            switch nextFieldInUI {
-            case .textField(let field):
-                return field
-            case .nonTextFieldOrEnd:
-                return nil
-            }
-        }
-        
-        var appropriateSubmitLabel: SubmitLabel {
-            return shouldDismissKeyboard ? .done : .next
-        }
-    }
     
     private var isFormValid: Bool {
         !medicationName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
         !dosage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
         duration != nil
-    }
-    
-    // Focus navigation helpers
-    private func focusNextField(after currentField: FormField) {
-        if currentField.shouldDismissKeyboard {
-            if currentField == .instructions && isFormValid {
-                submitForm()
-            } else {
-                focusedField = nil
-            }
-        } else if let nextField = currentField.nextTextField {
-            focusedField = nextField
-        } else {
-            focusedField = nil
-        }
     }
     
     private func submitForm() {
@@ -146,12 +76,8 @@ struct MedicationEditor: View {
                                 iconColor: .healthPrimary,
                                 isRequired: true,
                                 contentType: .none,
-                                submitLabel: FormField.medicationName.appropriateSubmitLabel,
-                                onSubmit: {
-                                    focusNextField(after: .medicationName)
-                                }
+                               
                             )
-                            .focused($focusedField, equals: .medicationName)
                             
                             TextFieldItem(
                                 icon: "cross.case.fill",
@@ -162,18 +88,13 @@ struct MedicationEditor: View {
                                 iconColor: .orange,
                                 isRequired: true,
                                 contentType: .none,
-                                submitLabel: FormField.dosage.appropriateSubmitLabel,
-                                onSubmit: {
-                                    focusNextField(after: .dosage)
-                                }
+                                
                             )
-                            .focused($focusedField, equals: .dosage)
                             
-                            MenuPickerItem(
+                            MedicationDurationPickerItem(
                                 icon: "calendar.day.timeline.left",
                                 title: "Duration",
-                                selectedOption: $duration,
-                                options: Self.durationOptions,
+                                selectedDuration: $duration,
                                 placeholder: "Select duration",
                                 helperText: "How long to take this medication",
                                 iconColor: .blue,
@@ -188,112 +109,6 @@ struct MedicationEditor: View {
                             .font(.headline)
                             .foregroundStyle(.secondary)
                             .padding(.horizontal, Spacing.medium)
-                        
-                        VStack(spacing: Spacing.medium) {
-                            // Breakfast Section
-                            VStack(alignment: .leading, spacing: Spacing.xs) {
-                                Text("Breakfast")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(.primary)
-                                    .padding(.horizontal, Spacing.medium)
-                                
-                                VStack(spacing: Spacing.small) {
-                                    ToggleItem(
-                                        icon: "sunrise",
-                                        title: "Before Breakfast",
-                                        subtitle: "Take before eating",
-                                        isOn: $breakfastBefore,
-                                        iconColor: .orange
-                                    )
-                                    
-                                    ToggleItem(
-                                        icon: "sunrise.fill",
-                                        title: "After Breakfast",
-                                        subtitle: "Take after eating",
-                                        isOn: $breakfastAfter,
-                                        iconColor: .orange
-                                    )
-                                }
-                            }
-                            
-                            // Lunch Section
-                            VStack(alignment: .leading, spacing: Spacing.xs) {
-                                Text("Lunch")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(.primary)
-                                    .padding(.horizontal, Spacing.medium)
-                                
-                                VStack(spacing: Spacing.small) {
-                                    ToggleItem(
-                                        icon: "sun.max",
-                                        title: "Before Lunch",
-                                        subtitle: "Take before eating",
-                                        isOn: $lunchBefore,
-                                        iconColor: .yellow
-                                    )
-                                    
-                                    ToggleItem(
-                                        icon: "sun.max.fill",
-                                        title: "After Lunch",
-                                        subtitle: "Take after eating",
-                                        isOn: $lunchAfter,
-                                        iconColor: .yellow
-                                    )
-                                }
-                            }
-                            
-                            // Dinner Section
-                            VStack(alignment: .leading, spacing: Spacing.xs) {
-                                Text("Dinner")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(.primary)
-                                    .padding(.horizontal, Spacing.medium)
-                                
-                                VStack(spacing: Spacing.small) {
-                                    ToggleItem(
-                                        icon: "sunset",
-                                        title: "Before Dinner",
-                                        subtitle: "Take before eating",
-                                        isOn: $dinnerBefore,
-                                        iconColor: .purple
-                                    )
-                                    
-                                    ToggleItem(
-                                        icon: "sunset.fill",
-                                        title: "After Dinner",
-                                        subtitle: "Take after eating",
-                                        isOn: $dinnerAfter,
-                                        iconColor: .purple
-                                    )
-                                }
-                            }
-                            
-                            // Bedtime Section
-                            VStack(alignment: .leading, spacing: Spacing.xs) {
-                                Text("Bedtime")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(.primary)
-                                    .padding(.horizontal, Spacing.medium)
-                                
-                                VStack(spacing: Spacing.small) {
-                                    ToggleItem(
-                                        icon: "moon",
-                                        title: "Before Bed",
-                                        subtitle: "Take before sleeping",
-                                        isOn: $bedtimeBefore,
-                                        iconColor: .indigo
-                                    )
-                                    
-                                    ToggleItem(
-                                        icon: "moon.fill",
-                                        title: "At Bedtime",
-                                        subtitle: "Take when going to bed",
-                                        isOn: $bedtimeAfter,
-                                        iconColor: .indigo
-                                    )
-                                }
-                            }
-                        }
                     }
                     
                     // Additional Information Section
@@ -310,12 +125,8 @@ struct MedicationEditor: View {
                             placeholder: "Special instructions or notes",
                             helperText: "Any specific instructions for taking this medication",
                             iconColor: .gray,
-                            submitLabel: FormField.instructions.appropriateSubmitLabel,
-                            onSubmit: {
-                                focusNextField(after: .instructions)
-                            }
+                           
                         )
-                        .focused($focusedField, equals: .instructions)
                     }
                     
                     Spacer(minLength: Spacing.xl)
