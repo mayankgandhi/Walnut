@@ -16,6 +16,4 @@ import Foundation
 /// - Unified document processing across multiple AI providers
 /// - File upload and management
 /// - Document type detection and routing
-public struct AIKit {
-    public static let version = "1.0.0"
-}
+

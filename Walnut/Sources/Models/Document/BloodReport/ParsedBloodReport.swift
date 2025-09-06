@@ -9,8 +9,8 @@
 import Foundation
 import AIKit
 
-struct ParsedBloodReport: ParseableModel, OpenAISchemaDefinable {
-    
+struct ParsedBloodReport: ParseableModel {
+  
     let testName: String
     let labName: String
     let category: String
@@ -18,15 +18,23 @@ struct ParsedBloodReport: ParseableModel, OpenAISchemaDefinable {
     let notes: String
     let testResults: [ParsedBloodTestResult]
     
-    static var parseDefinition: String {
-        """
-        Swift blood report parsing model: ParsedBloodReport
-        ParsedBloodReport: testName(String), labName(String), category(String), resultDate(Date:ISO8601-format), notes(String), testResults([ParsedBloodTestResult])
-        ParsedBloodTestResult: testName(String), value(String), unit(String), referenceRange(String), isAbnormal(Bool)
-        
-        Please extract all blood test results from the lab report. The resultDate should be the date when the tests were performed or results were available. 
-        Strictly Follow this rule: Expected all date strings to be ISO8601-format.
-        """
+    static var tool: AIKit.ClaudeTool {
+        AIKit.ClaudeTool(
+            name: "parse_blood_report",
+            description: "Parse a Blood Report document and extract structured Test Result data",
+            inputSchema: ClaudeInputSchema(
+                type: "object",
+                properties: jsonSchema.properties,
+                required: jsonSchema.required
+            )
+        )
+    }
+    
+    static var toolChoice: AIKit.ToolChoice {
+        AIKit.ToolChoice(
+            type: "tool",
+            name: "parse_blood_report"
+        )
     }
     
     static var jsonSchema: OpenAIJSONSchema  = {

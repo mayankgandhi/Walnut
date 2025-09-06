@@ -49,6 +49,69 @@ class Medication {
     
 }
 
+extension Medication {
+    static let sampleMedication = Medication(
+        id: UUID(),
+        name: "Lisinopril",
+        frequency: [
+            .daily(times: [DateComponents(hour: 8, minute: 0)]),
+            .mealBased(mealTime: .dinner, timing: .after)
+        ],
+        duration: .days(30),
+        dosage: "10mg",
+        instructions: "Take with water"
+    )
+    
+    static let complexMedication = Medication(
+        id: UUID(),
+        name: "Amoxicillin",
+        frequency: [
+            .daily(times: [
+                DateComponents(hour: 8, minute: 0),
+                DateComponents(hour: 14, minute: 0),
+                DateComponents(hour: 20, minute: 0)
+            ]),
+            .mealBased(mealTime: .breakfast, timing: .before)
+        ],
+        duration: .days(7),
+        dosage: "500mg",
+        instructions: "Complete the full course even if symptoms improve"
+    )
+    static let hourlyMedication = Medication(
+        id: UUID(),
+        name: "Ibuprofen",
+        frequency: [
+            .hourly(interval: 6, startTime: DateComponents(hour: 8, minute: 0)),
+            .mealBased(mealTime: .lunch, timing: .after)
+        ],
+        duration: .asNeeded,
+        dosage: "400mg",
+        instructions: "Take with food. Do not exceed 1200mg per day"
+    )
+    
+    static let weeklyMedication = Medication(
+        id: UUID(),
+        name: "Methotrexate",
+        frequency: [
+            .weekly(dayOfWeek: .monday, time: DateComponents(hour: 9, minute: 0))
+        ],
+        duration: .ongoing,
+        dosage: "15mg",
+        instructions: "Take on the same day each week. Monitor for side effects"
+    )
+    static let monthlyMedication = Medication(
+        id: UUID(),
+        name: "Vitamin D3",
+        frequency: [
+            .monthly(dayOfMonth: 1, time: DateComponents(hour: 10, minute: 0))
+        ],
+        duration: .months(6),
+        dosage: "50000 IU",
+        instructions: "Take with a meal for better absorption"
+    )
+    
+}
+
 enum Weekday: Int, Codable, CaseIterable, CustomStringConvertible {
     case sunday = 1, monday, tuesday, wednesday, thursday, friday, saturday
     

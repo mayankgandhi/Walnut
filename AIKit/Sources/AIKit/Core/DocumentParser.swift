@@ -27,7 +27,7 @@ public final class DocumentParser {
     
     // MARK: - Image Parsing (OpenAI Vision)
     
-    public func parseImage<T: ParseableModel & OpenAISchemaDefinable>(
+    public func parseImage<T: ParseableModel>(
         data: Data, 
         fileName: String, 
         as type: T.Type
@@ -36,7 +36,7 @@ public final class DocumentParser {
         let mimeType = MimeTypeResolver.mimeType(for: fileName)
         
         let prompt = """
-        Please analyze this document and extract the information according to the following structure: \(type.parseDefinition) Return the information as structured JSON matching the schema provided.
+        Please analyze this document and extract the information according to the tool. Return the information as structured JSON matching the schema provided.
         """
         
         let chatRequest = OpenAIChatRequest(
@@ -111,14 +111,15 @@ public final class DocumentParser {
     private func parseWithClaude<T: ParseableModel>(fileId: String, as type: T.Type) async throws -> T {
         let prompt = """
         Please analyze this document and extract the information into the following JSON structure. 
-        Return ONLY JSON and nothing else:
-        \(type.parseDefinition)
+        Return ONLY JSON and nothing else.
         The response is directly decoded by the same model shared.
         """
         
         let messageRequest = ClaudeMessageRequest(
             model: "claude-sonnet-4-20250514",
             maxTokens: 4096,
+            tools: [type.tool],
+            toolChoice: type.toolChoice,
             messages: [
                 ClaudeMessage(
                     role: "user",

@@ -366,36 +366,22 @@ final class JSONResponseParserTests: XCTestCase {
        
         // You can also test with Claude-style responses with markdown
         let claudeStyleResponse = """
-        "```json\n{\n  \"testName\": \"Multiple Blood Tests\",\n  \"labName\": \"VIJAYA DIAGNOSTIC CENTRE\",\n  \"category\": \"Comprehensive Health Check\",\n  \"resultDate\": \"2025-08-05T00:00:00Z\",\n  \"notes\": \"Complete blood work including kidney function, diabetes screening, thyroid profile, liver markers, and infectious disease screening\",\n  \"testResults\": [\n    {\n      \"testName\": \"Creatinine\",\n      \"value\": \"0.6\",\n      \"unit\": \"mg/dL\",\n      \"referenceRange\": \"0.5 - 1.0\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"e-GFR (Glomerular Filtration Rate)\",\n      \"value\": \"111.3\",\n      \"unit\": \"ml/min/1.73 m²\",\n      \"referenceRange\": \">/= 90\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"Glycated Haemoglobin\",\n      \"value\": \"6.0\",\n      \"unit\": \"%\",\n      \"referenceRange\": \"Non Diabetic: < 5.7, Pre-Diabetic: 5.7 - 6.4, Diabetic: >/= 6.5\",\n      \"isAbnormal\": true\n    },\n    {\n      \"testName\": \"Post Lunch Glucose\",\n      \"value\": \"156\",\n      \"unit\": \"mg/dL\",\n      \"referenceRange\": \"Normal: <140, Impaired: 140-199, Diabetes: >/= 200\",\n      \"isAbnormal\": true\n    },\n    {\n      \"testName\": \"Fasting Plasma Glucose\",\n      \"value\": \"102\",\n      \"unit\": \"mg/dL\",\n      \"referenceRange\": \"Normal: 70-99, Impaired: 100-125, Diabetes: >/=126\",\n      \"isAbnormal\": true\n    },\n    {\n      \"testName\": \"Bleeding Time\",\n      \"value\": \"01:30\",\n      \"unit\": \"min-sec\",\n      \"referenceRange\": \"1 - 5\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"Clotting Time\",\n      \"value\": \"06:00\",\n      \"unit\": \"min-sec\",\n      \"referenceRange\": \"4 - 9\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"T3 Total\",\n      \"value\": \"0.89\",\n      \"unit\": \"ng/mL\",\n      \"referenceRange\": \"Non pregnant: 0.60 - 1.81\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"T4 Total\",\n      \"value\": \"11.90\",\n      \"unit\": \"µg/dL\",\n      \"referenceRange\": \"Adult: 3.2 - 12.6\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"TSH - Ultrasensitive\",\n      \"value\": \"1.143\",\n      \"unit\": \"µIU/mL\",\n      \"referenceRange\": \"Non pregnant: 0.55 - 4.78\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"Haemoglobin\",\n      \"value\": \"11.6\",\n      \"unit\": \"gm/dL\",\n      \"referenceRange\": \"12.0 - 15.0\",\n      \"isAbnormal\": true\n    },\n    {\n      \"testName\": \"Total RBC Count\",\n      \"value\": \"3.8\",\n      \"unit\": \"Cells/cumm\",\n      \"referenceRange\": \"3.8 - 4.8\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"Packed Cell Volume / Hematocrit\",\n      \"value\": \"34.2\",\n      \"unit\": \"%\",\n      \"referenceRange\": \"36.0 - 46.0\",\n      \"isAbnormal\": true\n    },\n    {\n      \"testName\": \"MCV\",\n      \"value\": \"89.6\",\n      \"unit\": \"fL\",\n      \"referenceRange\": \"83.0 - 101.0\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"MCH\",\n      \"value\": \"30.4\",\n      \"unit\": \"pg\",\n      \"referenceRange\": \"27.0 - 32.0\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"MCHC\",\n      \"value\": \"33.9\",\n      \"unit\": \"gm/dL\",\n      \"referenceRange\": \"31.5 - 34.5\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"RDW\",\n      \"value\": \"16.1\",\n      \"unit\": \"%\",\n      \"referenceRange\": \"11.6 - 14.0\",\n      \"isAbnormal\": true\n    },\n    {\n      \"testName\": \"Total Leucocytes (WBC) Count\",\n      \"value\": \"6000\",\n      \"unit\": \"Cells/cumm\",\n      \"referenceRange\": \"4000 - 10000\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"Neutrophils\",\n      \"value\": \"47\",\n      \"unit\": \"%\",\n      \"referenceRange\": \"40 - 80\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"Lymphocytes\",\n      \"value\": \"45\",\n      \"unit\": \"%\",\n      \"referenceRange\": \"20 - 40\",\n      \"isAbnormal\": true\n    },\n    {\n      \"testName\": \"Eosinophils\",\n      \"value\": \"3\",\n      \"unit\": \"%\",\n      \"referenceRange\": \"1 - 6\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"Monocytes\",\n      \"value\": \"5\",\n      \"unit\": \"%\",\n      \"referenceRange\": \"2 - 10\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"Basophils\",\n      \"value\": \"0\",\n      \"unit\": \"%\",\n      \"referenceRange\": \"0-2\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"Platelet Count\",\n      \"value\": \"280000\",\n      \"unit\": \"Cells/cumm\",\n      \"referenceRange\": \"150000 - 410000\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"Hepatitis B Surface Antigen\",\n      \"value\": \"Non Reactive [<0.030]\",\n      \"unit\": \"IU/mL\",\n      \"referenceRange\": \"Nonreactive: < 0.05 IU/mL\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"HIV 1 & 2 Antibodies/Antigen\",\n      \"value\": \"Non Reactive [0.788]\",\n      \"unit\": \"S/CO\",\n      \"referenceRange\": \"Nonreactive: <1.0, Reactive: >/=1.0\",\n      \"isAbnormal\": false\n    },\n    {\n      \"testName\": \"Hepatitis C Antibody (HCV)\",\n      \"value\": \"Non Reactive [0.017]\",\n      \"unit\": \"S/CO\",\n      \"referenceRange\": \"Non Reactive: <1.0 S/CO, Reactive: >= 1.0 S/CO\",\n      \"isAbnormal\": false\n    }\n  ]\n}\n```
+        ```json\n{\n  \"dateIssued\": \"2025-05-27T15:18:00Z\",\n  \"doctorName\": \"Dr. Ravi Sankar Erukulapati\",\n  \"facilityName\": \"Apollo Hospitals Jubilee Hills\",\n  \"followUpDate\": \"2025-06-10T00:00:00Z\",\n  \"followUpTests\": [\n    \"SODIUM\",\n    \"POTASSIUM\", \n    \"CREATININE\",\n    \"TESTOSTERONE TROUGH LEVELS\",\n    \"FREE T4\",\n    \"FREE T3\",\n    \"LFTs\"\n  ],\n  \"notes\": \"see 17-5-2025 physical consult prescription, please. note- on att as per pulmonologist for uveitis- tb test positive. plan: counselled. sick day rules.\",\n  \"medications\": [\n    {\n      \"id\": \"550e8400-e29b-41d4-a716-446655440001\",\n      \"name\": \"TAB HISONE\",\n      \"frequency\": [\n        {\n          \"daily\": {\n            \"times\": [\n              {\"hour\": 7, \"minute\": 0},\n              {\"hour\": 12, \"minute\": 0},\n              {\"hour\": 17, \"minute\": 0}\n            ]\n          }\n        }\n      ],\n      \"duration\": \"ongoing\",\n      \"dosage\": \"10 MG AT 7 AM, 5 MG AT 12 NOON AND 5 MG AT 5 PM\",\n      \"instructions\": \"Increase dosage as prescribed\"\n    },\n    {\n      \"id\": \"550e8400-e29b-41d4-a716-446655440002\", \n      \"name\": \"SUSTANON INJECTION\",\n      \"frequency\": [],\n      \"duration\": \"ongoing\",\n      \"dosage\": null,\n      \"instructions\": \"AS PER MY 17-5-2025 physical PRESCRIPTION\"\n    },\n    {\n      \"id\": \"550e8400-e29b-41d4-a716-446655440003\",\n      \"name\": \"TAB THYRONORM\",\n      \"frequency\": [\n        {\n          \"daily\": {\n            \"times\": [\n              {\"hour\": 8, \"minute\": 0}\n            ]\n          }\n        }\n      ],\n      \"duration\": \"ongoing\",\n      \"dosage\": \"125 MICROGRAMS\",\n      \"instructions\": \"CONTINUE DAILY EMPTY STOMACH\"\n    }\n  ]\n}\n```
         """
         
-        // MARK: - TEST EXECUTION (Don't modify this part)
-    
         
         do {
             let cleanedResponse = createMockClaudeResponse(withContent: claudeStyleResponse)
             let result2 = try JSONResponseParser.parseClaudeResponse(
                 cleanedResponse,
-                as: ParsedBloodReport.self
+                as: ParsedPrescription.self
             )
             print("\\n✅ Claude-style response parsing successful:")
-            print("   Patient: \\(result2.patientName), Age: \\(result2.age)")
-            print("   Medications: \\(result2.medications.joined(separator: ", "))")
-            print("   Active: \\(result2.isActive), Last Visit: \\(result2.lastVisit ?? \"N/A\")")
+          
         } catch {
-            print("\\n❌ Claude-style response parsing failed: \\(error)")
+            print("\\n❌ Claude-style response parsing failed: \(error)")
             XCTFail("Claude-style response parsing should succeed")
         }
-                
-//        let mockClaudeResponse = createMockClaudeResponse(withContent: claudeStyleResponse)
-//        do {
-//            let result4 = try JSONResponseParser.parseClaudeResponse(mockClaudeResponse, as: ParsedBloodReport.self)
-//            print("\\n✅ Mock Claude response parsing successful:")
-//            print("   Patient: \\(result4.patientName), Age: \\(result4.age)")
-//        } catch {
-//            print("\\n❌ Mock Claude response parsing failed: \\(error)")
-//            XCTFail("Mock Claude response parsing should succeed")
-//        }
         
         print("\\n=== Custom Model Testing Complete ===\\n")
     }
@@ -421,33 +407,7 @@ final class JSONResponseParserTests: XCTestCase {
             XCTFail("Should successfully parse \(String(describing: model))", file: file, line: line)
         }
     }
-    
-    /// Example usage of the generic test helper
-//    func testUsingGenericHelper() {
-//        // Example 1: Simple model
-//        struct SimpleModel: Codable, Equatable {
-//            let name: String
-//            let value: Int
-//        }
-//        
-//        let simpleJSON = "{\\"name\\": \\"Test\\", \\"value\\": 42}"
-//        let expectedSimple = SimpleModel(name: "Test", value: 42)
-//        
-//        testGenericModelParsing(
-//            model: SimpleModel.self,
-//            jsonResponse: simpleJSON,
-//            expectedResult: expectedSimple
-//        )
-//        
-//        // Example 2: Array model
-//        let arrayJSON = "[\\"apple\\", \\"banana\\", \\"cherry\\"]"
-//        testGenericModelParsing(
-//            model: [String].self,
-//            jsonResponse: arrayJSON,
-//            expectedResult: ["apple", "banana", "cherry"]
-//        )
-//    }
-    
+
     // MARK: - Helper Methods
     
     private func encodeToJSONString<T: Codable>(_ object: T) throws -> String {

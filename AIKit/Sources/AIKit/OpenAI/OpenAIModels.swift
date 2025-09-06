@@ -11,7 +11,7 @@ import Foundation
 // MARK: - OpenAI-specific Protocol Extension
 
 /// Protocol extension for OpenAI JSON Schema support
-public protocol OpenAISchemaDefinable: ParseDefinable {
+public protocol OpenAISchemaDefinable {
     static var jsonSchema: OpenAIJSONSchema { get }
 }
 
@@ -165,6 +165,7 @@ public struct OpenAIJSONSchemaWrapper: Codable {
 }
 
 public struct OpenAIJSONSchema: Codable {
+    
     public let type: String = "object"
     public let properties: [String: Any]
     public let required: [String]
@@ -191,14 +192,19 @@ public struct OpenAIJSONSchema: Codable {
         required = try container.decode([String].self, forKey: .required)
         additionalProperties = try container.decode(Bool.self, forKey: .additionalProperties)
         let anyCodable = try container.decode(AnyCodable.self, forKey: .properties)
-        properties = anyCodable.value as? [String: Any] ?? [:]
+        properties = anyCodable.value as? [String: AnyCodable] ?? [:]
     }
     
-    public init(properties: [String: Any], required: [String], additionalProperties: Bool = false) {
+    public init(
+        properties: [String: Any],
+        required: [String],
+        additionalProperties: Bool = false
+    ) {
         self.properties = properties
         self.required = required
         self.additionalProperties = additionalProperties
     }
+    
 }
 
 public struct AnyCodable: Codable {

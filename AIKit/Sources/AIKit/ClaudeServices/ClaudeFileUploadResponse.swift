@@ -15,17 +15,90 @@ struct ClaudeFileUploadResponse: Codable {
     let id: String
 }
 
+// MARK: - Tool
+public struct ClaudeTool: Codable {
+    let name, description: String
+    let inputSchema: ClaudeInputSchema
+    
+    public init(name: String, description: String, inputSchema: ClaudeInputSchema) {
+        self.name = name
+        self.description = description
+        self.inputSchema = inputSchema
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case name, description
+        case inputSchema = "input_schema"
+    }
+}
+
+// MARK: - ToolChoice
+public struct ToolChoice: Codable {
+    let type, name: String
+    
+    public init(type: String, name: String) {
+        self.type = type
+        self.name = name
+    }
+}
+
+
+// MARK: - InputSchema
+public struct ClaudeInputSchema: Codable {
+    let type: String
+    let properties: [String: Any]
+    let required: [String]
+    
+    public init(
+        type: String,
+        properties: [String: Any],
+        required: [String]
+    ) {
+        self.type = type
+        self.properties = properties
+        self.required = required
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type, properties
+        case required = "required"
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(type, forKey: .type)
+        try container.encode(required, forKey: .required)
+        
+        let jsonData = try JSONSerialization.data(withJSONObject: properties)
+        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
+        try container.encode(AnyCodable(jsonObject), forKey: .properties)
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        type = try container.decode(String.self, forKey: .type)
+        required = try container.decode([String].self, forKey: .required)
+        let anyCodable = try container.decode(AnyCodable.self, forKey: .properties)
+        properties = anyCodable.value as? [String: AnyCodable] ?? [:]
+    }
+}
+
 struct ClaudeMessageRequest: Codable {
     let model: String
     let maxTokens: Int
+    let tools: [ClaudeTool]
+    let toolChoice: ToolChoice
     let messages: [ClaudeMessage]
-    
+
     enum CodingKeys: String, CodingKey {
         case model
         case maxTokens = "max_tokens"
+        case tools
+        case toolChoice = "tool_choice"
         case messages
     }
 }
+
 
 struct ClaudeMessage: Codable {
     let role: String

@@ -14,379 +14,226 @@ struct MedicationListItem: View {
     let medication: Medication
     
     var body: some View {
-        HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-                medicationHeaderSection
-                
-                if !(medication.frequency ?? []).isEmpty {
-                    frequencySection
-                }
-                
-                if let instructions = medication.instructions, !instructions.isEmpty {
-                    instructionsSection(instructions)
-                }
-                
-                progressSection
+        VStack(alignment: .leading, spacing: Spacing.medium) {
+            // Header with icon and basic info
+            medicationHeaderSection
+            
+            // Frequency schedules if available
+            if let frequencies = medication.frequency, !frequencies.isEmpty {
+                frequencySection(frequencies)
+                    .padding(Spacing.small)
+                    .background(Color.healthWarning.opacity(0.05))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.healthWarning.opacity(0.1), lineWidth: 1)
+                    )
+            }
+            
+            // Duration and dosage info
+            medicationDetailsSection
+                .padding(Spacing.small)
+                .background(Color.healthWarning.opacity(0.05))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.healthWarning.opacity(0.1), lineWidth: 1)
+                )
+            // Instructions if available
+            if let instructions = medication.instructions, !instructions.isEmpty {
+                instructionsSection(instructions)
+                    .padding(Spacing.small)
+                    .background(Color.healthWarning.opacity(0.05))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.healthWarning.opacity(0.1), lineWidth: 1)
+                    )
             }
         }
-        .overlay(
-            // Subtle gradient overlay for depth
-            LinearGradient(
-                colors: [
-                    medicationStatusColor.opacity(0.03),
-                    Color.clear,
-                    medicationStatusColor.opacity(0.02)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-        )
     }
     
-    // MARK: - Subviews
+    
+    // MARK: - Header Section
     
     private var medicationHeaderSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.small) {
-            HStack(alignment: .top) {
-                medicationStatusIcon
+        HStack(spacing: Spacing.medium) {
+            // Medication icon
+            medicationIcon
+            
+            // Medication info
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                if let name = medication.name, !name.isEmpty {
+                    Text(name)
+                        .font(.headline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                }
                 
-                Spacer()
-                
-                VStack(alignment: .trailing, spacing: Spacing.xs) {
-                    durationBadge
-                    medicationTypeIndicator
+                HStack(spacing: Spacing.xs) {
+                    if let dosage = medication.dosage, !dosage.isEmpty {
+                        dosageChip(dosage)
+                    }
+                    
+                    if let frequency = medication.frequency, !frequency.isEmpty {
+                        frequencyCountChip(frequency.count)
+                    }
                 }
             }
             
-            medicationInfoSection
+            Spacer()
         }
     }
     
-    private var medicationStatusIcon: some View {
-        ZStack {
-            // Animated background ring
-            Circle()
-                .stroke(medicationStatusColor.opacity(0.2), lineWidth: 2)
-                .frame(width: 40, height: 40)
-                .scaleEffect(1.2)
-            
-            // Main icon background
-            Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            medicationStatusColor,
-                            medicationStatusColor.opacity(0.8)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .frame(width: 36, height: 36)
-                .shadow(color: medicationStatusColor.opacity(0.3), radius: 4, x: 0, y: 2)
-            
-            // Icon with subtle animation
-            Image(systemName: medicationIcon)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(.white)
-                .symbolEffect(.pulse.wholeSymbol, options: .repeating.speed(0.5))
-        }
-    }
-    
-    private var medicationInfoSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            if let name = medication.name, !name.isEmpty {
-                Text(name)
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(.primary)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
-                    .shadow(color: .black.opacity(0.05), radius: 1, x: 0, y: 1)
+    private var medicationIcon: some View {
+        Circle()
+            .fill(Color.healthPrimary.opacity(0.15))
+            .frame(width: 44, height: 44)
+            .overlay {
+                Image(systemName: "pills.fill")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(Color.healthPrimary)
             }
-            
-            HStack(spacing: Spacing.small) {
-                if let dosage = medication.dosage, !dosage.isEmpty {
-                    dosageInfo(dosage)
-                }
-                
-                Spacer()
-                
-                // Daily frequency indicator
-                if let frequency = medication.frequency, !frequency.isEmpty {
-                    frequencyIndicator(count: frequency.count)
-                }
-            }
-        }
     }
     
-    private func dosageInfo(_ dosage: String) -> some View {
+    private func dosageChip(_ dosage: String) -> some View {
         HStack(spacing: 4) {
             Image(systemName: "scalemass.fill")
                 .font(.caption2)
-                .foregroundStyle(Color.healthPrimary)
-                .symbolEffect(.bounce, value: dosage)
+                .foregroundStyle(Color.healthSuccess)
             
             Text(dosage)
-                .font(.caption.weight(.semibold))
+                .font(.caption.weight(.medium))
                 .foregroundStyle(.primary)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(Color.healthPrimary.opacity(0.1))
-                .clipShape(Capsule())
         }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .background(Color.healthSuccess.opacity(0.1))
+        .clipShape(Capsule())
     }
     
-    private func frequencyIndicator(count: Int) -> some View {
+    private func frequencyCountChip(_ count: Int) -> some View {
         HStack(spacing: 2) {
             Image(systemName: "clock.fill")
                 .font(.caption2)
                 .foregroundStyle(Color.healthWarning)
             
-            Text("\(count)x")
-                .font(.caption2.weight(.bold))
-                .foregroundStyle(Color.healthWarning)
+            Text("\(count) schedule\(count == 1 ? "" : "s")")
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(.primary)
         }
         .padding(.horizontal, 6)
-        .padding(.vertical, 2)
-        .background(Color.healthWarning.opacity(0.15))
+        .padding(.vertical, 3)
+        .background(Color.healthWarning.opacity(0.1))
         .clipShape(Capsule())
     }
+    // MARK: - Frequency Section
     
-    private var medicationTypeIndicator: some View {
-        Text(medicationType)
-            .font(.caption2.weight(.medium))
-            .foregroundStyle(.white)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .background(medicationStatusColor.opacity(0.8))
-            .clipShape(Capsule())
-    }
-    
-    private var durationBadge: some View {
-        OptionalView(medication.duration?.totalDays) { totalDays in
-            VStack(spacing: 1) {
-                Text("\(totalDays)")
-                    .font(.headline.weight(.black))
-                    .foregroundStyle(Color.healthSuccess)
-                    .scaleEffect(1.1)
-                
-                Text(totalDays == 1 ? "day" : "days")
-                    .font(.caption2.weight(.medium))
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.horizontal, Spacing.small)
-            .padding(.vertical, 6)
-            .background(
-                LinearGradient(
-                    colors: [
-                        Color.healthSuccess.opacity(0.15),
-                        Color.healthSuccess.opacity(0.05)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.healthSuccess.opacity(0.3), lineWidth: 1)
-            )
-            .shadow(color: Color.healthSuccess.opacity(0.2), radius: 2, x: 0, y: 1)
-        }
-    }
-    
-    private var progressSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
+    private func frequencySection(_ frequencies: [MedicationFrequency]) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.small) {
             HStack {
-                Text("Treatment Progress")
-                    .font(.caption.weight(.semibold))
+                Label("Schedule", systemImage: "clock")
+                    .font(.caption.weight(.medium))
+                
+                Text("\(frequencies.count) frequenc\(frequencies.count == 1 ? "y" : "ies")")
+                    .font(.caption.weight(.medium))
                     .foregroundStyle(.secondary)
-                
-                Spacer()
-                
-                Text("Day \(currentDay) of \(medication.duration?.totalDays ?? 0)")
-                    .font(.caption2.weight(.medium))
-                    .foregroundStyle(.tertiary)
             }
             
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    // Background track
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(Color.secondary.opacity(0.2))
-                        .frame(height: 6)
-                    
-                    // Progress fill
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color.healthSuccess,
-                                    Color.healthSuccess.opacity(0.8)
-                                ],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .frame(width: geometry.size.width * progressPercentage, height: 6)
-                        .animation(.easeInOut(duration: 1), value: progressPercentage)
+            LazyVGrid(columns: [.init(), .init()],spacing: Spacing.xs) {
+                ForEach(Array(frequencies.enumerated()), id: \.offset) { index, frequency in
+                    frequencyItemView(frequency)
                 }
             }
-            .frame(height: 6)
         }
     }
     
-    private var frequencySection: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            frequencyHeader
-            frequencyGrid
-        }
-        .padding(Spacing.small)
-        .background(Color.healthWarning.opacity(0.05))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.healthWarning.opacity(0.1), lineWidth: 1)
-        )
+    private func frequencyItemView(_ frequency: MedicationFrequency) -> some View {
+        Label(frequency.displayText, systemImage: frequency.icon)
+            .font(.caption.weight(.medium))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, Spacing.small)
+            .padding(.vertical, Spacing.xs)
+            .background(frequency.color.opacity(0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+        
     }
     
-    private var frequencyHeader: some View {
-        OptionalView(medication.frequency) { frequency in
-            HStack(spacing: 6) {
-                Image(systemName: "clock")
-                    .font(.caption)
-                    .foregroundStyle(Color.healthWarning)
-                
-                Text("Schedule")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.primary)
-                
-                Spacer()
-                
-                Text("\(frequency.count)x daily")
-                    .font(.caption2.weight(.medium))
-                    .foregroundStyle(Color.healthWarning)
+    // MARK: - Details Section
+    
+    private var medicationDetailsSection: some View {
+        HStack(spacing: Spacing.large) {
+            // Duration info
+            if let duration = medication.duration {
+                detailItem(
+                    icon: "calendar",
+                    title: "Duration",
+                    value: duration.displayText,
+                    color: .healthSuccess
+                )
             }
+            
+            Spacer()
         }
     }
     
-    private var frequencyGrid: some View {
-        LazyVGrid(columns: [
-            GridItem(.flexible(), spacing: Spacing.xs),
-            GridItem(.flexible(), spacing: Spacing.xs)
-        ], spacing: Spacing.xs) {
-            ForEach((medication.frequency ?? []).indices, id: \.self) { index in
-                frequencyChip(schedule: medication.frequency![index])
-            }
+    private func detailItem(icon: String, title: String, value: String, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Label(title, systemImage: icon)
+                .font(.caption.weight(.medium))
+            
+            Text(value)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.primary)
+                .lineLimit(2)
         }
     }
     
-    private func frequencyChip(schedule: MedicationFrequency) -> some View {
-        Label(
-            schedule.displayText,
-            systemImage: schedule.icon
-        )
-        .font(.caption.weight(.bold))
-        .frame(maxWidth: .infinity, alignment: .center)
-        .padding(.horizontal, Spacing.xs)
-        .padding(.vertical, Spacing.xs)
-        .clipShape(RoundedRectangle(cornerRadius: 6))
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.healthPrimary.opacity(0.1), lineWidth: 1)
-        )
-    }
+    // MARK: - Instructions Section
     
     private func instructionsSection(_ instructions: String) -> some View {
         VStack(alignment: .leading, spacing: Spacing.small) {
-            instructionsHeader
-            instructionsContent(instructions)
-        }
-    }
-    
-    private var instructionsHeader: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "doc.text")
-                .font(.caption)
-                .foregroundStyle(Color.healthPrimary)
             
-            Text("Instructions")
-                .font(.caption.weight(.semibold))
+            Label("Instructions", systemImage: "doc.text")
+                .font(.caption.weight(.medium))
+            
+            Text(instructions)
+                .font(.caption)
                 .foregroundStyle(.primary)
+                .lineSpacing(2)
+                .multilineTextAlignment(.leading)
+                .padding(Spacing.small)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.healthPrimary.opacity(0.05))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
         }
     }
-    
-    private func instructionsContent(_ instructions: String) -> some View {
-        Text(instructions)
-            .font(.caption)
-            .foregroundStyle(.primary)
-            .lineSpacing(1)
-            .multilineTextAlignment(.leading)
-            .padding(Spacing.small)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.healthPrimary.opacity(0.05))
-            .clipShape(RoundedRectangle(cornerRadius: 6))
-            .overlay(
-                RoundedRectangle(cornerRadius: 6)
-                    .stroke(Color.healthPrimary.opacity(0.1), lineWidth: 1)
-            )
-    }
-    
-    
-    // MARK: - Helper Properties
-    
-    private var medicationStatusColor: Color {
-        // You can add logic here based on medication type or status
-        return Color.healthSuccess
-    }
-    
-    private var medicationIcon: String {
-        guard let name = medication.name else {
-            return "pills.fill"
-        }
-        // You can customize icons based on medication type
-        if name.lowercased().contains("antibiotic") {
-            return "shield.fill"
-        } else if name.lowercased().contains("pain") {
-            return "bolt.fill"
-        } else if name.lowercased().contains("vitamin") {
-            return "leaf.fill"
-        } else if name.lowercased().contains("blood") || name.lowercased().contains("pressure") {
-            return "heart.fill"
-        } else {
-            return "pills.fill"
-        }
-    }
-    
-    private var medicationType: String {
-        guard let name = medication.name else {
-            return "Medication"
-        }
-        
-        if name.lowercased().contains("antibiotic") {
-            return "Antibiotic"
-        } else if name.lowercased().contains("pain") {
-            return "Pain Relief"
-        } else if name.lowercased().contains("vitamin") {
-            return "Supplement"
-        } else if name.lowercased().contains("blood") || name.lowercased().contains("pressure") {
-            return "Heart"
-        } else {
-            return "Medication"
-        }
-    }
-    
-    private var currentDay: Int {
-        // For demo purposes, show a random day between 1 and total days
-        // In real implementation, this would be calculated based on start date
-        return min(Int.random(in: 1...5), medication.duration?.totalDays ?? 1)
-    }
-    
-    private var progressPercentage: Double {
-        guard let totalDays = medication.duration?.totalDays, totalDays > 0 else {
-            return 0
-        }
-        return Double(currentDay) / Double(totalDays)
-    }
+}
+
+// MARK: - Preview
+
+#Preview("Simple Medication") {
+    MedicationListItem(medication: .sampleMedication)
+        .padding()
+}
+
+#Preview("Complex Medication") {
+    MedicationListItem(medication: .complexMedication)
+        .padding()
+}
+
+#Preview("Hourly Medication") {
+    MedicationListItem(medication: .hourlyMedication)
+        .padding()
+}
+
+#Preview("Weekly Medication") {
+    MedicationListItem(medication: .weeklyMedication)
+        .padding()
+}
+
+#Preview("Monthly Medication") {
+    MedicationListItem(medication: .monthlyMedication)
+        .padding()
 }

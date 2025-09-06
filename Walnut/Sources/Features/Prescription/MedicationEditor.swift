@@ -315,15 +315,33 @@ struct FrequencyChip: View {
 }
 
 #Preview("Edit Medication") {
-    let sampleMedication = Medication(
-        id: UUID(),
-        name: "Lisinopril",
-        frequency: [],
-        duration: .days(30),
-        dosage: "10mg",
-        instructions: "Take with water"
-    )
     
-    MedicationEditor(medication: sampleMedication) { _ in }
+    MedicationEditor(medication: .sampleMedication) { _ in }
+        .modelContainer(for: Medication.self, inMemory: true)
+}
+
+#Preview("Complex Medication Schedule") {
+    
+    
+    MedicationEditor(medication: .complexMedication) { _ in }
+        .modelContainer(for: Medication.self, inMemory: true)
+}
+
+#Preview("Hourly Medication") {
+   
+    MedicationEditor(medication: .hourlyMedication) { _ in }
+        .modelContainer(for: Medication.self, inMemory: true)
+}
+
+#Preview("Weekly Medication") {
+   
+    
+    MedicationEditor(medication: .weeklyMedication) { _ in }
+        .modelContainer(for: Medication.self, inMemory: true)
+}
+
+#Preview("Monthly Medication") {
+    
+    MedicationEditor(medication: .monthlyMedication) { _ in }
         .modelContainer(for: Medication.self, inMemory: true)
 }
