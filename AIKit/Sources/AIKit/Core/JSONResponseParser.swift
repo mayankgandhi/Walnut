@@ -11,6 +11,12 @@ import Foundation
 /// Handles JSON response parsing and cleaning for AI service responses
 public struct JSONResponseParser {
     
+    private let jsonDecoder: JSONDecoder
+    
+    public init(jsonDecoder: JSONDecoder) {
+        self.jsonDecoder = jsonDecoder
+    }
+    
     // MARK: - Public Methods
     
     /// Parses OpenAI chat response content into a decodable model
@@ -19,7 +25,7 @@ public struct JSONResponseParser {
     ///   - type: The target model type to decode into
     /// - Returns: Decoded model instance
     /// - Throws: AIKitError.parsingError if parsing fails
-    internal static func parseOpenAIResponse<T: Decodable>(
+    internal func parseOpenAIResponse<T: Decodable>(
         _ response: OpenAIChatResponse,
         as type: T.Type
     ) throws -> T {
@@ -37,21 +43,21 @@ public struct JSONResponseParser {
     ///   - type: The target model type to decode into
     /// - Returns: Decoded model instance
     /// - Throws: AIKitError.parsingError if parsing fails
-    internal static func parseClaudeResponse<T: Decodable>(
-        _ response: ClaudeMessageResponse,
+    internal func parseClaudeResponse<T: Decodable>(
+        _ response: ClaudeMessageResponse<T>,
         as type: T.Type
     ) throws -> T {
-        guard let content = response.content.first?.text else {
+        guard let response = response.content.first?.input else {
             throw AIKitError.parsingError("No content in Claude response")
         }
         
-        let cleanedContent = cleanClaudeJSONResponse(content)
+//        let cleanedContent = cleanClaudeJSONResponse(content)
         
-        guard let jsonData = cleanedContent.data(using: .utf8) else {
-            throw AIKitError.parsingError("Could not convert cleaned response to data")
-        }
+//        guard let jsonData = cleanedContent.data(using: .utf8) else {
+//            throw AIKitError.parsingError("Could not convert cleaned response to data")
+//        }
         
-        return try parseJSON(jsonData, as: type)
+        return response
     }
     
     /// Parses raw JSON string into a decodable model
@@ -60,7 +66,7 @@ public struct JSONResponseParser {
     ///   - type: The target model type to decode into
     /// - Returns: Decoded model instance
     /// - Throws: AIKitError.parsingError if parsing fails
-    public static func parseJSONString<T: Decodable>(
+    public func parseJSONString<T: Decodable>(
         _ jsonString: String,
         as type: T.Type
     ) throws -> T {
@@ -77,15 +83,12 @@ public struct JSONResponseParser {
     ///   - type: The target model type to decode into
     /// - Returns: Decoded model instance
     /// - Throws: AIKitError.parsingError if parsing fails
-    public static func parseJSON<T: Decodable>(
+    public func parseJSON<T: Decodable>(
         _ jsonData: Data,
         as type: T.Type
     ) throws -> T {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        
         do {
-            return try decoder.decode(type, from: jsonData)
+            return try jsonDecoder.decode(type, from: jsonData)
         } catch {
             let jsonString = String(data: jsonData, encoding: .utf8) ?? "Invalid UTF-8 data"
             throw AIKitError.parsingError("Failed to decode JSON: \(error.localizedDescription). JSON content: \(jsonString)")
@@ -97,7 +100,7 @@ public struct JSONResponseParser {
     /// Cleans Claude AI response content by removing markdown code blocks and extra formatting
     /// - Parameter content: Raw Claude response content
     /// - Returns: Cleaned JSON string
-    public static func cleanClaudeJSONResponse(_ content: String) -> String {
+    public  func cleanClaudeJSONResponse(_ content: String) -> String {
         var text = content.trimmingCharacters(in: .whitespacesAndNewlines)
         
         // Remove markdown code blocks
@@ -125,7 +128,7 @@ public struct JSONResponseParser {
     /// Validates that a string contains valid JSON structure
     /// - Parameter jsonString: String to validate
     /// - Returns: True if the string appears to contain valid JSON structure
-    public static func isValidJSONStructure(_ jsonString: String) -> Bool {
+    public  func isValidJSONStructure(_ jsonString: String) -> Bool {
         let trimmed = jsonString.trimmingCharacters(in: .whitespacesAndNewlines)
         return (trimmed.hasPrefix("{") && trimmed.hasSuffix("}")) ||
                (trimmed.hasPrefix("[") && trimmed.hasSuffix("]"))
@@ -134,7 +137,7 @@ public struct JSONResponseParser {
     /// Extracts JSON object from mixed content (text + JSON)
     /// - Parameter content: Mixed content that may contain JSON
     /// - Returns: Extracted JSON string if found, nil otherwise
-    public static func extractJSONFromMixedContent(_ content: String) -> String? {
+    public  func extractJSONFromMixedContent(_ content: String) -> String? {
         let cleaned = cleanClaudeJSONResponse(content)
         return isValidJSONStructure(cleaned) ? cleaned : nil
     }

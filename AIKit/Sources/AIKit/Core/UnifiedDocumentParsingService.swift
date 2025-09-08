@@ -33,7 +33,7 @@ public final class UnifiedDocumentParsingService: DocumentParsingService, Observ
         case "pdf":
             return try await parser.parsePDF(data: data, fileName: fileName, as: type)
         case "jpg", "jpeg", "png", "gif", "webp", "heic", "heif":
-            guard let openAIType = type as? (ParseableModel & OpenAISchemaDefinable).Type else {
+            guard let openAIType = type as? (ParseableModel).Type else {
                 throw AIKitError.unsupportedFileType("Type \(T.self) does not support OpenAI schema definition")
             }
             return try await parser.parseImage(data: data, fileName: fileName, as: openAIType) as! T

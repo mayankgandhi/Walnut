@@ -9,12 +9,6 @@
 import Foundation
 
 // MARK: - OpenAI-specific Protocol Extension
-
-/// Protocol extension for OpenAI JSON Schema support
-public protocol OpenAISchemaDefinable {
-    static var jsonSchema: OpenAIJSONSchema { get }
-}
-
 // MARK: - File Upload Models
 
 public struct OpenAIFileUploadResponse: Codable {

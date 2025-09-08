@@ -89,8 +89,10 @@ class Prescription {
                 Medication(
                     id: medication.id,
                     name: medication.name,
-                    frequency: medication.frequency,
-                    duration: medication.duration,
+                    frequency: medication.frequency?.compactMap ({ dto in
+                        dto.toEnum()
+                    }),
+                    duration: medication.duration.toEnum(),
                     dosage: medication.dosage,
                     instructions: medication.instructions
                 )

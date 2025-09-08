@@ -18,11 +18,13 @@ final class ClaudeFileManager {
     // MARK: - Dependencies
     
     private let networkClient: ClaudeNetworkClient
+    private let jsonDecoder: JSONDecoder
     
     // MARK: - Initialization
     
     init(networkClient: ClaudeNetworkClient) {
         self.networkClient = networkClient
+        self.jsonDecoder = JSONDecoder()
     }
     
     // MARK: - File Upload
@@ -54,7 +56,10 @@ final class ClaudeFileManager {
         }
         
         do {
-            let uploadResponse = try JSONDecoder().decode(ClaudeFileUploadResponse.self, from: data)
+            let uploadResponse = try jsonDecoder.decode(
+                ClaudeFileUploadResponse.self,
+                from: data
+            )
             return uploadResponse
         } catch let error as DecodingError {
             throw AIKitError.decodingError(error)

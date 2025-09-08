@@ -175,19 +175,20 @@ struct ClaudeCitations: Codable {
     let enabled: Bool
 }
 
-struct ClaudeMessageResponse: Codable {
+struct ClaudeMessageResponse<T: Codable>: Codable {
     let id: String
     let type: String
     let role: String
     let model: String
-    let content: [ClaudeResponseContent]
+    let content: [ClaudeResponseContent<T>]
     
     enum CodingKeys: String, CodingKey {
         case id, type, role, model, content
     }
 }
 
-struct ClaudeResponseContent: Codable {
+struct ClaudeResponseContent<T: Codable>: Codable {
     let type: String
     let text: String?
+    let input: T?
 }

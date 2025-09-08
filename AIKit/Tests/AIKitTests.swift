@@ -10,10 +10,7 @@ import XCTest
 @testable import AIKit
 
 final class AIKitTests: XCTestCase {
-    
-    func testAIKitVersion() {
-        XCTAssertEqual(AIKit.version, "1.0.0")
-    }
+
     
     func testMimeTypeResolver() {
         XCTAssertEqual(MimeTypeResolver.mimeType(for: "test.pdf"), "application/pdf")

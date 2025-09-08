@@ -10,12 +10,12 @@ import Foundation
 
 // MARK: - Core Protocols
 
-public protocol ClaudeDefinable {
+public protocol ParseableModel: Codable {
+    static var parseDefinition: String { get }
+    static var jsonSchema: OpenAIJSONSchema { get }
     static var tool: ClaudeTool { get }
     static var toolChoice: ToolChoice { get }
 }
-
-public typealias ParseableModel = Codable & ClaudeDefinable & OpenAISchemaDefinable
 
 /// Simple protocol for AI document parsing services
 public protocol DocumentParsingService {

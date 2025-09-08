@@ -16,6 +16,8 @@ public final class DocumentParser {
     private let openAIClient: OpenAINetworkClient
     private let claudeClient: ClaudeNetworkClient
     private let claudeFileManager: ClaudeFileManager
+    private let jsonDecoder: JSONDecoder
+    private let jsonParser: JSONResponseParser
     
     // MARK: - Initialization
     
@@ -23,6 +25,9 @@ public final class DocumentParser {
         self.openAIClient = OpenAINetworkClient(apiKey: openAIKey)
         self.claudeClient = ClaudeNetworkClient(apiKey: claudeKey)
         self.claudeFileManager = ClaudeFileManager(networkClient: claudeClient)
+        self.jsonDecoder = JSONDecoder()
+        jsonDecoder.dateDecodingStrategy = .iso8601
+        self.jsonParser = JSONResponseParser(jsonDecoder: jsonDecoder)
     }
     
     // MARK: - Image Parsing (OpenAI Vision)
@@ -73,8 +78,11 @@ public final class DocumentParser {
             throw AIKitError.parsingError(errorMessage)
         }
         
-        let chatResponse = try JSONDecoder().decode(OpenAIChatResponse.self, from: data)
-        return try JSONResponseParser.parseOpenAIResponse(chatResponse, as: type)
+        let chatResponse = try jsonDecoder.decode(
+            OpenAIChatResponse.self,
+            from: data
+        )
+        return try jsonParser.parseOpenAIResponse(chatResponse, as: type)
     }
     
     // MARK: - PDF Parsing (Claude with file upload)
@@ -112,6 +120,7 @@ public final class DocumentParser {
         let prompt = """
         Please analyze this document and extract the information into the following JSON structure. 
         Return ONLY JSON and nothing else.
+        \(T.parseDefinition)
         The response is directly decoded by the same model shared.
         """
         
@@ -140,8 +149,11 @@ public final class DocumentParser {
             throw AIKitError.parsingError(errorMessage)
         }
         
-        let messageResponse = try JSONDecoder().decode(ClaudeMessageResponse.self, from: data)
-        return try JSONResponseParser.parseClaudeResponse(messageResponse, as: type)
+        let messageResponse = try jsonDecoder.decode(
+            ClaudeMessageResponse<T>.self,
+            from: data
+        )
+        return try jsonParser.parseClaudeResponse(messageResponse, as: type)
     }
     
     // MARK: - File Type Support

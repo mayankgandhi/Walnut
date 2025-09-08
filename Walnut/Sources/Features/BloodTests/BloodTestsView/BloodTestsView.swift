@@ -127,19 +127,31 @@ struct BloodTestsView: View {
     }
     
     private var emptyFilteredResultsView: some View {
-        ContentUnavailableView {
-            Label("No Matching Results", systemImage: "magnifyingglass")
-        } description: {
-            Text("Try adjusting your search terms or filters to find blood test results.")
-                .multilineTextAlignment(.center)
-        } actions: {
-            Button("Clear Filters") {
-                viewModel.clearSearch()
+        if viewModel.searchText != "" {
+            ContentUnavailableView {
+                Label("No Matching Results", systemImage: "magnifyingglass")
+            } description: {
+                Text("Try adjusting your search terms or filters to find blood test results.")
+                    .multilineTextAlignment(.center)
+            } actions: {
+                Button("Clear Filters") {
+                    viewModel.clearSearch()
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.bordered)
+        } else {
+            ContentUnavailableView {
+                Label("No Blood Results", systemImage: "testtube.2")
+            } description: {
+                Text("Add Blood reports under your medical cases to see them here.")
+                    .multilineTextAlignment(.center)
+            } actions: {
+                Button("Clear Filters") {
+                    viewModel.clearSearch()
+                }
+                .buttonStyle(.bordered)
+            }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(UIColor.systemGroupedBackground))
     }
     
 }
@@ -150,7 +162,7 @@ struct PreviewContainer {
     static func createModelContainer() -> ModelContainer {
         let schema = Schema([
             Patient.self,
-            MedicalCase.self, 
+            MedicalCase.self,
             BloodReport.self,
             BloodTestResult.self
         ])

@@ -37,6 +37,14 @@ struct ParsedBloodReport: ParseableModel {
         )
     }
     
+    static var parseDefinition: String {
+    """
+    Important Notes
+    - All dates MUST be in ISO8601 format (e.g., "2025-01-15T00:00:00Z")
+    - Times use 24-hour format in DateComponents (hour: 0-23)
+    """
+    }
+    
     static var jsonSchema: OpenAIJSONSchema  = {
         OpenAIJSONSchema(
             properties: [
