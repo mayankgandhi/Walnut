@@ -15,7 +15,6 @@ import CloudKit
 class PatientSettingsViewModel {
     
     // MARK: - Published Properties
-    var showICloudSync = false
     
     // Loading and Error States
     var isLoading = false
@@ -44,16 +43,6 @@ class PatientSettingsViewModel {
     
     // MARK: - Initializer
 
-    // MARK: - iCloud Sync Actions (kept centralized as it's not in current menu)
-    
-    func showICloudSyncScreen() {
-        showICloudSync = true
-    }
-    
-    func dismissICloudSync() {
-        showICloudSync = false
-    }
-    
     // MARK: - Settings Menu Items
     
     

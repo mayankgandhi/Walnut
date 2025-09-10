@@ -39,17 +39,6 @@ struct PatientSettingsView: View {
             .padding(.horizontal, Spacing.medium)
             .padding(.top, Spacing.medium)
         }
-        .sheet(isPresented: $viewModel.showICloudSync, onDismiss: {
-            viewModel.dismissICloudSync()
-        }) {
-            DSBottomSheet(title: "iCloud Sync"){
-                iCloudSyncBottomSheetContent
-            } content: {
-                iCloudSyncSettingsView()
-            }
-            .presentationDetents([.height(600), .large])
-            .presentationDragIndicator(.visible)
-        }
         .alert("Error", isPresented: $viewModel.showErrorAlert) {
             Button("OK") {
                 viewModel.dismissError()
@@ -87,26 +76,10 @@ struct PatientSettingsView: View {
             
             VStack(spacing: Spacing.xs) {
                 AppearanceView(patient: viewModel.patient)
+                ICloudSyncView(patient: viewModel.patient)
                 AboutView(patient: viewModel.patient)
                 HelpSupportView(patient: viewModel.patient)
             }
-        }
-    }
-    
-    private var iCloudSyncBottomSheetContent: some View {
-        VStack(spacing: Spacing.medium) {
-            // Header
-            VStack(spacing: Spacing.xs) {
-                Text("iCloud Sync")
-                    .font(.title2.weight(.semibold))
-                    .foregroundStyle(.primary)
-                
-                Text("Keep your medical data synchronized across all your devices")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-            .padding(.top, Spacing.small)
         }
     }
 }
