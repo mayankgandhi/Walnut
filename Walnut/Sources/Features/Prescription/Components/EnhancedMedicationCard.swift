@@ -14,7 +14,7 @@ struct MedicationListItem: View {
     let medication: Medication
     
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.medium) {
+        VStack(alignment: .leading, spacing: Spacing.small) {
             // Header with icon and basic info
             medicationHeaderSection
             
@@ -40,7 +40,8 @@ struct MedicationListItem: View {
                         .stroke(Color.healthWarning.opacity(0.1), lineWidth: 1)
                 )
             // Instructions if available
-            if let instructions = medication.instructions, !instructions.isEmpty {
+            if let instructions = medication.instructions,
+             !instructions.isEmpty {
                 instructionsSection(instructions)
                     .padding(Spacing.small)
                     .background(Color.healthWarning.opacity(0.05))
@@ -141,7 +142,11 @@ struct MedicationListItem: View {
                     .foregroundStyle(.secondary)
             }
             
-            LazyVGrid(columns: [.init(), .init()],spacing: Spacing.xs) {
+            LazyVGrid(
+                columns: [.init(), .init()],
+                alignment: .leading,
+                spacing: Spacing.xs
+            ) {
                 ForEach(Array(frequencies.enumerated()), id: \.offset) { index, frequency in
                     frequencyItemView(frequency)
                 }
@@ -152,7 +157,7 @@ struct MedicationListItem: View {
     private func frequencyItemView(_ frequency: MedicationFrequency) -> some View {
         Label(frequency.displayText, systemImage: frequency.icon)
             .font(.caption.weight(.medium))
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
             .padding(.horizontal, Spacing.small)
             .padding(.vertical, Spacing.xs)
             .background(frequency.color.opacity(0.1))
@@ -163,7 +168,7 @@ struct MedicationListItem: View {
     // MARK: - Details Section
     
     private var medicationDetailsSection: some View {
-        HStack(spacing: Spacing.large) {
+        HStack(spacing: Spacing.small) {
             // Duration info
             if let duration = medication.duration {
                 detailItem(
@@ -172,21 +177,21 @@ struct MedicationListItem: View {
                     value: duration.displayText,
                     color: .healthSuccess
                 )
+                Spacer()
             }
-            
-            Spacer()
         }
     }
     
     private func detailItem(icon: String, title: String, value: String, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: Spacing.small) {
             Label(title, systemImage: icon)
                 .font(.caption.weight(.medium))
             
             Text(value)
-                .font(.caption.weight(.semibold))
+                .font(.caption.weight(.regular))
                 .foregroundStyle(.primary)
                 .lineLimit(2)
+                .multilineTextAlignment(.leading)
         }
     }
     
@@ -199,14 +204,12 @@ struct MedicationListItem: View {
                 .font(.caption.weight(.medium))
             
             Text(instructions)
-                .font(.caption)
+                .font(.caption.weight(.regular))
                 .foregroundStyle(.primary)
                 .lineSpacing(2)
                 .multilineTextAlignment(.leading)
-                .padding(Spacing.small)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.healthPrimary.opacity(0.05))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                
         }
     }
 }
