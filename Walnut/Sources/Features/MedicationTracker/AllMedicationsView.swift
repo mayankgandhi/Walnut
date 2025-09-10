@@ -9,106 +9,156 @@
 import SwiftUI
 import SwiftData
 import WalnutDesignSystem
+import UIKit
+import Combine
 
+/// Redesigned medication scheduling interface with timeline-based UI
 struct AllMedicationsView: View {
+    
+    // MARK: - Properties
     
     let patient: Patient
     @Environment(\.modelContext) private var modelContext
-    @State private var medicationTracker = MedicationTracker()
+    @Environment(\.medicationContainer) private var container
+    
+    // Services
+    private let scheduleService: MedicationScheduleServiceProtocol
+    
+    // UI State
+    @State private var selectedDate = Date()
     @State private var medicationToEdit: Medication? = nil
-    @State private var groupedMedications: [MealTime: [MedicationTracker.MedicationScheduleInfo]] = [:]
+    @State private var showingDatePicker = false
+    @State private var errorMessage: String? = nil
+    @State private var showingError = false
     
     // SwiftData query for active prescriptions to automatically update UI
     @Query private var allPrescriptions: [Prescription]
     
-    // Computed property optimized with caching
+    // MARK: - Initialization
+    
+    init(patient: Patient, container: MedicationDependencyContainer = .shared) {
+        self.patient = patient
+        self.scheduleService = container.resolveScheduleService()
+    }
+    
+    // Computed property for active medications from prescriptions
     private var activeMedications: [Medication] {
-        // Filter for active medical cases and get their prescriptions
         let activePrescriptions = allPrescriptions.filter { prescription in
             guard let medicalCase = prescription.medicalCase else { return false }
             return medicalCase.patient?.id == patient.id && (medicalCase.isActive ?? false)
         }
         
-        // Flatten medications from active prescriptions
         return activePrescriptions.compactMap { $0.medications }.reduce([], +)
     }
     
+    // Computed metrics for display
+    private var scheduleMetrics: ScheduleMetrics {
+        scheduleService.calculateMetrics()
+    }
+    
+    
+    // MARK: - Body
     
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-                // Active Medications Section
-                if !groupedMedications.isEmpty {
-                    ForEach(MealTime.allCases, id: \.self) { timePeriod in
-                        if let medications = groupedMedications[timePeriod],
-                         !medications.isEmpty {
-                            timePeriodSection(timePeriod: timePeriod, medications: medications)
-                        }
-                    }
-                } else {
-                    ContentUnavailableView(
-                        "No Medications",
-                        systemImage: "pills",
-                        description: Text("Add medications to track dosages and schedules")
+        ZStack {
+            Color(.systemGroupedBackground).ignoresSafeArea()
+            
+            ScrollView {
+                VStack(spacing: Spacing.large) {
+                    // Date selector and summary header
+                    MedicationScheduleHeader(
+                        selectedDate: $selectedDate,
+                        showingDatePicker: $showingDatePicker,
+                        scheduleMetrics: scheduleMetrics
                     )
-                    .listRowBackground(Color.clear)
+                    
+                    // Main timeline content
+                    if !scheduleService.todaysDoses.isEmpty {
+                        MedicationTimelineView(
+                            scheduledDoses: scheduleService.timelineDoses,
+                            onDoseAction: handleDoseAction
+                        )
+                    } else {
+                        MedicationEmptyState(onAddPrescription: handleAddPrescription)
+                    }
                 }
+                .padding(.bottom, 100) // Extra padding for better scrolling
             }
-            .padding(.horizontal, Spacing.medium)
         }
+        .navigationTitle("Medication Schedule")
+        .navigationBarTitleDisplayMode(.large)
         .sheet(item: $medicationToEdit) {
             MedicationEditor(
                 medication: $0,
                 onSave: handleMedicationSave
             )
         }
-    }
-    
-    @ViewBuilder
-    private func timePeriodSection(
-        timePeriod: MealTime,
-        medications: [MedicationTracker.MedicationScheduleInfo]
-    ) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.small) {
-            HealthCardHeader(
-                iconName: timePeriod.iconString,
-                title: "\(timePeriod.displayName) Medications",
-                subtitle: "\(medications.count) medication\(medications.count == 1 ? "" : "s")"
-            )
-            
-            LazyVGrid(
-                columns: [.init(), .init()],
-                spacing: Spacing.small
-            ) {
-                ForEach(medications) { medicationInfo in
-                    medicationScheduleRow(medicationInfo: medicationInfo)
-                }
-            }
+        .onAppear {
+            setupScheduleService()
+        }
+        .onChange(of: selectedDate) { _, newDate in
+            scheduleService.currentDate = newDate
+        }
+        .onChange(of: activeMedications) { _, medications in
+            updateMedications(medications)
+        }
+        .alert("Schedule Error", isPresented: $showingError) {
+            Button("OK") { errorMessage = nil }
+        } message: {
+            Text(errorMessage ?? "An unknown error occurred")
         }
     }
     
-    @ViewBuilder
-    private func medicationScheduleRow(medicationInfo: MedicationTracker.MedicationScheduleInfo) -> some View {
-        MedicationCard(medication: medicationInfo.medication)
+    
+    // MARK: - Actions and Methods
+    
+    private func handleDoseAction(_ dose: ScheduledDose, _ action: MedicationTimelineView.DoseAction) {
+        switch action {
+        case .markTaken:
+            handleDoseStatusUpdate(dose, scheduleService.markDoseAsTaken)
+            
+        case .markMissed:
+            handleDoseStatusUpdate(dose, scheduleService.markDoseAsMissed)
+            
+        case .markSkipped:
+            handleDoseStatusUpdate(dose, scheduleService.markDoseAsSkipped)
+            
+        case .edit:
+            medicationToEdit = dose.medication
+        }
+    }
+    
+    private func handleDoseStatusUpdate(_ dose: ScheduledDose, _ updateMethod: (ScheduledDose) -> MedicationScheduleResult<ScheduledDose>) {
+        let result = updateMethod(dose)
+        
+        switch result {
+        case .success:
+            // Haptic feedback for successful status changes
+            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+            impactFeedback.impactOccurred()
+            
+        case .failure(let error):
+            errorMessage = error.localizedDescription
+            showingError = true
+        }
     }
     
     private func handleMedicationSave(_ medication: Medication) {
         Task { @MainActor in
-            // Find the prescription that contains this medication and update it
+            // Find and update the prescription containing this medication
             let relevantPrescriptions = allPrescriptions.filter { prescription in
                 prescription.medications?.contains(where: { $0.id == medication.id }) == true
             }
             
             for prescription in relevantPrescriptions {
                 if let medicationIndex = prescription.medications?.firstIndex(where: { $0.id == medication.id }) {
-                    // Update the medication in the prescription using SwiftData
                     prescription.medications?[medicationIndex] = medication
                     prescription.updatedAt = Date()
                     
-                    // Save context
                     do {
                         try modelContext.save()
-                        // UI will automatically update due to @Query
+                        // Refresh schedule after medication update
+                        setupScheduleService()
                     } catch {
                         print("Error saving medication: \(error)")
                     }
@@ -117,6 +167,28 @@ struct AllMedicationsView: View {
             }
         }
     }
+    
+    private func setupScheduleService() {
+        // Initialize schedule service with current medications
+        updateMedications(activeMedications)
+        scheduleService.currentDate = selectedDate
+    }
+    
+    private func updateMedications(_ medications: [Medication]) {
+        let result = scheduleService.updateMedications(medications)
+        
+        if case .failure(let error) = result {
+            errorMessage = error.localizedDescription
+            showingError = true
+        }
+    }
+    
+    private func handleAddPrescription() {
+        // Placeholder for add prescription navigation
+        // In a real implementation, this would navigate to the prescription creation flow
+        print("Navigate to add prescription")
+    }
+    
 }
 
 #Preview {
