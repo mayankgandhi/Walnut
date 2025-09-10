@@ -30,7 +30,6 @@ struct PatientEditor: View {
     @State private var emergencyContactName = ""
     @State private var emergencyContactPhone = ""
     @State private var notes = ""
-    @State private var isActive = true
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -241,16 +240,6 @@ struct PatientEditor: View {
                                 }
                             )
                             .focused($focusedField, equals: .notes)
-                            
-                            
-                            ToggleItem(
-                                icon: "heart.fill",
-                                title: "Active Patient",
-                                subtitle: "Currently receiving care",
-                                isOn: $isActive,
-                                helperText: "Inactive patients are archived",
-                                iconColor: isActive ? .healthSuccess : .gray
-                            )
                         }
                     }
                     

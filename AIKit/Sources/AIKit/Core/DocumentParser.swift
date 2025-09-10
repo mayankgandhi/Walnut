@@ -92,16 +92,24 @@ public final class DocumentParser {
         fileName: String, 
         as type: T.Type
     ) async throws -> T {
-        // Upload file to Claude
-        let uploadResponse = try await claudeFileManager.uploadFile(data: data, fileName: fileName)
-        
-        // Parse using Claude
-        let result = try await parseWithClaude(fileId: uploadResponse.id, as: type)
-        
-        // Clean up uploaded file
-        try await claudeFileManager.deleteDocument(fileId: uploadResponse.id)
-        
-        return result
+        var fileID: String?
+        do {
+            // Upload file to Claude
+            let uploadResponse = try await claudeFileManager.uploadFile(data: data, fileName: fileName)
+            fileID = uploadResponse.id
+            // Parse using Claude
+            let result = try await parseWithClaude(fileId: uploadResponse.id, as: type)
+            
+            // Clean up uploaded file
+            try await claudeFileManager.deleteDocument(fileId: uploadResponse.id)
+            
+            return result
+        } catch {
+            if fileID != nil {
+                try await claudeFileManager.deleteDocument(fileId: fileID!)
+            }
+            throw error
+        }
     }
     
     public func parsePDF<T: ParseableModel>(
@@ -119,7 +127,8 @@ public final class DocumentParser {
     private func parseWithClaude<T: ParseableModel>(fileId: String, as type: T.Type) async throws -> T {
         let prompt = """
         Please analyze this document and extract the information into the following JSON structure. 
-        Return ONLY JSON and nothing else.
+        Return ONLY JSON and nothing else. Ensure that the values are properly cased as per the data: upper cased, lower cased, etc. 
+        Make sure the data is grammatically correct. 
         \(T.parseDefinition)
         The response is directly decoded by the same model shared.
         """

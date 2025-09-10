@@ -80,6 +80,18 @@ struct UnifiedDocumentsSection: View {
         .task {
             viewModel.loadDocuments(from: medicalCase)
         }
+        .onChange(of: medicalCase.updatedAt) { _, _ in
+            viewModel.loadDocuments(from: medicalCase)
+        }
+        .onChange(of: medicalCase.prescriptions?.count) { _, _ in
+            viewModel.loadDocuments(from: medicalCase)
+        }
+        .onChange(of: medicalCase.bloodReports?.count) { _, _ in
+            viewModel.loadDocuments(from: medicalCase)
+        }
+        .onChange(of: medicalCase.unparsedDocuments?.count) { _, _ in
+            viewModel.loadDocuments(from: medicalCase)
+        }
         
     }
     
