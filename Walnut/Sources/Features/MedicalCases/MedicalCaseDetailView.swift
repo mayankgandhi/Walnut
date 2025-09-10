@@ -31,16 +31,13 @@ struct MedicalCaseDetailView: View {
         Group {
             if let medicalCase = medicalCase {
                 ScrollView {
-                    VStack(spacing: Spacing.large) {
+                    VStack(spacing: Spacing.medium) {
                         // Modern Hero Header
                         heroSection
                         
-                        // Case Overview Cards
-                        overviewCardsSection
-                        
                         // Clinical Notes Section
                         if let notes = medicalCase.notes,
-                            !notes.isEmpty {
+                           !notes.isEmpty {
                             clinicalNotesSection
                         }
                         
@@ -71,133 +68,111 @@ struct MedicalCaseDetailView: View {
         Group {
             if let medicalCase = medicalCase {
                 HealthCard {
-                    HStack(spacing: Spacing.medium) {
-                        // Specialty Icon with Modern Design
-                        OptionalView(medicalCase.specialty) { specialty in
-                            Image(specialty.icon)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 96, height: 96, alignment: .center)
-                        }
-                        
-                        // Content Section
-                        VStack(alignment: .leading, spacing: Spacing.small) {
-                            // Title
-                            Text(medicalCase.title ?? "Medical Case")
-                                .font(.title2.weight(.bold))
-                                .foregroundStyle(.primary)
-                                .lineLimit(2)
-                                .multilineTextAlignment(.leading)
-                            
+                    VStack(alignment: .leading, spacing: Spacing.medium) {
+                        HStack(spacing: Spacing.medium) {
+                            // Specialty Icon with Modern Design
                             OptionalView(medicalCase.specialty) { specialty in
-                                HStack {
-                                    Image(systemName: "stethoscope")
-                                        .font(.callout.weight(.medium))
-                                        .foregroundStyle(specialty.color)
-                                    Text(specialty.rawValue)
-                                        .font(.callout.weight(.medium))
-                                        .foregroundStyle(.primary)
-                                        .lineLimit(1)
+                                Image(specialty.icon)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 96, height: 96, alignment: .center)
+                            }
+                            
+                            // Content Section
+                            VStack(alignment: .leading, spacing: Spacing.small) {
+                                // Title
+                                Text(medicalCase.title ?? "Medical Case")
+                                    .font(.title2.weight(.bold))
+                                    .foregroundStyle(.primary)
+                                    .lineLimit(2)
+                                    .multilineTextAlignment(.leading)
+                                
+                                OptionalView(medicalCase.specialty) { specialty in
+                                    HStack {
+                                        Image(systemName: "stethoscope")
+                                            .font(.callout.weight(.medium))
+                                            .foregroundStyle(specialty.color)
+                                        Text(specialty.rawValue)
+                                            .font(.callout.weight(.medium))
+                                            .foregroundStyle(.primary)
+                                            .lineLimit(1)
+                                    }
+                                }
+                                
+                                OptionalView(medicalCase.isActive) { isActive in
+                                    Text(isActive ? "Active Treatment" : "Case Closed")
+                                        .font(.caption.weight(.medium))
+                                        .foregroundStyle(isActive ? Color.healthSuccess : Color.healthWarning)
+                                        .padding(.horizontal, Spacing.small)
+                                        .padding(.vertical, 4)
+                                        .background(
+                                            (isActive ? Color.healthSuccess : Color.healthWarning).opacity(0.1),
+                                            in: Capsule()
+                                        )
                                 }
                             }
                             
-                            OptionalView(medicalCase.isActive) { isActive in
-                                Text(isActive ? "Active Treatment" : "Case Closed")
-                                    .font(.caption.weight(.medium))
-                                    .foregroundStyle(isActive ? Color.healthSuccess : Color.healthWarning)
-                                    .padding(.horizontal, Spacing.small)
-                                    .padding(.vertical, 4)
-                                    .background(
-                                        (isActive ? Color.healthSuccess : Color.healthWarning).opacity(0.1),
-                                        in: Capsule()
-                                    )
-                            }
-                        }
-                        
-                        Spacer()
-                    }
-                }
-            }
-        }
-    }
-
-    var overviewCardsSection: some View {
-        Group {
-            if medicalCase != nil {
-                LazyVGrid(
-                    columns: [
-                        GridItem(.flexible(), spacing: Spacing.small),
-                        GridItem(.flexible(), spacing: Spacing.small)
-                    ],
-                    spacing: Spacing.small
-                ) {
-                    // Case Type Card
-                    caseTypeCard
-                    
-                    // Date Card
-                    dateCard
-                }
-            }
-        }
-    }
-    
-    var caseTypeCard: some View {
-        Group {
-            if let medicalCase = medicalCase {
-                OptionalView(medicalCase.type) { type in
-                    HealthCard {
-                        VStack(alignment: .leading, spacing: Spacing.xs) {
-                            HStack {
-                                Image(systemName: "folder")
-                                    .font(.subheadline.weight(.medium))
-                                    .foregroundStyle(type.foregroundColor)
-                                
-                                Text("Type")
-                                    .font(.caption.weight(.medium))
-                                    .foregroundStyle(.tertiary)
-                                
-                                Spacer()
-                            }
-                            
-                            Text(type.displayName)
-                                .font(.callout.weight(.semibold))
-                                .foregroundStyle(.primary)
-                                .lineLimit(1)
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    var dateCard: some View {
-        Group {
-            if let medicalCase = medicalCase {
-                HealthCard {
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        HStack {
-                            Image(systemName: "calendar")
-                                .font(.subheadline.weight(.medium))
-                                .foregroundStyle(Color.healthPrimary)
-                            
-                            Text("Created")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(.tertiary)
-                            
                             Spacer()
                         }
-                        OptionalView(medicalCase.createdAt) { createdAt in
-                            Text(createdAt.formatted(date: .abbreviated, time: .omitted))
-                                .font(.callout.weight(.semibold))
-                                .foregroundStyle(.primary)
-                                .lineLimit(1)
+                        
+                        HStack(alignment: .center, spacing: Spacing.medium) {
+                            if let type = medicalCase.type {
+                                // Case Type Card
+                                caseTypeCard(type: type)
+                            }
+                            
+                            if let createdAt = medicalCase.createdAt {
+                                dateCard(createdAt: createdAt)
+                            }
                         }
                     }
                 }
             }
         }
     }
- 
+    
+    
+    func caseTypeCard(type: MedicalCaseType) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            HStack {
+                Image(systemName: "folder")
+                    .font(.caption2.weight(.medium))
+                
+                Text("Type")
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(.tertiary)
+                
+                Spacer()
+            }
+            
+            Text(type.displayName)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+        }
+    }
+    
+    
+    func dateCard(createdAt: Date) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            HStack {
+                Image(systemName: "calendar")
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(Color.healthPrimary)
+                
+                Text("Created")
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(.tertiary)
+                
+                Spacer()
+            }
+            Text(createdAt.formatted(date: .abbreviated, time: .omitted))
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+        }
+    }
+    
     var clinicalNotesSection: some View {
         Group {
             if let medicalCase = medicalCase {
@@ -206,7 +181,13 @@ struct MedicalCaseDetailView: View {
                         HealthCardHeader.clinicalNotes()
                         HealthCard {
                             Text(notes)
-                                .font(.body)
+                                .font(
+                                    .system(
+                                        .body,
+                                        design: .rounded,
+                                        weight: .regular
+                                    )
+                                )
                                 .foregroundStyle(.primary)
                                 .lineLimit(nil)
                                 .multilineTextAlignment(.leading)
@@ -219,8 +200,25 @@ struct MedicalCaseDetailView: View {
     
 }
 
-#Preview(body: {
-    MedicalCaseDetailView(
-        medicalCase: MedicalCase.sampleCase
-    )
-})
+#Preview {
+    do {
+        let container = try ModelContainer(for: Patient.self, MedicalCase.self, Prescription.self, BloodReport.self, Document.self)
+        let context = ModelContext(container)
+        
+        // Insert sample data
+        let samplePatient = Patient.samplePatient
+        let sampleCase = MedicalCase.sampleCase
+        sampleCase.patient = samplePatient
+        
+        context.insert(samplePatient)
+        context.insert(sampleCase)
+        try context.save()
+        
+        return NavigationStack {
+            MedicalCaseDetailView(medicalCase: sampleCase)
+                .modelContainer(container)
+        }
+    } catch {
+        return Text("Failed to create preview: \(error.localizedDescription)")
+    }
+}

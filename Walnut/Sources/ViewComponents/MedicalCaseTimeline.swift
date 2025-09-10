@@ -56,7 +56,7 @@ struct Timeline: View {
     }
     
     var timelineEvents: some View {
-        VStack {
+        VStack(spacing: .zero) {
             let sortedEvents = events.sorted(by: { $0.date < $1.date })
             
             ForEach(Array(sortedEvents.enumerated()), id: \.element.id) { index, event in
@@ -166,45 +166,58 @@ struct TimelineItemView: View {
     let isFirst: Bool
     let isLast: Bool
     
+    
+    /// Dynamic marker size based on content scaling and accessibility settings
+    @ScaledMetric(relativeTo: .callout) private var markerIconSize: CGFloat = 28
+    
     var body: some View {
         HStack(spacing: Spacing.medium) {
             // Timeline marker
             timelineMarker
             
-            // Content
-            eventContent
-            
-            Spacer()
+            // Content aligned with marker center
+            VStack(spacing: 0) {
+                if !isFirst {
+                    Spacer()
+                        .frame(height: markerIconSize * 0.6)
+                }
+                
+                HStack {
+                    eventContent
+                    Spacer()
+                }
+                .frame(height: markerIconSize, alignment: .center)
+                
+                if !isLast {
+                    Spacer()
+                        .frame(height: markerIconSize * 0.6)
+                }
+            }
         }
     }
-}
-
-// MARK: - Timeline Item Private Views
-
-private extension TimelineItemView {
     
     var timelineMarker: some View {
         VStack(spacing: 0) {
             if !isFirst {
                 Rectangle()
                     .fill(Color(UIColor.separator))
-                    .frame(width: 2, height: 20)
+                    .frame(width: 2, height: markerIconSize * 0.6)
             }
             
             ZStack {
                 Circle()
                     .fill(event.color.opacity(0.2))
-                    .frame(width: 28, height: 28)
+                    .frame(width: markerIconSize, height: markerIconSize)
                 
                 Image(systemName: event.icon)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.system(size: markerIconSize * 0.4, weight: .semibold))
                     .foregroundStyle(event.color)
             }
             
             if !isLast {
                 Rectangle()
                     .fill(Color(UIColor.separator))
-                    .frame(width: 2, height: 20)
+                    .frame(width: 2, height: markerIconSize * 0.6)
             }
         }
     }
@@ -240,6 +253,27 @@ private extension TimelineItemView {
                     title: "Task Completed",
                     subtitle: "Successfully finished the task",
                     date: Date().addingTimeInterval(-3600)
+                ),
+                 TimelineEvent(
+                    icon: "exclamationmark.triangle.fill",
+                    color: .orange,
+                    title: "Warning Issued",
+                    subtitle: "System detected an issue",
+                    date: Date()
+                ),
+                 TimelineEvent(
+                    icon: "exclamationmark.triangle.fill",
+                    color: .orange,
+                    title: "Warning Issued",
+                    subtitle: "System detected an issue",
+                    date: Date()
+                ),
+                 TimelineEvent(
+                    icon: "exclamationmark.triangle.fill",
+                    color: .orange,
+                    title: "Warning Issued",
+                    subtitle: "System detected an issue",
+                    date: Date()
                 ),
                 TimelineEvent(
                     icon: "exclamationmark.triangle.fill",
