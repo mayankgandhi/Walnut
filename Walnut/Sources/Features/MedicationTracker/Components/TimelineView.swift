@@ -12,7 +12,6 @@ import WalnutDesignSystem
 /// Enhanced medication card for timeline usage with dose status tracking
 struct TimelineMedicationCard: View {
     let dose: ScheduledDose
-    let onAction: (MedicationTimelineView.DoseAction) -> Void
     
     @State private var showingActionSheet = false
     
@@ -39,7 +38,7 @@ struct TimelineMedicationCard: View {
             // Dosage
             if let dosage = dose.medication.dosage, !dosage.isEmpty {
                 HStack(spacing: 4) {
-                    Image(systemName: "scalemass.fill")
+                    Image(systemName: "checkmark")
                         .font(.caption2)
                         .foregroundStyle(dose.timeSlot.color)
                     
@@ -73,16 +72,6 @@ struct TimelineMedicationCard: View {
         VStack(alignment: .trailing, spacing: 2) {
             Text(dose.displayTime)
                 .font(.subheadline.weight(.bold))
-            
-            if dose.isOverdue {
-                Text("Overdue")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.red)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(.red.opacity(0.15))
-                    .clipShape(Capsule())
-            }
         }
     }
     

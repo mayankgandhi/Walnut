@@ -19,10 +19,6 @@ struct ScheduledDose: Identifiable, Hashable {
     let mealRelation: MealRelation?
     var actualTakenTime: Date?
     
-    var isOverdue: Bool {
-        scheduledTime < Date()
-    }
-    
     var displayTime: String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short

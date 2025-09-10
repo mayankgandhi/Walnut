@@ -16,15 +16,6 @@ struct MedicationTimelineView: View {
     
     let scheduledDoses: [TimeSlot: [ScheduledDose]]
     
-    // MARK: - Actions
-    
-    enum DoseAction {
-        case markTaken
-        case markMissed
-        case markSkipped
-        case edit
-    }
-    
     // MARK: - Body
     
     var body: some View {
@@ -59,11 +50,19 @@ struct TimeSlotSection: View {
             // Time slot header
             TimeSlotHeader(timeSlot: timeSlot, doseCount: doses.count)
             
-            // Doses for this time slot
-            ForEach(doses) { dose in
-                MedicationDoseCard(
-                    dose: dose
-                )
+            // Doses for this time slot in 2-column grid
+            LazyVGrid(
+                columns: [
+                    GridItem(.flexible(), spacing: Spacing.small),
+                    GridItem(.flexible(), spacing: Spacing.small)
+                ],
+                spacing: Spacing.small
+            ) {
+                ForEach(doses) { dose in
+                    MedicationDoseCard(
+                        dose: dose
+                    )
+                }
             }
         }
     }
@@ -105,7 +104,7 @@ struct TimeSlotHeader: View {
             // Time range indicator
             Text(timeRangeText)
                 .font(.caption.weight(.medium))
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(.primary)
                 .padding(.horizontal, Spacing.xs)
                 .padding(.vertical, 4)
                 .background(.quaternary)
@@ -148,48 +147,72 @@ struct MedicationDoseCard: View {
     
     var body: some View {
         HealthCard {
-            HStack(spacing: Spacing.medium) {
-               // Medication info
-                VStack(alignment: .leading, spacing: Spacing.xs) {
-                    HStack {
-                        Text(dose.medication.name ?? "Unknown Medication")
-                            .font(.subheadline.weight(.semibold))
+            VStack(alignment: .leading, spacing: Spacing.small) {
+                // Header with status indicator and time
+                VStack(alignment: .leading, spacing: Spacing.small) {
+                    
+                    HStack(alignment: .top) {
+                        
+                        Text(dose.medication.name ?? "Unknown")
+                            .font(.system(.subheadline, design: .rounded, weight: .semibold))
                             .foregroundStyle(.primary)
-                        
-                        Spacer()
-                        
-                        Text(dose.displayTime)
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(.secondary)
-                    }
-                    
-                    if let dosage = dose.medication.dosage {
-                        Text(dosage)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    
-                    // Meal relation info
-                    if let mealRelation = dose.mealRelation {
-                        MealRelationMarker(mealRelation: mealRelation)
-                    }
-                    
-                    // Instructions (if available)
-                    if let instructions = dose.medication.instructions, !instructions.isEmpty {
-                        Text(instructions)
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
                             .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                        
+                        // Dosage information
+                        if let dosage = dose.medication.dosage {
+                            Text(dosage)
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(Color.healthPrimary)
+                                .padding(.horizontal, Spacing.xs)
+                                .padding(.vertical, 2)
+                                .background(
+                                    Color.healthPrimary.opacity(0.1),
+                                    in: Capsule()
+                                )
+                        }
                     }
+                    
+                    Text(dose.displayTime)
+                        .font(.caption2.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    
                 }
                 
-
+                // Meal relation badge
+                if let mealRelation = dose.mealRelation {
+                    MealRelationMarker(mealRelation: mealRelation)
+                }
+                
+                // Instructions (compact)
+                if let instructions = dose.medication.instructions, !instructions.isEmpty {
+                    Text(instructions)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(4)
+                        .truncationMode(.tail)
+                }
+                Spacer()
+                
             }
-            .padding(Spacing.medium)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
     
-  
+    // MARK: - Computed Properties
+    
+    /// Status color based on dose state
+    private var statusColor: Color {
+        if dose.actualTakenTime != nil {
+            return .healthSuccess
+        }  else if dose.isDueSoon {
+            return .healthWarning
+        } else {
+            return .healthPrimary
+        }
+    }
+    
+    
 }
 
 // MARK: - Meal Time Marker Component
@@ -253,5 +276,4 @@ struct MealRelationMarker: View {
             scheduledDoses: sampleDoses,
         )
     }
-    .background(Color(.systemGroupedBackground))
 }

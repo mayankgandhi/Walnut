@@ -32,12 +32,14 @@ struct PrescriptionDetailView: View {
                     }
                     
                     // Follow-up Section
-                    if prescription.followUpDate != nil || !(prescription.followUpTests?.isEmpty ?? false) {
+                    if prescription.followUpDate != nil ||
+                        !(prescription.followUpTests?.isEmpty ?? false) {
                         enhancedFollowUpCard
                     }
                     
                     // Clinical Notes Section
-                    if let notes = prescription.notes, !notes.isEmpty {
+                    if let notes = prescription.notes,
+                       !notes.isEmpty {
                         enhancedNotesCard
                     }
                     

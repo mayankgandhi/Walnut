@@ -385,10 +385,36 @@ struct PrescriptionEditor: View {
             }
             .sheet(isPresented: $showMedicationEditor) {
                 if let medicationToEdit = medicationToEdit {
+                    // Edit existing medication
                     MedicationEditor(
                         medication: medicationToEdit,
                         onSave: handleMedicationSave
                     )
+                } else {
+                    // Add new medication - create temporary prescription if needed
+                    if let prescription = prescription {
+                        // Use existing prescription for adding medication
+                        MedicationEditor(
+                            prescription: prescription,
+                            onSave: handleMedicationSave
+                        )
+                    } else {
+                        // For new prescriptions, create medication without prescription link initially
+                        MedicationEditor(
+                            medication: Medication(
+                                id: UUID(),
+                                name: "",
+                                frequency: nil,
+                                duration: .days(7),
+                                dosage: nil,
+                                instructions: nil,
+                                createdAt: Date(),
+                                updatedAt: Date(),
+                                prescription: nil
+                            ),
+                            onSave: handleMedicationSave
+                        )
+                    }
                 }
             }
         }
@@ -498,8 +524,11 @@ struct PrescriptionEditor: View {
             prescription.followUpDate = hasFollowUp ? followUpDate : nil
             prescription.followUpTests = testsArray.isEmpty ? nil : testsArray
             prescription.notes = notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : notes.trimmingCharacters(in: .whitespacesAndNewlines)
-            prescription.medications = medications
             prescription.updatedAt = now
+            
+            // Update medications relationship - ensure proper linking
+            prescription.medications = medications
+           
         } else {
             // Create new prescription
             let newPrescription = Prescription(
@@ -514,7 +543,22 @@ struct PrescriptionEditor: View {
                 medicalCase: medicalCase,
                 medications: medications
             )
+            
+            // Insert prescription first
             modelContext.insert(newPrescription)
+            
+            // Link all medications to the new prescription and insert them
+            for medication in medications {
+                medication.prescription = newPrescription
+                modelContext.insert(medication)
+            }
+        }
+        
+        // Save the context
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to save prescription: \(error)")
         }
     }
 }

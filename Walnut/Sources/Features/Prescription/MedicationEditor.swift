@@ -13,16 +13,32 @@ import WalnutDesignSystem
 struct MedicationEditor: View {
     
     @Environment(\.modelContext) var modelContext
-    let medication: Medication
+    let medication: Medication?
+    let targetPrescription: Prescription?
     let onSave: (Medication) -> Void
     
+    // MARK: - Initializers
+    
+    /// Initialize for editing existing medication
     init(medication: Medication, onSave: @escaping (Medication) -> Void) {
         self.medication = medication
+        self.targetPrescription = nil
         self.onSave = onSave
     }
     
+    /// Initialize for adding new medication to prescription
+    init(prescription: Prescription, onSave: @escaping (Medication) -> Void) {
+        self.medication = nil
+        self.targetPrescription = prescription
+        self.onSave = onSave
+    }
+    
+    private var isEditingMode: Bool {
+        medication != nil
+    }
+    
     private var editorTitle: String {
-        medication == nil ? "Add Medication" : "Edit Medication"
+        isEditingMode ? "Edit Medication" : "Add Medication"
     }
     
     @State private var medicationName = ""
@@ -53,6 +69,11 @@ struct MedicationEditor: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: Spacing.large) {
+                    // Context indicator for adding to prescription
+                    if !isEditingMode, let prescription = targetPrescription {
+                        contextIndicator(for: prescription)
+                    }
+                    
                     // Medication Information Section
                     VStack(alignment: .leading, spacing: Spacing.xs) {
                         Text("Medication Information")
@@ -217,8 +238,9 @@ struct MedicationEditor: View {
                 }
             }
             .onAppear {
-                loadMedicationData(medication)
-                
+                if let medication = medication {
+                    loadMedicationData(medication)
+                }
             }
         }
         .presentationDetents([.large])
@@ -241,16 +263,96 @@ struct MedicationEditor: View {
     private func save() {
         guard let medicationDuration = duration else { return }
         
-        // Edit existing medication - update properties but don't perform modelContext operations
-        medication.name = medicationName.trimmingCharacters(in: .whitespacesAndNewlines)
-        medication.dosage = dosage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : dosage.trimmingCharacters(in: .whitespacesAndNewlines)
-        medication.instructions = instructions.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : instructions.trimmingCharacters(in: .whitespacesAndNewlines)
-        medication.duration = medicationDuration
-        medication.frequency = selectedFrequencies.isEmpty ? nil : selectedFrequencies
-        medication.updatedAt = Date()
+        let medicationToSave: Medication
         
-        onSave(medication)
+        if isEditingMode {
+            // Edit existing medication - update properties
+            medicationToSave = medication!
+            medicationToSave.updatedAt = Date()
+        } else {
+            // Create new medication for prescription
+            medicationToSave = Medication(
+                id: UUID(),
+                name: "",
+                frequency: nil,
+                duration: medicationDuration,
+                dosage: nil,
+                instructions: nil,
+                createdAt: Date(),
+                updatedAt: Date(),
+                prescription: targetPrescription,
+            )
+            
+            // Add medication to model context
+            modelContext.insert(medicationToSave)
+            
+            // Add to prescription's medications array
+            if targetPrescription?.medications == nil {
+                targetPrescription?.medications = []
+            }
+            targetPrescription?.medications?.append(medicationToSave)
+        }
         
+        // Update medication properties
+        medicationToSave.name = medicationName.trimmingCharacters(in: .whitespacesAndNewlines)
+        medicationToSave.dosage = dosage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : dosage.trimmingCharacters(in: .whitespacesAndNewlines)
+        medicationToSave.instructions = instructions.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : instructions.trimmingCharacters(in: .whitespacesAndNewlines)
+        medicationToSave.duration = medicationDuration
+        medicationToSave.frequency = selectedFrequencies.isEmpty ? nil : selectedFrequencies
+        
+        // Save context for new medications
+        if !isEditingMode {
+            do {
+                try modelContext.save()
+            } catch {
+                print("Failed to save new medication: \(error)")
+            }
+        }
+        
+        onSave(medicationToSave)
+    }
+    
+    // MARK: - Context Indicator
+    
+    @ViewBuilder
+    private func contextIndicator(for prescription: Prescription) -> some View {
+        VStack(spacing: Spacing.small) {
+            HealthCard {
+                HStack(spacing: Spacing.medium) {
+                    // Prescription icon
+                    Circle()
+                        .fill(Color.blue.opacity(0.15))
+                        .frame(width: 40, height: 40)
+                        .overlay {
+                            Image(systemName: "doc.text.fill")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(.blue)
+                        }
+                    
+                    // Prescription details
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Adding medication to prescription")
+                            .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                            .foregroundStyle(.primary)
+                        
+                        if let doctorName = prescription.doctorName {
+                            Text("Dr. \(doctorName)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        
+                        if let dateIssued = prescription.dateIssued {
+                            Text("Issued \(dateIssued.formatted(date: .abbreviated, time: .omitted))")
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    
+                    Spacer()
+                }
+            }
+        }
+        .padding(.horizontal, Spacing.medium)
     }
 }
 

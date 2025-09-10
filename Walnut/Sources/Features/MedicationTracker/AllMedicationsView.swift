@@ -57,8 +57,6 @@ struct AllMedicationsView: View {
     
     var body: some View {
         ZStack {
-            Color(.systemGroupedBackground).ignoresSafeArea()
-            
             ScrollView {
                 VStack(spacing: Spacing.large) {
             
@@ -74,8 +72,6 @@ struct AllMedicationsView: View {
                 .padding(.bottom, 100) // Extra padding for better scrolling
             }
         }
-        .navigationTitle("Medication Schedule")
-        .navigationBarTitleDisplayMode(.large)
         .sheet(item: $medicationToEdit) {
             MedicationEditor(
                 medication: $0,

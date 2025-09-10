@@ -20,11 +20,11 @@ struct PatientTabView: View {
             
             Tab("Meds", systemImage: "pills.fill") {
                 NavigationStack {
-                    MedicationsTrackerView(patient: patient)
+                    AllMedicationsView(patient: patient)
                 }
             }
             
-            Tab("Cases", systemImage: "document.on.document") {
+            Tab("Cases", systemImage: "folder.fill") {
                 NavigationStack {
                     MedicalCasesView(
                         viewModel: MedicalCasesViewModel(
@@ -35,7 +35,7 @@ struct PatientTabView: View {
                 }
             }
             
-            Tab("Blood Tests", systemImage: "testtube.2") {
+            Tab("Trends", systemImage: "chart.line.uptrend.xyaxis") {
                 NavigationStack {
                     BloodTestsView(
                         viewModel: BloodTestsViewModel(
