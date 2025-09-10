@@ -11,10 +11,16 @@ import SwiftData
 import WalnutDesignSystem
 
 struct PatientSettingsView: View {
+
     @State private var viewModel: PatientSettingsViewModel
     
-    init(patient: Patient) {
-        self._viewModel = State(wrappedValue: PatientSettingsViewModel(patient: patient))
+    init(patient: Patient, modelContext: ModelContext) {
+        self._viewModel = State(
+            wrappedValue: PatientSettingsViewModel(
+                patient: patient,
+                modelContext: modelContext
+            )
+        )
     }
     
     var body: some View {
@@ -23,34 +29,15 @@ struct PatientSettingsView: View {
                 PatientHeaderCard(patient: viewModel.patient)
                 
                 // Patient Settings Section
-                settingsSection(
-                    title: "Settings",
-                    items: viewModel.getPatientSettingsItems()
-                )
+                patientSettingsSection
                 
                 // App Settings Section
-                settingsSection(
-                    title: "App Settings",
-                    items: viewModel.getAppSettingsItems()
-                )
+                appSettingsSection
                 
                 Spacer(minLength: Spacing.xl)
             }
             .padding(.horizontal, Spacing.medium)
             .padding(.top, Spacing.medium)
-        }
-        .sheet(isPresented: $viewModel.showEditPatient, onDismiss: {
-            viewModel.dismissEditPatient()
-        }) {
-            PatientEditor(patient: viewModel.patient)
-        }
-        .sheet(isPresented: $viewModel.showAboutSheet, onDismiss: {
-            viewModel.dismissAbout()
-        }) {
-            AboutSheet()
-                .presentationDetents([.medium])
-                .presentationCornerRadius(Spacing.large)
-                .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $viewModel.showICloudSync, onDismiss: {
             viewModel.dismissICloudSync()
@@ -61,17 +48,6 @@ struct PatientSettingsView: View {
                 iCloudSyncSettingsView()
             }
             .presentationDetents([.height(600), .large])
-            .presentationDragIndicator(.visible)
-        }
-        .sheet(isPresented: $viewModel.showNotificationSettings, onDismiss: {
-            viewModel.dismissNotificationSettings()
-        }) {
-            DSBottomSheet(title: "Notifications"){
-                notificationSettingsBottomSheetContent
-            } content: {
-                NotificationSettingsView()
-            }
-            .presentationDetents([.height(700), .large])
             .presentationDragIndicator(.visible)
         }
         .alert("Error", isPresented: $viewModel.showErrorAlert) {
@@ -86,25 +62,33 @@ struct PatientSettingsView: View {
     
     // MARK: - View Components
     
-    @ViewBuilder
-    private func settingsSection(title: String, items: [SettingsMenuItem]) -> some View {
+    private var patientSettingsSection: some View {
         VStack(alignment: .leading, spacing: Spacing.medium) {
-            Text(title)
+            Text("Settings")
                 .font(.headline)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             VStack(spacing: Spacing.xs) {
-                ForEach(items) { item in
-                    MenuListItem(
-                        icon: item.icon,
-                        title: item.title,
-                        subtitle: item.subtitle,
-                        iconColor: item.iconColor
-                    ) {
-                        item.action()
-                    }
-                }
+                EditProfileView(patient: viewModel.patient)
+                NotificationsView(patient: viewModel.patient)
+                PrivacySecurityView(patient: viewModel.patient)
+                DeleteAllDataView(patient: viewModel.patient, modelContext: viewModel.modelContext)
+            }
+        }
+    }
+    
+    private var appSettingsSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.medium) {
+            Text("App Settings")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            VStack(spacing: Spacing.xs) {
+                AppearanceView(patient: viewModel.patient)
+                AboutView(patient: viewModel.patient)
+                HelpSupportView(patient: viewModel.patient)
             }
         }
     }
@@ -125,35 +109,5 @@ struct PatientSettingsView: View {
             .padding(.top, Spacing.small)
         }
     }
-    
-    private var notificationSettingsBottomSheetContent: some View {
-        VStack(spacing: Spacing.medium) {
-            // Header
-            VStack(spacing: Spacing.xs) {
-                Text("Medication Reminders")
-                    .font(.title2.weight(.semibold))
-                    .foregroundStyle(.primary)
-                
-                Text("Configure notifications and alarms for your medication schedule")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-            .padding(.top, Spacing.small)
-        }
-    }
 }
 
-#Preview("Patient Settings") {
-    NavigationStack {
-        PatientSettingsView(patient: .samplePatient)
-    }
-    .modelContainer(for: Patient.self, inMemory: true)
-}
-
-#Preview("Patient Settings - With Medications") {
-    NavigationStack {
-        PatientSettingsView(patient: .samplePatientWithMedications)
-    }
-    .modelContainer(for: Patient.self, inMemory: true)
-}

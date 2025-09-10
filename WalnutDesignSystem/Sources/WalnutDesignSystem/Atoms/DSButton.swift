@@ -67,7 +67,9 @@ public struct DSButton: View {
                 
                 Text(title)
                     .font(.body.weight(.semibold))
+                    .padding(.vertical, Spacing.small)
             }
+            .frame(maxWidth: .infinity)
             .foregroundStyle(style.foregroundColor)
             .padding(.horizontal, Spacing.medium)
             .padding(.vertical, Spacing.small)
@@ -81,9 +83,6 @@ public struct DSButton: View {
         }
         .touchTarget()
         .accessibilityLabel(title)
-        .onLongPressGesture(minimumDuration: 0, maximumDistance: .infinity) { isPressing in
-            isPressed = isPressing
-        } perform: { }
     }
 }
 

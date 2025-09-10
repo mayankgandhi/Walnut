@@ -48,7 +48,10 @@ struct PatientTabView: View {
             
             Tab("Account", systemImage: "person.2.badge.gearshape.fill") {
                 NavigationStack {
-                    PatientSettingsView(patient: patient)
+                    PatientSettingsView(
+                        patient: patient,
+                        modelContext: modelContext
+                    )
                 }
             }
             

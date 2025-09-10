@@ -15,13 +15,6 @@ import CloudKit
 class PatientSettingsViewModel {
     
     // MARK: - Published Properties
-    var showEditPatient = false
-    var showAboutSheet = false
-    var showNotificationSettings = false
-    var showExportData = false
-    var showPrivacySettings = false
-    var showAppearanceSettings = false
-    var showHelpSupport = false
     var showICloudSync = false
     
     // Loading and Error States
@@ -29,9 +22,15 @@ class PatientSettingsViewModel {
     var error: Error?
     var showErrorAlert = false
     
-    // MARK: - Private Properties
+    // MARK: - Properties
     let patient: Patient
-    private let modelContext: ModelContext?
+    let modelContext: ModelContext
+    
+    
+    init(patient: Patient, modelContext: ModelContext) {
+        self.patient = patient
+        self.modelContext = modelContext
+    }
     
     // MARK: - Computed Properties
     
@@ -44,52 +43,8 @@ class PatientSettingsViewModel {
     }
     
     // MARK: - Initializer
-    
-    init(patient: Patient, modelContext: ModelContext? = nil) {
-        self.patient = patient
-        self.modelContext = modelContext
-    }
-    
-    // MARK: - Navigation Actions
-    
-    func showEditPatientScreen() {
-        showEditPatient = true
-    }
-    
-    func dismissEditPatient() {
-        showEditPatient = false
-    }
-    
-    func showAbout() {
-        showAboutSheet = true
-    }
-    
-    func dismissAbout() {
-        showAboutSheet = false
-    }
-    
-    func showNotifications() {
-        showNotificationSettings = true
-    }
-    
-    func dismissNotificationSettings() {
-        showNotificationSettings = false
-    }
-    
-    func showAppearance() {
-        showAppearanceSettings = true
-        // TODO: Implement appearance settings navigation
-    }
-    
-    func showHelpAndSupport() {
-        showHelpSupport = true
-        // TODO: Implement help and support navigation
-    }
-    
-    func showPrivacy() {
-        showPrivacySettings = true
-        // TODO: Implement privacy settings navigation
-    }
+
+    // MARK: - iCloud Sync Actions (kept centralized as it's not in current menu)
     
     func showICloudSyncScreen() {
         showICloudSync = true
@@ -101,70 +56,6 @@ class PatientSettingsViewModel {
     
     // MARK: - Settings Menu Items
     
-    func getPatientSettingsItems() -> [SettingsMenuItem] {
-        return [
-            SettingsMenuItem(
-                icon: "pencil.circle.fill",
-                title: "Edit Profile",
-                subtitle: "Update patient information",
-                iconColor: .healthPrimary,
-                action: { [weak self] in
-                    self?.showEditPatientScreen()
-                }
-            ),
-            SettingsMenuItem(
-                icon: "bell.fill",
-                title: "Notifications",
-                subtitle: "Manage alerts and reminders",
-                iconColor: .orange,
-                action: { [weak self] in
-                    self?.showNotifications()
-                }
-            ),
-           
-            SettingsMenuItem(
-                icon: "shield.fill",
-                title: "Privacy & Security",
-                subtitle: "Data protection settings",
-                iconColor: .green,
-                action: { [weak self] in
-                    self?.showPrivacy()
-                }
-            )
-        ]
-    }
-    
-    func getAppSettingsItems() -> [SettingsMenuItem] {
-        return [
-            SettingsMenuItem(
-                icon: "paintbrush.fill",
-                title: "Appearance",
-                subtitle: "Theme and display options",
-                iconColor: .purple,
-                action: { [weak self] in
-                    self?.showAppearance()
-                }
-            ),
-            SettingsMenuItem(
-                icon: "info.circle.fill",
-                title: "About",
-                subtitle: "App version and info",
-                iconColor: .gray,
-                action: { [weak self] in
-                    self?.showAbout()
-                }
-            ),
-            SettingsMenuItem(
-                icon: "questionmark.circle.fill",
-                title: "Help & Support",
-                subtitle: "Get help and contact support",
-                iconColor: .healthPrimary,
-                action: { [weak self] in
-                    self?.showHelpAndSupport()
-                }
-            )
-        ]
-    }
     
     // MARK: - Error Handling
     
