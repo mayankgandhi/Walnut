@@ -181,7 +181,6 @@ struct MedicalCasesView: View {
         emergencyContactName: "Bob Johnson",
         emergencyContactPhone: "(555) 234-5678",
         notes: "No known allergies",
-        primaryColorHex: "#4ECDC4",
         createdAt: Date(),
         updatedAt: Date(),
         medicalCases: []

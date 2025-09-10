@@ -25,16 +25,13 @@ class Patient: Identifiable, Sendable, Hashable {
     
     var notes: String?
     
-    // Primary color for theming - stored as hex string
-    var primaryColorHex: String?
-    
     var createdAt: Date?
     var updatedAt: Date?
     
     @Relationship(deleteRule: .cascade, inverse: \MedicalCase.patient)
     var medicalCases: [MedicalCase]?
     
-    init(id: UUID, name: String, dateOfBirth: Date, gender: String, bloodType: String, emergencyContactName: String, emergencyContactPhone: String, notes: String, primaryColorHex: String? = nil, createdAt: Date, updatedAt: Date, medicalCases: [MedicalCase]) {
+    init(id: UUID, name: String, dateOfBirth: Date, gender: String, bloodType: String, emergencyContactName: String, emergencyContactPhone: String, notes: String, createdAt: Date, updatedAt: Date, medicalCases: [MedicalCase]) {
         self.id = id
         self.name = name
         self.dateOfBirth = dateOfBirth
@@ -43,7 +40,6 @@ class Patient: Identifiable, Sendable, Hashable {
         self.emergencyContactName = emergencyContactName
         self.emergencyContactPhone = emergencyContactPhone
         self.notes = notes
-        self.primaryColorHex = primaryColorHex ?? Self.generateRandomColorHex()
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.medicalCases = medicalCases
@@ -53,28 +49,6 @@ class Patient: Identifiable, Sendable, Hashable {
     var age: Int {
         guard let dateOfBirth else { return 0 }
         return Calendar.current.dateComponents([.year], from: dateOfBirth, to: Date()).year ?? 0
-    }
-    
-    // Computed property for primary color
-    var primaryColor: Color {
-        Color(hex: primaryColorHex ?? Patient.generateRandomColorHex()) ?? .blue
-    }
-    
-    // Static method to generate random color hex
-    static func generateRandomColorHex() -> String {
-        let colors = [
-            "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7",
-            "#DDA0DD", "#98D8C8", "#F7DC6F", "#BB8FCE", "#85C1E9",
-            "#F8C471", "#82E0AA", "#F1948A", "#85C1CC", "#D2B4DE",
-            "#AED6F1", "#A3E4D7", "#F9E79F", "#FADBD8", "#D5DBDB"
-        ]
-        return colors.randomElement() ?? "#4ECDC4"
-    }
-    
-    // Method to update primary color
-    func updatePrimaryColor(_ colorHex: String) {
-        self.primaryColorHex = colorHex
-        self.updatedAt = Date()
     }
     
     // MARK: - Hashable Conformance
@@ -99,7 +73,6 @@ extension Patient {
         emergencyContactName: "Jane Doe",
         emergencyContactPhone: "(555) 123-4567",
         notes: "Patient has mild allergies to penicillin.",
-        primaryColorHex: "#4ECDC4",
         createdAt: Date(),
         updatedAt: Date(),
         medicalCases: []
@@ -116,7 +89,6 @@ extension Patient {
             emergencyContactName: "Robert Wilson",
             emergencyContactPhone: "(555) 987-6543",
             notes: "Patient with diabetes and hypertension. Regular monitoring required.",
-            primaryColorHex: "#FF6B6B",
             createdAt: Date(),
             updatedAt: Date(),
             medicalCases: []
@@ -230,7 +202,6 @@ extension Patient {
             emergencyContactName: "Lisa Chen",
             emergencyContactPhone: "(555) 456-7890",
             notes: "Complex medication regimen including injections, drops, and as-needed medications.",
-            primaryColorHex: "#6C5CE7",
             createdAt: Date(),
             updatedAt: Date(),
             medicalCases: []

@@ -31,7 +31,6 @@ struct PatientEditor: View {
     @State private var emergencyContactPhone = ""
     @State private var notes = ""
     @State private var isActive = true
-    @State private var selectedColorHex = Patient.generateRandomColorHex()
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -243,13 +242,6 @@ struct PatientEditor: View {
                             )
                             .focused($focusedField, equals: .notes)
                             
-                            ColorPickerItem(
-                                icon: "paintpalette.fill",
-                                title: "Theme Color",
-                                selectedColorHex: $selectedColorHex,
-                                helperText: "This color will theme the patient's profile",
-                                iconColor: Color(hex: selectedColorHex) ?? .healthPrimary
-                            )
                             
                             ToggleItem(
                                 icon: "heart.fill",
@@ -307,7 +299,6 @@ struct PatientEditor: View {
         emergencyContactName = patient.emergencyContactName ?? emergencyContactName
         emergencyContactPhone = patient.emergencyContactPhone ?? emergencyContactPhone
         notes = patient.notes ?? notes
-        selectedColorHex = patient.primaryColorHex ?? Patient.generateRandomColorHex()
     }
     
     private func save() {
@@ -324,7 +315,6 @@ struct PatientEditor: View {
             patient.emergencyContactName = emergencyContactName.trimmingCharacters(in: .whitespacesAndNewlines)
             patient.emergencyContactPhone = emergencyContactPhone.trimmingCharacters(in: .whitespacesAndNewlines)
             patient.notes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
-            patient.primaryColorHex = selectedColorHex
             patient.updatedAt = now
         } else {
             // Create new patient
@@ -337,7 +327,6 @@ struct PatientEditor: View {
                 emergencyContactName: emergencyContactName.trimmingCharacters(in: .whitespacesAndNewlines),
                 emergencyContactPhone: emergencyContactPhone.trimmingCharacters(in: .whitespacesAndNewlines),
                 notes: notes.trimmingCharacters(in: .whitespacesAndNewlines),
-                primaryColorHex: selectedColorHex,
                 createdAt: now,
                 updatedAt: now,
                 medicalCases: []

@@ -174,7 +174,7 @@ struct MedicalCaseEditor: View {
                             HStack(spacing: Spacing.medium) {
                                 PatientAvatar(
                                     name: patient?.name ?? "P",
-                                    color: patient?.primaryColor ?? Color.blue,
+                                    color: Color.blue,
                                     size: Size.avatarLarge
                                 )
                                 
