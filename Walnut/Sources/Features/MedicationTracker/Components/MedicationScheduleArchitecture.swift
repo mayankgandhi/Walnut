@@ -55,11 +55,6 @@
    - Action buttons for status changes
    - Contextual action sheets
  
- #### D. DoseStatusIndicator (Status Tracking)
- - **Purpose**: Visual representation of dose status
- - **States**: scheduled, taken, missed, skipped
- - **Design**: Color-coded circular indicators with SF Symbols
- 
  #### E. MealTimeMarker (Meal References)
  - **Purpose**: Shows medication's relationship to meals
  - **Features**: Before/after/with meal indicators

@@ -31,29 +31,6 @@ struct MealTimeConfiguration {
     }
 }
 
-/// Enhanced dose status with additional metadata
-extension DoseStatus {
-    /// Whether this status represents a completed action
-    var isCompleted: Bool {
-        switch self {
-        case .taken, .skipped:
-            return true
-        case .scheduled, .missed:
-            return false
-        }
-    }
-    
-    /// Whether this status requires user attention
-    var requiresAttention: Bool {
-        switch self {
-        case .missed:
-            return true
-        case .taken, .scheduled, .skipped:
-            return false
-        }
-    }
-}
-
 /// Enhanced scheduled dose with computed properties
 extension ScheduledDose {
     /// Time until this dose is due (negative if overdue)
@@ -69,18 +46,7 @@ extension ScheduledDose {
     
     /// Human-readable time description
     var timeDescription: String {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .abbreviated
-        
-        if status == .taken, let takenTime = actualTakenTime {
-            return "Taken \(formatter.localizedString(for: takenTime, relativeTo: Date()))"
-        } else if isOverdue {
-            return "Overdue by \(formatter.localizedString(for: scheduledTime, relativeTo: Date()))"
-        } else if isDueSoon {
-            return "Due in \(formatter.localizedString(for: scheduledTime, relativeTo: Date()))"
-        } else {
-            return displayTime
-        }
+        return displayTime
     }
 }
 

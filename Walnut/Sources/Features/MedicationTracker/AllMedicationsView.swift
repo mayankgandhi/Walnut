@@ -51,11 +51,7 @@ struct AllMedicationsView: View {
         return activePrescriptions.compactMap { $0.medications }.reduce([], +)
     }
     
-    // Computed metrics for display
-    private var scheduleMetrics: ScheduleMetrics {
-        scheduleService.calculateMetrics()
-    }
-    
+
     
     // MARK: - Body
     
@@ -65,18 +61,11 @@ struct AllMedicationsView: View {
             
             ScrollView {
                 VStack(spacing: Spacing.large) {
-                    // Date selector and summary header
-                    MedicationScheduleHeader(
-                        selectedDate: $selectedDate,
-                        showingDatePicker: $showingDatePicker,
-                        scheduleMetrics: scheduleMetrics
-                    )
-                    
+            
                     // Main timeline content
                     if !scheduleService.todaysDoses.isEmpty {
                         MedicationTimelineView(
-                            scheduledDoses: scheduleService.timelineDoses,
-                            onDoseAction: handleDoseAction
+                            scheduledDoses: scheduleService.timelineDoses
                         )
                     } else {
                         MedicationEmptyState(onAddPrescription: handleAddPrescription)
@@ -109,40 +98,7 @@ struct AllMedicationsView: View {
         }
     }
     
-    
-    // MARK: - Actions and Methods
-    
-    private func handleDoseAction(_ dose: ScheduledDose, _ action: MedicationTimelineView.DoseAction) {
-        switch action {
-        case .markTaken:
-            handleDoseStatusUpdate(dose, scheduleService.markDoseAsTaken)
-            
-        case .markMissed:
-            handleDoseStatusUpdate(dose, scheduleService.markDoseAsMissed)
-            
-        case .markSkipped:
-            handleDoseStatusUpdate(dose, scheduleService.markDoseAsSkipped)
-            
-        case .edit:
-            medicationToEdit = dose.medication
-        }
-    }
-    
-    private func handleDoseStatusUpdate(_ dose: ScheduledDose, _ updateMethod: (ScheduledDose) -> MedicationScheduleResult<ScheduledDose>) {
-        let result = updateMethod(dose)
-        
-        switch result {
-        case .success:
-            // Haptic feedback for successful status changes
-            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-            impactFeedback.impactOccurred()
-            
-        case .failure(let error):
-            errorMessage = error.localizedDescription
-            showingError = true
-        }
-    }
-    
+   
     private func handleMedicationSave(_ medication: Medication) {
         Task { @MainActor in
             // Find and update the prescription containing this medication

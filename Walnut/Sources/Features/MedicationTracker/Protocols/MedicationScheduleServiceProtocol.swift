@@ -34,20 +34,11 @@ protocol MedicationScheduleServiceProtocol: AnyObject {
     /// Generate medication schedule for a specific date
     func generateSchedule(for date: Date) -> MedicationScheduleResult<Void>
     
-    /// Mark a dose with the specified status
-    func updateDoseStatus(_ dose: ScheduledDose, to status: DoseStatus, takenTime: Date?) -> MedicationScheduleResult<ScheduledDose>
-    
     /// Get doses for a specific time slot
     func doses(for timeSlot: TimeSlot) -> [ScheduledDose]
     
-    /// Get overdue doses
-    func getOverdueDoses() -> [ScheduledDose]
-    
     /// Get upcoming doses within specified hours
     func getUpcomingDoses(within hours: Int) -> [ScheduledDose]
-    
-    /// Calculate schedule metrics
-    func calculateMetrics() -> ScheduleMetrics
     
     /// Validate medication data
     func validateMedication(_ medication: Medication) -> MedicationScheduleResult<Void>
@@ -55,21 +46,6 @@ protocol MedicationScheduleServiceProtocol: AnyObject {
 
 /// Default implementations for common functionality
 extension MedicationScheduleServiceProtocol {
-    
-    /// Mark a dose as taken
-    func markDoseAsTaken(_ dose: ScheduledDose) -> MedicationScheduleResult<ScheduledDose> {
-        return updateDoseStatus(dose, to: .taken, takenTime: Date())
-    }
-    
-    /// Mark a dose as missed
-    func markDoseAsMissed(_ dose: ScheduledDose) -> MedicationScheduleResult<ScheduledDose> {
-        return updateDoseStatus(dose, to: .missed, takenTime: nil)
-    }
-    
-    /// Mark a dose as skipped
-    func markDoseAsSkipped(_ dose: ScheduledDose) -> MedicationScheduleResult<ScheduledDose> {
-        return updateDoseStatus(dose, to: .skipped, takenTime: nil)
-    }
     
     /// Get upcoming doses with default 2-hour window
     func getUpcomingDoses() -> [ScheduledDose] {

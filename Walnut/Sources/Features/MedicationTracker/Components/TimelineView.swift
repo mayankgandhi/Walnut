@@ -19,29 +19,12 @@ struct TimelineMedicationCard: View {
     var body: some View {
         HealthCard {
             HStack(spacing: Spacing.medium) {
-                // Dose status indicator
-                DoseStatusIndicator(status: dose.status)
-                
-                // Medication information
                 medicationInfo
-                
                 Spacer()
-                
-                // Timing and actions
-                VStack(alignment: .trailing, spacing: Spacing.xs) {
-                    timingInfo
-                    actionButton
-                }
+                timingInfo                
             }
-            .padding(Spacing.medium)
         }
-        .confirmationDialog(
-            "Medication Actions",
-            isPresented: $showingActionSheet,
-            titleVisibility: .visible
-        ) {
-            actionSheetButtons
-        }
+        
     }
     
     @ViewBuilder
@@ -90,7 +73,6 @@ struct TimelineMedicationCard: View {
         VStack(alignment: .trailing, spacing: 2) {
             Text(dose.displayTime)
                 .font(.subheadline.weight(.bold))
-                .foregroundStyle(dose.status.color)
             
             if dose.isOverdue {
                 Text("Overdue")
@@ -104,114 +86,6 @@ struct TimelineMedicationCard: View {
         }
     }
     
-    @ViewBuilder
-    private var actionButton: some View {
-        Button {
-            if dose.status == .scheduled {
-                // Quick mark as taken for scheduled doses
-                onAction(.markTaken)
-            } else {
-                // Show action sheet for other statuses
-                showingActionSheet = true
-            }
-        } label: {
-            Image(systemName: dose.status == .scheduled ? "checkmark.circle" : "ellipsis.circle")
-                .font(.system(size: 20, weight: .medium))
-                .foregroundStyle(dose.status == .scheduled ? .green : .secondary)
-        }
-        .buttonStyle(.plain)
-    }
-    
-    @ViewBuilder
-    private var actionSheetButtons: some View {
-        if dose.status == .scheduled {
-            Button("Mark as Taken") {
-                onAction(.markTaken)
-            }
-            
-            Button("Mark as Missed") {
-                onAction(.markMissed)
-            }
-            
-            Button("Skip This Dose") {
-                onAction(.markSkipped)
-            }
-        } else {
-            Button("Mark as Taken") {
-                onAction(.markTaken)
-            }
-            
-            Button("Mark as Scheduled") {
-                // Reset to scheduled status
-                onAction(.markTaken) // Placeholder - should reset status
-            }
-        }
-        
-        Button("Edit Medication") {
-            onAction(.edit)
-        }
-        
-        Button("Cancel", role: .cancel) { }
-    }
-}
-
-/// Component for displaying dose status with visual indicator
-struct DoseStatusIndicator: View {
-    let status: DoseStatus
-    
-    var body: some View {
-        ZStack {
-            Circle()
-                .stroke(status.color.opacity(0.3), lineWidth: 2)
-                .frame(width: 40, height: 40)
-            
-            Circle()
-                .fill(status.color.opacity(0.15))
-                .frame(width: 36, height: 36)
-            
-            Image(systemName: status.icon)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(status.color)
-        }
-    }
-}
-
-/// Meal time marker component for showing meal reference points
-struct MealTimeMarker: View {
-    let mealTime: MealTime
-    let isUpcoming: Bool
-    
-    var body: some View {
-        HStack(spacing: Spacing.small) {
-            Image(systemName: mealTime.icon)
-                .font(.caption)
-                .foregroundStyle(mealTime.color)
-                .frame(width: 20, height: 20)
-                .background(mealTime.color.opacity(0.15))
-                .clipShape(Circle())
-            
-            Text(mealTime.displayName)
-                .font(.caption.weight(.medium))
-                .foregroundStyle(isUpcoming ? mealTime.color : .secondary)
-            
-            if isUpcoming {
-                Text("upcoming")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(mealTime.color)
-                    .clipShape(Capsule())
-            }
-            
-            Spacer()
-        }
-        .padding(.horizontal, Spacing.medium)
-        .padding(.vertical, Spacing.small)
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-    }
 }
 
 // MARK: - Preview Support
@@ -220,10 +94,7 @@ struct MealTimeMarker: View {
     NavigationView {
         ScrollView {
             MedicationTimelineView(
-                scheduledDoses: sampleTimelineData(),
-                onDoseAction: { dose, action in
-                    print("Action \(action) for dose: \(dose.medication.name ?? "Unknown")")
-                }
+                scheduledDoses: sampleTimelineData()
             )
         }
         .navigationTitle("Today's Schedule")
@@ -239,7 +110,6 @@ private func sampleTimelineData() -> [TimeSlot: [ScheduledDose]] {
         scheduledTime: calendar.date(bySettingHour: 8, minute: 0, second: 0, of: today) ?? today,
         timeSlot: .morning,
         mealRelation: MealRelation(mealTime: .breakfast, timing: .before, offsetMinutes: -15),
-        status: .scheduled
     )
     
     let eveningDose = ScheduledDose(
@@ -247,7 +117,6 @@ private func sampleTimelineData() -> [TimeSlot: [ScheduledDose]] {
         scheduledTime: calendar.date(bySettingHour: 18, minute: 0, second: 0, of: today) ?? today,
         timeSlot: .evening,
         mealRelation: MealRelation(mealTime: .dinner, timing: .after, offsetMinutes: 30),
-        status: .taken,
         actualTakenTime: calendar.date(bySettingHour: 18, minute: 15, second: 0, of: today)
     )
     

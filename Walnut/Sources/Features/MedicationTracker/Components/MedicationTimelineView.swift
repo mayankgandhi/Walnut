@@ -15,7 +15,6 @@ struct MedicationTimelineView: View {
     // MARK: - Properties
     
     let scheduledDoses: [TimeSlot: [ScheduledDose]]
-    let onDoseAction: (ScheduledDose, DoseAction) -> Void
     
     // MARK: - Actions
     
@@ -35,7 +34,6 @@ struct MedicationTimelineView: View {
                     TimeSlotSection(
                         timeSlot: timeSlot,
                         doses: doses,
-                        onDoseAction: onDoseAction
                     )
                 }
             }
@@ -53,7 +51,6 @@ struct TimeSlotSection: View {
     
     let timeSlot: TimeSlot
     let doses: [ScheduledDose]
-    let onDoseAction: (ScheduledDose, MedicationTimelineView.DoseAction) -> Void
     
     // MARK: - Body
     
@@ -65,10 +62,7 @@ struct TimeSlotSection: View {
             // Doses for this time slot
             ForEach(doses) { dose in
                 MedicationDoseCard(
-                    dose: dose,
-                    onAction: { action in
-                        onDoseAction(dose, action)
-                    }
+                    dose: dose
                 )
             }
         }
@@ -147,7 +141,6 @@ struct MedicationDoseCard: View {
     // MARK: - Properties
     
     let dose: ScheduledDose
-    let onAction: (MedicationTimelineView.DoseAction) -> Void
     
     @State private var showingActionSheet = false
     
@@ -156,10 +149,7 @@ struct MedicationDoseCard: View {
     var body: some View {
         HealthCard {
             HStack(spacing: Spacing.medium) {
-                // Status indicator
-                DoseStatusIndicator(status: dose.status)
-                
-                // Medication info
+               // Medication info
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     HStack {
                         Text(dose.medication.name ?? "Unknown Medication")
@@ -193,60 +183,13 @@ struct MedicationDoseCard: View {
                     }
                 }
                 
-                // Action button
-                actionButton
+
             }
             .padding(Spacing.medium)
         }
-        .confirmationDialog(
-            "Medication Actions", 
-            isPresented: $showingActionSheet
-        ) {
-            dosActionButtons
-        }
     }
     
-    @ViewBuilder
-    private var actionButton: some View {
-        if dose.status == .scheduled {
-            Button {
-                showingActionSheet = true
-            } label: {
-                Image(systemName: "ellipsis")
-                    .font(.title3.weight(.medium))
-                    .foregroundStyle(.secondary)
-            }
-        } else {
-            Button {
-                onAction(.edit)
-            } label: {
-                Image(systemName: "square.and.pencil")
-                    .font(.title3.weight(.medium))
-                    .foregroundStyle(.secondary)
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private var dosActionButtons: some View {
-        Button("Mark as Taken") {
-            onAction(.markTaken)
-        }
-        
-        Button("Mark as Missed") {
-            onAction(.markMissed)
-        }
-        
-        Button("Skip Dose") {
-            onAction(.markSkipped)
-        }
-        
-        Button("Edit Medication") {
-            onAction(.edit)
-        }
-        
-        Button("Cancel", role: .cancel) { }
-    }
+  
 }
 
 // MARK: - Meal Time Marker Component
@@ -287,14 +230,12 @@ struct MealRelationMarker: View {
                 scheduledTime: Calendar.current.date(bySettingHour: 8, minute: 0, second: 0, of: Date()) ?? Date(),
                 timeSlot: .morning,
                 mealRelation: MealRelation(mealTime: .breakfast, timing: .before, offsetMinutes: -15),
-                status: .taken
             ),
             ScheduledDose(
                 medication: .complexMedication,
                 scheduledTime: Calendar.current.date(bySettingHour: 9, minute: 30, second: 0, of: Date()) ?? Date(),
                 timeSlot: .morning,
                 mealRelation: nil,
-                status: .scheduled
             )
         ],
         .evening: [
@@ -303,7 +244,6 @@ struct MealRelationMarker: View {
                 scheduledTime: Calendar.current.date(bySettingHour: 18, minute: 0, second: 0, of: Date()) ?? Date(),
                 timeSlot: .evening,
                 mealRelation: MealRelation(mealTime: .dinner, timing: .after, offsetMinutes: 30),
-                status: .missed
             )
         ]
     ]
@@ -311,9 +251,6 @@ struct MealRelationMarker: View {
     ScrollView {
         MedicationTimelineView(
             scheduledDoses: sampleDoses,
-            onDoseAction: { dose, action in
-                print("Action \(action) for dose: \(dose.medication.name ?? "")")
-            }
         )
     }
     .background(Color(.systemGroupedBackground))

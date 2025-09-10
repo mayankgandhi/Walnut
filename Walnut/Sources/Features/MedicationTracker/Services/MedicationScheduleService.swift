@@ -1,139 +1,13 @@
 //
-//  MedicationScheduleService.swift
+//  MedicationScheduleService 2.swift
 //  Walnut
 //
 //  Created by Mayank Gandhi on 10/09/25.
 //  Copyright © 2025 m. All rights reserved.
 //
 
-import SwiftUI
 import Foundation
 import Combine
-
-// MARK: - Timeline Data Models
-
-/// Represents a scheduled dose with timing and status information
-struct ScheduledDose: Identifiable, Hashable {
-    let id = UUID()
-    let medication: Medication
-    let scheduledTime: Date
-    let timeSlot: TimeSlot
-    let mealRelation: MealRelation?
-    var status: DoseStatus
-    var actualTakenTime: Date?
-    
-    var isOverdue: Bool {
-        status == .scheduled && scheduledTime < Date()
-    }
-    
-    var displayTime: String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter.string(from: scheduledTime)
-    }
-}
-
-/// Time slots for organizing medications throughout the day
-enum TimeSlot: String, CaseIterable, Identifiable {
-    case morning = "morning"
-    case midday = "midday" 
-    case afternoon = "afternoon"
-    case evening = "evening"
-    case night = "night"
-    
-    var id: String { rawValue }
-    
-    var displayName: String {
-        switch self {
-        case .morning: return "Morning"
-        case .midday: return "Midday"
-        case .afternoon: return "Afternoon"
-        case .evening: return "Evening"
-        case .night: return "Night"
-        }
-    }
-    
-    var icon: String {
-        switch self {
-        case .morning: return "sunrise.fill"
-        case .midday: return "sun.max.fill"
-        case .afternoon: return "sun.haze.fill"
-        case .evening: return "sunset.fill"
-        case .night: return "moon.fill"
-        }
-    }
-    
-    var color: Color {
-        switch self {
-        case .morning: return .orange
-        case .midday: return .yellow
-        case .afternoon: return .blue
-        case .evening: return .purple
-        case .night: return .indigo
-        }
-    }
-    
-    var timeRange: (start: Int, end: Int) {
-        switch self {
-        case .morning: return (6, 11)   // 6 AM - 11 AM
-        case .midday: return (11, 14)   // 11 AM - 2 PM
-        case .afternoon: return (14, 17) // 2 PM - 5 PM
-        case .evening: return (17, 21)   // 5 PM - 9 PM
-        case .night: return (21, 6)      // 9 PM - 6 AM (next day)
-        }
-    }
-}
-
-/// Tracks relationship to meals for medication timing
-struct MealRelation: Equatable, Hashable {
-    let mealTime: MealTime
-    let timing: MedicationTime?
-    let offsetMinutes: Int // Minutes before(-) or after(+) meal
-    
-    var displayText: String {
-        if let timing = timing {
-            return "\(timing.displayName) \(mealTime.displayName)"
-        } else {
-            return "With \(mealTime.displayName)"
-        }
-    }
-}
-
-/// Status of a scheduled medication dose
-enum DoseStatus: String, CaseIterable {
-    case scheduled = "scheduled"
-    case taken = "taken"
-    case missed = "missed"
-    case skipped = "skipped"
-    
-    var displayName: String {
-        switch self {
-        case .scheduled: return "Scheduled"
-        case .taken: return "Taken"
-        case .missed: return "Missed"
-        case .skipped: return "Skipped"
-        }
-    }
-    
-    var color: Color {
-        switch self {
-        case .scheduled: return .blue
-        case .taken: return .green
-        case .missed: return .red
-        case .skipped: return .orange
-        }
-    }
-    
-    var icon: String {
-        switch self {
-        case .scheduled: return "clock.fill"
-        case .taken: return "checkmark.circle.fill"
-        case .missed: return "exclamationmark.triangle.fill"
-        case .skipped: return "minus.circle.fill"
-        }
-    }
-}
-
 
 // MARK: - Medication Schedule Service
 
@@ -207,8 +81,8 @@ class MedicationScheduleService: MedicationScheduleServiceProtocol {
     }
     
     /// Update dose status with error handling
-    func updateDoseStatus(_ dose: ScheduledDose, to status: DoseStatus, takenTime: Date?) -> MedicationScheduleResult<ScheduledDose> {
-        guard let updatedDose = performDoseStatusUpdate(dose, to: status, takenTime: takenTime) else {
+    func updateDoseStatus(_ dose: ScheduledDose, takenTime: Date?) -> MedicationScheduleResult<ScheduledDose> {
+        guard let updatedDose = performDoseStatusUpdate(dose, takenTime: takenTime) else {
             return .failure(.doseUpdateFailed)
         }
         
@@ -221,32 +95,12 @@ class MedicationScheduleService: MedicationScheduleServiceProtocol {
         return timelineDoses[timeSlot] ?? []
     }
     
-    /// Get overdue doses
-    func getOverdueDoses() -> [ScheduledDose] {
-        return todaysDoses.filter { $0.isOverdue }
-    }
-    
     /// Get upcoming doses in the next few hours
     func getUpcomingDoses(within hours: Int = 2) -> [ScheduledDose] {
         let cutoffTime = Calendar.current.date(byAdding: .hour, value: hours, to: Date()) ?? Date()
         return todaysDoses.filter { 
-            $0.status == .scheduled && $0.scheduledTime <= cutoffTime && $0.scheduledTime >= Date()
+            $0.scheduledTime <= cutoffTime && $0.scheduledTime >= Date()
         }
-    }
-    
-    /// Calculate schedule metrics
-    func calculateMetrics() -> ScheduleMetrics {
-        let totalDoses = todaysDoses.count
-        let takenDoses = todaysDoses.filter { $0.status == .taken }.count
-        let overdueDoses = getOverdueDoses().count
-        let upcomingDoses = getUpcomingDoses().count
-        
-        return ScheduleMetrics(
-            totalDoses: totalDoses,
-            takenDoses: takenDoses,
-            overdueDoses: overdueDoses,
-            upcomingDoses: upcomingDoses
-        )
     }
     
     /// Validate medication data
@@ -264,12 +118,11 @@ class MedicationScheduleService: MedicationScheduleServiceProtocol {
     
     // MARK: - Private Methods
     
-    private func performDoseStatusUpdate(_ dose: ScheduledDose, to status: DoseStatus, takenTime: Date? = nil) -> ScheduledDose? {
+    private func performDoseStatusUpdate(_ dose: ScheduledDose, takenTime: Date? = nil) -> ScheduledDose? {
         // Find and update the dose
         for (timeSlot, doses) in timelineDoses {
             if let index = doses.firstIndex(where: { $0.id == dose.id }) {
                 var updatedDose = doses[index]
-                updatedDose.status = status
                 updatedDose.actualTakenTime = takenTime
                 
                 // Update in timeline
@@ -320,7 +173,7 @@ class MedicationScheduleService: MedicationScheduleServiceProtocol {
         // Process each medication's frequency patterns
         for medication in medications {
             guard let frequencies = medication.frequency else { 
-                throw MedicationScheduleError.invalidFrequency
+                return
             }
             
             for frequency in frequencies {
@@ -356,7 +209,6 @@ class MedicationScheduleService: MedicationScheduleServiceProtocol {
                         scheduledTime: scheduledTime,
                         timeSlot: timeSlot,
                         mealRelation: nil,
-                        status: .scheduled
                     )
                     doses.append(dose)
                 }
@@ -378,7 +230,6 @@ class MedicationScheduleService: MedicationScheduleServiceProtocol {
                 scheduledTime: adjustedTime,
                 timeSlot: timeSlot,
                 mealRelation: mealRelation,
-                status: .scheduled
             )
             doses.append(dose)
             
@@ -397,7 +248,6 @@ class MedicationScheduleService: MedicationScheduleServiceProtocol {
                     scheduledTime: currentTime,
                     timeSlot: timeSlot,
                     mealRelation: nil,
-                    status: .scheduled
                 )
                 doses.append(dose)
                 
@@ -415,7 +265,6 @@ class MedicationScheduleService: MedicationScheduleServiceProtocol {
                         scheduledTime: scheduledTime,
                         timeSlot: timeSlot,
                         mealRelation: nil,
-                        status: .scheduled
                     )
                     doses.append(dose)
                 }
@@ -432,7 +281,6 @@ class MedicationScheduleService: MedicationScheduleServiceProtocol {
                         scheduledTime: scheduledTime,
                         timeSlot: timeSlot,
                         mealRelation: nil,
-                        status: .scheduled
                     )
                     doses.append(dose)
                 }
@@ -502,7 +350,6 @@ class MedicationScheduleService: MedicationScheduleServiceProtocol {
                     scheduledTime: scheduledTime,
                     timeSlot: timeSlot,
                     mealRelation: mealRelation,
-                    status: .scheduled
                 )
                 allDoses.append(dose)
             }
@@ -510,11 +357,6 @@ class MedicationScheduleService: MedicationScheduleServiceProtocol {
         
         groupAndSortDoses(allDoses)
     }
-}
-
-// MARK: - Extensions
-
-extension MedicationScheduleService {
     
     /// Calculate next dose time for a medication frequency
     func calculateNextDoseTime(
