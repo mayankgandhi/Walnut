@@ -15,7 +15,6 @@ struct AllMedicationsView: View {
     let patient: Patient
     @Environment(\.modelContext) private var modelContext
     @State private var medicationTracker = MedicationTracker()
-    @State private var showMedicationEditor = false
     @State private var medicationToEdit: Medication? = nil
     @State private var groupedMedications: [MealTime: [MedicationTracker.MedicationScheduleInfo]] = [:]
     
@@ -57,21 +56,9 @@ struct AllMedicationsView: View {
             }
             .padding(.horizontal, Spacing.medium)
         }
-        
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    medicationToEdit = nil
-                    showMedicationEditor = true
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 16, weight: .semibold))
-                }
-            }
-        }
-        .sheet(isPresented: $showMedicationEditor) {
+        .sheet(item: $medicationToEdit) {
             MedicationEditor(
-                medication: medicationToEdit,
+                medication: $0,
                 onSave: handleMedicationSave
             )
         }

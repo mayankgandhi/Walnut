@@ -12,10 +12,11 @@ import WalnutDesignSystem
 
 struct MedicationEditor: View {
     
-    let medication: Medication?
+    @Environment(\.modelContext) var modelContext
+    let medication: Medication
     let onSave: (Medication) -> Void
     
-    init(medication: Medication? = nil, onSave: @escaping (Medication) -> Void) {
+    init(medication: Medication, onSave: @escaping (Medication) -> Void) {
         self.medication = medication
         self.onSave = onSave
     }
@@ -68,7 +69,7 @@ struct MedicationEditor: View {
                                 iconColor: .healthPrimary,
                                 isRequired: true,
                                 contentType: .none,
-                               
+                                
                             )
                             
                             TextFieldItem(
@@ -188,7 +189,7 @@ struct MedicationEditor: View {
                             placeholder: "Special instructions or notes",
                             helperText: "Any specific instructions for taking this medication",
                             iconColor: .gray,
-                           
+                            
                         )
                     }
                     
@@ -216,9 +217,8 @@ struct MedicationEditor: View {
                 }
             }
             .onAppear {
-                if let medication {
-                    loadMedicationData(medication)
-                }
+                loadMedicationData(medication)
+                
             }
         }
         .presentationDetents([.large])
@@ -241,29 +241,16 @@ struct MedicationEditor: View {
     private func save() {
         guard let medicationDuration = duration else { return }
         
-        if let medication {
-            // Edit existing medication - update properties but don't perform modelContext operations
-            medication.name = medicationName.trimmingCharacters(in: .whitespacesAndNewlines)
-            medication.dosage = dosage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : dosage.trimmingCharacters(in: .whitespacesAndNewlines)
-            medication.instructions = instructions.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : instructions.trimmingCharacters(in: .whitespacesAndNewlines)
-            medication.duration = medicationDuration
-            medication.frequency = selectedFrequencies.isEmpty ? nil : selectedFrequencies
-            medication.updatedAt = Date()
-            
-            onSave(medication)
-        } else {
-            // Create new medication - just pass data to parent, no modelContext operations
-            let newMedication = Medication(
-                id: UUID(),
-                name: medicationName.trimmingCharacters(in: .whitespacesAndNewlines),
-                frequency: selectedFrequencies.isEmpty ? nil : selectedFrequencies,
-                duration: medicationDuration,
-                dosage: dosage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : dosage.trimmingCharacters(in: .whitespacesAndNewlines),
-                instructions: instructions.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : instructions.trimmingCharacters(in: .whitespacesAndNewlines)
-            )
-            
-            onSave(newMedication)
-        }
+        // Edit existing medication - update properties but don't perform modelContext operations
+        medication.name = medicationName.trimmingCharacters(in: .whitespacesAndNewlines)
+        medication.dosage = dosage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : dosage.trimmingCharacters(in: .whitespacesAndNewlines)
+        medication.instructions = instructions.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : instructions.trimmingCharacters(in: .whitespacesAndNewlines)
+        medication.duration = medicationDuration
+        medication.frequency = selectedFrequencies.isEmpty ? nil : selectedFrequencies
+        medication.updatedAt = Date()
+        
+        onSave(medication)
+        
     }
 }
 
@@ -302,46 +289,4 @@ struct FrequencyChip: View {
                 .stroke(frequency.color.opacity(0.3), lineWidth: 1)
         )
     }
-}
-
-// MARK: - Medication Frequency Bottom Sheet
-
-
-// MARK: - Previews
-
-#Preview("Add Medication") {
-    MedicationEditor(medication: nil) { _ in }
-        .modelContainer(for: Medication.self, inMemory: true)
-}
-
-#Preview("Edit Medication") {
-    
-    MedicationEditor(medication: .sampleMedication) { _ in }
-        .modelContainer(for: Medication.self, inMemory: true)
-}
-
-#Preview("Complex Medication Schedule") {
-    
-    
-    MedicationEditor(medication: .complexMedication) { _ in }
-        .modelContainer(for: Medication.self, inMemory: true)
-}
-
-#Preview("Hourly Medication") {
-   
-    MedicationEditor(medication: .hourlyMedication) { _ in }
-        .modelContainer(for: Medication.self, inMemory: true)
-}
-
-#Preview("Weekly Medication") {
-   
-    
-    MedicationEditor(medication: .weeklyMedication) { _ in }
-        .modelContainer(for: Medication.self, inMemory: true)
-}
-
-#Preview("Monthly Medication") {
-    
-    MedicationEditor(medication: .monthlyMedication) { _ in }
-        .modelContainer(for: Medication.self, inMemory: true)
 }

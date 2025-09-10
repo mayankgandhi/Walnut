@@ -389,11 +389,6 @@ struct PrescriptionEditor: View {
                         medication: medicationToEdit,
                         onSave: handleMedicationSave
                     )
-                } else {
-                    MedicationEditor(
-                        medication: nil,
-                        onSave: handleMedicationSave
-                    )
                 }
             }
         }
