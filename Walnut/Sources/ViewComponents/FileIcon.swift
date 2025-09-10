@@ -48,7 +48,7 @@ public struct FileIcon: View {
                 if let iconImage = documentType?.iconImage {
                     Image(iconImage)
                         .resizable()
-                        .frame(width: 48, height: 48, alignment: .center)
+                        .frame(width: 36, height: 36, alignment: .center)
                 } else if let typeIcon = documentType?.typeIcon {
                     Image(systemName: typeIcon)
                         .font(.system(size: iconSize, weight: .semibold))

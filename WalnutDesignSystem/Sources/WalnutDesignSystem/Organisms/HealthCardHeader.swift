@@ -167,10 +167,9 @@ public extension HealthCardHeader {
     /// Standard timeline header
     static func timeline(
         title: String = "Timeline",
-        icon: String = "clock.arrow.circlepath"
     ) -> HealthCardHeader {
         HealthCardHeader(
-            icon: icon,
+            iconName: "calendar",
             title: title
         )
     }
