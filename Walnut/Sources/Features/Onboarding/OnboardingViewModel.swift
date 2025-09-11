@@ -41,8 +41,6 @@ final class OnboardingViewModel {
             return true
         case .vitalsIntroduction:
             return true
-        case .completion:
-            return true
         }
     }
     
@@ -91,14 +89,6 @@ final class OnboardingViewModel {
         }
     }
     
-    func setEmergencyContact(name: String, phone: String, relationship: String) {
-        healthProfile.emergencyContact = EmergencyContact(
-            name: name,
-            phone: phone,
-            relationship: relationship
-        )
-    }
-    
     // MARK: - Permission Handling
     @MainActor
     func requestNotificationPermission() async {
@@ -138,8 +128,8 @@ final class OnboardingViewModel {
             dateOfBirth: patientSetupData.dateOfBirth ?? Date(),
             gender: patientSetupData.gender,
             bloodType: patientSetupData.bloodType,
-            emergencyContactName: healthProfile.emergencyContact?.name ?? "",
-            emergencyContactPhone: healthProfile.emergencyContact?.phone ?? "",
+            emergencyContactName: nil,
+            emergencyContactPhone: nil,
             notes: patientSetupData.notes,
             createdAt: Date(),
             updatedAt: Date(),

@@ -15,53 +15,39 @@ struct HealthProfileScreen: View {
     @Bindable var viewModel: OnboardingViewModel
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: Spacing.xl) {
-                // Header
-                VStack(spacing: Spacing.medium) {
-                    Image(systemName: "heart.circle.fill")
-                        .font(.system(size: 50))
-                        .foregroundStyle(Color.healthPrimary)
-                    
-                    Text("Health Profile")
-                        .font(.largeTitle.bold())
-                    
-                    Text("Tell us about your health conditions and emergency contacts")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, Spacing.medium)
-                }
-                .padding(.top, Spacing.large)
+        
+        VStack(spacing: Spacing.xl) {
+            
+            OnboardingHeader(icon: "heart.circle.fill", title: "Health Profile", subtitle: "Tell us about your health conditions and emergency contacts")
+            
+            // Chronic Conditions Section
+            VStack(spacing: Spacing.medium) {
+                SectionHeader(
+                    title: "Chronic Conditions",
+                    subtitle: "Select any that apply (optional)"
+                )
                 
-                // Chronic Conditions Section
-                VStack(spacing: Spacing.medium) {
-                    SectionHeader(
-                        title: "Chronic Conditions",
-                        subtitle: "Select any that apply (optional)"
-                    )
-                    
-                    HealthCard {
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.small), count: 2), spacing: Spacing.small) {
-                            ForEach(ChronicCondition.allCases, id: \.self) { condition in
-                                ConditionTile(
-                                    condition: condition,
-                                    isSelected: viewModel.healthProfile.selectedConditions.contains(condition)
-                                ) {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        viewModel.toggleChronicCondition(condition)
-                                    }
+                HealthCard {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.small), count: 2), spacing: Spacing.small) {
+                        ForEach(ChronicCondition.allCases, id: \.self) { condition in
+                            ConditionTile(
+                                condition: condition,
+                                isSelected: viewModel.healthProfile.selectedConditions.contains(condition)
+                            ) {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    viewModel.toggleChronicCondition(condition)
                                 }
                             }
                         }
                     }
                 }
-                
-                
-                Spacer()
-                    .frame(height: Spacing.xl)
             }
+            
+            
+            Spacer()
+                .frame(height: Spacing.xl)
         }
+        
         .padding(.horizontal, Spacing.large)
         
     }
@@ -78,7 +64,7 @@ private struct SectionHeader: View {
         VStack(spacing: Spacing.xs) {
             HStack {
                 Text(title)
-                    .font(.title3.bold())
+                    .font(.headline.bold())
                     .foregroundStyle(.primary)
                 Spacer()
             }

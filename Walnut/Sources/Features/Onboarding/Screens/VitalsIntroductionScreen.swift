@@ -11,149 +11,57 @@ import WalnutDesignSystem
 
 /// Vitals tracking introduction screen showcasing health monitoring features
 struct VitalsIntroductionScreen: View {
-     @Bindable var viewModel: OnboardingViewModel
+    @Bindable var viewModel: OnboardingViewModel
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: Spacing.xl) {
-                // Header
+        VStack(spacing: Spacing.xl) {
+            
+            OnboardingHeader(icon: "heart.text.square.fill", title: "Vitals Tracking", subtitle: "Track your vital signs and health metrics with ease")
+            
+            
+            // Features Section
+            VStack(spacing: Spacing.medium) {
+                Text("Powerful Features")
+                    .font(.title3.bold())
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
                 VStack(spacing: Spacing.medium) {
-                    Image(systemName: "heart.text.square.fill")
-                        .font(.system(size: 50))
-                        .foregroundStyle(Color.healthPrimary)
+                    FeatureRow(
+                        icon: "chart.line.uptrend.xyaxis",
+                        title: "Trend Analysis",
+                        description: "Visualize your health data over time with interactive charts",
+                        color: .healthPrimary
+                    )
                     
-                    Text("Vitals Tracking")
-                        .font(.largeTitle.bold())
+                    FeatureRow(
+                        icon: "bell.fill",
+                        title: "Smart Reminders",
+                        description: "Get reminded to take measurements at optimal times",
+                        color: .healthWarning
+                    )
                     
-                    Text("Track your vital signs and health metrics with ease")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, Spacing.medium)
-                }
-                .padding(.top, Spacing.large)
-                
-                // Featured Vitals
-                VStack(spacing: Spacing.medium) {
-                    Text("Monitor Your Health")
-                        .font(.title3.bold())
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    FeatureRow(
+                        icon: "share",
+                        title: "Share with Doctors",
+                        description: "Export reports to share with your healthcare team",
+                        color: .healthSuccess
+                    )
                     
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.medium), count: 2), spacing: Spacing.medium) {
-                        VitalCard(
-                            title: "Blood Pressure",
-                            icon: "heart.circle.fill",
-                            color: .heartRate,
-                            value: "120/80",
-                            unit: "mmHg"
-                        )
-                        
-                        VitalCard(
-                            title: "Heart Rate",
-                            icon: "heart.fill",
-                            color: .red,
-                            value: "72",
-                            unit: "bpm"
-                        )
-                        
-                        VitalCard(
-                            title: "Blood Glucose",
-                            icon: "drop.circle.fill",
-                            color: .glucose,
-                            value: "95",
-                            unit: "mg/dL"
-                        )
-                        
-                        VitalCard(
-                            title: "Weight",
-                            icon: "scalemass.fill",
-                            color: .healthPrimary,
-                            value: "165",
-                            unit: "lbs"
-                        )
-                        
-                        VitalCard(
-                            title: "Temperature",
-                            icon: "thermometer",
-                            color: .orange,
-                            value: "98.6",
-                            unit: "°F"
-                        )
-                        
-                        VitalCard(
-                            title: "Oxygen Sat",
-                            icon: "lungs.fill",
-                            color: .cyan,
-                            value: "98",
-                            unit: "%"
-                        )
-                    }
+                    FeatureRow(
+                        icon: "target",
+                        title: "Personal Goals",
+                        description: "Set targets and track your progress toward better health",
+                        color: .purple
+                    )
                 }
-                
-                // Features Section
-                VStack(spacing: Spacing.medium) {
-                    Text("Powerful Features")
-                        .font(.title3.bold())
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    VStack(spacing: Spacing.medium) {
-                        FeatureRow(
-                            icon: "chart.line.uptrend.xyaxis",
-                            title: "Trend Analysis",
-                            description: "Visualize your health data over time with interactive charts",
-                            color: .healthPrimary
-                        )
-                        
-                        FeatureRow(
-                            icon: "bell.fill",
-                            title: "Smart Reminders",
-                            description: "Get reminded to take measurements at optimal times",
-                            color: .healthWarning
-                        )
-                        
-                        FeatureRow(
-                            icon: "share",
-                            title: "Share with Doctors",
-                            description: "Export reports to share with your healthcare team",
-                            color: .healthSuccess
-                        )
-                        
-                        FeatureRow(
-                            icon: "target",
-                            title: "Personal Goals",
-                            description: "Set targets and track your progress toward better health",
-                            color: .purple
-                        )
-                    }
-                }
-                
-                // Health Integration
-                HealthCard {
-                    VStack(spacing: Spacing.medium) {
-                        HStack {
-                            Image(systemName: "heart.text.square")
-                                .font(.title)
-                                .foregroundStyle(Color.healthPrimary)
-                            
-                            VStack(alignment: .leading, spacing: Spacing.xs) {
-                                Text("Apple Health Integration")
-                                    .font(.headline)
-                                    .foregroundStyle(.primary)
-                                
-                                Text("Automatically sync with Apple Health for a complete picture of your wellness journey.")
-                                    .font(.body)
-                                    .foregroundStyle(.secondary)
-                            }
-                            
-                            Spacer()
-                        }
-                    }
-                }
-                
-                Spacer()
-                    .frame(height: Spacing.xl)
             }
+            
+            
+            
+            Spacer()
+                .frame(height: Spacing.xl)
         }
+        
         .padding(.horizontal, Spacing.large)
     }
 }

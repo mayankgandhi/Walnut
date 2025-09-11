@@ -11,7 +11,7 @@ import WalnutDesignSystem
 
 /// Patient setup screen for gathering patient information
 struct PatientSetupScreen: View {
-
+    
     @Bindable var viewModel: OnboardingViewModel
     
     // Define options as enums that conform to CustomStringConvertible
@@ -45,45 +45,11 @@ struct PatientSetupScreen: View {
     var body: some View {
         ScrollView {
             VStack(spacing: Spacing.xl) {
-                // Header with enhanced visual appeal
-                VStack(spacing: Spacing.large) {
-                    // Enhanced icon with gradient background
-                    ZStack {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        Color.healthPrimary.opacity(0.1),
-                                        Color.healthPrimary.opacity(0.05)
-                                    ]),
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(width: 100, height: 100)
-                        
-                        Circle()
-                            .stroke(Color.healthPrimary.opacity(0.2), lineWidth: 2)
-                            .frame(width: 100, height: 100)
-                        
-                        Image(systemName: "person.circle.fill")
-                            .font(.system(size: 50, weight: .semibold))
-                            .foregroundStyle(Color.healthPrimary)
-                    }
-                    
-                    VStack(spacing: Spacing.small) {
-                        Text("Patient Information")
-                            .font(.largeTitle.bold())
-                            .foregroundStyle(.primary)
-                        
-                        Text("Let's set up your patient profile with some basic information")
-                            .font(.body)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, Spacing.medium)
-                    }
-                }
-                .padding(.top, Spacing.large)
+                
+                OnboardingHeader(
+                    icon:  "person.circle.fill",
+                    title: "Patient Information",
+                    subtitle: "Let's set up your patient profile with some basic information")
                 
                 // Form Fields with improved design
                 VStack(spacing: Spacing.large) {
@@ -110,7 +76,6 @@ struct PatientSetupScreen: View {
                                 text: $viewModel.patientSetupData.name,
                                 placeholder: "Enter your full name",
                                 helperText: "This will be displayed on your health records",
-                                errorMessage: getValidationError(for: "name"),
                                 iconColor: Color.healthPrimary,
                                 isRequired: true,
                                 contentType: .name
@@ -122,7 +87,6 @@ struct PatientSetupScreen: View {
                                 title: "Date of Birth",
                                 selectedDate: $viewModel.patientSetupData.dateOfBirth,
                                 helperText: "Used for age calculations and health assessments",
-                                errorMessage: getValidationError(for: "dateOfBirth"),
                                 iconColor: .blue,
                                 isRequired: true
                             )
@@ -356,21 +320,7 @@ struct PatientSetupScreen: View {
             selectedGender = GenderOption.allCases.first { $0.rawValue == viewModel.patientSetupData.gender }
             selectedBloodType = BloodTypeOption.allCases.first { $0.rawValue == viewModel.patientSetupData.bloodType }
         }
-    
-    // MARK: - Helper Methods
-    
-    /// Get validation error for a specific field
-    private func getValidationError(for field: String) -> String? {
-        let errors = viewModel.validatePatientSetup()
         
-        switch field {
-        case "name":
-            return errors.contains("Full name is required") ? "Full name is required" : nil
-        case "dateOfBirth":
-            return errors.contains("Date of birth is required") ? "Date of birth is required" : nil
-        default:
-            return nil
-        }
     }
 }
 
@@ -378,6 +328,5 @@ struct PatientSetupScreen: View {
 #Preview {
     NavigationStack {
         PatientSetupScreen(viewModel: OnboardingViewModel())
-            .environment(OnboardingViewModel())
     }
 }
