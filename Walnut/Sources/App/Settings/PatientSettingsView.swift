@@ -77,6 +77,7 @@ struct PatientSettingsView: View {
             VStack(spacing: Spacing.xs) {
                 AppearanceView(patient: viewModel.patient)
                 ICloudSyncView(patient: viewModel.patient)
+                AlarmSettingsView(patient: viewModel.patient)
                 AboutView(patient: viewModel.patient)
                 HelpSupportView(patient: viewModel.patient)
             }

@@ -46,6 +46,8 @@ let infoPlist: InfoPlist = .extendingDefault(with: [
         ]
     ),
     "NSLocalNetworkUsageDescription": .string("Atlantis would use Bonjour Service to discover Proxyman app from your local network. Atlantis uses it to transfer the data from your iOS app to Proxyman macOS for debugging purposes."),
+    "NSAlarmKitUsageDescription": .string("Alarm Kit permissions for reminding users to take their medications"),
+    
 ])
 
 let settings: SettingsDictionary = [
