@@ -32,15 +32,13 @@ struct ProgressIndicatorView: View {
             .frame(height: 4)
             
             HStack {
+                
+                Spacer()
+                
                 Text("Step \(Int(progress * 6)) of 6")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 
-                Spacer()
-                
-                Text("\(Int(progress * 100))% Complete")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
         }
     }

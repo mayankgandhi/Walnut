@@ -16,7 +16,7 @@ public struct ContentView: View {
     public var body: some View {
         Group {
             if hasCompletedOnboarding,
-                let patient = firstPatient {
+               let patient = firstPatient {
                 PatientTabView(patient: patient)
             } else {
                 OnboardingContainerView {
@@ -24,14 +24,12 @@ public struct ContentView: View {
                 }
             }
         }
-         .onAppear {
+        .onAppear {
             // Check if onboarding was completed previously
             if !hasCompletedOnboarding {
                 showingOnboarding = true
             }
-        }
-        
-        
+        }        
     }
     
 }

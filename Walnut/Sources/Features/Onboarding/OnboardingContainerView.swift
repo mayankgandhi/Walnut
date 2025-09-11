@@ -25,6 +25,7 @@ struct OnboardingContainerView: View {
                 ProgressIndicatorView(progress: viewModel.progressPercentage)
                     .padding(.vertical, Spacing.large)
                     .padding(.horizontal, Spacing.medium)
+                    .opacity(viewModel.currentScreen != .welcome ? 1 : 0.01)
                 
                 // Main content with page navigation
                 TabView(selection: $viewModel.currentScreenIndex) {
@@ -42,7 +43,6 @@ struct OnboardingContainerView: View {
                     
                     VitalsIntroductionScreen(viewModel: viewModel)
                         .tag(OnboardingScreen.vitalsIntroduction.rawValue)
-                    
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.spring(duration: 0.1), value: viewModel.currentScreenIndex)
