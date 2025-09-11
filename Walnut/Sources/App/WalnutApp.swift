@@ -2,7 +2,6 @@ import SwiftUI
 import SwiftData
 
 #if DEBUG
-// 1. Import Atlantis
 import Atlantis
 #endif
 
@@ -27,7 +26,7 @@ struct WalnutApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            AppMainView()
                 .modelContainer(for: [
                     Patient.self,
                     MedicalCase.self,
