@@ -43,7 +43,7 @@ struct PatientSetupScreen: View {
     @State private var selectedBloodType: BloodTypeOption?
     
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(spacing: Spacing.xl) {
                 
                 OnboardingHeader(

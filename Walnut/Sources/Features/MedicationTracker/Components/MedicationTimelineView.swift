@@ -104,10 +104,10 @@ struct TimeSlotHeader: View {
             // Time range indicator
             Text(timeRangeText)
                 .font(.caption.weight(.medium))
-                .foregroundStyle(.primary)
+                .foregroundStyle(Color.white)
                 .padding(.horizontal, Spacing.xs)
                 .padding(.vertical, 4)
-                .background(.quaternary)
+                .background(timeSlot.color)
                 .cornerRadius(6)
         }
         .padding(.bottom, Spacing.xs)
@@ -148,10 +148,11 @@ struct MedicationDoseCard: View {
     var body: some View {
         HealthCard {
             VStack(alignment: .leading, spacing: Spacing.small) {
+            
                 // Header with status indicator and time
                 VStack(alignment: .leading, spacing: Spacing.small) {
                     
-                    HStack(alignment: .top) {
+                    VStack(alignment: .leading) {
                         
                         Text(dose.medication.name ?? "Unknown")
                             .font(.system(.subheadline, design: .rounded, weight: .semibold))

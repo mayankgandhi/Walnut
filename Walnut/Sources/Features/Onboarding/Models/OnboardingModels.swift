@@ -10,6 +10,7 @@ import Foundation
 
 /// Represents different onboarding flow screens
 enum OnboardingScreen: Int, CaseIterable {
+
     case welcome = 0
     case healthProfile
     case permissions
@@ -96,6 +97,27 @@ enum ChronicCondition: String, CaseIterable {
                 return "brown"
             case .thyroidDisorder:
                 return "green"
+        }
+    }
+    
+    var specialty: MedicalSpecialty {
+        switch self {
+            case .diabetes:
+                    .endocrinologist
+            case .hypertension:
+                    .cardiologist
+            case .heartDisease:
+                    .cardiologist
+            case .asthma:
+                    .pulmonologist
+            case .arthritis:
+                    .rheumatologist
+            case .copd:
+                    .pulmonologist
+            case .osteoporosis:
+                    .orthopedicSurgeon
+            case .thyroidDisorder:
+                    .endocrinologist
         }
     }
 }

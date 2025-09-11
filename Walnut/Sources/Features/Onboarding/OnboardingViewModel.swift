@@ -136,7 +136,17 @@ final class OnboardingViewModel {
             medicalCases: []
         )
         
+       
         modelContext.insert(patient)
+        
+        healthProfile.selectedConditions.forEach { condition in
+            let medicalCase = MedicalCase(
+                chronicCondition: condition,
+                patient: patient
+            )
+            patient.medicalCases?.append(medicalCase)
+        }
+        
         try modelContext.save()
         return patient
     }

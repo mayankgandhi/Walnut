@@ -63,6 +63,24 @@ class MedicalCase: Identifiable, Sendable {
         self.unparsedDocuments = unparsedDocuments
     }
     
+    init(
+        chronicCondition: ChronicCondition,
+        patient: Patient
+    ) {
+        self.id = UUID()
+        self.title = chronicCondition.rawValue
+        self.notes = nil
+        self.type = .consultation
+        self.specialty = chronicCondition.specialty
+        self.isActive = true
+        self.createdAt = Date()
+        self.updatedAt = Date()
+        self.patient = patient
+        self.prescriptions = []
+        self.bloodReports = []
+        self.unparsedDocuments = []
+    }
+    
 }
 
 // MARK: - Extension for easy access

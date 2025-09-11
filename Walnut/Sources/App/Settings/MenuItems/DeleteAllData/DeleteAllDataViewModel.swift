@@ -76,6 +76,10 @@ class DeleteAllDataViewModel {
             showDeleteConfirmation = false
             showDeleteSuccess = true
             
+            UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+            
+            assert(false)
+            
         } catch {
             isDeleting = false
             // Handle error - could add error state here

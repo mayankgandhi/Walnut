@@ -26,7 +26,7 @@ struct WalnutApp: App {
     
     var body: some Scene {
         WindowGroup {
-            AppMainView()
+            ContentView()
                 .modelContainer(for: [
                     Patient.self,
                     MedicalCase.self,

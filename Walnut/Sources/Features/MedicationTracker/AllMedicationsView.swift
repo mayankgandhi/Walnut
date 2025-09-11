@@ -51,26 +51,32 @@ struct AllMedicationsView: View {
         return activePrescriptions.compactMap { $0.medications }.reduce([], +)
     }
     
-
+    
     
     // MARK: - Body
     
     var body: some View {
-        ZStack {
-            ScrollView {
-                VStack(spacing: Spacing.large) {
-            
-                    // Main timeline content
-                    if !scheduleService.todaysDoses.isEmpty {
-                        MedicationTimelineView(
-                            scheduledDoses: scheduleService.timelineDoses
-                        )
-                    } else {
-                        MedicationEmptyState(onAddPrescription: handleAddPrescription)
-                    }
+        ScrollView {
+            VStack(spacing: Spacing.large) {
+                
+                HealthCardHeader(
+                    iconName: "pill-bottle",
+                    iconColor: .healthSuccess,
+                    title: "Medications",
+                    subtitle: "\(scheduleService.todaysDoses.count) Medications"
+                )
+                .padding(.horizontal, Spacing.medium)
+                
+                // Main timeline content
+                if !scheduleService.todaysDoses.isEmpty {
+                    MedicationTimelineView(
+                        scheduledDoses: scheduleService.timelineDoses
+                    )
+                } else {
+                    MedicationEmptyState(onAddPrescription: handleAddPrescription)
                 }
-                .padding(.bottom, 100) // Extra padding for better scrolling
             }
+            .padding(.bottom, 100) // Extra padding for better scrolling
         }
         .sheet(item: $medicationToEdit) {
             MedicationEditor(
@@ -94,7 +100,7 @@ struct AllMedicationsView: View {
         }
     }
     
-   
+    
     private func handleMedicationSave(_ medication: Medication) {
         Task { @MainActor in
             // Find and update the prescription containing this medication

@@ -15,7 +15,7 @@ struct PermissionsScreen: View {
      @Bindable var viewModel: OnboardingViewModel
     
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(spacing: Spacing.xl) {
             
                 OnboardingHeader(
