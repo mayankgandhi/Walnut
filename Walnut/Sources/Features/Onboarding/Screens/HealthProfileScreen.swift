@@ -108,12 +108,12 @@ private struct ConditionTile: View {
             .background(
                 RoundedRectangle(cornerRadius: 12)
                     .fill(
-                        isSelected ? condition.color.opacity(0.4) : .clear
+                        isSelected ? Color.healthPrimary.opacity(0.4) : .clear
                     )
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? condition.color.opacity(1.0) : condition.color.opacity(0.1), lineWidth: 2)
+                    .stroke(isSelected ? Color.healthPrimary.opacity(1.0) : Color.healthPrimary.opacity(0.1), lineWidth: 2)
             )
             .animation(.easeInOut(duration: 0.2), value: isSelected)
             .contentShape(.rect)

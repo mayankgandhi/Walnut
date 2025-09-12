@@ -22,30 +22,40 @@ struct OnboardingContainerView: View {
         NavigationStack {
             VStack(alignment: .center, spacing: .zero) {
                 // Progress indicator
-                ProgressIndicatorView(progress: viewModel.progressPercentage)
-                    .padding(.vertical, Spacing.large)
-                    .padding(.horizontal, Spacing.medium)
-                    .opacity(viewModel.currentScreen != .welcome ? 1 : 0.01)
+                ProgressIndicatorView(
+                    progress: viewModel.progressPercentage,
+                    currentStep: viewModel.currentScreenIndex + 1,
+                    totalSteps: viewModel.availableScreens.count
+                )
+                .padding(.vertical, Spacing.large)
+                .padding(.horizontal, Spacing.medium)
+                .opacity(viewModel.currentScreen != .welcome ? 1 : 0.01)
                 
-                // Main content with page navigation
-                TabView(selection: $viewModel.currentScreenIndex) {
-                    WelcomeScreen(viewModel: viewModel)
-                        .tag(OnboardingScreen.welcome.rawValue)
-                    
-                    HealthProfileScreen(viewModel: viewModel)
-                        .tag(OnboardingScreen.healthProfile.rawValue)
-                    
-                    PermissionsScreen(viewModel: viewModel)
-                        .tag(OnboardingScreen.permissions.rawValue)
-                    
-                    PatientSetupScreen(viewModel: viewModel)
-                        .tag(OnboardingScreen.patientSetup.rawValue)
-                    
-                    VitalsIntroductionScreen(viewModel: viewModel)
-                        .tag(OnboardingScreen.vitalsIntroduction.rawValue)
+                // Main content container with direct view switching
+                ZStack {
+                    // Show current screen based on viewModel.currentScreen
+                    Group {
+                        switch viewModel.currentScreen {
+                        case .welcome:
+                            WelcomeScreen(viewModel: viewModel)
+                        case .healthProfile:
+                            HealthProfileScreen(viewModel: viewModel)
+                        case .permissions:
+                            PermissionsScreen(viewModel: viewModel)
+                        case .patientSetup:
+                            PatientSetupScreen(viewModel: viewModel)
+                        case .vitalsIntroduction:
+                            VitalsIntroductionScreen(viewModel: viewModel)
+                        }
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .trailing)))
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-                .animation(.spring(duration: 0.1), value: viewModel.currentScreenIndex)
+                .frame(
+                    maxWidth: .infinity,
+                    maxHeight: .infinity,
+                    alignment: .top
+                )
+                .animation(.easeInOut(duration: 0.3), value: viewModel.currentScreen)
                 
                 // Navigation controls
                 OnboardingNavigationView(viewModel: viewModel)
@@ -59,7 +69,9 @@ struct OnboardingContainerView: View {
             .environment(viewModel)
             .navigationBarHidden(true)
             .onReceive(NotificationCenter.default.publisher(for: .onboardingCompleted)) { _ in
-                onOnboardingComplete()
+                Task { @MainActor in
+                    onOnboardingComplete()
+                }
             }
         }
     }

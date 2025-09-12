@@ -12,6 +12,8 @@ import WalnutDesignSystem
 // MARK: - Progress Indicator
 struct ProgressIndicatorView: View {
     let progress: Double
+    let currentStep: Int
+    let totalSteps: Int
     
     var body: some View {
         VStack(spacing: Spacing.small) {
@@ -35,7 +37,7 @@ struct ProgressIndicatorView: View {
                 
                 Spacer()
                 
-                Text("Step \(Int(progress * 6)) of 6")
+                Text("Step \(currentStep) of \(totalSteps)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 

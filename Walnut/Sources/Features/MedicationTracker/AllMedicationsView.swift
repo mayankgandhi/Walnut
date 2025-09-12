@@ -56,17 +56,16 @@ struct AllMedicationsView: View {
     // MARK: - Body
     
     var body: some View {
+    
+        NavBarHeader(
+            iconName: "pill-bottle",
+            iconColor: .red,
+            title: "Medications",
+            subtitle: "\(scheduleService.todaysDoses.count) Medications"
+        )
+        
         ScrollView {
             VStack(spacing: Spacing.large) {
-                
-                HealthCardHeader(
-                    iconName: "pill-bottle",
-                    iconColor: .healthSuccess,
-                    title: "Medications",
-                    subtitle: "\(scheduleService.todaysDoses.count) Medications"
-                )
-                .padding(.horizontal, Spacing.medium)
-                
                 // Main timeline content
                 if !scheduleService.todaysDoses.isEmpty {
                     MedicationTimelineView(
@@ -76,6 +75,7 @@ struct AllMedicationsView: View {
                     MedicationEmptyState(onAddPrescription: handleAddPrescription)
                 }
             }
+            .padding(.top, Spacing.medium)
             .padding(.bottom, 100) // Extra padding for better scrolling
         }
         .sheet(item: $medicationToEdit) {

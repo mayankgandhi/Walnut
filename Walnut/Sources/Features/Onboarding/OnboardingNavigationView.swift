@@ -11,8 +11,10 @@ import WalnutDesignSystem
 
 // MARK: - Navigation Controls
 struct OnboardingNavigationView: View {
+
     @Bindable var viewModel: OnboardingViewModel
-    
+    @Environment(\.modelContext) var modelContext
+
     var body: some View {
         HStack(spacing: Spacing.medium) {
             // Back button
@@ -32,7 +34,9 @@ struct OnboardingNavigationView: View {
                 style: .primary,
                 icon: viewModel.isLastScreen ? "checkmark" : "chevron.right"
             ) {
-                viewModel.nextScreen()
+                Task {
+                    try? await viewModel.nextScreen(modelContext: modelContext)
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: 44)
             .disabled(!viewModel.canProceedToNext || viewModel.isLoading)

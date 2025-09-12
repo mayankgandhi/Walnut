@@ -60,18 +60,23 @@ struct PatientTabView: View {
         .onAppear {
             uploadStateManager.initializeProcessingService(modelContext: modelContext)
         }
-        .conditionalModifier(when: uploadStateManager.isUploading, apply: {
-            $0.tabViewBottomAccessory {
-                if let documentType = uploadStateManager.documentType {
-                    UploadViewBottomAccessory(
-                        documentType: documentType,
-                        state: uploadStateManager.uploadState,
-                        progress: uploadStateManager.progress,
-                        customStatusText: uploadStateManager.statusText
-                    )
-                }
+        .tabViewBottomAccessory {
+            // Always provide the accessory view, but conditionally show content
+            if uploadStateManager.isUploading, let documentType = uploadStateManager.documentType {
+                UploadViewBottomAccessory(
+                    documentType: documentType,
+                    state: uploadStateManager.uploadState,
+                    progress: uploadStateManager.progress,
+                    customStatusText: uploadStateManager.statusText
+                )
+            } else {
+                // Provide an empty view with zero height when not uploading
+                // This maintains view structure stability
+                EmptyView()
+                    .frame(height: 0)
+                    .opacity(0)
             }
-        })
+        }
     }
 }
 

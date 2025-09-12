@@ -24,9 +24,28 @@ final class OnboardingViewModel {
     var patientSetupData = PatientSetupData()
     var permissions = AppPermissions()
     
+    // MARK: - Initialization
+    init() {
+        // Check permissions at startup to determine initial flow
+        checkNotificationPermission()
+    }
+    
+    // MARK: - Dynamic Flow Management
+    private var _availableScreens: [OnboardingScreen] = []
+    
+    var availableScreens: [OnboardingScreen] {
+        if _availableScreens.isEmpty {
+            _availableScreens = calculateAvailableScreens()
+        }
+        return _availableScreens
+    }
+    
     // MARK: - Computed Properties
     var currentScreen: OnboardingScreen {
-        OnboardingScreen(rawValue: currentScreenIndex) ?? .welcome
+        guard currentScreenIndex < availableScreens.count else {
+            return availableScreens.last ?? .welcome
+        }
+        return availableScreens[currentScreenIndex]
     }
     
     var canProceedToNext: Bool {
@@ -45,22 +64,23 @@ final class OnboardingViewModel {
     }
     
     var isLastScreen: Bool {
-        currentScreenIndex >= OnboardingScreen.allCases.count - 1
+        currentScreenIndex >= availableScreens.count - 1
     }
     
     var progressPercentage: Double {
-        Double(currentScreenIndex + 1) / Double(OnboardingScreen.allCases.count)
+        Double(currentScreenIndex + 1) / Double(availableScreens.count)
     }
     
     // MARK: - Navigation Actions
     @MainActor
-    func nextScreen() {
+    func nextScreen(modelContext: ModelContext) async throws {
         guard canProceedToNext else { return }
         
-        withAnimation(.easeInOut(duration: 0.3)) {
-            if isLastScreen {
-                completeOnboarding()
-            } else {
+        if isLastScreen {
+            _ = try createPatient(modelContext: modelContext)
+            completeOnboarding()
+        } else {
+            withAnimation(.easeInOut(duration: 0.3)) {
                 currentScreenIndex += 1
             }
         }
@@ -75,9 +95,30 @@ final class OnboardingViewModel {
     }
     
     func goToScreen(_ screen: OnboardingScreen) {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentScreenIndex = screen.rawValue
+        if let index = availableScreens.firstIndex(of: screen) {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                currentScreenIndex = index
+            }
         }
+    }
+    
+    // MARK: - Dynamic Flow Calculation
+    private func calculateAvailableScreens() -> [OnboardingScreen] {
+        var screens: [OnboardingScreen] = [.welcome, .healthProfile]
+        
+        // Only include permissions screen if notifications are not already granted
+        if permissions.notifications != .granted {
+            screens.append(.permissions)
+        }
+        
+        // Always include patient setup and vitals introduction
+        screens.append(contentsOf: [.patientSetup, .vitalsIntroduction])
+        
+        return screens
+    }
+    
+    func refreshAvailableScreens() {
+        _availableScreens = calculateAvailableScreens()
     }
     
     // MARK: - Health Profile Actions
@@ -97,14 +138,18 @@ final class OnboardingViewModel {
                 options: [.alert, .badge, .sound]
             )
             permissions.notifications = granted ? .granted : .denied
+            refreshAvailableScreens()
         } catch {
             permissions.notifications = .denied
+            refreshAvailableScreens()
         }
     }
     
     func checkNotificationPermission() {
         UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
             DispatchQueue.main.async {
+                let oldStatus = self?.permissions.notifications
+                
                 switch settings.authorizationStatus {
                 case .authorized, .provisional:
                     self?.permissions.notifications = .granted
@@ -114,6 +159,11 @@ final class OnboardingViewModel {
                     self?.permissions.notifications = .notDetermined
                 @unknown default:
                     self?.permissions.notifications = .notDetermined
+                }
+                
+                // Refresh available screens if permission status changed
+                if oldStatus != self?.permissions.notifications {
+                    self?.refreshAvailableScreens()
                 }
             }
         }

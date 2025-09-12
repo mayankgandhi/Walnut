@@ -64,6 +64,7 @@ class Patient: Identifiable, Sendable, Hashable {
 
 // MARK: - Sample Data
 extension Patient {
+
     static let samplePatient = Patient(
         id: UUID(),
         name: "John Doe",

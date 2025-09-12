@@ -39,7 +39,7 @@ enum OnboardingScreen: Int, CaseIterable {
             case .welcome:
                 return "Your comprehensive health management companion"
             case .healthProfile:
-                return "Tell us about your health conditions and emergency contacts"
+                return "Tell us about your health conditions"
             case .permissions:
                 return "Enable features to get the most out of your health tracking"
             case .patientSetup:
