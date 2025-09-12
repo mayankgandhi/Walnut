@@ -15,6 +15,7 @@ struct WelcomeScreen: View {
     @Bindable var viewModel: OnboardingViewModel
     
     @State var showFeatures: Bool = false
+    @State var showChildFeatures: Bool = false
     @Namespace var animation
     
     var body: some View {
@@ -41,16 +42,10 @@ struct WelcomeScreen: View {
             
             if showFeatures {
                 VStack(alignment: .center, spacing: Spacing.medium) {
-                    FeatureItemView(icon: "ai-sparkle", title: "Super AI", subtitle: "Keep track of features")
-                        .matchedGeometryEffect(id: "ai-sparkle", in: animation)
-                    FeatureItemView(icon: "graph", title: "Trends", subtitle: "Keep track of features")
-                        .matchedGeometryEffect(id: "graph", in: animation)
-                    FeatureItemView(icon: "calendar", title: "Smart Reminders", subtitle: "Keep track of features")
-                        .matchedGeometryEffect(id: "calendar", in: animation)
-                    FeatureItemView(icon: "health-journal", title: "Health Journal", subtitle: "Keep track of features")
-                        .matchedGeometryEffect(id: "health-journal", in: animation)
-                    FeatureItemView(icon: "journal", title: "Health Journal", subtitle: "Keep track of features")
-                        .matchedGeometryEffect(id: "journal", in: animation)
+                    featureItemView(icon: "ai-sparkle", title: "Super AI", subtitle: "Keep track of features")
+                    featureItemView(icon: "graph", title: "Health Trends Tracker", subtitle: "Visualize your health journey with dynamic charts and trends. Stay informed, stay ahead.")
+                    featureItemView(icon: "calendar", title: "Never Miss a Dose", subtitle: "Smart reminders for medications, appointments, and check-ups. Your health, always on track.")
+                    featureItemView(icon: "journal", title: "Secure Health Vault", subtitle: "Store and organize all your health documents securely. Access your records anytime, anywhere.")
                 }
             } else {
                 HStack(alignment: .center, spacing: Spacing.medium) {
@@ -66,16 +61,12 @@ struct WelcomeScreen: View {
                         .resizable()
                         .scaledToFit()
                         .matchedGeometryEffect(id: "calendar", in: animation)
-                    Image("health-journal")
-                        .resizable()
-                        .scaledToFit()
-                        .matchedGeometryEffect(id: "health-journal", in: animation)
+                   
                     Image("journal")
                         .resizable()
                         .scaledToFit()
                         .matchedGeometryEffect(id: "journal", in: animation)
                 }
-                
             }
         }
         .padding(.horizontal, Spacing.medium)
@@ -86,27 +77,20 @@ struct WelcomeScreen: View {
             }
         }
     }
-}
-
-struct FeatureItemView: View {
     
-    var icon: String
-    var title: String
-    var subtitle: String
-    
-    @State var showFeatures: Bool = false
-    @Namespace var itemNamespace
-    
-    var body: some View {
+    func featureItemView(
+        icon: String,
+        title: String,
+        subtitle: String
+    ) -> some View {
         Group {
-            if showFeatures {
-                
+            if showChildFeatures {
                 HStack(alignment: .center, spacing: Spacing.medium) {
                     Image(icon)
                         .resizable()
                         .scaledToFit()
                         .frame(width: 64, height: 64)
-                        .matchedGeometryEffect(id: icon, in: itemNamespace)
+                        .matchedGeometryEffect(id: icon, in: animation)
                     
                     VStack(alignment: .leading, spacing: Spacing.xs) {
                         Text(title)
@@ -114,11 +98,12 @@ struct FeatureItemView: View {
                             .foregroundStyle(.primary)
                         
                         Text(subtitle)
-                            .font(.subheadline)
+                            .font(.subheadline.weight(.light))
                             .foregroundStyle(.primary)
                     }
                     
                 }
+                .padding(Spacing.medium)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .subtleCardStyle()
             } else {
@@ -126,7 +111,8 @@ struct FeatureItemView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 64, height: 64)
-                    .matchedGeometryEffect(id: icon, in: itemNamespace)
+                    .matchedGeometryEffect(id: icon, in: animation)
+                    .padding(.horizontal, Spacing.medium)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
             }
@@ -134,11 +120,12 @@ struct FeatureItemView: View {
         .task {
             try? await Task.sleep(nanoseconds: 2_000_000_000)
             withAnimation(.easeInOut(duration: 0.5)) {
-                showFeatures = true
+                showChildFeatures = true
             }
         }
     }
 }
+
 
 
 // MARK: - Preview

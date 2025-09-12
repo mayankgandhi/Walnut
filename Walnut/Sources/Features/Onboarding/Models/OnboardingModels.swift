@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 /// Represents different onboarding flow screens
 enum OnboardingScreen: Int, CaseIterable {
@@ -53,13 +54,13 @@ enum OnboardingScreen: Int, CaseIterable {
 /// Common chronic conditions for health profile setup
 enum ChronicCondition: String, CaseIterable {
 
-    case diabetes = "Diabetes"
-    case hypertension = "High Blood Pressure"
+    case hypertension = "Hypertension"
     case heartDisease = "Heart Disease"
     case asthma = "Asthma"
-    case arthritis = "Arthritis"
     case copd = "COPD"
+    case arthritis = "Arthritis"
     case osteoporosis = "Osteoporosis"
+    case diabetes = "Diabetes"
     case thyroidDisorder = "Thyroid Disorder"
     
     var icon: String {
@@ -83,20 +84,20 @@ enum ChronicCondition: String, CaseIterable {
         }
     }
     
-    var color: String {
+    var color: Color {
         switch self {
             case .diabetes:
-                return "orange"
+                return .orange
             case .hypertension, .heartDisease:
-                return "red"
+                return .red
             case .asthma, .copd:
-                return "blue"
+                return .blue
             case .arthritis:
-                return "purple"
+                return .purple
             case .osteoporosis:
-                return "brown"
+                return .brown
             case .thyroidDisorder:
-                return "green"
+                return .green
         }
     }
     

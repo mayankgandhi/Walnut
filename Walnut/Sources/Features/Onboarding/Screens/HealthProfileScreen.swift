@@ -22,25 +22,28 @@ struct HealthProfileScreen: View {
             
             // Chronic Conditions Section
             VStack(spacing: Spacing.medium) {
+            
                 SectionHeader(
                     title: "Chronic Conditions",
                     subtitle: "Select any that apply (optional)"
                 )
                 
-                HealthCard {
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.small), count: 2), spacing: Spacing.small) {
-                        ForEach(ChronicCondition.allCases, id: \.self) { condition in
-                            ConditionTile(
-                                condition: condition,
-                                isSelected: viewModel.healthProfile.selectedConditions.contains(condition)
-                            ) {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    viewModel.toggleChronicCondition(condition)
-                                }
+                LazyVGrid(
+                    columns: Array(repeating: .init(), count: 2),
+                    spacing: Spacing.small
+                ) {
+                    ForEach(ChronicCondition.allCases, id: \.self) { condition in
+                        ConditionTile(
+                            condition: condition,
+                            isSelected: viewModel.healthProfile.selectedConditions.contains(condition)
+                        ) {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                viewModel.toggleChronicCondition(condition)
                             }
                         }
                     }
                 }
+                
             }
             
             
@@ -80,6 +83,7 @@ private struct SectionHeader: View {
 }
 
 private struct ConditionTile: View {
+    
     let condition: ChronicCondition
     let isSelected: Bool
     let action: () -> Void
@@ -87,32 +91,36 @@ private struct ConditionTile: View {
     var body: some View {
         Button(action: action) {
             VStack(spacing: Spacing.small) {
-                Image(systemName: condition.icon)
-                    .font(.title2)
+                Image(condition.specialty.icon)
+                    .resizable()
+                    .frame(width: 32, height: 32)
                     .foregroundStyle(isSelected ? .white : .healthPrimary)
                 
                 Text(condition.rawValue)
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(isSelected ? .white : .primary)
+                    .font(.headline.weight(.medium))
+                    .foregroundStyle(.primary)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, Spacing.medium)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.vertical, Spacing.small)
             .padding(.horizontal, Spacing.small)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ? Color.healthPrimary : .clear)
+                    .fill(
+                        isSelected ? condition.color.opacity(0.4) : .clear
+                    )
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color.healthPrimary : .clear, lineWidth: 2)
+                    .stroke(isSelected ? condition.color.opacity(1.0) : condition.color.opacity(0.1), lineWidth: 2)
             )
-            .scaleEffect(isSelected ? 1.05 : 1.0)
             .animation(.easeInOut(duration: 0.2), value: isSelected)
+            .contentShape(.rect)
         }
         .buttonStyle(.plain)
     }
+    
 }
 
 // MARK: - Preview
