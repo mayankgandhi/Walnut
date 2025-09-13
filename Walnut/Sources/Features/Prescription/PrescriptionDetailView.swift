@@ -40,7 +40,7 @@ struct PrescriptionDetailView: View {
                     // Clinical Notes Section
                     if let notes = prescription.notes,
                        !notes.isEmpty {
-                        enhancedNotesCard
+                        enhancedNotesCard(notes: notes)
                     }
                     
                     // Document Section
@@ -85,9 +85,9 @@ struct PrescriptionDetailView: View {
     // MARK: - Enhanced Header Card
     private var enhancedHeaderCard: some View {
         HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.large) {
+            VStack(alignment: .leading, spacing: Spacing.medium) {
                 // Hero Section with enhanced prescription visualization
-                HStack(alignment: .center, spacing: Spacing.large) {
+                HStack(alignment: .center, spacing: Spacing.medium) {
                     // Enhanced Prescription Icon with animated background
                     ZStack {
                         // Animated background gradient
@@ -102,18 +102,18 @@ struct PrescriptionDetailView: View {
                                     endPoint: .bottomTrailing
                                 )
                             )
-                            .frame(width: 80, height: 80)
+                            .frame(width: 64, height: 64)
                             .shadow(color: Color.healthSuccess.opacity(0.3), radius: 8, x: 0, y: 4)
                         
                         // Subtle pulse ring
                         Circle()
                             .stroke(DocumentType.prescription.backgroundColor.opacity(0.2), lineWidth: 2)
-                            .frame(width: 88, height: 88)
-                            
+                            .frame(width: 64, height: 64)
+                        
                         // Main icon with enhanced styling
                         Image(DocumentType.prescription.iconImage)
                             .resizable()
-                            .frame(width: 72, height: 72)
+                            .frame(width: 48, height: 48)
                             .scaleEffect(1.0)
                     }
                     
@@ -121,7 +121,7 @@ struct PrescriptionDetailView: View {
                     VStack(alignment: .leading, spacing: Spacing.small) {
                         if let doctorName = prescription.doctorName {
                             Text("\(doctorName)")
-                                .font(.title.weight(.bold))
+                                .font(.headline.weight(.bold))
                                 .foregroundStyle(.primary)
                                 .lineLimit(2)
                                 .multilineTextAlignment(.leading)
@@ -138,29 +138,13 @@ struct PrescriptionDetailView: View {
                                     .frame(width: 20, height: 20)
                                     .overlay {
                                         Image(systemName: "building.2")
-                                            .font(.caption2.weight(.medium))
+                                            .font(.caption2.weight(.regular))
                                             .foregroundStyle(.blue)
                                     }
                                 
                                 Text(facilityName)
-                                    .font(.subheadline.weight(.medium))
+                                    .font(.body.weight(.medium))
                                     .foregroundStyle(.secondary)
-                            }
-                        }
-                        
-                        if let medicationCount = prescription.medications?.count {
-                            // Enhanced status with medication count
-                            HStack(spacing: Spacing.xs) {
-                                Circle()
-                                    .fill(Color.healthSuccess)
-                                    .frame(width: 8, height: 8)
-                                    .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: prescription.medications?.isEmpty)
-                                
-                                Text(
-                                    "\(medicationCount) Medications Prescribed"
-                                )
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(Color.healthSuccess)
                             }
                         }
                         
@@ -212,7 +196,7 @@ struct PrescriptionDetailView: View {
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(followUpColor)
                     }
-                   
+                    
                 }
             }
         }
@@ -243,19 +227,12 @@ struct PrescriptionDetailView: View {
                                 
                                 Text(followUpTests[index])
                                     .font(.subheadline)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(.primary)
                                 
                                 Spacer()
                             }
                         }
                     }
-                    .padding(Spacing.small)
-                    .background(Color.healthWarning.opacity(0.05))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.healthWarning.opacity(0.1), lineWidth: 1)
-                    )
                 }
             }
         }
@@ -263,23 +240,15 @@ struct PrescriptionDetailView: View {
     
     
     // MARK: - Enhanced Notes Card
-    private var enhancedNotesCard: some View {
+    private func enhancedNotesCard(notes: String) -> some View {
         VStack(alignment: .leading, spacing: Spacing.medium) {
-            
             HealthCardHeader.clinicalNotes()
-            
-            if let notes = prescription.notes {
+            HealthCard {
                 Text(notes)
                     .font(.subheadline)
                     .lineSpacing(4)
                     .foregroundStyle(.primary)
-                    .padding(Spacing.small)
-                    .background(Color.healthPrimary.opacity(0.05))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.healthPrimary.opacity(0.1), lineWidth: 1)
-                    )
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }

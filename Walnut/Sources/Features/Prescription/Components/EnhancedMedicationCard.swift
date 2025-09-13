@@ -30,18 +30,11 @@ struct MedicationListItem: View {
                     )
             }
             
-            // Duration and dosage info
-            medicationDetailsSection
-                .padding(Spacing.small)
-                .background(Color.healthWarning.opacity(0.05))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.healthWarning.opacity(0.1), lineWidth: 1)
-                )
+            
             // Instructions if available
             if let instructions = medication.instructions,
-             !instructions.isEmpty {
+               !instructions.isEmpty,
+               instructions != "" {
                 instructionsSection(instructions)
                     .padding(Spacing.small)
                     .background(Color.healthWarning.opacity(0.05))
@@ -59,26 +52,30 @@ struct MedicationListItem: View {
     
     private var medicationHeaderSection: some View {
         HStack(spacing: Spacing.medium) {
-            // Medication icon
-            medicationIcon
-            
             // Medication info
             VStack(alignment: .leading, spacing: Spacing.xs) {
-                if let name = medication.name, !name.isEmpty {
-                    Text(name)
-                        .font(.headline.weight(.semibold))
-                        .foregroundStyle(.primary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
-                }
-                
                 HStack(spacing: Spacing.xs) {
+                    
+                    if let name = medication.name, !name.isEmpty {
+                        Text(name)
+                            .font(.headline.weight(.semibold))
+                            .foregroundStyle(.primary)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                    }
+                    
                     if let dosage = medication.dosage, !dosage.isEmpty {
                         dosageChip(dosage)
                     }
                     
-                    if let frequency = medication.frequency, !frequency.isEmpty {
-                        frequencyCountChip(frequency.count)
+                }
+                
+                if let duration = medication.duration {
+                    HStack {
+                        Image(systemName: "calendar")
+                            .font(.caption)
+                        Text("\(duration.displayText)")
+                            .font(.caption)
                     }
                 }
             }
@@ -90,11 +87,11 @@ struct MedicationListItem: View {
     private var medicationIcon: some View {
         Circle()
             .fill(Color.healthPrimary.opacity(0.15))
-            .frame(width: 44, height: 44)
+            .frame(width: 32, height: 32)
             .overlay {
-                Image(systemName: "pills.fill")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(Color.healthPrimary)
+                Image("pills")
+                    .resizable()
+                    .frame(width: 32, height: 32)
             }
     }
     
@@ -114,43 +111,30 @@ struct MedicationListItem: View {
         .clipShape(Capsule())
     }
     
-    private func frequencyCountChip(_ count: Int) -> some View {
-        HStack(spacing: 2) {
-            Image(systemName: "clock.fill")
-                .font(.caption2)
-                .foregroundStyle(Color.healthWarning)
-            
-            Text("\(count) schedule\(count == 1 ? "" : "s")")
-                .font(.caption2.weight(.medium))
-                .foregroundStyle(.primary)
-        }
-        .padding(.horizontal, 6)
-        .padding(.vertical, 3)
-        .background(Color.healthWarning.opacity(0.1))
-        .clipShape(Capsule())
-    }
-    // MARK: - Frequency Section
-    
     private func frequencySection(_ frequencies: [MedicationFrequency]) -> some View {
         VStack(alignment: .leading, spacing: Spacing.small) {
-            HStack {
-                Label("Schedule", systemImage: "clock")
+        
+            Label("Schedule", systemImage: "clock")
                     .font(.caption.weight(.medium))
-                
-                Text("\(frequencies.count) frequenc\(frequencies.count == 1 ? "y" : "ies")")
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.secondary)
-            }
             
-            LazyVGrid(
-                columns: [.init(), .init()],
-                alignment: .leading,
-                spacing: Spacing.xs
-            ) {
-                ForEach(Array(frequencies.enumerated()), id: \.offset) { index, frequency in
-                    frequencyItemView(frequency)
+            if frequencies.count == 1 {
+                VStack(alignment: .leading, spacing: Spacing.small) {
+                    ForEach(Array(frequencies.enumerated()), id: \.offset) { index, frequency in
+                        frequencyItemView(frequency)
+                    }
+                }
+            } else {
+                LazyVGrid(
+                    columns: [.init(), .init()],
+                    alignment: .leading,
+                    spacing: Spacing.xs
+                ) {
+                    ForEach(Array(frequencies.enumerated()), id: \.offset) { index, frequency in
+                        frequencyItemView(frequency)
+                    }
                 }
             }
+            
         }
     }
     
@@ -166,21 +150,6 @@ struct MedicationListItem: View {
     }
     
     // MARK: - Details Section
-    
-    private var medicationDetailsSection: some View {
-        HStack(spacing: Spacing.small) {
-            // Duration info
-            if let duration = medication.duration {
-                detailItem(
-                    icon: "calendar",
-                    title: "Duration",
-                    value: duration.displayText,
-                    color: .healthSuccess
-                )
-                Spacer()
-            }
-        }
-    }
     
     private func detailItem(icon: String, title: String, value: String, color: Color) -> some View {
         VStack(alignment: .leading, spacing: Spacing.small) {
@@ -209,7 +178,7 @@ struct MedicationListItem: View {
                 .lineSpacing(2)
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                
+            
         }
     }
 }

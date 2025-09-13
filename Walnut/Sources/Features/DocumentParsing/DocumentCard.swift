@@ -28,17 +28,17 @@ struct DocumentCard: View {
     }
     
     var body: some View {
-        HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-                
-                HealthCardHeader(
-                    icon: "doc.text.fill",
-                    iconColor: .blue,
-                    title: title,
-                    subtitle: document.fileName
-                )
-                                
-                // Action Buttons Section
+        VStack(alignment: .leading, spacing: Spacing.medium) {
+            
+            HealthCardHeader(
+                icon: "doc.text.fill",
+                iconColor: .blue,
+                title: title,
+                subtitle: document.fileName
+            )
+            
+            // Action Buttons Section
+            HealthCard {
                 HStack(spacing: Spacing.medium) {
                     Button(action: {
                         viewDocument(document)
@@ -75,6 +75,7 @@ struct DocumentCard: View {
                     Spacer()
                 }
             }
+            
         }
         .sheet(isPresented: $showingDocumentViewer) {
             NavigationStack {

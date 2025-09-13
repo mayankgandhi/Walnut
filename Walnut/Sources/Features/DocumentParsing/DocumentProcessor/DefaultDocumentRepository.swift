@@ -39,6 +39,10 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
             fileURL: fileURL
         )
         modelContext.insert(prescription)
+        
+        // Update medical case timestamp to trigger UI refresh
+        medicalCase.updatedAt = Date()
+        
         try modelContext.save()
         return prescription.persistentModelID
     }
@@ -83,6 +87,9 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
         // This establishes the bidirectional relationship between MedicalCase and BloodReport
         medicalCase.bloodReports?.append(bloodReport)
         
+        // Update medical case timestamp to trigger UI refresh
+        medicalCase.updatedAt = Date()
+        
         try modelContext.save()
         return bloodReport.persistentModelID
     }
@@ -97,6 +104,9 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
         // Add document to medical case's unparsed documents array
         medicalCase.otherDocuments?.append(document)
         
+        // Update medical case timestamp to trigger UI refresh
+        medicalCase.updatedAt = Date()
+        
         try modelContext.save()
         return document.persistentModelID
     }
@@ -110,6 +120,9 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
         
         // Add document to medical case's unparsed documents array
         medicalCase.unparsedDocuments?.append(document)
+        
+        // Update medical case timestamp to trigger UI refresh
+        medicalCase.updatedAt = Date()
         
         try modelContext.save()
         return document.persistentModelID

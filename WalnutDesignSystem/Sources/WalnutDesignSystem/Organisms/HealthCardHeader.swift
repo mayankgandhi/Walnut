@@ -127,7 +127,7 @@ public struct HealthCardHeader: View {
     private var contentView: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
-                .font(.title3.weight(.bold))
+                .font(.subheadline.weight(.bold))
                 .foregroundStyle(.primary)
             
             if let subtitle = subtitle {

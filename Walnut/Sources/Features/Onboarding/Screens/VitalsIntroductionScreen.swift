@@ -41,7 +41,7 @@ struct VitalsIntroductionScreen: View {
                     )
                     
                     FeatureRow(
-                        icon: "share",
+                        icon: "square.and.arrow.up",
                         title: "Share with Doctors",
                         description: "Export reports to share with your healthcare team",
                         color: .healthSuccess
