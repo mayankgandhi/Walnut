@@ -11,7 +11,7 @@ import Charts
 import WalnutDesignSystem
 
 /// Enhanced interactive chart for biomarker data visualization
-public struct EnhancedBiomarkerChart: View {
+struct EnhancedBiomarkerChart: View {
     
     // MARK: - Properties
     
@@ -24,7 +24,7 @@ public struct EnhancedBiomarkerChart: View {
     
     // MARK: - Initializers
     
-    public init(
+    init(
         dataPoints: [BiomarkerDataPoint],
         color: Color = .healthPrimary,
         normalRange: String,

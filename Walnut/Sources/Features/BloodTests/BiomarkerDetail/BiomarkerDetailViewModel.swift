@@ -21,7 +21,6 @@ public class BiomarkerDetailViewModel {
     var trendPercentage: Double = 0.0
     var trendDirection: TrendDirection = .stable
     var healthStatus: HealthStatus = .good
-    var animateChart = false
     
     // MARK: - Private Properties
     private let biomarkerName: String
@@ -73,7 +72,7 @@ public class BiomarkerDetailViewModel {
     
     // MARK: - Initializer
     
-    public init(
+    init(
         biomarkerName: String,
         unit: String,
         normalRange: String,

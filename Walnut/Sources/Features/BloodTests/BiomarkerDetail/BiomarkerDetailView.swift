@@ -11,11 +11,12 @@ import Charts
 import WalnutDesignSystem
 
 /// Full-screen biomarker detail view with chart and metrics
-public struct BiomarkerDetailView: View {
+struct BiomarkerDetailView: View {
     
     @State var viewModel: BiomarkerDetailViewModel
+    @State private var selectedDocument: Document?
     
-    public init(
+    init(
         biomarkerName: String,
         unit: String,
         normalRange: String,
@@ -31,25 +32,15 @@ public struct BiomarkerDetailView: View {
         ))
     }
     
-    public var body: some View {
+    var body: some View {
         ScrollView {
             VStack(spacing: Spacing.large) {
-                // Hero section with current value and trend
                 heroSection
                 
-                // Information section
-                informationSection
+                timeFrameSelector
                 
-                // Chart section with enhanced visualization
                 chartSection
                 
-                // Time frame selector
-                timeFrameSelector
-
-                // Metrics cards
-                metricsSection
-                                
-                // Historical data section
                 if viewModel.filteredDataPoints.count > 1 {
                     historicalDataSection
                 }
@@ -60,69 +51,59 @@ public struct BiomarkerDetailView: View {
         .background(Color(UIColor.systemGroupedBackground))
         .navigationTitle(viewModel.biomarkerTitle)
         .navigationBarTitleDisplayMode(.large)
-        .onAppear {
-            Task {
-                try await Task.sleep(nanoseconds: 2_000_000_000)
-                withAnimation(.easeInOut(duration: 1.0)) {
-                    viewModel.animateChart = true
-                }
+        .sheet(item: $selectedDocument) { document in
+            NavigationView {
+                DocumentViewer(document: document)
             }
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(Spacing.large)
         }
     }
     
     // MARK: - Hero Section
     private var heroSection: some View {
         HealthCard {
-            VStack(spacing: Spacing.medium) {
+            VStack(alignment: .leading, spacing: Spacing.medium) {
                 // Current value display
-                HStack {
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("Latest Value")
-                            .font(.caption.weight(.medium))
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    Text("Latest Value")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    
+                    HStack(alignment: .center, spacing: Spacing.xs) {
+                        Text(viewModel.formattedCurrentValue)
+                            .font(
+                                .system(
+                                    .title,
+                                    design: .rounded,
+                                    weight: .black
+                                )
+                            )
+                            .foregroundStyle(viewModel.primaryColor)
+                            .contentTransition(.numericText())
+                        
+                        Text(viewModel.unitText)
+                            .font(
+                                .system(
+                                    .subheadline,
+                                    design: .rounded,
+                                    weight: .black
+                                )
+                            )
                             .foregroundStyle(.secondary)
-                        
-                        HStack(alignment: .center, spacing: Spacing.xs) {
-                            Text(viewModel.formattedCurrentValue)
-                                .font(
-                                    .system(
-                                        .title,
-                                        design: .rounded,
-                                        weight: .black
-                                    )
-                                )
-                                .foregroundStyle(viewModel.primaryColor)
-                                .contentTransition(.numericText())
-                            
-                            Text(viewModel.unitText)
-                                .font(
-                                    .system(
-                                        .subheadline,
-                                        design: .rounded,
-                                        weight: .black
-                                    )
-                                )
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    
-                    Spacer()
-                    
-                    // Health status indicator
-                    VStack(spacing: Spacing.xs) {
-                        Circle()
-                            .fill(viewModel.healthStatusColor)
-                            .frame(width: 24, height: 24)
-                            .overlay {
-                                Image(systemName: viewModel.healthStatusIcon)
-                                    .font(.caption.weight(.bold))
-                                    .foregroundStyle(.white)
-                            }
-                        
-                        Text(viewModel.healthStatusText)
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(viewModel.healthStatusColor)
                     }
                 }
+                
+                HStack {
+                    Text("Reference Range:")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    
+                    Text("\(viewModel.normalRangeText) \(viewModel.unitText)")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.primary)
+                }
+                
                 
                 // Trend information
                 if viewModel.filteredDataPoints.count >= 2 {
@@ -145,62 +126,52 @@ public struct BiomarkerDetailView: View {
                                 .foregroundStyle(.tertiary)
                         }
                         
-                        Spacer()
                     }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
     
     // MARK: - Time Frame Selector
     private var timeFrameSelector: some View {
-        HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.small) {
-                Text("Time Range")
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.secondary)
-                
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: Spacing.small) {
-                        ForEach(viewModel.availableTimeFrames, id: \.self) { timeFrame in
-                            Button(action: {
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    viewModel.updateTimeFrame(timeFrame)
-                                }
-                            }) {
-                                VStack(spacing: 2) {
-                                    Text(timeFrame.rawValue)
-                                        .font(.caption.weight(.semibold))
-                                        .foregroundStyle(viewModel.selectedTimeFrame == timeFrame ? .white : viewModel.primaryColor)
-                                    
-                                    Text(timeFrame.displayName)
-                                        .font(.caption2)
-                                        .foregroundStyle(viewModel.selectedTimeFrame == timeFrame ? .white.opacity(0.8) : .secondary)
-                                }
-                                .padding(.horizontal, Spacing.small)
-                                .padding(.vertical, 6)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .fill(viewModel.selectedTimeFrame == timeFrame ? viewModel.primaryColor : Color.clear)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 6)
-                                                .stroke(viewModel.primaryColor.opacity(0.3), lineWidth: 1)
-                                        )
-                                )
-                            }
-                            .buttonStyle(PlainButtonStyle())
+        VStack(alignment: .leading, spacing: Spacing.small) {
+            HStack(spacing: Spacing.small) {
+                ForEach(viewModel.availableTimeFrames, id: \.self) { timeFrame in
+                    Button(action: {
+                        viewModel.updateTimeFrame(timeFrame)
+                        
+                    }) {
+                        VStack(spacing: 2) {
+                            Text(timeFrame.rawValue)
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(viewModel.selectedTimeFrame == timeFrame ? .white : viewModel.primaryColor)
+                            
+                            Text(timeFrame.displayName)
+                                .font(.caption2)
+                                .foregroundStyle(viewModel.selectedTimeFrame == timeFrame ? .white.opacity(0.8) : .secondary)
                         }
+                        
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(viewModel.selectedTimeFrame == timeFrame ? viewModel.primaryColor : Color.clear)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(viewModel.primaryColor.opacity(0.3), lineWidth: 1)
+                                )
+                        )
                     }
-                    .padding(.horizontal, 1)
-                }
-                
-                if !viewModel.filteredDataPoints.isEmpty {
-                    Text("\(viewModel.filteredDataPoints.count) readings")
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
+                    .buttonStyle(PlainButtonStyle())
                 }
             }
+            
+            if !viewModel.filteredDataPoints.isEmpty {
+                Text("\(viewModel.filteredDataPoints.count) readings")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     // MARK: - Chart Section
@@ -214,7 +185,7 @@ public struct BiomarkerDetailView: View {
                         date: point.date,
                         value: point.value,
                         bloodReport: point.bloodReport,
-                        bloodReportURLPath: nil
+                        document: point.document
                     )
                 },
                 color: viewModel.primaryColor,
@@ -226,7 +197,7 @@ public struct BiomarkerDetailView: View {
                             date: selected.date,
                             value: selected.value,
                             bloodReport: selected.bloodReport,
-                            bloodReportURLPath: nil
+                            document: selected.document
                         )
                     },
                     set: { newValue in
@@ -243,7 +214,6 @@ public struct BiomarkerDetailView: View {
                         }
                     }
                 ),
-                animateChart: viewModel.animateChart
             )
             .frame(height: 280)
             
@@ -294,107 +264,6 @@ public struct BiomarkerDetailView: View {
         }
     }
     
-    
-    // MARK: - Metrics Section
-    private var metricsSection: some View {
-        LazyVGrid(columns: [
-            GridItem(.flexible()),
-            GridItem(.flexible()),
-            GridItem(.flexible())
-        ], spacing: Spacing.medium) {
-            
-            HealthCard {
-                VStack(spacing: Spacing.xs) {
-                    Text("Normal Range")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                    
-                    Text(viewModel.normalRangeText)
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(.primary)
-                        .multilineTextAlignment(.center)
-                    
-                    Text(viewModel.unitText)
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                }
-            }
-            
-            HealthCard {
-                VStack(spacing: Spacing.xs) {
-                    Text("Status")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                    
-                    Text(viewModel.healthStatusText)
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(viewModel.healthStatusColor)
-                    
-                    Text("needs attention")
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                        .multilineTextAlignment(.center)
-                }
-            }
-            
-            HealthCard {
-                VStack(spacing: Spacing.xs) {
-                    Text("Readings")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                    
-                    Text("\(viewModel.filteredDataPoints.count)")
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(.primary)
-                    
-                    Text("in timeframe")
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                }
-            }
-        }
-    }
-    
-    // MARK: - Information Section
-    private var informationSection: some View {
-        HealthCard {
-            
-            VStack(alignment: .leading, spacing: Spacing.small) {
-                HStack {
-                    Image(systemName: "ruler")
-                        .font(.caption)
-                        .foregroundStyle(Color.healthPrimary)
-                        .frame(width: 20)
-                    
-                    Text("Reference Range:")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                    
-                    Text("\(viewModel.normalRangeText) \(viewModel.unitText)")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.primary)
-                }
-                
-                HStack {
-                    Image(systemName: "calendar")
-                        .font(.caption)
-                        .foregroundStyle(Color.healthPrimary)
-                        .frame(width: 20)
-                    
-                    Text("Frequency:")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                    
-                    Text("Regular monitoring recommended")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.primary)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-    
-    // MARK: - Historical Data Section
     private var historicalDataSection: some View {
         HealthCard {
             VStack(alignment: .leading, spacing: Spacing.medium) {
@@ -440,6 +309,19 @@ public struct BiomarkerDetailView: View {
                             Text("\(String(format: "%.1f", dataPoint.value)) \(viewModel.unitText)")
                                 .font(.subheadline.weight(.bold))
                                 .foregroundStyle(.primary)
+                            
+                            // Document access button
+                            if let document = dataPoint.document {
+                                Button(action: {
+                                    selectedDocument = document
+                                }) {
+                                    Image(systemName: "arrow.up.right.square.fill")
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundStyle(Color.healthPrimary)
+                                }
+                                .buttonStyle(.plain)
+                                .contentShape(Rectangle())
+                            }
                         }
                         .padding(.vertical, 2)
                     }
@@ -559,51 +441,49 @@ public struct BiomarkerDetailView: View {
                 BiomarkerDataPoint(
                     date: Calendar.current.date(byAdding: .month, value: -6, to: Date()) ?? Date(),
                     value: 13.8,
-                    
                     bloodReport: "LabCorp",
-                    bloodReportURLPath: nil
+                    document: Document(
+                        fileName: "blood_report_2024_01.pdf",
+                        fileURL: "/Documents/blood_report_2024_01.pdf",
+                        documentType: .labResult,
+                        fileSize: 1024000
+                    )
                 ),
                 BiomarkerDataPoint(
                     date: Calendar.current.date(byAdding: .month, value: -5, to: Date()) ?? Date(),
                     value: 12.5,
-                    
                     bloodReport: "Quest Diagnostics",
-                    bloodReportURLPath: nil
+                    document: Document(
+                        fileName: "lab_results_image.jpg",
+                        fileURL: "/Documents/lab_results_image.jpg",
+                        documentType: .labResult,
+                        fileSize: 512000
+                    )
                 ),
                 BiomarkerDataPoint(
                     date: Calendar.current.date(byAdding: .month, value: -4, to: Date()) ?? Date(),
                     value: 14.5,
-                    
-                    bloodReport: "LabCorp",
-                    bloodReportURLPath: nil
+                    bloodReport: "LabCorp"
                 ),
                 BiomarkerDataPoint(
                     date: Calendar.current.date(byAdding: .month, value: -3, to: Date()) ?? Date(),
                     value: 14.1,
-                    
-                    bloodReport: "Hospital Lab",
-                    bloodReportURLPath: nil
+                    bloodReport: "Hospital Lab"
                 ),
                 BiomarkerDataPoint(
                     date: Calendar.current.date(byAdding: .month, value: -2, to: Date()) ?? Date(),
                     value: 14.3,
-                    
-                    bloodReport: "Quest Diagnostics",
-                    bloodReportURLPath: nil
+                    bloodReport: "Quest Diagnostics"
                 ),
                 BiomarkerDataPoint(
                     date: Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date(),
                     value: 13.8,
-                    
-                    bloodReport: "LabCorp",
-                    bloodReportURLPath: nil
+                    bloodReport: "LabCorp"
                 ),
                 BiomarkerDataPoint(
                     date: Date(),
                     value: 14.2,
-                    
-                    bloodReport: "LabCorp",
-                    bloodReportURLPath: nil
+                    bloodReport: "LabCorp"
                 )
             ],
             color: .healthPrimary

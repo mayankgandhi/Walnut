@@ -125,13 +125,14 @@ class UnifiedDocumentsSectionViewModel {
         components.append(bloodReport.labName)
         
         let abnormalCount = bloodReport.testResults?.filter({ $0.isAbnormal  ?? false }).count
-        if abnormalCount > 0 {
+        if abnormalCount != nil,
+            abnormalCount > 0 {
             components
-                .append("\(String(describing: abnormalCount)) abnormal results")
-        } else if !(bloodReport.testResults?.isEmpty ?? true) {
+                .append("\(abnormalCount!) abnormal results")
+        } else if let testResults = bloodReport.testResults?.count {
             components
                 .append(
-                    "\(String(describing: bloodReport.testResults?.count)) results"
+                    "\(testResults) results"
                 )
         }
         

@@ -9,23 +9,23 @@
 import Foundation
 
 // Historical data model - keeping for compatibility
-public struct BiomarkerDataPoint: Identifiable {
-    public let id = UUID()
-    public let date: Date
-    public let value: Double
-    public let bloodReport: String?
-    public let bloodReportURLPath: String?
+struct BiomarkerDataPoint: Identifiable {
+     let id = UUID()
+     let date: Date
+     let value: Double
+     let bloodReport: String?
+     let document: Document?
     
     init(
         date: Date,
         value: Double,
         bloodReport: String? = nil,
-        bloodReportURLPath: String? = nil
+        document: Document? = nil
     ) {
         self.date = date
         self.value = value
         self.bloodReport = bloodReport
-        self.bloodReportURLPath = bloodReportURLPath
+        self.document = document
     }
 }
 

@@ -223,7 +223,7 @@ class BloodTestsViewModel {
                 date: resultDate,
                 value: Double(value),
                 bloodReport: result.bloodReport?.labName,
-                bloodReportURLPath: result.bloodReport?.document?.fileURL
+                document: result.bloodReport?.document
             )
         }
         

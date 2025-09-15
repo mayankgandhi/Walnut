@@ -42,7 +42,7 @@ struct WelcomeScreen: View {
             
             if showFeatures {
                 VStack(alignment: .center, spacing: Spacing.medium) {
-                    featureItemView(icon: "ai-sparkle", title: "Super AI", subtitle: "Keep track of features")
+                    featureItemView(icon: "ai-sparkle", title: "AI Powered", subtitle: "Documents scanning using AI Models. Automatically extract and organize your health data for easier access.")
                     featureItemView(icon: "graph", title: "Health Trends Tracker", subtitle: "Visualize your health journey with dynamic charts and trends. Stay informed, stay ahead.")
                     featureItemView(icon: "calendar", title: "Never Miss a Dose", subtitle: "Smart reminders for medications, appointments, and check-ups. Your health, always on track.")
                     featureItemView(icon: "journal", title: "Secure Health Vault", subtitle: "Store and organize all your health documents securely. Access your records anytime, anywhere.")
