@@ -11,11 +11,14 @@ import SwiftData
 import WalnutDesignSystem
 
 struct MedicationEditor: View {
-    
+
     @Environment(\.modelContext) var modelContext
+    @Environment(\.notificationErrorHandler) private var errorHandler
     let medication: Medication?
     let targetPrescription: Prescription?
     let onSave: (Medication) -> Void
+
+    @State private var notificationManager = MedicationNotificationManager()
     
     // MARK: - Initializers
     
@@ -248,6 +251,7 @@ struct MedicationEditor: View {
         .sheet(isPresented: $showFrequencyBottomSheet) {
             MedicationFrequencyBottomSheet(selectedFrequencies: $selectedFrequencies)
         }
+        .notificationErrorHandling()
     }
     
     
@@ -310,6 +314,23 @@ struct MedicationEditor: View {
         }
         
         onSave(medicationToSave)
+
+        // Schedule notifications for the medication
+        scheduleNotifications(for: medicationToSave)
+    }
+
+    private func scheduleNotifications(for medication: Medication) {
+        Task {
+            let result = await notificationManager.scheduleNotificationsForMedication(medication)
+            switch result {
+            case .success(let identifiers):
+                print("Scheduled \(identifiers.count) notifications for \(medication.name ?? "medication")")
+            case .failure(let error):
+                await MainActor.run {
+                    errorHandler.handleError(error)
+                }
+            }
+        }
     }
     
     // MARK: - Context Indicator

@@ -11,9 +11,12 @@ import SwiftData
 import WalnutDesignSystem
 
 struct PrescriptionEditor: View {
-    
+
     let prescription: Prescription?
     let medicalCase: MedicalCase
+
+    @State private var notificationManager = MedicationNotificationManager()
+    @Environment(\.notificationErrorHandler) private var errorHandler
     
     init(prescription: Prescription? = nil, medicalCase: MedicalCase) {
         self.prescription = prescription
@@ -420,6 +423,7 @@ struct PrescriptionEditor: View {
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
+        .notificationErrorHandling()
     }
     
     
@@ -557,8 +561,30 @@ struct PrescriptionEditor: View {
         // Save the context
         do {
             try modelContext.save()
+
+            // Schedule notifications for all medications in this prescription
+            scheduleNotificationsForMedications()
+
         } catch {
             print("Failed to save prescription: \(error)")
+        }
+    }
+
+    private func scheduleNotificationsForMedications() {
+        Task {
+            for medication in medications {
+                let result = await notificationManager.scheduleNotificationsForMedication(medication)
+                switch result {
+                case .success(let identifiers):
+                    print("Scheduled \(identifiers.count) notifications for \(medication.name ?? "medication")")
+                case .failure(let error):
+                    await MainActor.run {
+                        errorHandler.handleError(error)
+                    }
+                    // Stop scheduling on first error to avoid multiple alerts
+                    break
+                }
+            }
         }
     }
 }

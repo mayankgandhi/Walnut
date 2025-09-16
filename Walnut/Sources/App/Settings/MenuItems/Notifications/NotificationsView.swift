@@ -10,33 +10,29 @@ import SwiftUI
 import WalnutDesignSystem
 
 struct NotificationsView: View {
-    @State private var viewModel: NotificationsViewModel
+    @State private var showNotificationReview = false
     private let patient: Patient
     
     init(patient: Patient) {
         self.patient = patient
-        self._viewModel = State(wrappedValue: NotificationsViewModel(patient: patient))
     }
     
     var body: some View {
+        
         MenuListItem(
-            icon: viewModel.menuItem.icon,
-            title: viewModel.menuItem.title,
-            subtitle: viewModel.menuItem.subtitle,
-            iconColor: viewModel.menuItem.iconColor
+            icon: "bell.badge",
+            title: "Upcoming Reminders",
+            subtitle: "View your medication schedule",
+            iconColor: .healthSuccess
         ) {
-            viewModel.presentNotificationSettings()
+            showNotificationReview = true
         }
-        .sheet(isPresented: $viewModel.showNotificationSettings, onDismiss: {
-            viewModel.dismissNotificationSettings()
-        }) {
-            DSBottomSheet(title: "Notifications"){
-                viewModel.notificationSettingsBottomSheetContent
-            } content: {
-                NotificationSettingsView()
-            }
-            .presentationDetents([.height(700), .large])
-            .presentationDragIndicator(.visible)
+        
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+        
+        .sheet(isPresented: $showNotificationReview) {
+            NotificationReviewView()
         }
     }
 }
