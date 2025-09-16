@@ -20,14 +20,24 @@ struct MedicalCasesView: View {
     
     private var emptyStateView: some View {
         ContentUnavailableView {
-            Label("No Medical Cases", systemImage: "doc.text.magnifyingglass")
+            Label(viewModel.searchText.isEmpty ? "No Medical Cases" : "No Results",
+                  systemImage: viewModel.searchText.isEmpty ? "doc.text" : "magnifyingglass")
         } description: {
-            Text("Create your first medical case to get started/No cases match your search or filter criteria")
+            Text(viewModel.searchText.isEmpty ?
+                 "Create your first medical case to get started" :
+                 "No cases match your search criteria")
         } actions: {
-            Button("Create Medical Case") {
-                viewModel.showCreateMedicalCase()
+            if viewModel.searchText.isEmpty {
+                Button("Create Medical Case") {
+                    viewModel.showCreateMedicalCase()
+                }
+                .buttonStyle(.borderedProminent)
+            } else {
+                Button("Clear Search") {
+                    viewModel.clearSearch()
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.borderedProminent)
         }
     }
     
@@ -35,7 +45,35 @@ struct MedicalCasesView: View {
     
     var body: some View {
         NavigationStack {
-            Group {
+            VStack(alignment: .leading, spacing: Spacing.medium) {
+                HStack {
+                    NavBarHeader(
+                        iconName: "folder",
+                        iconColor: .red,
+                        title: "Medical Cases",
+                        subtitle: "\(viewModel.medicalCases.count) Cases"
+                    )
+
+                    Button(action: viewModel.showCreateMedicalCase) {
+                        Image(systemName: "plus")
+                    }
+                    .buttonStyle(.glass)
+                    .padding(.trailing, Spacing.medium)
+                }
+
+                // Search bar
+                SearchBar(
+                    searchText: Binding(
+                        get: { viewModel.searchText },
+                        set: { viewModel.updateSearchText($0) }
+                    ),
+                    placeholder: "Search cases...",
+                    onClear: {
+                        viewModel.clearSearch()
+                    }
+                )
+                .padding(.bottom, Spacing.small)
+                
                 if viewModel.isLoading {
                     loadingView
                 } else if !viewModel.hasFilteredResults {
@@ -46,15 +84,7 @@ struct MedicalCasesView: View {
                     medicalCasesList(viewModel: viewModel)
                 }
             }
-            .navigationTitle("Medical Cases")
-            .navigationBarTitleDisplayMode(.large)
-            .searchable(text: Binding(
-                get: { viewModel.searchText },
-                set: { viewModel.updateSearchText($0) }
-            ), prompt: "Search cases, patients, or notes")
-            .toolbar {
-                toolbarContent
-            }
+            
             .navigationDestination(item: $viewModel.selectedCase) { medicalCase in
                 MedicalCaseDetailView(medicalCase: medicalCase)
             }
@@ -93,7 +123,7 @@ struct MedicalCasesView: View {
     }
     
     // MARK: - View Components
-    
+
     private var loadingView: some View {
         VStack(spacing: Spacing.medium) {
             ProgressView()
@@ -111,7 +141,7 @@ struct MedicalCasesView: View {
             LazyVGrid(
                 columns: [.init(), .init(), .init()],
                 alignment: .leading,
-                spacing: Spacing.xs
+                spacing: .zero
             ) {
                 ForEach(viewModel.filteredAndSortedCases) { medicalCase in
                     Button {
@@ -126,17 +156,6 @@ struct MedicalCasesView: View {
                 }
             }
             .padding(.horizontal, Spacing.medium)
-        }
-    }
-    
-    // MARK: - Toolbar Content
-    
-    @ToolbarContentBuilder
-    private var toolbarContent: some ToolbarContent {
-        ToolbarItemGroup(placement: .primaryAction) {
-            Button("Add Medical Case", systemImage: "plus") {
-                viewModel.showCreateMedicalCase()
-            }
         }
     }
     

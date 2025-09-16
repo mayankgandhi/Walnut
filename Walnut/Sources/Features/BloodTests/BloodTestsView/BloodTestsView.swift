@@ -20,7 +20,27 @@ struct BloodTestsView: View {
     
     var body: some View {
         NavigationStack {
-            Group {
+            VStack(alignment: .leading, spacing: Spacing.medium) {
+                NavBarHeader(
+                    iconName: "graph",
+                    iconColor: .red,
+                    title: "Vitals",
+                    subtitle: nil
+                )
+
+                // Search bar
+                SearchBar(
+                    searchText: Binding(
+                        get: { viewModel.searchText },
+                        set: { viewModel.updateSearchText($0) }
+                    ),
+                    placeholder: "Search biomarkers...",
+                    onClear: {
+                        viewModel.clearSearch()
+                    }
+                )
+                .padding(.bottom, Spacing.small)
+
                 if viewModel.isLoading || viewModel.isProcessingData {
                     loadingView
                 } else if viewModel.shouldShowEmptyFilteredResults {
@@ -33,12 +53,6 @@ struct BloodTestsView: View {
                     emptyStateView
                 }
             }
-            .navigationTitle("Blood Tests")
-            .navigationBarTitleDisplayMode(.large)
-            .searchable(text: Binding(
-                get: { viewModel.searchText },
-                set: { viewModel.updateSearchText($0) }
-            ), prompt: "Search biomarkers...")
             .navigationDestination(item: $viewModel.selectedBiomarker) { biomarker in
                 BiomarkerDetailView(
                     biomarkerName: biomarker.testName,
