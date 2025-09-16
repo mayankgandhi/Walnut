@@ -9,6 +9,7 @@
 import Foundation
 import UserNotifications
 import SwiftUI
+import SwiftData
 import Observation
 import AlarmKit
 
@@ -76,6 +77,17 @@ class MedicationNotificationManager {
         set { userDefaults.set(newValue, forKey: "EnableSmartScheduling") }
     }
 
+    var enableNotificationGrouping: Bool {
+        get {
+            // Default to true if not set
+            if userDefaults.object(forKey: "EnableNotificationGrouping") == nil {
+                return true
+            }
+            return userDefaults.bool(forKey: "EnableNotificationGrouping")
+        }
+        set { userDefaults.set(newValue, forKey: "EnableNotificationGrouping") }
+    }
+
     enum NotificationType: String, CaseIterable {
         case pushNotifications = "Push Notifications"
         case alarms = "Alarms"
@@ -119,6 +131,110 @@ class MedicationNotificationManager {
             DispatchQueue.main.async {
                 self.authorizationStatus = settings.authorizationStatus
             }
+        }
+    }
+
+    // MARK: - Notification Grouping
+
+    func scheduleNotificationsForAllMedications(_ medications: [Medication]) async -> Result<[String], Error> {
+        // Check authorization first
+        guard await ensureAuthorization() else {
+            return .failure(NotificationError.authorizationDenied)
+        }
+
+        // Cancel all existing notifications first
+        await cancelAllMedicationNotifications()
+
+        // Check if grouping is enabled
+        guard enableNotificationGrouping else {
+            // If grouping is disabled, schedule individually
+            return await scheduleIndividualNotifications(medications)
+        }
+
+        // Create notification info for all medications
+        let notificationInfos = createNotificationInfos(from: medications)
+
+        // Group by time
+        let groups = groupNotificationsByTime(notificationInfos)
+
+        var scheduledIdentifiers: [String] = []
+
+        // Schedule grouped notifications
+        for group in groups {
+            let result = await scheduleGroupedNotification(group)
+            switch result {
+            case .success(let identifier):
+                scheduledIdentifiers.append(identifier)
+            case .failure(let error):
+                await cancelAllMedicationNotifications()
+                return .failure(NotificationError.schedulingFailed(error))
+            }
+        }
+
+        return .success(scheduledIdentifiers)
+    }
+
+    private func scheduleIndividualNotifications(_ medications: [Medication]) async -> Result<[String], Error> {
+        var scheduledIdentifiers: [String] = []
+
+        for medication in medications {
+            let result = await scheduleNotificationsForMedication(medication)
+            switch result {
+            case .success(let identifiers):
+                scheduledIdentifiers.append(contentsOf: identifiers)
+            case .failure(let error):
+                await cancelAllMedicationNotifications()
+                return .failure(error)
+            }
+        }
+
+        return .success(scheduledIdentifiers)
+    }
+
+    private func createNotificationInfos(from medications: [Medication]) -> [MedicationNotificationInfo] {
+        var infos: [MedicationNotificationInfo] = []
+
+        for medication in medications {
+            guard let frequencies = medication.frequency, !frequencies.isEmpty else { continue }
+
+            for frequency in frequencies {
+                let schedules = generateNotificationSchedules(for: frequency)
+                for schedule in schedules {
+                    let info = MedicationNotificationInfo(
+                        medication: medication,
+                        schedule: schedule,
+                        frequency: frequency
+                    )
+                    infos.append(info)
+                }
+            }
+        }
+
+        return infos
+    }
+
+    private func groupNotificationsByTime(_ infos: [MedicationNotificationInfo]) -> [MedicationGroup] {
+        let grouped = Dictionary(grouping: infos) { $0.schedule.timeKey }
+
+        return grouped.map { timeKey, medications in
+            MedicationGroup(timeKey: timeKey, medications: medications)
+        }.sorted { group1, group2 in
+            let time1 = group1.timeKey
+            let time2 = group2.timeKey
+            return time1.hour < time2.hour || (time1.hour == time2.hour && time1.minute < time2.minute)
+        }
+    }
+
+    // MARK: - Global Medication Scheduling
+
+    func rescheduleAllMedicationNotifications(from modelContext: ModelContext) async -> Result<[String], Error> {
+        // Fetch all medications from the model context
+        let descriptor = FetchDescriptor<Medication>()
+        do {
+            let allMedications = try modelContext.fetch(descriptor)
+            return await scheduleNotificationsForAllMedications(allMedications)
+        } catch {
+            return .failure(error)
         }
     }
 
@@ -182,6 +298,140 @@ class MedicationNotificationManager {
         case .alarms:
             return await scheduleAlarmNotifications(frequency: frequency, medication: medication)
         }
+    }
+
+    // MARK: - Grouped Notification Scheduling
+
+    private func scheduleGroupedNotification(_ group: MedicationGroup) async -> Result<String, Error> {
+        switch preferredNotificationType {
+        case .pushNotifications:
+            return await scheduleGroupedUNNotification(group)
+        case .alarms:
+            return await scheduleGroupedAlarmNotification(group)
+        }
+    }
+
+    private func scheduleGroupedUNNotification(_ group: MedicationGroup) async -> Result<String, Error> {
+        let identifier = "grouped_\(group.timeKey.hour)_\(group.timeKey.minute)_\(group.medications.map { $0.id }.joined(separator: "_"))"
+
+        let content = UNMutableNotificationContent()
+
+        if group.isSingle {
+            let medication = group.medications.first!
+            content.title = "Medication Reminder"
+            content.body = createSingleMedicationBody(medication)
+        } else {
+            content.title = "Medication Reminders"
+            content.body = createGroupedMedicationBody(group.medications)
+        }
+
+        content.sound = .default
+        content.badge = NSNumber(value: 1)
+        content.categoryIdentifier = "MEDICATION_REMINDER"
+        content.userInfo = createGroupedUserInfo(group)
+
+        // Create trigger for the time
+        let trigger = createNotificationTrigger(for: group.timeKey)
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+
+        do {
+            try await UNUserNotificationCenter.current().add(request)
+            return .success(identifier)
+        } catch {
+            return .failure(error)
+        }
+    }
+
+    private func scheduleGroupedAlarmNotification(_ group: MedicationGroup) async -> Result<String, Error> {
+        // For grouped alarms, we'll create one alarm for the group
+        let alarmSchedule = Alarm.Schedule.Relative(
+            time: Alarm.Schedule.Relative.Time(
+                hour: group.timeKey.hour,
+                minute: group.timeKey.minute
+            )
+        )
+
+        let medicationName = group.isSingle ?
+            group.medications.first!.name :
+            "\(group.medications.count) medications"
+
+        let configuration = MedicationAlarmConfiguration(
+            medicationID: UUID(), // Group ID
+            medicationName: medicationName,
+            dosage: group.isSingle ? group.medications.first!.dosage : nil,
+            schedule: .relative(alarmSchedule),
+            enableSnooze: true,
+            enableCountdown: false
+        )
+
+        let result = await alarmService.createMedicationAlarm(configuration: configuration)
+        switch result {
+        case .success(let alarmId):
+            return .success(alarmId.uuidString)
+        case .failure(let error):
+            return .failure(error)
+        }
+    }
+
+    private func createSingleMedicationBody(_ medication: MedicationNotificationInfo) -> String {
+        var body = "Time to take your \(medication.name)"
+
+        if let dosage = medication.dosage {
+            body += " (\(dosage))"
+        }
+
+        if let instructions = medication.instructions, !instructions.isEmpty {
+            body += " - \(instructions)"
+        }
+
+        return body
+    }
+
+    private func createGroupedMedicationBody(_ medications: [MedicationNotificationInfo]) -> String {
+        let medicationNames = medications.prefix(3).map { medication in
+            var name = medication.name
+            if let dosage = medication.dosage {
+                name += " (\(dosage))"
+            }
+            return name
+        }
+
+        if medications.count <= 3 {
+            return "Time to take: \(medicationNames.joined(separator: ", "))"
+        } else {
+            let displayedNames = medicationNames.joined(separator: ", ")
+            let remainingCount = medications.count - 3
+            return "Time to take: \(displayedNames) and \(remainingCount) more"
+        }
+    }
+
+    private func createGroupedUserInfo(_ group: MedicationGroup) -> [String: Any] {
+        var userInfo: [String: Any] = [
+            "isGrouped": group.isGrouped,
+            "medicationCount": group.medications.count,
+            "timeHour": group.timeKey.hour,
+            "timeMinute": group.timeKey.minute
+        ]
+
+        // Add individual medication info
+        let medicationsInfo = group.medications.enumerated().map { index, medication in
+            [
+                "id": medication.id,
+                "name": medication.name,
+                "dosage": medication.dosage ?? "",
+                "instructions": medication.instructions ?? ""
+            ]
+        }
+
+        userInfo["medications"] = medicationsInfo
+        return userInfo
+    }
+
+    private func createNotificationTrigger(for timeKey: MedicationGroup.TimeKey) -> UNNotificationTrigger {
+        var components = DateComponents()
+        components.hour = timeKey.hour
+        components.minute = timeKey.minute
+        return UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
     }
 
     // MARK: - UNUserNotificationCenter Integration
@@ -557,6 +807,52 @@ class MedicationNotificationManager {
 
 // MARK: - Supporting Types
 
+struct MedicationGroup {
+    let timeKey: TimeKey
+    let medications: [MedicationNotificationInfo]
+
+    var isSingle: Bool { medications.count == 1 }
+    var isGrouped: Bool { medications.count > 1 }
+
+    struct TimeKey: Hashable {
+        let hour: Int
+        let minute: Int
+
+        init(hour: Int, minute: Int) {
+            self.hour = hour
+            self.minute = minute
+        }
+
+        init(from schedule: NotificationSchedule) {
+            switch schedule {
+            case .daily(let hour, let minute):
+                self.hour = hour
+                self.minute = minute
+            case .weekly(_, let hour, let minute):
+                self.hour = hour
+                self.minute = minute
+            case .biweekly(_, let hour, let minute):
+                self.hour = hour
+                self.minute = minute
+            case .monthly(_, let hour, let minute):
+                self.hour = hour
+                self.minute = minute
+            }
+        }
+    }
+}
+
+struct MedicationNotificationInfo {
+    let medication: Medication
+    let schedule: NotificationSchedule
+    let frequency: MedicationFrequency
+
+    var name: String { medication.name ?? "Medication" }
+    var dosage: String? { medication.dosage }
+    var instructions: String? { medication.instructions }
+    var id: String { medication.id?.uuidString ?? UUID().uuidString }
+}
+
 enum NotificationSchedule: Hashable, Comparable {
     case daily(hour: Int, minute: Int)
     case weekly(weekday: Int, hour: Int, minute: Int)
@@ -576,6 +872,10 @@ enum NotificationSchedule: Hashable, Comparable {
         default:
             return false
         }
+    }
+
+    var timeKey: MedicationGroup.TimeKey {
+        return MedicationGroup.TimeKey(from: self)
     }
 }
 

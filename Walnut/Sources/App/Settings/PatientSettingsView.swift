@@ -11,7 +11,7 @@ import SwiftData
 import WalnutDesignSystem
 
 struct PatientSettingsView: View {
-
+    
     @State private var viewModel: PatientSettingsViewModel
     
     init(patient: Patient, modelContext: ModelContext) {
@@ -27,23 +27,23 @@ struct PatientSettingsView: View {
         ScrollView {
             VStack(spacing: Spacing.medium) {
                 NavBarHeader(
-                        iconName: "settings",
-                        iconColor: .blue,
-                        title: "Settings",
-                        subtitle: "Add your details and preferences here."
-                    )
-            
+                    iconName: "settings",
+                    iconColor: .blue,
+                    title: "Settings",
+                    subtitle: "Add your details and preferences here."
+                )
+                
                 PatientHeaderCard(patient: viewModel.patient)
-                            .padding(.horizontal, Spacing.medium)
-
+                    .padding(.horizontal, Spacing.medium)
+                
                 // Patient Settings Section
                 patientSettingsSection
-                            .padding(.horizontal, Spacing.medium)
-
+                    .padding(.horizontal, Spacing.medium)
+                
                 // App Settings Section
                 appSettingsSection
-                            .padding(.horizontal, Spacing.medium)
-
+                    .padding(.horizontal, Spacing.medium)
+                
                 Spacer(minLength: Spacing.xl)
             }
         }
@@ -69,7 +69,6 @@ struct PatientSettingsView: View {
                 EditProfileView(patient: viewModel.patient)
                 NotificationsView(patient: viewModel.patient)
                 PrivacySecurityView(patient: viewModel.patient)
-                DeleteAllDataView(patient: viewModel.patient, modelContext: viewModel.modelContext)
             }
         }
     }
@@ -87,6 +86,19 @@ struct PatientSettingsView: View {
                 AlarmSettingsView(patient: viewModel.patient)
                 AboutView(patient: viewModel.patient)
                 HelpSupportView(patient: viewModel.patient)
+            }
+        }
+    }
+    
+    private var deadZoneSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.medium) {
+            Text("Dead Zone")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            VStack(spacing: Spacing.xs) {
+                DeleteAllDataView(patient: viewModel.patient, modelContext: viewModel.modelContext)
             }
         }
     }

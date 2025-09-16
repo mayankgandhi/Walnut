@@ -16,7 +16,7 @@ struct NotificationReviewView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.notificationErrorHandler) private var errorHandler
     @State private var notificationManager = MedicationNotificationManager()
-    @State private var upcomingNotifications: [UpcomingNotification] = []
+    @State private var upcomingNotifications: [UpcomingNotificationGroup] = []
     @State private var isRefreshing = false
 
     var body: some View {
@@ -57,6 +57,18 @@ struct NotificationReviewView: View {
                             Label("Clear All", systemImage: "trash")
                         }
                         .foregroundStyle(.red)
+
+                        Divider()
+
+                        Button(action: {
+                            notificationManager.enableNotificationGrouping.toggle()
+                            Task { await refreshNotifications() }
+                        }) {
+                            Label(
+                                notificationManager.enableNotificationGrouping ? "Disable Grouping" : "Enable Grouping",
+                                systemImage: notificationManager.enableNotificationGrouping ? "rectangle.split.3x1" : "rectangle.stack"
+                            )
+                        }
                     } label: {
                         Image(systemName: "ellipsis.circle")
                     }
@@ -136,7 +148,7 @@ struct NotificationReviewView: View {
     private func notificationSection(
         title: String,
         subtitle: String,
-        notifications: [UpcomingNotification],
+        notifications: [UpcomingNotificationGroup],
         headerColor: Color
     ) -> some View {
         VStack(alignment: .leading, spacing: Spacing.medium) {
@@ -163,58 +175,109 @@ struct NotificationReviewView: View {
         }
     }
 
-    private func notificationCard(_ notification: UpcomingNotification) -> some View {
+    private func notificationCard(_ notificationGroup: UpcomingNotificationGroup) -> some View {
         HealthCard {
             VStack(spacing: Spacing.medium) {
                 HStack(spacing: Spacing.medium) {
-                    // Medication icon
-                    Circle()
-                        .fill(notification.medicationColor.opacity(0.15))
-                        .frame(width: 44, height: 44)
-                        .overlay {
-                            Image(systemName: "pills.fill")
-                                .font(.system(size: 20, weight: .semibold))
-                                .foregroundStyle(notification.medicationColor)
+                    // Medication icon(s)
+                    if notificationGroup.isSingle {
+                        Circle()
+                            .fill(notificationGroup.primaryColor.opacity(0.15))
+                            .frame(width: 44, height: 44)
+                            .overlay {
+                                Image(systemName: "pills.fill")
+                                    .font(.system(size: 20, weight: .semibold))
+                                    .foregroundStyle(notificationGroup.primaryColor)
+                            }
+                    } else {
+                        ZStack {
+                            Circle()
+                                .fill(Color.healthPrimary.opacity(0.15))
+                                .frame(width: 44, height: 44)
+
+                            Text("\(notificationGroup.medicationCount)")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundStyle(Color.healthPrimary)
                         }
+                    }
 
                     // Medication details
                     VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text(notification.medicationName)
-                            .font(.headline.weight(.semibold))
-                            .foregroundStyle(.primary)
-                            .lineLimit(2)
+                        if notificationGroup.isSingle {
+                            Text(notificationGroup.displayTitle)
+                                .font(.headline.weight(.semibold))
+                                .foregroundStyle(.primary)
+                                .lineLimit(2)
 
-                        if let dosage = notification.dosage {
-                            Text(dosage)
+                            if let dosage = notificationGroup.displaySubtitle {
+                                Text(dosage)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } else {
+                            Text(notificationGroup.displayTitle)
+                                .font(.headline.weight(.semibold))
+                                .foregroundStyle(.primary)
+
+                            Text(notificationGroup.displaySubtitle ?? "")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
+                                .lineLimit(2)
                         }
 
-                        Text(notification.timeDisplayText)
+                        Text(notificationGroup.timeDisplayText)
                             .font(.subheadline.weight(.medium))
-                            .foregroundStyle(notification.isToday ? Color.healthPrimary : .secondary)
+                            .foregroundStyle(notificationGroup.isToday ? Color.healthPrimary : .secondary)
                     }
 
                     Spacer()
 
                     // Time badge
                     VStack(spacing: Spacing.xs) {
-                        Text(notification.formattedTime)
+                        Text(notificationGroup.formattedTime)
                             .font(.system(.subheadline, design: .rounded, weight: .semibold))
-                            .foregroundStyle(notification.isToday ? .white : .primary)
+                            .foregroundStyle(notificationGroup.isToday ? .white : .primary)
 
-                        Text(notification.formattedDate)
+                        Text(notificationGroup.formattedDate)
                             .font(.system(.caption2, design: .rounded, weight: .medium))
-                            .foregroundStyle(notification.isToday ? .white.opacity(0.8) : .secondary)
+                            .foregroundStyle(notificationGroup.isToday ? .white.opacity(0.8) : .secondary)
                     }
                     .padding(.horizontal, Spacing.small)
                     .padding(.vertical, Spacing.xs)
-                    .background(notification.isToday ? Color.healthPrimary : Color.secondary.opacity(0.1))
+                    .background(notificationGroup.isToday ? Color.healthPrimary : Color.secondary.opacity(0.1))
                     .cornerRadius(8)
                 }
 
-                // Instructions if available
-                if let instructions = notification.instructions, !instructions.isEmpty {
+                // Grouped medications list
+                if notificationGroup.isGrouped {
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        ForEach(Array(notificationGroup.medications.enumerated()), id: \.offset) { index, medication in
+                            HStack(spacing: Spacing.small) {
+                                Circle()
+                                    .fill(Color.secondary.opacity(0.3))
+                                    .frame(width: 6, height: 6)
+
+                                Text(medication.name)
+                                    .font(.caption)
+                                    .foregroundStyle(.primary)
+
+                                if let dosage = medication.dosage {
+                                    Text("(\(dosage))")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+
+                                Spacer()
+                            }
+                        }
+                    }
+                    .padding(.top, Spacing.xs)
+                }
+
+                // Instructions if available (for single medication)
+                if notificationGroup.isSingle,
+                   let instructions = notificationGroup.medications.first?.instructions,
+                   !instructions.isEmpty {
                     HStack(spacing: Spacing.small) {
                         Image(systemName: "info.circle")
                             .font(.caption)
@@ -256,8 +319,9 @@ struct NotificationReviewView: View {
         }
     }
 
-    private func generateUpcomingNotifications(from medications: [Medication]) async -> [UpcomingNotification] {
-        var notifications: [UpcomingNotification] = []
+    private func generateUpcomingNotifications(from medications: [Medication]) async -> [UpcomingNotificationGroup] {
+        // Create notification infos similar to MedicationNotificationManager
+        var notificationInfos: [ReviewNotificationInfo] = []
         let calendar = Calendar.current
         let now = Date()
         let endDate = calendar.date(byAdding: .day, value: 7, to: now) ?? now // Next 7 days
@@ -272,21 +336,45 @@ struct NotificationReviewView: View {
                     let scheduleDates = generateScheduleDates(for: schedule, from: now, to: endDate)
 
                     for date in scheduleDates {
-                        let notification = UpcomingNotification(
-                            id: "\(medication.id?.uuidString ?? UUID().uuidString)_\(date.timeIntervalSince1970)",
-                            medicationName: medication.name ?? "Medication",
-                            dosage: medication.dosage,
-                            instructions: medication.instructions,
+                        let info = ReviewNotificationInfo(
+                            medication: medication,
+                            frequency: frequency,
                             scheduledDate: date,
-                            medicationColor: getColorForMedication(medication)
+                            timeKey: MedicationGroup.TimeKey(
+                                hour: calendar.component(.hour, from: date),
+                                minute: calendar.component(.minute, from: date)
+                            )
                         )
-                        notifications.append(notification)
+                        notificationInfos.append(info)
                     }
                 }
             }
         }
 
-        return notifications
+        // Group by date and time
+        let groupedByDateTime = Dictionary(grouping: notificationInfos) { info in
+            let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: info.scheduledDate)
+            return calendar.date(from: components) ?? info.scheduledDate
+        }
+
+        // Convert to notification groups
+        let groups = groupedByDateTime.map { dateTime, infos in
+            UpcomingNotificationGroup(
+                scheduledDate: dateTime,
+                medications: infos.map { info in
+                    UpcomingNotification(
+                        id: "\(info.medication.id?.uuidString ?? UUID().uuidString)_\(dateTime.timeIntervalSince1970)",
+                        medicationName: info.medication.name ?? "Medication",
+                        dosage: info.medication.dosage,
+                        instructions: info.medication.instructions,
+                        scheduledDate: dateTime,
+                        medicationColor: getColorForMedication(info.medication)
+                    )
+                }
+            )
+        }
+
+        return groups.sorted { $0.scheduledDate < $1.scheduledDate }
     }
 
     private func generateNotificationSchedulesForFrequency(_ frequency: MedicationFrequency) -> [NotificationSchedule] {
@@ -440,6 +528,81 @@ struct NotificationReviewView: View {
 
 // MARK: - Supporting Models
 
+struct ReviewNotificationInfo {
+    let medication: Medication
+    let frequency: MedicationFrequency
+    let scheduledDate: Date
+    let timeKey: MedicationGroup.TimeKey
+}
+
+struct UpcomingNotificationGroup: Identifiable {
+    let id = UUID()
+    let scheduledDate: Date
+    let medications: [UpcomingNotification]
+
+    var isSingle: Bool { medications.count == 1 }
+    var isGrouped: Bool { medications.count > 1 }
+    var medicationCount: Int { medications.count }
+
+    var isToday: Bool {
+        Calendar.current.isDateInToday(scheduledDate)
+    }
+
+    var isTomorrow: Bool {
+        Calendar.current.isDateInTomorrow(scheduledDate)
+    }
+
+    var formattedTime: String {
+        scheduledDate.formatted(date: .omitted, time: .shortened)
+    }
+
+    var formattedDate: String {
+        if isToday {
+            return "Today"
+        } else if isTomorrow {
+            return "Tomorrow"
+        } else {
+            return scheduledDate.formatted(date: .abbreviated, time: .omitted)
+        }
+    }
+
+    var timeDisplayText: String {
+        if isToday {
+            return "Today at \(formattedTime)"
+        } else if isTomorrow {
+            return "Tomorrow at \(formattedTime)"
+        } else {
+            return "On \(formattedDate) at \(formattedTime)"
+        }
+    }
+
+    var displayTitle: String {
+        if isSingle {
+            return medications.first?.medicationName ?? "Medication"
+        } else {
+            return "\(medicationCount) Medications"
+        }
+    }
+
+    var displaySubtitle: String? {
+        if isSingle {
+            return medications.first?.dosage
+        } else {
+            let names = medications.prefix(2).map { $0.medicationName }
+            let remainingCount = max(0, medicationCount - 2)
+            if remainingCount > 0 {
+                return "\(names.joined(separator: ", ")) + \(remainingCount) more"
+            } else {
+                return names.joined(separator: ", ")
+            }
+        }
+    }
+
+    var primaryColor: Color {
+        medications.first?.medicationColor ?? .healthPrimary
+    }
+}
+
 struct UpcomingNotification: Identifiable {
     let id: String
     let medicationName: String
@@ -447,6 +610,8 @@ struct UpcomingNotification: Identifiable {
     let instructions: String?
     let scheduledDate: Date
     let medicationColor: Color
+
+    var name: String { medicationName }
 
     var isToday: Bool {
         Calendar.current.isDateInToday(scheduledDate)

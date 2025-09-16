@@ -321,10 +321,11 @@ struct MedicationEditor: View {
 
     private func scheduleNotifications(for medication: Medication) {
         Task {
-            let result = await notificationManager.scheduleNotificationsForMedication(medication)
+            // Reschedule all medications to enable grouping
+            let result = await notificationManager.rescheduleAllMedicationNotifications(from: modelContext)
             switch result {
             case .success(let identifiers):
-                print("Scheduled \(identifiers.count) notifications for \(medication.name ?? "medication")")
+                print("Rescheduled \(identifiers.count) grouped notifications after adding/editing \(medication.name ?? "medication")")
             case .failure(let error):
                 await MainActor.run {
                     errorHandler.handleError(error)

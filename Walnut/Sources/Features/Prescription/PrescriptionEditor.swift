@@ -572,17 +572,14 @@ struct PrescriptionEditor: View {
 
     private func scheduleNotificationsForMedications() {
         Task {
-            for medication in medications {
-                let result = await notificationManager.scheduleNotificationsForMedication(medication)
-                switch result {
-                case .success(let identifiers):
-                    print("Scheduled \(identifiers.count) notifications for \(medication.name ?? "medication")")
-                case .failure(let error):
-                    await MainActor.run {
-                        errorHandler.handleError(error)
-                    }
-                    // Stop scheduling on first error to avoid multiple alerts
-                    break
+            // Use grouped scheduling for all medications
+            let result = await notificationManager.scheduleNotificationsForAllMedications(medications)
+            switch result {
+            case .success(let identifiers):
+                print("Scheduled \(identifiers.count) grouped notifications for \(medications.count) medications")
+            case .failure(let error):
+                await MainActor.run {
+                    errorHandler.handleError(error)
                 }
             }
         }
