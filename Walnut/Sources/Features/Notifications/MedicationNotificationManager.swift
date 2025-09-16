@@ -17,14 +17,11 @@ import AlarmKit
 class MedicationNotificationManager {
 
     // MARK: - Properties
-
     var authorizationStatus: UNAuthorizationStatus = .notDetermined
     var pendingNotifications: [UNNotificationRequest] = []
-    private let alarmService = MedicationAlarmService()
     private let userDefaults = UserDefaults.standard
 
     // MARK: - Configuration
-
     var preferredNotificationType: NotificationType {
         get {
             if let rawValue = userDefaults.string(forKey: "PreferredNotificationType"),
@@ -90,12 +87,10 @@ class MedicationNotificationManager {
 
     enum NotificationType: String, CaseIterable {
         case pushNotifications = "Push Notifications"
-        case alarms = "Alarms"
 
         var icon: String {
             switch self {
             case .pushNotifications: return "bell.fill"
-            case .alarms: return "alarm.fill"
             }
         }
     }
@@ -295,8 +290,6 @@ class MedicationNotificationManager {
         switch preferredNotificationType {
         case .pushNotifications:
             return await scheduleUNNotifications(frequency: frequency, medication: medication)
-        case .alarms:
-            return await scheduleAlarmNotifications(frequency: frequency, medication: medication)
         }
     }
 
@@ -306,8 +299,6 @@ class MedicationNotificationManager {
         switch preferredNotificationType {
         case .pushNotifications:
             return await scheduleGroupedUNNotification(group)
-        case .alarms:
-            return await scheduleGroupedAlarmNotification(group)
         }
     }
 
@@ -342,36 +333,7 @@ class MedicationNotificationManager {
         }
     }
 
-    private func scheduleGroupedAlarmNotification(_ group: MedicationGroup) async -> Result<String, Error> {
-        // For grouped alarms, we'll create one alarm for the group
-        let alarmSchedule = Alarm.Schedule.Relative(
-            time: Alarm.Schedule.Relative.Time(
-                hour: group.timeKey.hour,
-                minute: group.timeKey.minute
-            )
-        )
-
-        let medicationName = group.isSingle ?
-            group.medications.first!.name :
-            "\(group.medications.count) medications"
-
-        let configuration = MedicationAlarmConfiguration(
-            medicationID: UUID(), // Group ID
-            medicationName: medicationName,
-            dosage: group.isSingle ? group.medications.first!.dosage : nil,
-            schedule: .relative(alarmSchedule),
-            enableSnooze: true,
-            enableCountdown: false
-        )
-
-        let result = await alarmService.createMedicationAlarm(configuration: configuration)
-        switch result {
-        case .success(let alarmId):
-            return .success(alarmId.uuidString)
-        case .failure(let error):
-            return .failure(error)
-        }
-    }
+    
 
     private func createSingleMedicationBody(_ medication: MedicationNotificationInfo) -> String {
         var body = "Time to take your \(medication.name)"
@@ -478,38 +440,7 @@ class MedicationNotificationManager {
 
     // MARK: - AlarmKit Integration
 
-    private func scheduleAlarmNotifications(
-        frequency: MedicationFrequency,
-        medication: Medication
-    ) async -> Result<[String], Error> {
-
-        let schedules = generateNotificationSchedules(for: frequency)
-        var identifiers: [String] = []
-
-        for schedule in schedules {
-            let alarmSchedule = convertToAlarmSchedule(schedule)
-
-            let configuration = MedicationAlarmConfiguration(
-                medicationID: medication.id ?? UUID(),
-                medicationName: medication.name ?? "Medication",
-                dosage: medication.dosage,
-                schedule: alarmSchedule,
-                enableSnooze: true,
-                enableCountdown: false
-            )
-
-            let result = await alarmService.createMedicationAlarm(configuration: configuration)
-
-            switch result {
-            case .success(let alarmId):
-                identifiers.append(alarmId.uuidString)
-            case .failure(let error):
-                return .failure(error)
-            }
-        }
-
-        return .success(identifiers)
-    }
+   
 
     // MARK: - Schedule Generation
 
@@ -693,18 +624,14 @@ class MedicationNotificationManager {
         let identifiersToCancel = medicationNotifications.map { $0.identifier }
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiersToCancel)
 
-        // Cancel alarm service notifications
-        for (alarmId, _) in alarmService.activeAlarms {
-            await alarmService.cancelAlarm(id: alarmId)
-        }
+        
     }
 
     func cancelAllMedicationNotifications() async {
         // Cancel all UNUserNotificationCenter notifications
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
 
-        // Cancel all alarms
-        await alarmService.cancelAllAlarms()
+        
 
         await loadPendingNotifications()
     }

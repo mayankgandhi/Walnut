@@ -49,9 +49,7 @@ struct AllMedicationsView: View {
         }
         
         return activePrescriptions.compactMap { $0.medications }.reduce([], +)
-    }
-    
-    
+    }    
     
     // MARK: - Body
     
