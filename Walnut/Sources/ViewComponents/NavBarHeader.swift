@@ -13,8 +13,9 @@ import WalnutDesignSystem
     
     // MARK: - Properties
     
-    private let iconName: String
-    private let iconColor: Color
+    private let iconName: String?
+    private let iconColor: Color?
+    
     private let title: String
     private let subtitle: String?
     private let iconBackgroundSize: CGFloat = 64
@@ -23,8 +24,8 @@ import WalnutDesignSystem
     // MARK: - Initialization
     
     init(
-        iconName: String,
-        iconColor: Color,
+        iconName: String? = nil,
+        iconColor: Color? = nil,
         title: String,
         subtitle: String? = nil,
     ) {
@@ -38,7 +39,9 @@ import WalnutDesignSystem
     
      public var body: some View {
          HStack(spacing: Spacing.medium) {
-             iconImageView(iconName)
+             if let iconName, let iconColor {
+                 iconImageView(iconName, iconColor: iconColor)
+             }
              contentView
              Spacer()
          }
@@ -49,7 +52,7 @@ import WalnutDesignSystem
     
    
     @ViewBuilder
-    private func iconImageView(_ iconName: String) -> some View {
+    private func iconImageView(_ iconName: String, iconColor: Color) -> some View {
         ZStack {
             Circle()
                 .fill(

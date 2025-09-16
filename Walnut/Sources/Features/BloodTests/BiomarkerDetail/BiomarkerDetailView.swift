@@ -35,22 +35,29 @@ struct BiomarkerDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: Spacing.large) {
-                heroSection
                 
-                timeFrameSelector
+                NavBarHeader(
+                    iconName: nil,
+                    iconColor: nil,
+                    title: viewModel.biomarkerTitle,
+                    subtitle: nil
+                )
+                
+                heroSection
+                    .padding(.horizontal, Spacing.medium)
                 
                 chartSection
+                    .padding(.horizontal, Spacing.medium)
                 
                 if viewModel.filteredDataPoints.count > 1 {
                     historicalDataSection
+                        .padding(.horizontal, Spacing.medium)
+                    
                 }
             }
-            .padding(.horizontal, Spacing.medium)
             .padding(.bottom, Spacing.xl)
         }
         .background(Color(UIColor.systemGroupedBackground))
-        .navigationTitle(viewModel.biomarkerTitle)
-        .navigationBarTitleDisplayMode(.large)
         .sheet(item: $selectedDocument) { document in
             NavigationView {
                 DocumentViewer(document: document)
@@ -106,28 +113,27 @@ struct BiomarkerDetailView: View {
                 
                 
                 // Trend information
-                if viewModel.filteredDataPoints.count >= 2 {
-                    HStack {
-                        HStack(spacing: Spacing.xs) {
-                            Image(systemName: viewModel.trendDirection.iconName)
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(viewModel.trendColor)
-                            
-                            Text(String(format: "%.1f", abs(viewModel.currentValue - (viewModel.filteredDataPoints.count >= 2 ? viewModel.filteredDataPoints[viewModel.filteredDataPoints.count - 2].value : 0))))
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(viewModel.trendColor)
-                            
-                            Text("(\(viewModel.formattedTrendPercentage))")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(.secondary)
-                            
-                            Text("from last reading")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
-                        }
+                HStack {
+                    HStack(spacing: Spacing.xs) {
+                        Image(systemName: viewModel.trendDirection.iconName)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(viewModel.trendColor)
                         
+                        Text(String(format: "%.1f", abs(viewModel.currentValue - (viewModel.filteredDataPoints.count >= 2 ? viewModel.filteredDataPoints[viewModel.filteredDataPoints.count - 2].value : 0))))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(viewModel.trendColor)
+                        
+                        Text("(\(viewModel.formattedTrendPercentage))")
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(.secondary)
+                        
+                        Text("from last reading")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
                     }
+                    
                 }
+                
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -143,15 +149,12 @@ struct BiomarkerDetailView: View {
                         
                     }) {
                         VStack(spacing: 2) {
-                            Text(timeFrame.rawValue)
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(viewModel.selectedTimeFrame == timeFrame ? .white : viewModel.primaryColor)
                             
                             Text(timeFrame.displayName)
                                 .font(.caption2)
                                 .foregroundStyle(viewModel.selectedTimeFrame == timeFrame ? .white.opacity(0.8) : .secondary)
                         }
-                        
+                        .padding(.all, Spacing.xs)
                         .background(
                             RoundedRectangle(cornerRadius: 6)
                                 .fill(viewModel.selectedTimeFrame == timeFrame ? viewModel.primaryColor : Color.clear)
@@ -165,18 +168,15 @@ struct BiomarkerDetailView: View {
                 }
             }
             
-            if !viewModel.filteredDataPoints.isEmpty {
-                Text("\(viewModel.filteredDataPoints.count) readings")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-            }
+            
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .trailing)
     }
     
     // MARK: - Chart Section
     private var chartSection: some View {
-        HealthCard {
+        VStack(alignment: .leading, spacing: Spacing.medium)  {
+            headingView
             
             // Enhanced chart
             EnhancedBiomarkerChart(
@@ -217,50 +217,46 @@ struct BiomarkerDetailView: View {
             )
             .frame(height: 280)
             
-            VStack(alignment: .leading, spacing: Spacing.medium) {
-                // Chart header
-                HStack {
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("Trend Analysis")
-                            .font(.headline.weight(.bold))
-                            .foregroundStyle(.primary)
-                        
-                        Text("\(viewModel.filteredDataPoints.count) readings over time")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    
-                    Spacer()
-                    
-                    // Legend
-                    HStack(spacing: Spacing.small) {
-                        HStack(spacing: 4) {
-                            Circle()
-                                .fill(Color.healthSuccess.opacity(0.3))
-                                .frame(width: 8, height: 8)
-                            Text("Normal Range")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        
-                        HStack(spacing: 4) {
-                            Circle()
-                                .fill(viewModel.primaryColor)
-                                .frame(width: 8, height: 8)
-                            Text("Your Values")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
+            timeFrameSelector
+        }
+    }
+    
+    private var headingView: some View {
+        
+        HStack {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                Text("Trend Analysis")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(.primary)
+                
+                Text("\(viewModel.filteredDataPoints.count) readings over time")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            
+            Spacer()
+            
+            // Legend
+            HStack(spacing: Spacing.small) {
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(Color.healthSuccess.opacity(0.3))
+                        .frame(width: 8, height: 8)
+                    Text("Normal Range")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
                 
-                // Chart insights
-                if let selectedDataPoint = viewModel.selectedDataPoint {
-                    chartInsights(for: selectedDataPoint)
-                } else {
-                    defaultChartInsights
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(viewModel.primaryColor)
+                        .frame(width: 8, height: 8)
+                    Text("Your Values")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
+            
         }
     }
     
@@ -272,7 +268,7 @@ struct BiomarkerDetailView: View {
                     .foregroundStyle(.primary)
                 
                 VStack(spacing: Spacing.small) {
-                    ForEach(Array(viewModel.filteredDataPoints.reversed().prefix(5))) { dataPoint in
+                    ForEach(Array(viewModel.filteredDataPoints.reversed())) { dataPoint in
                         let isInRange = isValueInNormalRange(dataPoint.value, normalRange: parseNormalRange(viewModel.normalRangeText))
                         let isLatest = dataPoint.id == viewModel.filteredDataPoints.last?.id
                         
@@ -326,15 +322,7 @@ struct BiomarkerDetailView: View {
                         .padding(.vertical, 2)
                     }
                     
-                    if viewModel.filteredDataPoints.count > 5 {
-                        HStack {
-                            Text("And \(viewModel.filteredDataPoints.count - 5) more readings in this timeframe...")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
-                            Spacer()
-                        }
-                        .padding(.top, Spacing.xs)
-                    }
+                    
                 }
             }
         }
