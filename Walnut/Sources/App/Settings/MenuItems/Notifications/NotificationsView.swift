@@ -33,6 +33,8 @@ struct NotificationsView: View {
         
         .sheet(isPresented: $showNotificationReview) {
             NotificationReviewView()
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(Spacing.large)
         }
     }
 }
