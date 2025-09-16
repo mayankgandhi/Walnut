@@ -59,7 +59,7 @@ struct AllMedicationsView: View {
     
         NavBarHeader(
             iconName: "pill-bottle",
-            iconColor: .red,
+            iconColor: .yellow,
             title: "Medications",
             subtitle: "\(scheduleService.todaysDoses.count) Medications"
         )

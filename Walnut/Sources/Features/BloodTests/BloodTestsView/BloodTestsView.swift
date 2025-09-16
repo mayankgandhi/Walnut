@@ -23,9 +23,9 @@ struct BloodTestsView: View {
             VStack(alignment: .leading, spacing: Spacing.medium) {
                 NavBarHeader(
                     iconName: "graph",
-                    iconColor: .red,
-                    title: "Vitals",
-                    subtitle: nil
+                    iconColor: .green,
+                    title: "Trends",
+                    subtitle: "Visualise the latest trends in your health"
                 )
 
                 // Search bar

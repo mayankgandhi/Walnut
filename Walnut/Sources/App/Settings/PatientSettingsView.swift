@@ -25,19 +25,27 @@ struct PatientSettingsView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: Spacing.large) {
+            VStack(spacing: Spacing.medium) {
+                NavBarHeader(
+                        iconName: "settings",
+                        iconColor: .blue,
+                        title: "Settings",
+                        subtitle: "Add your details and preferences here."
+                    )
+            
                 PatientHeaderCard(patient: viewModel.patient)
-                
+                            .padding(.horizontal, Spacing.medium)
+
                 // Patient Settings Section
                 patientSettingsSection
-                
+                            .padding(.horizontal, Spacing.medium)
+
                 // App Settings Section
                 appSettingsSection
-                
+                            .padding(.horizontal, Spacing.medium)
+
                 Spacer(minLength: Spacing.xl)
             }
-            .padding(.horizontal, Spacing.medium)
-            .padding(.top, Spacing.medium)
         }
         .alert("Error", isPresented: $viewModel.showErrorAlert) {
             Button("OK") {
@@ -46,7 +54,6 @@ struct PatientSettingsView: View {
         } message: {
             Text(viewModel.error?.localizedDescription ?? "An unknown error occurred.")
         }
-        .navigationTitle("Settings")
     }
     
     // MARK: - View Components
