@@ -49,16 +49,6 @@ $HOME/.local/bin/mise exec -- tuist version || {
     exit 1
 }
 
-# Accept Xcode license right before using tuist
-echo "📝 Accepting Xcode license before tuist commands..."
-sudo xcodebuild -license accept 2>/dev/null || \
-xcodebuild -license accept 2>/dev/null || \
-echo "yes" | sudo xcodebuild -license 2>/dev/null || {
-    echo "⚠️  License acceptance may have failed, continuing..."
-}
-
-cd ..
-
 # Install tuist dependencies using direct mise exec
 echo "📥 Installing tuist dependencies..."
 $HOME/.local/bin/mise exec -- tuist install || {
