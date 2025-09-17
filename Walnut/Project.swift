@@ -1,7 +1,10 @@
 import ProjectDescription
 
 let infoPlist: InfoPlist = .extendingDefault(with: [
-    "UILaunchScreen": "LaunchScreen.storyboard",
+    "UILaunchScreen": .dictionary([
+        "UIImageName": .string("display-app-icon"),
+        "UIColorName": .string("blue"),
+    ]),
     "CFBundleName": .string("$(PRODUCT_NAME)"),
     "CFBundleIdentifier": .string("$(PRODUCT_BUNDLE_IDENTIFIER)"),
     "CFBundleVersion": .string("$(MARKETING_VERSION)"),
