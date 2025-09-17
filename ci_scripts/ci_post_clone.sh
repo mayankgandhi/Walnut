@@ -56,8 +56,7 @@ $HOME/.local/bin/mise exec -- tuist install || {
     exit 1
 }
 
-cd ~/Walnut/
-
+cd ..
 # Generate the project using direct mise exec
 echo "🏗️  Generating Xcode project..."
 $HOME/.local/bin/mise exec -- tuist generate || {

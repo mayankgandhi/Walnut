@@ -55,7 +55,7 @@ struct OnboardingNavigationView: View {
                             .foregroundColor(.blue)
                             .underline()
                             .onTapGesture {
-                                if let url = URL(string: "https://example.com/terms") {
+                                if let url = URL(string: "https://mayankgandhi.com/walnut/terms") {
                                     UIApplication.shared.open(url)
                                 }
                             }
@@ -66,7 +66,7 @@ struct OnboardingNavigationView: View {
                             .foregroundColor(.blue)
                             .underline()
                             .onTapGesture {
-                                if let url = URL(string: "https://example.com/privacy") {
+                                if let url = URL(string: "https://mayankgandhi.com/walnut/privacy-policy") {
                                     UIApplication.shared.open(url)
                                 }
                             }
