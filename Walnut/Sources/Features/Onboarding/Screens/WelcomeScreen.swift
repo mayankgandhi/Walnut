@@ -37,15 +37,13 @@ struct WelcomeScreen: View {
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)
             }
-            .padding(.bottom, Spacing.xl)
-            
             
             if showFeatures {
                 VStack(alignment: .center, spacing: Spacing.medium) {
-                    featureItemView(icon: "ai-sparkle", title: "AI Powered", subtitle: "Documents scanning using AI Models. Automatically extract and organize your health data for easier access.")
+                    featureItemView(icon: "ai-sparkle", title: "AI Powered", subtitle: "Automatically extract and organize your health data for easier access.")
                     featureItemView(icon: "graph", title: "Health Trends Tracker", subtitle: "Visualize your health journey with dynamic charts and trends. Stay informed, stay ahead.")
                     featureItemView(icon: "calendar", title: "Never Miss a Dose", subtitle: "Smart reminders for medications, appointments, and check-ups. Your health, always on track.")
-                    featureItemView(icon: "journal", title: "Secure Health Vault", subtitle: "Store and organize all your health documents securely. Access your records anytime, anywhere.")
+                    featureItemView(icon: "journal", title: "Secure Health Vault", subtitle: "Store and organize all your health documents securely.")
                 }
             } else {
                 HStack(alignment: .center, spacing: Spacing.medium) {
@@ -98,12 +96,12 @@ struct WelcomeScreen: View {
                             .foregroundStyle(.primary)
                         
                         Text(subtitle)
-                            .font(.subheadline.weight(.light))
+                            .font(.caption.weight(.light))
                             .foregroundStyle(.primary)
                     }
                     
                 }
-                .padding(Spacing.medium)
+                .padding(Spacing.small)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .subtleCardStyle()
             } else {
@@ -114,7 +112,6 @@ struct WelcomeScreen: View {
                     .matchedGeometryEffect(id: icon, in: animation)
                     .padding(.horizontal, Spacing.medium)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                
             }
         }
         .task {

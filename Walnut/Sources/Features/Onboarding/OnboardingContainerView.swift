@@ -20,20 +20,21 @@ struct OnboardingContainerView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(alignment: .center, spacing: .zero) {
-                // Progress indicator
-                ProgressIndicatorView(
-                    progress: viewModel.progressPercentage,
-                    currentStep: viewModel.currentScreenIndex + 1,
-                    totalSteps: viewModel.availableScreens.count
-                )
-                .padding(.vertical, Spacing.large)
-                .padding(.horizontal, Spacing.medium)
-                .opacity(viewModel.currentScreen != .welcome ? 1 : 0.01)
+        
+            VStack(alignment: .center, spacing: Spacing.small) {
+
+                if viewModel.currentScreenIndex != 0 {
+                    ProgressIndicatorView(
+                        progress: viewModel.progressPercentage,
+                        currentStep: viewModel.currentScreenIndex + 1,
+                        totalSteps: viewModel.availableScreens.count
+                    )
+                    .padding(.vertical, Spacing.large)
+                    .padding(.horizontal, Spacing.medium)
+                    .opacity(viewModel.currentScreen != .welcome ? 1 : 0.01)
+                }
                 
-                // Main content container with direct view switching
                 ZStack {
-                    // Show current screen based on viewModel.currentScreen
                     Group {
                         switch viewModel.currentScreen {
                         case .welcome:
@@ -57,15 +58,10 @@ struct OnboardingContainerView: View {
                 )
                 .animation(.easeInOut(duration: 0.3), value: viewModel.currentScreen)
                 
-                // Navigation controls
                 OnboardingNavigationView(viewModel: viewModel)
                     .padding(.vertical, Spacing.large)
                     .padding(.horizontal, Spacing.medium)
             }
-            .background(
-                Color(hex: "#B8D4F0")
-                    .edgesIgnoringSafeArea(.all)
-            )
             .environment(viewModel)
             .navigationBarHidden(true)
             .onReceive(NotificationCenter.default.publisher(for: .onboardingCompleted)) { _ in
