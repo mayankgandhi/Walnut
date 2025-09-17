@@ -1,8 +1,6 @@
 import ProjectDescription
 
 let infoPlist: InfoPlist = .extendingDefault(with: [
-    "UILaunchStoryboardName": "LaunchScreen.storyboard",
-    "UILaunchStoryboardName~ipad": "Launch Screen-iPAD.storyboard",
     "UILaunchScreen": "LaunchScreen.storyboard",
     "CFBundleName": .string("$(PRODUCT_NAME)"),
     "CFBundleIdentifier": .string("$(PRODUCT_BUNDLE_IDENTIFIER)"),

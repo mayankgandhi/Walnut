@@ -33,8 +33,10 @@ struct PrescriptionDetailView: View {
                     
                     // Follow-up Section
                     if prescription.followUpDate != nil ||
-                        !(prescription.followUpTests?.isEmpty ?? false) {
-                        enhancedFollowUpCard
+                        prescription.followUpTests?.joined(separator: ", ") != "" {
+                        enhancedFollowUpCard(
+                            followUpTests: prescription.followUpTests ?? []
+                        )
                     }
                     
                     // Clinical Notes Section
@@ -203,7 +205,7 @@ struct PrescriptionDetailView: View {
     }
     
     // MARK: - Enhanced Follow-up Card
-    private var enhancedFollowUpCard: some View {
+    private func enhancedFollowUpCard(followUpTests: [String]) -> some View {
         VStack(alignment: .leading, spacing: Spacing.medium) {
             HealthCardHeader(
                 icon: "calendar.badge.clock",
@@ -212,7 +214,7 @@ struct PrescriptionDetailView: View {
                 subtitle: prescription.followUpDate != nil ? "Due \(prescription.followUpDate!.formatted(date: .abbreviated, time: .omitted))" : nil,
             )
             
-            if let followUpTests = prescription.followUpTests, !followUpTests.isEmpty {
+            
                 HealthCard {
                     VStack(alignment: .leading, spacing: Spacing.small) {
                         Text("Required Tests:")
@@ -234,7 +236,7 @@ struct PrescriptionDetailView: View {
                         }
                     }
                 }
-            }
+            
         }
     }
     
