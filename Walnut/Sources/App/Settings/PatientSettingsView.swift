@@ -47,6 +47,9 @@ struct PatientSettingsView: View {
                 Spacer(minLength: Spacing.xl)
             }
         }
+        .background {
+            ContentBackgroundView(color: .blue)
+        }
         .alert("Error", isPresented: $viewModel.showErrorAlert) {
             Button("OK") {
                 viewModel.dismissError()

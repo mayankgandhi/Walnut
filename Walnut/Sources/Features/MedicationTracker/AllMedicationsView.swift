@@ -54,7 +54,6 @@ struct AllMedicationsView: View {
     // MARK: - Body
     
     var body: some View {
-        
         ScrollView {
             VStack(spacing: Spacing.medium) {
                 NavBarHeader(
@@ -73,6 +72,9 @@ struct AllMedicationsView: View {
                 }
             }
             .padding(.bottom, 100) // Extra padding for better scrolling
+        }
+        .background {
+            ContentBackgroundView(color: .yellow)
         }
         .sheet(item: $medicationToEdit) {
             MedicationEditor(

@@ -84,7 +84,15 @@ struct MedicalCasesView: View {
                     medicalCasesList(viewModel: viewModel)
                 }
             }
-            
+            .task {
+                viewModel.refreshData()
+            }
+            .refreshable {
+                viewModel.refreshData()
+            }
+            .background {
+                ContentBackgroundView(color: .blue)
+            }
             .navigationDestination(item: $viewModel.selectedCase) { medicalCase in
                 MedicalCaseDetailView(medicalCase: medicalCase)
             }
@@ -113,12 +121,7 @@ struct MedicalCasesView: View {
             } message: {
                 Text("Are you sure you want to delete this medical case? This action cannot be undone.")
             }
-            .task {
-                await viewModel.refreshData()
-            }
-            .refreshable {
-                await viewModel.refreshData()
-            }
+            
         }
     }
     

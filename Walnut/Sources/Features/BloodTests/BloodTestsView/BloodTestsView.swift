@@ -53,6 +53,15 @@ struct BloodTestsView: View {
                     emptyStateView
                 }
             }
+            .task {
+                viewModel.refreshData()
+            }
+            .refreshable {
+                viewModel.refreshData()
+            }
+            .background {
+                ContentBackgroundView(color: .green)
+            }
             .navigationDestination(item: $viewModel.selectedBiomarker) { biomarker in
                 BiomarkerDetailView(
                     biomarkerName: biomarker.testName,
@@ -65,12 +74,7 @@ struct BloodTestsView: View {
             .navigationDestination(item: $viewModel.selectedBloodReport) { bloodReport in
                 BloodReportDetailView(bloodReport: bloodReport)
             }
-            .task {
-                viewModel.refreshData()
-            }
-            .refreshable {
-                viewModel.refreshData()
-            }
+            
         }
     }
     

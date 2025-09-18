@@ -21,9 +21,7 @@ struct PatientTabView: View {
             Tab("Meds", systemImage: "pills.fill") {
                 NavigationStack {
                     AllMedicationsView(patient: patient)
-                        .background {
-                            ContentBackgroundView(color: .red)
-                        }
+                        
                 }
             }
             
@@ -35,9 +33,6 @@ struct PatientTabView: View {
                             modelContext: modelContext
                         )
                     )
-                    .background {
-                        ContentBackgroundView(color: .blue)
-                    }
                 }
             }
             
@@ -49,9 +44,6 @@ struct PatientTabView: View {
                             modelContext: modelContext
                         )
                     )
-                    .background {
-                        ContentBackgroundView(color: .yellow)
-                    }
                 }
             }
             
@@ -61,9 +53,7 @@ struct PatientTabView: View {
                         patient: patient,
                         modelContext: modelContext
                     )
-                    .background {
-                        ContentBackgroundView(color: .green)
-                    }
+                    
                 }
             }
             

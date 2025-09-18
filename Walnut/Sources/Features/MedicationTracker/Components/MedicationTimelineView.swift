@@ -198,16 +198,9 @@ struct MedicationDoseCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background {
-            ZStack {
-                LinearGradient(colors: [
-                    .gray.opacity(0.25),
-                    .gray.opacity(0.15),
-                    .gray.opacity(0.05)
-                ], startPoint: .top, endPoint: .bottom)
-                PatternBackground()
-            }
-        }
+        
+        .background(.thinMaterial)
+        
         .cornerRadius(12)
     }
     
