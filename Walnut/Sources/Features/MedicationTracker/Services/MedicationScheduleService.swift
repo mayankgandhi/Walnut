@@ -63,10 +63,7 @@ class MedicationScheduleService: MedicationScheduleServiceProtocol {
     /// Generate medication schedule for a specific date
     func generateSchedule(for date: Date) -> MedicationScheduleResult<Void> {
         do {
-            if medications.isEmpty {
-                // Use placeholder data for demonstration when no real medications exist
-                generatePlaceholderSchedule(for: date)
-            } else {
+            if !medications.isEmpty {
                 // Generate real schedule from medication frequencies
                 try generateRealSchedule(for: date)
             }
@@ -324,38 +321,6 @@ class MedicationScheduleService: MedicationScheduleServiceProtocol {
         
         self.timelineDoses = groupedDoses
         self.todaysDoses = allDoses.sorted { $0.scheduledTime < $1.scheduledTime }
-    }
-    
-    /// Placeholder implementation to demonstrate architecture when no real medications exist
-    private func generatePlaceholderSchedule(for date: Date) {
-        // Reset current schedule
-        timelineDoses = [:]
-        todaysDoses = []
-        
-        let calendar = Calendar.current
-        var allDoses: [ScheduledDose] = []
-        
-        // Example: Create sample doses for demonstration
-        let sampleDoses = [
-            (Medication.sampleMedication, 8, TimeSlot.morning, MealRelation(mealTime: .breakfast, timing: .before, offsetMinutes: -15)),
-            (Medication.complexMedication, 13, TimeSlot.midday, nil),
-            (Medication.hourlyMedication, 18, TimeSlot.evening, MealRelation(mealTime: .dinner, timing: .after, offsetMinutes: 30)),
-            (Medication.weeklyMedication, 22, TimeSlot.night, nil)
-        ]
-        
-        for (medication, hour, timeSlot, mealRelation) in sampleDoses {
-            if let scheduledTime = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: date) {
-                let dose = ScheduledDose(
-                    medication: medication,
-                    scheduledTime: scheduledTime,
-                    timeSlot: timeSlot,
-                    mealRelation: mealRelation,
-                )
-                allDoses.append(dose)
-            }
-        }
-        
-        groupAndSortDoses(allDoses)
     }
     
     /// Calculate next dose time for a medication frequency
