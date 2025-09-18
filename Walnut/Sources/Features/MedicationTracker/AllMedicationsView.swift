@@ -49,31 +49,29 @@ struct AllMedicationsView: View {
         }
         
         return activePrescriptions.compactMap { $0.medications }.reduce([], +)
-    }    
+    }
     
     // MARK: - Body
     
     var body: some View {
-    
-        NavBarHeader(
-            iconName: "pill-bottle",
-            iconColor: .yellow,
-            title: "Medications",
-            subtitle: "\(scheduleService.todaysDoses.count) Medications"
-        )
         
         ScrollView {
-            VStack(spacing: Spacing.large) {
+            VStack(spacing: Spacing.medium) {
+                NavBarHeader(
+                    iconName: "pill-bottle",
+                    iconColor: .yellow,
+                    title: "Medications",
+                    subtitle: "\(scheduleService.todaysDoses.count) Medications"
+                )
                 // Main timeline content
                 if !scheduleService.todaysDoses.isEmpty {
                     MedicationTimelineView(
                         scheduledDoses: scheduleService.timelineDoses
                     )
                 } else {
-                    MedicationEmptyState(onAddPrescription: handleAddPrescription)
+                    MedicationEmptyState()
                 }
             }
-            .padding(.top, Spacing.medium)
             .padding(.bottom, 100) // Extra padding for better scrolling
         }
         .sheet(item: $medicationToEdit) {
@@ -140,9 +138,6 @@ struct AllMedicationsView: View {
     }
     
     private func handleAddPrescription() {
-        // Placeholder for add prescription navigation
-        // In a real implementation, this would navigate to the prescription creation flow
-        print("Navigate to add prescription")
     }
     
 }

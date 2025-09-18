@@ -119,7 +119,6 @@ struct BloodTestsView: View {
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(UIColor.systemGroupedBackground))
     }
     
     private var emptyStateView: some View {
@@ -137,7 +136,6 @@ struct BloodTestsView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(UIColor.systemGroupedBackground))
     }
     
     private var emptyFilteredResultsView: some View {

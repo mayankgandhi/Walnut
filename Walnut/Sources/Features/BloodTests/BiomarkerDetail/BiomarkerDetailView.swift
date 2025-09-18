@@ -57,7 +57,7 @@ struct BiomarkerDetailView: View {
             }
             .padding(.bottom, Spacing.xl)
         }
-        .background(Color(UIColor.systemGroupedBackground))
+        .background(ContentBackgroundView(color: .blue))
         .sheet(item: $selectedDocument) { document in
             NavigationView {
                 DocumentViewer(document: document)

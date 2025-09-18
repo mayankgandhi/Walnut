@@ -11,11 +11,6 @@ import WalnutDesignSystem
 
 /// Empty state view for when no medications are scheduled
 struct MedicationEmptyState: View {
-    
-    // MARK: - Properties
-    
-    let onAddPrescription: (() -> Void)?
-    
     // MARK: - Body
     
     var body: some View {
@@ -25,10 +20,7 @@ struct MedicationEmptyState: View {
             } description: {
                 Text("Add medications to your prescriptions to track dosages and schedules throughout the day.")
             } actions: {
-                if let onAddPrescription = onAddPrescription {
-                    Button("Add Prescription", action: onAddPrescription)
-                        .buttonStyle(.borderedProminent)
-                }
+               
             }
             .padding(Spacing.large)
         }
@@ -38,8 +30,5 @@ struct MedicationEmptyState: View {
 // MARK: - Preview
 
 #Preview {
-    MedicationEmptyState(onAddPrescription: {
-        print("Add prescription tapped")
-    })
-    .background(Color(.systemGroupedBackground))
+    MedicationEmptyState()
 }

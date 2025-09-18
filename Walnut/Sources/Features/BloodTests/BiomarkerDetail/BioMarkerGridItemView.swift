@@ -123,14 +123,12 @@ public struct BioMarkerGridItemView: View {
 
 #Preview("List") {
     ScrollView {
-        
         ForEach(BioMarker.samples, id: \.id) { biomarker in
             BioMarkerGridItemView(
                 biomarker: biomarker
             )
         }
     }
-    .background(Color(UIColor.systemGroupedBackground))
 }
 
 #Preview("Different States") {

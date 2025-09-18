@@ -146,58 +146,69 @@ struct MedicationDoseCard: View {
     // MARK: - Body
     
     var body: some View {
-        HealthCard {
-            VStack(alignment: .leading, spacing: Spacing.small) {
+        VStack(alignment: .leading, spacing: Spacing.small) {
             
-                // Header with status indicator and time
-                VStack(alignment: .leading, spacing: Spacing.small) {
+            // Header with status indicator and time
+            VStack(alignment: .leading, spacing: Spacing.small) {
+                
+                VStack(alignment: .leading) {
                     
-                    VStack(alignment: .leading) {
-                        
-                        Text(dose.medication.name ?? "Unknown")
-                            .font(.system(.subheadline, design: .rounded, weight: .semibold))
-                            .foregroundStyle(.primary)
-                            .lineLimit(2)
-                            .multilineTextAlignment(.leading)
-                        
-                        // Dosage information
-                        if let dosage = dose.medication.dosage {
-                            Text(dosage)
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(Color.healthPrimary)
-                                .padding(.horizontal, Spacing.xs)
-                                .padding(.vertical, 2)
-                                .background(
-                                    Color.healthPrimary.opacity(0.1),
-                                    in: Capsule()
-                                )
-                        }
+                    Text(dose.medication.name ?? "Unknown")
+                        .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                        .foregroundStyle(.primary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                    
+                    // Dosage information
+                    if let dosage = dose.medication.dosage {
+                        Text(dosage)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(Color.healthPrimary)
+                            .padding(.horizontal, Spacing.xs)
+                            .padding(.vertical, 2)
+                            .background(
+                                Color.healthPrimary.opacity(0.1),
+                                in: Capsule()
+                            )
                     }
-                    
-                    Text(dose.displayTime)
-                        .font(.caption2.weight(.medium))
-                        .foregroundStyle(.secondary)
-                    
                 }
                 
-                // Meal relation badge
-                if let mealRelation = dose.mealRelation {
-                    MealRelationMarker(mealRelation: mealRelation)
-                }
-                
-                // Instructions (compact)
-                if let instructions = dose.medication.instructions, !instructions.isEmpty {
-                    Text(instructions)
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                        .lineLimit(4)
-                        .truncationMode(.tail)
-                }
-                Spacer()
+                Text(dose.displayTime)
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(.secondary)
                 
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            // Meal relation badge
+            if let mealRelation = dose.mealRelation {
+                MealRelationMarker(mealRelation: mealRelation)
+            }
+            
+            // Instructions (compact)
+            if let instructions = dose.medication.instructions, !instructions.isEmpty {
+                Text(instructions.lowercased())
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(4)
+                    .truncationMode(.tail)
+            }
+            Spacer()
+            
+            
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background {
+            ZStack {
+                LinearGradient(colors: [
+                    .gray.opacity(0.25),
+                    .gray.opacity(0.15),
+                    .gray.opacity(0.05)
+                ], startPoint: .top, endPoint: .bottom)
+                PatternBackground()
+            }
+        }
+        .cornerRadius(12)
     }
     
     // MARK: - Computed Properties

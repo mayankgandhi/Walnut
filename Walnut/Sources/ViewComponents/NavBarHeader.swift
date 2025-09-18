@@ -9,7 +9,7 @@
 import SwiftUI
 import WalnutDesignSystem
 
- struct NavBarHeader: View {
+struct NavBarHeader: View {
     
     // MARK: - Properties
     
@@ -37,20 +37,21 @@ import WalnutDesignSystem
     
     // MARK: - Body
     
-     public var body: some View {
-         HStack(spacing: Spacing.medium) {
-             if let iconName, let iconColor {
-                 iconImageView(iconName, iconColor: iconColor)
-             }
-             contentView
-             Spacer()
-         }
-         .padding(.horizontal, Spacing.medium)
-     }
-     
+    public var body: some View {
+        HStack(spacing: Spacing.medium) {
+            if let iconName, let iconColor {
+                iconImageView(iconName, iconColor: iconColor)
+            }
+            contentView
+            Spacer()
+        }
+        .padding(.horizontal, Spacing.medium)
+        .padding(.top, Spacing.medium)
+    }
+    
     // MARK: - View Components
     
-   
+    
     @ViewBuilder
     private func iconImageView(_ iconName: String, iconColor: Color) -> some View {
         ZStack {
@@ -95,15 +96,12 @@ import WalnutDesignSystem
 #Preview("Standard Headers") {
     ScrollView {
         VStack(spacing: Spacing.xl) {
-            
-            // Minimal header (title only)
             NavBarHeader(
                 iconName: "pill-bottle",
                 iconColor: .red,
                 title: "Patient Summary",
                 subtitle: nil
             )
-            
         }
     }
 }

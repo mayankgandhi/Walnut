@@ -136,7 +136,7 @@ private struct PDFDocumentView: View {
                 }
             } else {
                 PDFKitView(url: url)
-                    .background(Color(.systemGroupedBackground))
+        .background(ContentBackgroundView(color: .blue))
             }
         }
         .alert("Error", isPresented: $showingError) {

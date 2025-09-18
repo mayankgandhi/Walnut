@@ -360,5 +360,4 @@ public struct BiomarkerListItemView: View {
         }
         .padding()
     }
-    .background(Color(UIColor.systemGroupedBackground))
 }
