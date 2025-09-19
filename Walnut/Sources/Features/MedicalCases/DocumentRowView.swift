@@ -97,7 +97,7 @@ struct DocumentRowView: View {
 #Preview {
     DocumentRowView(
         item: .prescription(.samplePrescription(for: .sampleCase)),
-        viewModel: UnifiedDocumentsSectionViewModel()
+        viewModel: UnifiedDocumentsSectionViewModel(patient: .samplePatient)
     )
     .padding()
 }

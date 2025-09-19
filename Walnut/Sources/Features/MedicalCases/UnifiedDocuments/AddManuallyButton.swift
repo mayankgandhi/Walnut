@@ -9,7 +9,8 @@
 import SwiftUI
 
 public struct AddManuallyButton: View {
-
+    
+    let patient: Patient
     let medicalCase: MedicalCase
     @State var store: DocumentPickerStore
     @State var presentDocumentPicker: DocumentType?
@@ -40,7 +41,7 @@ public struct AddManuallyButton: View {
         .sheet(item: $presentDocumentPicker) { documentType in
             switch documentType {
             case .prescription:
-                 PrescriptionEditor(medicalCase: medicalCase)
+                    PrescriptionEditor(patient: patient, medicalCase: medicalCase)
             case .labResult:
                 BloodReportEditor(medicalCase: medicalCase)
                 

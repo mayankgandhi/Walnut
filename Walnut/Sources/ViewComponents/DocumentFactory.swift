@@ -45,13 +45,19 @@ struct DocumentContextMenuItem {
 
 class DocumentFactory {
     
-    static let shared = DocumentFactory()
-    private init() {}
+    private let patient: Patient
+    
+    init(patient: Patient) {
+        self.patient = patient
+    }
     
     func createActionHandler(for item: DocumentItem) -> any DocumentActionHandler {
         switch item {
         case .prescription(let prescription):
-            return PrescriptionActionHandler(prescription: prescription)
+                return PrescriptionActionHandler(
+                    patient: patient,
+                    prescription: prescription
+                )
         case .bloodReport(let bloodReport):
             return BloodReportActionHandler(bloodReport: bloodReport)
         case .unparsedDocument(let document):
@@ -66,11 +72,13 @@ class DocumentFactory {
 
 @Observable
 class PrescriptionActionHandler: DocumentActionHandler {
+    private let patient: Patient
     private let prescription: Prescription
     
     private var navigationState = NavigationState()
     
-    init(prescription: Prescription) {
+    init(patient: Patient, prescription: Prescription) {
+        self.patient = patient
         self.prescription = prescription
     }
     
@@ -108,7 +116,7 @@ class PrescriptionActionHandler: DocumentActionHandler {
     func getNavigationDestination() -> AnyView? {
         if navigationState.selectedPrescription != nil {
             return AnyView(
-                PrescriptionDetailView(prescription: prescription)
+                PrescriptionDetailView(patient: patient, prescription: prescription)
             )
         }
         return nil

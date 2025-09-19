@@ -31,6 +31,9 @@ class Patient: Identifiable, Sendable, Hashable {
     @Relationship(deleteRule: .cascade, inverse: \MedicalCase.patient)
     var medicalCases: [MedicalCase]?
     
+    @Relationship(deleteRule: .cascade, inverse: \Medication.patient)
+    var medications: [Medication]?
+    
     init(id: UUID, name: String, dateOfBirth: Date, gender: String, bloodType: String, emergencyContactName: String?, emergencyContactPhone: String?, notes: String, createdAt: Date, updatedAt: Date, medicalCases: [MedicalCase]) {
         self.id = id
         self.name = name
@@ -76,7 +79,7 @@ extension Patient {
         notes: "Patient has mild allergies to penicillin.",
         createdAt: Date(),
         updatedAt: Date(),
-        medicalCases: []
+        medicalCases: [],
     )
     
     @MainActor
@@ -92,7 +95,7 @@ extension Patient {
             notes: "Patient with diabetes and hypertension. Regular monitoring required.",
             createdAt: Date(),
             updatedAt: Date(),
-            medicalCases: []
+            medicalCases: [],
         )
         
         // Create medical case for diabetes management
@@ -105,7 +108,7 @@ extension Patient {
             isActive: true,
             createdAt: Date().addingTimeInterval(-86400 * 30),
             updatedAt: Date(),
-            patient: patient
+            patient: patient,
         )
         
         // Create medical case for hypertension
@@ -139,7 +142,8 @@ extension Patient {
                     frequency: [],
                     duration: .days(90),
                     dosage: "500mg",
-                    instructions: "Take with meals to control blood sugar"
+                    instructions: "Take with meals to control blood sugar",
+                    patient: .samplePatient
                 ),
                 Medication(
                     id: UUID(),
@@ -147,7 +151,8 @@ extension Patient {
                     frequency: [],
                     duration: .days(90),
                     dosage: "20 units",
-                    instructions: "Inject subcutaneously at bedtime"
+                    instructions: "Inject subcutaneously at bedtime",
+                    patient: .samplePatient
                 )
             ]
         )
@@ -169,7 +174,8 @@ extension Patient {
                     frequency: [],
                     duration: .days(90),
                     dosage: "10mg",
-                    instructions: "Take at the same time each morning"
+                    instructions: "Take at the same time each morning",
+                    patient: .samplePatient
                 ),
                 Medication(
                     id: UUID(),
@@ -177,7 +183,8 @@ extension Patient {
                     frequency: [],
                     duration: .days(90),
                     dosage: "5mg",
-                    instructions: "Take once daily with breakfast"
+                    instructions: "Take once daily with breakfast",
+                    patient: .samplePatient
                 )
             ]
         )

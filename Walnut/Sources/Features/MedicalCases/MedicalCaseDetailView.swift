@@ -14,12 +14,14 @@ struct MedicalCaseDetailView: View {
     
     @Environment(\.modelContext) var modelContext
     @Query private var medicalCases: [MedicalCase]
+    private let patient: Patient
     
     private var medicalCase: MedicalCase? {
         medicalCases.first
     }
     
-    init(medicalCase: MedicalCase) {
+    init(patient: Patient, medicalCase: MedicalCase) {
+        self.patient = patient
         let id = medicalCase.id
         _medicalCases = Query(
             filter: #Predicate<MedicalCase> { $0.id == id },
@@ -46,7 +48,7 @@ struct MedicalCaseDetailView: View {
                         
                         // Unified Documents Section (unchanged)
                         UnifiedDocumentsSection(
-                            modelContext: modelContext,
+                            patient: patient,
                             medicalCase: medicalCase
                         )
                     }
@@ -215,7 +217,7 @@ struct MedicalCaseDetailView: View {
         try context.save()
         
         return NavigationStack {
-            MedicalCaseDetailView(medicalCase: sampleCase)
+            MedicalCaseDetailView(patient: .samplePatient, medicalCase: sampleCase)
                 .modelContainer(container)
         }
     } catch {

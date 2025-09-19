@@ -14,6 +14,7 @@ import WalnutDesignSystem
 struct ModularDocumentPickerView: View {
     
     // MARK: - Configuration
+    let patient: Patient
     let medicalCase: MedicalCase
     
     // MARK: - Environment
@@ -22,9 +23,11 @@ struct ModularDocumentPickerView: View {
     // MARK: - State
     
     init(
+        patient: Patient,
         medicalCase: MedicalCase,
         store: DocumentPickerStore
     ) {
+        self.patient = patient
         self.medicalCase = medicalCase
         self.store = store
     }
@@ -36,7 +39,7 @@ struct ModularDocumentPickerView: View {
                 
                 if store.selectedDocumentType != nil {
                     // Document Source Picker
-                    DocumentSourcePicker(medicalCase: medicalCase, store: store)
+                    DocumentSourcePicker(patient: patient, medicalCase: medicalCase, store: store)
                         .padding(.horizontal)
                     
                     // Clear selection button

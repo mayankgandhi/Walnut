@@ -28,13 +28,20 @@ class UnifiedDocumentsSectionViewModel {
     private var _cachedUnparsedCount: Int = 0
     
     // MARK: - Private Properties
-    private let factory = DocumentFactory.shared
-    private var debounceTask: Task<Void, Never>?
+    private let factory: DocumentFactory
+    private var debounceTask: Task<Void, Never>? = nil
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter
     }()
+    
+    init(
+        patient: Patient
+    ) {
+        
+        self.factory = DocumentFactory(patient: patient)
+    }
     
     // MARK: - Computed Properties
     
@@ -126,7 +133,7 @@ class UnifiedDocumentsSectionViewModel {
         
         let abnormalCount = bloodReport.testResults?.filter({ $0.isAbnormal  ?? false }).count
         if abnormalCount != nil,
-            abnormalCount > 0 {
+           abnormalCount > 0 {
             components
                 .append("\(abnormalCount!) abnormal results")
         } else if let testResults = bloodReport.testResults?.count {

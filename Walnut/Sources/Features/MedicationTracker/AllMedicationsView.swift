@@ -78,6 +78,7 @@ struct AllMedicationsView: View {
         }
         .sheet(item: $medicationToEdit) {
             MedicationEditor(
+                patient: patient,
                 medication: $0,
                 onSave: handleMedicationSave
             )

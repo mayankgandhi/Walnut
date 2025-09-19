@@ -12,6 +12,7 @@ import WalnutDesignSystem
 
 struct PrescriptionDetailView: View {
     
+    let patient: Patient
     @Bindable var prescription: Prescription
     @Environment(\.dismiss) private var dismiss
     
@@ -64,6 +65,7 @@ struct PrescriptionDetailView: View {
                     )
                 } else {
                     PrescriptionEditor(
+                        patient: patient,
                         prescription: prescription,
                         medicalCase: prescription.medicalCase!
                     )
@@ -293,7 +295,10 @@ struct PrescriptionDetailView: View {
 // MARK: - Comprehensive Preview
 
 #Preview("Complete Prescription") {
-    PrescriptionDetailView(prescription: .samplePrescription(for: .sampleCase))
+    PrescriptionDetailView(
+        patient: .samplePatient,
+        prescription: .samplePrescription(for: .sampleCase)
+    )
         .modelContainer(for: Prescription.self, inMemory: true)
 }
 

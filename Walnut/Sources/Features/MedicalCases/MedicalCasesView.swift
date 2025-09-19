@@ -94,7 +94,10 @@ struct MedicalCasesView: View {
                 ContentBackgroundView(color: .blue)
             }
             .navigationDestination(item: $viewModel.selectedCase) { medicalCase in
-                MedicalCaseDetailView(medicalCase: medicalCase)
+                MedicalCaseDetailView(
+                    patient: viewModel.patient,
+                    medicalCase: medicalCase
+                )
             }
             .sheet(isPresented: $viewModel.showCreateView, onDismiss: {
                 viewModel.dismissCreateSheet()

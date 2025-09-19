@@ -12,7 +12,7 @@ import UniformTypeIdentifiers
 import PhotosUI
 
 struct DocumentSourcePicker: View {
-    
+    let patient: Patient
     let medicalCase: MedicalCase
     @State var store: DocumentPickerStore
     @State private var showingActionSheet = false
@@ -41,32 +41,35 @@ struct DocumentSourcePicker: View {
                 }
                 
                 Button("Cancel", role: .cancel) { }
-            }            
+            }
             
             if let selectedDocumentType = store.selectedDocumentType {
                 switch selectedDocumentType {
-                case .prescription, .labResult:
-                    
-                    HStack {
-                        Rectangle()
-                            .frame(height: 1)
-                            .foregroundColor(.secondary.opacity(0.3))
+                    case .prescription, .labResult:
                         
-                        Text("or")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal, 12)
+                        HStack {
+                            Rectangle()
+                                .frame(height: 1)
+                                .foregroundColor(.secondary.opacity(0.3))
+                            
+                            Text("or")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 12)
+                            
+                            Rectangle()
+                                .frame(height: 1)
+                                .foregroundColor(.secondary.opacity(0.3))
+                        }
                         
-                        Rectangle()
-                            .frame(height: 1)
-                            .foregroundColor(.secondary.opacity(0.3))
-                    }
-                    
-                    AddManuallyButton(medicalCase: medicalCase,
-                                      store: store)
-                    
-                default:
-                    EmptyView()
+                        AddManuallyButton(
+                            patient: patient,
+                            medicalCase: medicalCase,
+                            store: store
+                        )
+                        
+                    default:
+                        EmptyView()
                 }
             }
             
@@ -142,7 +145,7 @@ struct DocumentUploadArea: View {
         .cornerRadius(16)
     }
 }
- 
+
 struct CameraPickerView: View {
     
     @State private var store: DocumentPickerStore
@@ -150,7 +153,7 @@ struct CameraPickerView: View {
     init(store: DocumentPickerStore) {
         self.store = store
     }
-
+    
     var body: some View {
         ImagePickerRepresentable(
             selectedImage: Binding(
@@ -169,9 +172,9 @@ struct CameraPickerView: View {
     @Previewable @State var store = DocumentPickerStore.forAllDocuments()
     
     VStack {
-        DocumentSourcePicker(medicalCase: .sampleCase,
+        DocumentSourcePicker(patient: .samplePatient, medicalCase: .sampleCase,
                              store: store)
-            .padding()
+        .padding()
         
         Spacer()
     }

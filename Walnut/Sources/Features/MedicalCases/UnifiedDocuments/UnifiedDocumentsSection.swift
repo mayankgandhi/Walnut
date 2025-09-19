@@ -13,17 +13,18 @@ import SwiftData
 struct UnifiedDocumentsSection: View {
     
     @Environment(\.modelContext) var modelContext
-    let medicalCase: MedicalCase
     
-    @State private var viewModel = UnifiedDocumentsSectionViewModel()
+    let patient: Patient
+    let medicalCase: MedicalCase
+    @State private var viewModel: UnifiedDocumentsSectionViewModel
     
     init(
-        modelContext: ModelContext,
-        medicalCase: MedicalCase,
-        viewModel: UnifiedDocumentsSectionViewModel = UnifiedDocumentsSectionViewModel()
+        patient: Patient,
+        medicalCase: MedicalCase
     ) {
+        self.patient = patient
         self.medicalCase = medicalCase
-        self.viewModel = viewModel
+        self.viewModel = UnifiedDocumentsSectionViewModel(patient: patient)
     }
     
     var body: some View {
@@ -37,7 +38,11 @@ struct UnifiedDocumentsSection: View {
                     count: viewModel.totalDocumentCount
                 )
             
-                AddDocumentsButton(modelContext: modelContext, medicalCase: medicalCase)
+                AddDocumentsButton(
+                    patient: patient,
+                    modelContext: modelContext,
+                    medicalCase: medicalCase
+                )
             }
             
             Group {
@@ -59,7 +64,7 @@ struct UnifiedDocumentsSection: View {
             await viewModel.refresh(from: medicalCase)
         }
         .sheet(item: $viewModel.navigationState.selectedPrescription) { prescription in
-                PrescriptionDetailView(prescription: prescription)
+            PrescriptionDetailView(patient: patient, prescription: prescription)
             .presentationDragIndicator(.visible)
             .presentationCornerRadius(Spacing.large)
         }
@@ -175,7 +180,8 @@ struct UnifiedDocumentsSection: View {
                 frequency: [],
                 duration: .days(30),
                 dosage: "500mg",
-                instructions: "Take with breakfast"
+                instructions: "Take with breakfast",
+                patient: .samplePatient
             )
         ]
     )
@@ -226,7 +232,7 @@ struct UnifiedDocumentsSection: View {
     return NavigationStack {
         ScrollView {
             UnifiedDocumentsSection(
-                modelContext: container.mainContext,
+                patient: .samplePatient,
                 medicalCase: medicalCase
             )
             .padding()
@@ -268,7 +274,7 @@ struct UnifiedDocumentsSection: View {
     return NavigationStack {
         ScrollView {
             UnifiedDocumentsSection(
-                modelContext: container.mainContext,
+                patient: .samplePatient,
                 medicalCase: medicalCase
             )
             .padding()

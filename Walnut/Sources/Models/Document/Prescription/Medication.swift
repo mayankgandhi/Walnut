@@ -24,6 +24,7 @@ class Medication {
     var updatedAt: Date?
     
     var prescription: Prescription?
+    var patient: Patient?
     
     init(
         id: UUID? = nil,
@@ -34,6 +35,7 @@ class Medication {
         instructions: String? = nil,
         createdAt: Date? = nil,
         updatedAt: Date? = nil,
+        patient: Patient,
         prescription: Prescription? = nil
     ) {
         self.id = id
@@ -59,7 +61,8 @@ extension Medication {
         ],
         duration: .days(30),
         dosage: "10mg",
-        instructions: "Take with water"
+        instructions: "Take with water",
+        patient: .samplePatient
     )
     
     static let complexMedication = Medication(
@@ -75,7 +78,8 @@ extension Medication {
         ],
         duration: .days(7),
         dosage: "500mg",
-        instructions: "Complete the full course even if symptoms improve"
+        instructions: "Complete the full course even if symptoms improve",
+        patient: .samplePatient
     )
     static let hourlyMedication = Medication(
         id: UUID(),
@@ -86,7 +90,8 @@ extension Medication {
         ],
         duration: .asNeeded,
         dosage: "400mg",
-        instructions: "Take with food. Do not exceed 1200mg per day"
+        instructions: "Take with food. Do not exceed 1200mg per day",
+        patient: .samplePatient
     )
     
     static let weeklyMedication = Medication(
@@ -97,7 +102,8 @@ extension Medication {
         ],
         duration: .ongoing,
         dosage: "15mg",
-        instructions: "Take on the same day each week. Monitor for side effects"
+        instructions: "Take on the same day each week. Monitor for side effects",
+        patient: .samplePatient
     )
     static let monthlyMedication = Medication(
         id: UUID(),
@@ -107,7 +113,8 @@ extension Medication {
         ],
         duration: .months(6),
         dosage: "50000 IU",
-        instructions: "Take with a meal for better absorption"
+        instructions: "Take with a meal for better absorption",
+        patient: .samplePatient
     )
     
 }

@@ -14,6 +14,7 @@ struct MedicationEditor: View {
 
     @Environment(\.modelContext) var modelContext
     @Environment(\.notificationErrorHandler) private var errorHandler
+    let patient: Patient
     let medication: Medication?
     let targetPrescription: Prescription?
     let onSave: (Medication) -> Void
@@ -23,16 +24,26 @@ struct MedicationEditor: View {
     // MARK: - Initializers
     
     /// Initialize for editing existing medication
-    init(medication: Medication, onSave: @escaping (Medication) -> Void) {
+    init(patient: Patient, medication: Medication, onSave: @escaping (Medication) -> Void) {
+        self.patient = patient
         self.medication = medication
         self.targetPrescription = nil
         self.onSave = onSave
     }
     
     /// Initialize for adding new medication to prescription
-    init(prescription: Prescription, onSave: @escaping (Medication) -> Void) {
+    init(patient: Patient, prescription: Prescription, onSave: @escaping (Medication) -> Void) {
+        self.patient = patient
         self.medication = nil
         self.targetPrescription = prescription
+        self.onSave = onSave
+    }
+    
+    /// Initialize for adding new medication to patient
+    init(patient: Patient, onSave: @escaping (Medication) -> Void) {
+        self.patient = patient
+        self.medication = nil
+        self.targetPrescription = nil
         self.onSave = onSave
     }
     
@@ -284,6 +295,7 @@ struct MedicationEditor: View {
                 instructions: nil,
                 createdAt: Date(),
                 updatedAt: Date(),
+                patient: patient,
                 prescription: targetPrescription,
             )
             

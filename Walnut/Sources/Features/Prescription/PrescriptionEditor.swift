@@ -11,14 +11,16 @@ import SwiftData
 import WalnutDesignSystem
 
 struct PrescriptionEditor: View {
-
+    
+    let patient: Patient
     let prescription: Prescription?
     let medicalCase: MedicalCase
-
+    
     @State private var notificationManager = MedicationNotificationManager()
     @Environment(\.notificationErrorHandler) private var errorHandler
     
-    init(prescription: Prescription? = nil, medicalCase: MedicalCase) {
+    init(patient: Patient, prescription: Prescription? = nil, medicalCase: MedicalCase) {
+        self.patient = patient
         self.prescription = prescription
         self.medicalCase = medicalCase
     }
@@ -59,32 +61,32 @@ struct PrescriptionEditor: View {
         
         private var nextFieldInUI: NextFieldType {
             switch self {
-            case .doctorName:
-                return .textField(.facilityName)
-            case .facilityName:
-                return .nonTextFieldOrEnd  // Next: Date picker
-            case .followUpTests:
-                return .textField(.notes)
-            case .notes:
-                return .nonTextFieldOrEnd  // Last field
+                case .doctorName:
+                    return .textField(.facilityName)
+                case .facilityName:
+                    return .nonTextFieldOrEnd  // Next: Date picker
+                case .followUpTests:
+                    return .textField(.notes)
+                case .notes:
+                    return .nonTextFieldOrEnd  // Last field
             }
         }
         
         var shouldDismissKeyboard: Bool {
             switch nextFieldInUI {
-            case .nonTextFieldOrEnd:
-                return true
-            case .textField:
-                return false
+                case .nonTextFieldOrEnd:
+                    return true
+                case .textField:
+                    return false
             }
         }
         
         var nextTextField: FormField? {
             switch nextFieldInUI {
-            case .textField(let field):
-                return field
-            case .nonTextFieldOrEnd:
-                return nil
+                case .textField(let field):
+                    return field
+                case .nonTextFieldOrEnd:
+                    return nil
             }
         }
         
@@ -131,7 +133,7 @@ struct PrescriptionEditor: View {
                             .font(.headline)
                             .foregroundStyle(.secondary)
                             .padding(.horizontal, Spacing.medium)
-
+                        
                         VStack(spacing: Spacing.medium) {
                             TextFieldItem(
                                 icon: "person.fill.badge.plus",
@@ -390,6 +392,7 @@ struct PrescriptionEditor: View {
                 if let medicationToEdit = medicationToEdit {
                     // Edit existing medication
                     MedicationEditor(
+                        patient: patient,
                         medication: medicationToEdit,
                         onSave: handleMedicationSave
                     )
@@ -398,23 +401,14 @@ struct PrescriptionEditor: View {
                     if let prescription = prescription {
                         // Use existing prescription for adding medication
                         MedicationEditor(
+                            patient: patient,
                             prescription: prescription,
                             onSave: handleMedicationSave
                         )
                     } else {
                         // For new prescriptions, create medication without prescription link initially
                         MedicationEditor(
-                            medication: Medication(
-                                id: UUID(),
-                                name: "",
-                                frequency: nil,
-                                duration: .days(7),
-                                dosage: nil,
-                                instructions: nil,
-                                createdAt: Date(),
-                                updatedAt: Date(),
-                                prescription: nil
-                            ),
+                            patient: patient,
                             onSave: handleMedicationSave
                         )
                     }
@@ -485,7 +479,7 @@ struct PrescriptionEditor: View {
             }
         }
     }
-
+    
     private func handleMedicationSave(_ medication: Medication) {
         if let index = medications.firstIndex(where: { $0.id == medication.id }) {
             // Update existing medication
@@ -532,7 +526,7 @@ struct PrescriptionEditor: View {
             
             // Update medications relationship - ensure proper linking
             prescription.medications = medications
-           
+            
         } else {
             // Create new prescription
             let newPrescription = Prescription(
@@ -547,7 +541,7 @@ struct PrescriptionEditor: View {
                 medicalCase: medicalCase,
                 medications: medications
             )
-            
+           
             // Insert prescription first
             modelContext.insert(newPrescription)
             
@@ -561,34 +555,38 @@ struct PrescriptionEditor: View {
         // Save the context
         do {
             try modelContext.save()
-
+            
             // Schedule notifications for all medications in this prescription
             scheduleNotificationsForMedications()
-
+            
         } catch {
             print("Failed to save prescription: \(error)")
         }
     }
-
+    
     private func scheduleNotificationsForMedications() {
         Task {
             // Use grouped scheduling for all medications
             let result = await notificationManager.scheduleNotificationsForAllMedications(medications)
             switch result {
-            case .success(let identifiers):
-                print("Scheduled \(identifiers.count) grouped notifications for \(medications.count) medications")
-            case .failure(let error):
-                await MainActor.run {
-                    errorHandler.handleError(error)
-                }
+                case .success(let identifiers):
+                    print("Scheduled \(identifiers.count) grouped notifications for \(medications.count) medications")
+                case .failure(let error):
+                    await MainActor.run {
+                        errorHandler.handleError(error)
+                    }
             }
         }
     }
 }
 
 #Preview("Add Prescription") {
-    PrescriptionEditor(prescription: nil, medicalCase: .sampleCase)
-        .modelContainer(for: Prescription.self, inMemory: true)
+    PrescriptionEditor(
+        patient: .samplePatient,
+        prescription: nil,
+        medicalCase: .sampleCase
+    )
+    .modelContainer(for: Prescription.self, inMemory: true)
 }
 
 #Preview("Edit Prescription") {
@@ -610,6 +608,10 @@ struct PrescriptionEditor: View {
         medications: []
     )
     
-    PrescriptionEditor(prescription: samplePrescription, medicalCase: .sampleCase)
-        .modelContainer(for: Prescription.self, inMemory: true)
+    PrescriptionEditor(
+        patient: .samplePatient,
+        prescription: samplePrescription,
+        medicalCase: .sampleCase
+    )
+    .modelContainer(for: Prescription.self, inMemory: true)
 }

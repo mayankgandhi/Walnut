@@ -11,17 +11,20 @@ import WalnutDesignSystem
 import SwiftData
 
 struct AddDocumentsButton: View {
-    
+
+    let patient: Patient
     @Environment(\.modelContext) var modelContext
     let medicalCase: MedicalCase
     @State private var store: DocumentPickerStore
     @State private var viewModel: AddDocumentsButtonViewModel
     
     init(
+        patient: Patient,
         modelContext: ModelContext,
         medicalCase: MedicalCase,
         viewModel: AddDocumentsButtonViewModel = .init()
     ) {
+        self.patient = patient
         self.medicalCase = medicalCase
         self._store = State(initialValue: DocumentPickerStore())
         self.viewModel = viewModel
@@ -59,7 +62,8 @@ struct AddDocumentsButton: View {
             },
             content: {
                 ModularDocumentPickerView(
-                    medicalCase: medicalCase,
+                    patient: patient,
+                     medicalCase: medicalCase,
                     store: store
                 )
                 .presentationCornerRadius(Spacing.large)
@@ -85,6 +89,7 @@ struct AddDocumentsButton: View {
             .font(.title2)
         
         AddDocumentsButton(
+            patient: .samplePatient,
             modelContext: container.mainContext,
             medicalCase: .sampleCase
         )

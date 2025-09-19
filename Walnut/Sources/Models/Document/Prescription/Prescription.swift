@@ -94,7 +94,8 @@ class Prescription {
                     }),
                     duration: medication.duration.toEnum(),
                     dosage: medication.dosage,
-                    instructions: medication.instructions
+                    instructions: medication.instructions,
+                    patient: .samplePatient
                 )
             })
         )
@@ -118,7 +119,8 @@ extension Prescription {
                 frequency: [],
                 duration: .days(7),
                 dosage: "500mg",
-                instructions: "Take with food to reduce stomach upset"
+                instructions: "Take with food to reduce stomach upset",
+                patient: .samplePatient
             ),
             Medication(
                 id: UUID(),
@@ -126,7 +128,8 @@ extension Prescription {
                 frequency: [],
                 duration: .days(5),
                 dosage: "400mg",
-                instructions: "Take as needed for pain. Do not exceed 1200mg per day"
+                instructions: "Take as needed for pain. Do not exceed 1200mg per day",
+                patient: .samplePatient
             )
         ]
         
@@ -162,7 +165,8 @@ extension Prescription {
                 frequency: [],
                 duration: .days(90),
                 dosage: "10mg",
-                instructions: "Take at the same time each day for blood pressure control"
+                instructions: "Take at the same time each day for blood pressure control",
+                patient: .samplePatient
             ),
             Medication(
                 id: UUID(),
@@ -170,7 +174,8 @@ extension Prescription {
                 frequency: [],
                 duration: .days(90),
                 dosage: "500mg",
-                instructions: "Take with meals to control blood sugar levels"
+                instructions: "Take with meals to control blood sugar levels",
+                patient: .samplePatient
             )
         ]
         
