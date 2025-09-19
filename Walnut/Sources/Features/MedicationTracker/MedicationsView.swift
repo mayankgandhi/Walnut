@@ -50,12 +50,10 @@ struct MedicationsView: View {
             )
         }
         .sheet(isPresented: $viewModel.showingMedicationsList) {
-            NavigationView {
-                ActiveMedicationsListView(
-                    patient: patient,
-                    onEdit: viewModel.handleMedicationEdit
-                )
-            }
+            ActiveMedicationsListView(
+                patient: patient,
+                modelContext: modelContext
+            )
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
         }
