@@ -53,7 +53,12 @@ struct PatientTabView: View {
                             )
                         )
                     } else {
-                        AppPaywallView()
+                        BloodTestsView(
+                            viewModel: BloodTestsViewModel(
+                                patient: patient,
+                                modelContext: modelContext
+                            )
+                        )
                     }
                 }
             }
