@@ -10,10 +10,11 @@ import SwiftUI
 import WalnutDesignSystem
 
 struct PatientTabView: View {
-    
+
     @Environment(\.modelContext) private var modelContext
     let patient: Patient
     @State private var uploadStateManager = DocumentUploadStateManager.shared
+    @StateObject private var subscriptionService = SubscriptionService.shared
     
     var body: some View {
         TabView {
@@ -38,12 +39,16 @@ struct PatientTabView: View {
             
             Tab("Trends", systemImage: "chart.line.uptrend.xyaxis") {
                 NavigationStack {
-                    BloodTestsView(
-                        viewModel: BloodTestsViewModel(
-                            patient: patient,
-                            modelContext: modelContext
+                    if subscriptionService.isSubscribed {
+                        BloodTestsView(
+                            viewModel: BloodTestsViewModel(
+                                patient: patient,
+                                modelContext: modelContext
+                            )
                         )
-                    )
+                    } else {
+                        AppPaywallView()
+                    }
                 }
             }
             

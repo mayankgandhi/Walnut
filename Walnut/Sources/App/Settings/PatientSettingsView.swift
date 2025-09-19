@@ -26,12 +26,15 @@ struct PatientSettingsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: Spacing.medium) {
+            
                 NavBarHeader(
                     iconName: "settings",
                     iconColor: .blue,
                     title: "Settings",
                     subtitle: "Add your details and preferences here."
                 )
+                
+                HealthStackPro()
                 
                 PatientHeaderCard(patient: viewModel.patient)
                     .padding(.horizontal, Spacing.medium)
