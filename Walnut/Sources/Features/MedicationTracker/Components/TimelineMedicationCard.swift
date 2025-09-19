@@ -11,6 +11,7 @@ import WalnutDesignSystem
 
 /// Enhanced medication card for timeline usage with dose status tracking
 struct TimelineMedicationCard: View {
+
     let dose: ScheduledDose
     
     @State private var showingActionSheet = false

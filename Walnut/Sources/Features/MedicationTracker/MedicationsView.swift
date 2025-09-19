@@ -34,7 +34,8 @@ struct MedicationsView: View {
             todaysMedications: viewModel.todaysActiveMedications,
             onAddMedication: viewModel.showAddMedication,
             onShowAllMedications: viewModel.showMedicationsList,
-            onEditMedication: viewModel.editMedication
+            onEditMedication: viewModel.editMedication,
+            modelContext: modelContext
         )
         .onAppear {
             viewModel.refreshData()

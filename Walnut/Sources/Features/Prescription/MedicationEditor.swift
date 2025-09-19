@@ -68,7 +68,6 @@ struct MedicationEditor: View {
     
     private var isFormValid: Bool {
         !medicationName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !dosage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
         duration != nil
     }
     
@@ -114,7 +113,7 @@ struct MedicationEditor: View {
                                 placeholder: "e.g., 500mg, 1 tablet, 2 capsules",
                                 helperText: "Strength and quantity per dose",
                                 iconColor: .orange,
-                                isRequired: true,
+                                isRequired: false,
                                 contentType: .none,
                                 
                             )
@@ -285,7 +284,7 @@ struct MedicationEditor: View {
             medicationToSave = medication!
             medicationToSave.updatedAt = Date()
         } else {
-            // Create new medication for prescription
+            // Create new medication
             medicationToSave = Medication(
                 id: UUID(),
                 name: "",
@@ -298,15 +297,17 @@ struct MedicationEditor: View {
                 patient: patient,
                 prescription: targetPrescription,
             )
-            
-            // Add medication to model context
-            modelContext.insert(medicationToSave)
-            
-            // Add to prescription's medications array
-            if targetPrescription?.medications == nil {
-                targetPrescription?.medications = []
+
+            // Only insert and add to prescription if there's a target prescription
+            if let targetPrescription = targetPrescription {
+                modelContext.insert(medicationToSave)
+
+                // Add to prescription's medications array
+                if targetPrescription.medications == nil {
+                    targetPrescription.medications = []
+                }
+                targetPrescription.medications?.append(medicationToSave)
             }
-            targetPrescription?.medications?.append(medicationToSave)
         }
         
         // Update medication properties
@@ -316,8 +317,8 @@ struct MedicationEditor: View {
         medicationToSave.duration = medicationDuration
         medicationToSave.frequency = selectedFrequencies.isEmpty ? nil : selectedFrequencies
         
-        // Save context for new medications
-        if !isEditingMode {
+        // Save context for new medications with prescriptions
+        if !isEditingMode && targetPrescription != nil {
             do {
                 try modelContext.save()
             } catch {

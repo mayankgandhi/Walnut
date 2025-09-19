@@ -21,9 +21,20 @@ struct MedicationFrequencyBottomSheet: View {
     @State private var weeklyTime: DateComponents = DateComponents(hour: 9, minute: 0)
     @State private var monthlyDay: Int? = 1
     @State private var monthlyTime: DateComponents = DateComponents(hour: 10, minute: 0)
-    @State private var selectedMealTime: MealTime? = .breakfast
+    @State private var selectedMealTimes: [MealTime] = [.breakfast]
     @State private var selectedMedicationTime: MedicationTime? = .after
     
+    private var isAddButtonEnabled: Bool {
+        guard let frequencyType = selectedFrequencyType else { return false }
+
+        switch frequencyType {
+        case .mealBased:
+            return !selectedMealTimes.isEmpty
+        default:
+            return true
+        }
+    }
+
     enum FrequencyType: String, CaseIterable, CustomStringConvertible {
         case daily = "Daily"
         case hourly = "Hourly"
@@ -95,6 +106,7 @@ struct MedicationFrequencyBottomSheet: View {
                         dismiss()
                     }
                     .font(.system(size: 16, weight: .semibold))
+                    .disabled(!isAddButtonEnabled)
                 }
                 
                 ToolbarItem(placement: .cancellationAction) {
@@ -262,15 +274,59 @@ struct MedicationFrequencyBottomSheet: View {
     @ViewBuilder
     private var mealBasedInputs: some View {
         VStack(spacing: Spacing.medium) {
-            MenuPickerItem(
-                icon: "fork.knife",
-                title: "Meal Time",
-                selectedOption: $selectedMealTime,
-                options: MealTime.allCases,
-                placeholder: "Select meal",
-                iconColor: .red
-            )
-            
+            // Multiple meal time selection
+            VStack(alignment: .leading, spacing: Spacing.small) {
+                HStack(spacing: Spacing.medium) {
+                    Circle()
+                        .fill(Color.red.opacity(0.15))
+                        .frame(width: 36, height: 36)
+                        .overlay {
+                            Image(systemName: "fork.knife")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(.red)
+                        }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Meal Times")
+                            .font(.system(.subheadline, design: .rounded, weight: .medium))
+                            .foregroundStyle(.secondary)
+
+                        Text("Select one or more meal times")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+
+                    Spacer()
+                }
+                .padding(.horizontal, Spacing.medium)
+                .padding(.vertical, Spacing.small + 4)
+                .background(Color(.systemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color(.systemGray5), lineWidth: 1)
+                )
+
+                // Meal time selection grid
+                LazyVGrid(
+                    columns: [
+                        GridItem(.flexible(), spacing: Spacing.small),
+                        GridItem(.flexible(), spacing: Spacing.small)
+                    ],
+                    spacing: Spacing.small
+                ) {
+                    ForEach(MealTime.allCases, id: \.self) { mealTime in
+                        MealTimeSelectionChip(
+                            mealTime: mealTime,
+                            isSelected: selectedMealTimes.contains(mealTime)
+                        ) {
+                            toggleMealTimeSelection(mealTime)
+                        }
+                    }
+                }
+                .padding(.horizontal, Spacing.medium)
+            }
+
             MenuPickerItem(
                 icon: "clock.arrow.2.circlepath",
                 title: "Timing",
@@ -297,17 +353,69 @@ struct MedicationFrequencyBottomSheet: View {
         case .monthly:
             newFrequency = .monthly(dayOfMonth: monthlyDay ?? 1, time: monthlyTime)
         case .mealBased:
-                newFrequency = 
-                    .mealBased(
-                        mealTime: selectedMealTime ?? .breakfast,
-                        timing: selectedMedicationTime
-                    )
+            // Create a frequency for each selected meal time
+            for mealTime in selectedMealTimes {
+                let mealFrequency = MedicationFrequency.mealBased(
+                    mealTime: mealTime,
+                    timing: selectedMedicationTime
+                )
+                selectedFrequencies.append(mealFrequency)
+            }
+            return // Exit early since we've added multiple frequencies
         default:
-                newFrequency = nil
+            newFrequency = nil
         }
         if let newFrequency {
             selectedFrequencies.append(newFrequency)
         }
+    }
+
+    private func toggleMealTimeSelection(_ mealTime: MealTime) {
+        if selectedMealTimes.contains(mealTime) {
+            // Don't allow deselecting if it's the only selected meal time
+            if selectedMealTimes.count > 1 {
+                selectedMealTimes.removeAll { $0 == mealTime }
+            }
+        } else {
+            selectedMealTimes.append(mealTime)
+        }
+    }
+}
+
+// MARK: - Meal Time Selection Chip Component
+
+struct MealTimeSelectionChip: View {
+    let mealTime: MealTime
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: Spacing.small) {
+                Image(systemName: mealTime.icon)
+                    .font(.caption)
+                    .foregroundStyle(isSelected ? .white : mealTime.color)
+
+                Text(mealTime.displayName)
+                    .font(.system(.caption, design: .rounded, weight: .medium))
+                    .foregroundStyle(isSelected ? .white : .primary)
+                    .lineLimit(1)
+            }
+            .padding(.horizontal, Spacing.small)
+            .padding(.vertical, 6)
+            .background(
+                isSelected ? mealTime.color : mealTime.color.opacity(0.1)
+            )
+            .clipShape(Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(
+                        isSelected ? mealTime.color : mealTime.color.opacity(0.3),
+                        lineWidth: isSelected ? 2 : 1
+                    )
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 

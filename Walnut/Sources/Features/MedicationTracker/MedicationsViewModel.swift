@@ -108,15 +108,8 @@ class MedicationsViewModel {
     }
 
     func handleNewMedicationSave(_ medication: Medication) {
-        modelContext.insert(medication)
-
-        do {
-            try modelContext.save()
-            showingAddMedication = false
-            refreshData()
-        } catch {
-            handleError("Failed to save medication: \(error.localizedDescription)")
-        }
+        showingAddMedication = false
+        refreshData()
     }
 
     func handleMedicationSave(_ medication: Medication) {

@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import SwiftData
 import WalnutDesignSystem
 
 struct ActiveMedicationsView: View {
@@ -17,7 +18,27 @@ struct ActiveMedicationsView: View {
     let onAddMedication: () -> Void
     let onShowAllMedications: () -> Void
     let onEditMedication: (Medication) -> Void
-    
+
+    @State private var timelineViewModel: MedicationTimelineViewModel
+
+    // MARK: - Initialization
+
+    init(
+        patient: Patient,
+        todaysMedications: [Medication],
+        onAddMedication: @escaping () -> Void,
+        onShowAllMedications: @escaping () -> Void,
+        onEditMedication: @escaping (Medication) -> Void,
+        modelContext: ModelContext
+    ) {
+        self.patient = patient
+        self.todaysMedications = todaysMedications
+        self.onAddMedication = onAddMedication
+        self.onShowAllMedications = onShowAllMedications
+        self.onEditMedication = onEditMedication
+        self._timelineViewModel = State(initialValue: MedicationTimelineViewModel(patient: patient, modelContext: modelContext))
+    }
+
     // MARK: - Body
 
     var body: some View {
@@ -26,8 +47,8 @@ struct ActiveMedicationsView: View {
                 headerView
 
                 // Main medications content
-                if !todaysMedications.isEmpty {
-                    medicationsListView
+                if !timelineViewModel.scheduledDoses.isEmpty {
+                    MedicationTimelineView(scheduledDoses: timelineViewModel.scheduledDoses)
                 } else {
                     MedicationEmptyState()
                 }
@@ -39,6 +60,12 @@ struct ActiveMedicationsView: View {
         }
     }
 
+    // MARK: - Computed Properties
+
+    private var totalDosesCount: Int {
+        timelineViewModel.scheduledDoses.values.reduce(0) { $0 + $1.count }
+    }
+
     // MARK: - Private Views
 
     private var headerView: some View {
@@ -47,7 +74,7 @@ struct ActiveMedicationsView: View {
                 iconName: "pill-bottle",
                 iconColor: .yellow,
                 title: "Medications",
-                subtitle: "\(todaysMedications.count) Today"
+                subtitle: "\(totalDosesCount) Today"
             )
 
             HStack(spacing: Spacing.small) {
@@ -65,76 +92,22 @@ struct ActiveMedicationsView: View {
         }
     }
 
-    private var medicationsListView: some View {
-        LazyVStack(spacing: Spacing.medium) {
-            ForEach(todaysMedications, id: \.id) { medication in
-                TodaysMedicationCard(
-                    medication: medication,
-                    onEdit: { onEditMedication(medication) }
-                )
-            }
-        }
-        .padding(.horizontal, Spacing.medium)
-    }
-}
-
-struct TodaysMedicationCard: View {
-
-    let medication: Medication
-    let onEdit: () -> Void
-
-    var body: some View {
-        HealthCard {
-            HStack {
-                VStack(alignment: .leading, spacing: Spacing.xs) {
-                    Text(medication.name ?? "Medication")
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-
-                    if let dosage = medication.dosage {
-                        Text(dosage)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    if let instructions = medication.instructions {
-                        Text(instructions)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(2)
-                    }
-                }
-
-                Spacer()
-
-                VStack(spacing: Spacing.xs) {
-                    Button(action: onEdit) {
-                        Image(systemName: "pencil")
-                            .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.plain)
-
-                    if let frequency = medication.frequency, !frequency.isEmpty {
-                        Text("\(frequency.count)x daily")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-            .padding(Spacing.medium)
-        }
-    }
 }
 
 #Preview {
-    NavigationStack {
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: Patient.self, configurations: config)
+    let context = container.mainContext
+
+    return NavigationStack {
         ActiveMedicationsView(
             patient: .samplePatient,
             todaysMedications: [.sampleMedication, .complexMedication],
             onAddMedication: { print("Add medication") },
             onShowAllMedications: { print("Show all medications") },
-            onEditMedication: { _ in print("Edit medication") }
+            onEditMedication: { _ in print("Edit medication") },
+            modelContext: context
         )
     }
-    .modelContainer(for: Patient.self, inMemory: true)
+    .modelContainer(container)
 }
