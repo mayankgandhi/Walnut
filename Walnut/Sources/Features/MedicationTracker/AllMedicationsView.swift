@@ -30,10 +30,14 @@ struct AllMedicationsView: View {
     @State private var showingDatePicker = false
     @State private var errorMessage: String? = nil
     @State private var showingError = false
+    @State private var showingAddMedication = false
     
     // SwiftData query for active prescriptions to automatically update UI
     @Query private var allPrescriptions: [Prescription]
-    
+
+    // SwiftData query for all medications to include patient-direct medications
+    @Query private var allMedications: [Medication]
+
     // MARK: - Initialization
     
     init(patient: Patient, container: MedicationDependencyContainer = .shared) {
@@ -41,14 +45,21 @@ struct AllMedicationsView: View {
         self.scheduleService = container.resolveScheduleService()
     }
     
-    // Computed property for active medications from prescriptions
+    // Computed property for active medications from prescriptions and direct patient medications
     private var activeMedications: [Medication] {
         let activePrescriptions = allPrescriptions.filter { prescription in
             guard let medicalCase = prescription.medicalCase else { return false }
             return medicalCase.patient?.id == patient.id && (medicalCase.isActive ?? false)
         }
-        
-        return activePrescriptions.compactMap { $0.medications }.reduce([], +)
+
+        let prescriptionMedications = activePrescriptions.compactMap { $0.medications }.reduce([], +)
+
+        // Also include medications directly associated with the patient (not through prescriptions)
+        let patientDirectMedications = allMedications.filter { medication in
+            medication.patient?.id == patient.id && medication.prescription == nil
+        }
+
+        return prescriptionMedications + patientDirectMedications
     }
     
     // MARK: - Body
@@ -56,12 +67,20 @@ struct AllMedicationsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: Spacing.medium) {
-                NavBarHeader(
-                    iconName: "pill-bottle",
-                    iconColor: .yellow,
-                    title: "Medications",
-                    subtitle: "\(scheduleService.todaysDoses.count) Medications"
-                )
+                HStack {
+                    NavBarHeader(
+                        iconName: "pill-bottle",
+                        iconColor: .yellow,
+                        title: "Medications",
+                        subtitle: "\(scheduleService.todaysDoses.count) Medications"
+                    )
+
+                    Button(action: { showingAddMedication = true }) {
+                        Image(systemName: "plus")
+                    }
+                    .buttonStyle(.glass)
+                    .padding(.trailing, Spacing.medium)
+                }
                 // Main timeline content
                 if !scheduleService.todaysDoses.isEmpty {
                     MedicationTimelineView(
@@ -83,6 +102,12 @@ struct AllMedicationsView: View {
                 onSave: handleMedicationSave
             )
         }
+        .sheet(isPresented: $showingAddMedication) {
+            MedicationEditor(
+                patient: patient,
+                onSave: handleNewMedicationSave
+            )
+        }
         .onAppear {
             setupScheduleService()
         }
@@ -91,6 +116,10 @@ struct AllMedicationsView: View {
         }
         .onChange(of: activeMedications) { _, medications in
             updateMedications(medications)
+        }
+        .onChange(of: allMedications) { _, _ in
+            // Update when any medication changes (including direct patient medications)
+            updateMedications(activeMedications)
         }
         .alert("Schedule Error", isPresented: $showingError) {
             Button("OK") { errorMessage = nil }
@@ -106,12 +135,12 @@ struct AllMedicationsView: View {
             let relevantPrescriptions = allPrescriptions.filter { prescription in
                 prescription.medications?.contains(where: { $0.id == medication.id }) == true
             }
-            
+
             for prescription in relevantPrescriptions {
                 if let medicationIndex = prescription.medications?.firstIndex(where: { $0.id == medication.id }) {
                     prescription.medications?[medicationIndex] = medication
                     prescription.updatedAt = Date()
-                    
+
                     do {
                         try modelContext.save()
                         // Refresh schedule after medication update
@@ -121,6 +150,26 @@ struct AllMedicationsView: View {
                     }
                     return
                 }
+            }
+        }
+    }
+
+    private func handleNewMedicationSave(_ medication: Medication) {
+        Task { @MainActor in
+            // Insert the new medication directly to the model context
+            // This medication is associated with the patient but not with any specific prescription/medical case
+            modelContext.insert(medication)
+
+            do {
+                try modelContext.save()
+                // Dismiss the sheet
+                showingAddMedication = false
+                // Refresh schedule after adding new medication
+                setupScheduleService()
+            } catch {
+                print("Error saving new medication: \(error)")
+                errorMessage = "Failed to save medication"
+                showingError = true
             }
         }
     }
