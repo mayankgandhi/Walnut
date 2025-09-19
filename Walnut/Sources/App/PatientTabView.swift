@@ -15,14 +15,17 @@ struct PatientTabView: View {
     let patient: Patient
     @State private var uploadStateManager = DocumentUploadStateManager.shared
     @StateObject private var subscriptionService = SubscriptionService.shared
-    
+
+    init(patient: Patient) {
+        self.patient = patient
+    }
+
     var body: some View {
         TabView {
             
             Tab("Meds", systemImage: "pills.fill") {
                 NavigationStack {
-                    AllMedicationsView(patient: patient)
-                        
+                    MedicationsView(patient: patient)
                 }
             }
             

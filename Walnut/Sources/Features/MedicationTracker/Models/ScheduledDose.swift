@@ -17,7 +17,6 @@ struct ScheduledDose: Identifiable, Hashable {
     let scheduledTime: Date
     let timeSlot: TimeSlot
     let mealRelation: MealRelation?
-    var actualTakenTime: Date?
     
     var displayTime: String {
         let formatter = DateFormatter()

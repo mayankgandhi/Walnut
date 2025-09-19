@@ -11,18 +11,18 @@
  ==========================================
  
  This file documents the architecture and design patterns used in the sophisticated
- medication scheduling interface implemented in AllMedicationsView and related components.
+ medication scheduling interface implemented in MedicationsView and related components.
  
  ## Architecture Overview
  
  The medication scheduling system follows modern SwiftUI patterns with proper separation
  of concerns and component-based architecture:
  
- ### 1. MAIN VIEW (AllMedicationsView)
+ ### 1. MAIN VIEW (MedicationsView)
  - **Responsibility**: Main coordination and data binding
- - **Pattern**: @Observable service injection via @State
- - **Data Flow**: Reactive to SwiftData changes via @Query
- - **Architecture**: No ViewModels, pure SwiftUI with environment objects
+ - **Pattern**: MVVM with MedicationsViewModel
+ - **Data Flow**: Reactive to SwiftData changes via ViewModel
+ - **Architecture**: Clean MVVM separation with simple, performant flow
  
  ### 2. SERVICE LAYER (MedicationScheduleService)
  - **Pattern**: @Observable class for reactive state management
