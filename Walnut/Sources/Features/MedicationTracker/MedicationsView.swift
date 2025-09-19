@@ -31,18 +31,11 @@ struct MedicationsView: View {
     var body: some View {
         ActiveMedicationsView(
             patient: patient,
-            todaysMedications: viewModel.todaysActiveMedications,
             onAddMedication: viewModel.showAddMedication,
             onShowAllMedications: viewModel.showMedicationsList,
             onEditMedication: viewModel.editMedication,
             modelContext: modelContext
         )
-        .onAppear {
-            viewModel.refreshData()
-        }
-        .refreshable {
-            viewModel.refreshData()
-        }
         .sheet(isPresented: $viewModel.showingAddMedication) {
             MedicationEditor(
                 patient: patient,
@@ -60,7 +53,6 @@ struct MedicationsView: View {
             NavigationView {
                 ActiveMedicationsListView(
                     patient: patient,
-                    medications: viewModel.activeMedications,
                     onEdit: viewModel.handleMedicationEdit
                 )
             }

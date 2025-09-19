@@ -14,7 +14,6 @@ struct ActiveMedicationsView: View {
 
     // MARK: - Properties
     let patient: Patient
-    let todaysMedications: [Medication]
     let onAddMedication: () -> Void
     let onShowAllMedications: () -> Void
     let onEditMedication: (Medication) -> Void
@@ -25,14 +24,12 @@ struct ActiveMedicationsView: View {
 
     init(
         patient: Patient,
-        todaysMedications: [Medication],
         onAddMedication: @escaping () -> Void,
         onShowAllMedications: @escaping () -> Void,
         onEditMedication: @escaping (Medication) -> Void,
         modelContext: ModelContext
     ) {
         self.patient = patient
-        self.todaysMedications = todaysMedications
         self.onAddMedication = onAddMedication
         self.onShowAllMedications = onShowAllMedications
         self.onEditMedication = onEditMedication
@@ -99,10 +96,9 @@ struct ActiveMedicationsView: View {
     let container = try! ModelContainer(for: Patient.self, configurations: config)
     let context = container.mainContext
 
-    return NavigationStack {
+    NavigationStack {
         ActiveMedicationsView(
             patient: .samplePatient,
-            todaysMedications: [.sampleMedication, .complexMedication],
             onAddMedication: { print("Add medication") },
             onShowAllMedications: { print("Show all medications") },
             onEditMedication: { _ in print("Edit medication") },

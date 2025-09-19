@@ -25,76 +25,13 @@ class MedicationsViewModel {
     var errorMessage: String?
     var showingError = false
 
-    // Data
-    var allPrescriptions: [Prescription] = []
-    var allMedications: [Medication] = []
-
-    // MARK: - Computed Properties
-
-    var activeMedications: [Medication] {
-        let prescriptionMedications = prescriptionBasedMedications
-        let directMedications = patientDirectMedications
-        return prescriptionMedications + directMedications
-    }
-
-    private var prescriptionBasedMedications: [Medication] {
-        let activePrescriptions = allPrescriptions.filter { prescription in
-            guard let medicalCase = prescription.medicalCase else { return false }
-            return medicalCase.patient?.id == patient.id && (medicalCase.isActive ?? false)
-        }
-        return activePrescriptions.compactMap { $0.medications }.reduce([], +)
-    }
-
-    private var patientDirectMedications: [Medication] {
-        return allMedications.filter { medication in
-            medication.patient?.id == patient.id && medication.prescription == nil
-        }
-    }
-
-    var todaysActiveMedications: [Medication] {
-        // Filter medications that should be shown for today
-        // This is a simple filter - could be enhanced with more complex scheduling logic
-        return activeMedications.filter { medication in
-            // Include all active medications for now
-            // In the future, this could filter based on scheduling, duration, etc.
-            return true
-        }
-    }
-
     // MARK: - Initialization
 
     init(patient: Patient, modelContext: ModelContext) {
         self.patient = patient
         self.modelContext = modelContext
     }
-
-    // MARK: - Data Management
-
-    func refreshData() {
-        fetchPrescriptions()
-        fetchMedications()
-    }
-
-    private func fetchPrescriptions() {
-        let descriptor = FetchDescriptor<Prescription>()
-        do {
-            allPrescriptions = try modelContext.fetch(descriptor)
-        } catch {
-            handleError("Failed to fetch prescriptions: \(error.localizedDescription)")
-        }
-    }
-
-    private func fetchMedications() {
-        let descriptor = FetchDescriptor<Medication>()
-        do {
-            allMedications = try modelContext.fetch(descriptor)
-        } catch {
-            handleError("Failed to fetch medications: \(error.localizedDescription)")
-        }
-    }
-
-    // MARK: - Actions
-
+    
     func showAddMedication() {
         showingAddMedication = true
     }
@@ -109,30 +46,10 @@ class MedicationsViewModel {
 
     func handleNewMedicationSave(_ medication: Medication) {
         showingAddMedication = false
-        refreshData()
     }
 
     func handleMedicationSave(_ medication: Medication) {
-        // Find and update the prescription containing this medication
-        let relevantPrescriptions = allPrescriptions.filter { prescription in
-            prescription.medications?.contains(where: { $0.id == medication.id }) == true
-        }
-
-        for prescription in relevantPrescriptions {
-            if let medicationIndex = prescription.medications?.firstIndex(where: { $0.id == medication.id }) {
-                prescription.medications?[medicationIndex] = medication
-                prescription.updatedAt = Date()
-
-                do {
-                    try modelContext.save()
-                    refreshData()
-                    return
-                } catch {
-                    handleError("Failed to update medication: \(error.localizedDescription)")
-                    return
-                }
-            }
-        }
+        showingAddMedication = false
     }
 
     func dismissMedicationsList() {

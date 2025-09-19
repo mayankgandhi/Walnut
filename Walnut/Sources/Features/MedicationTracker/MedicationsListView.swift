@@ -14,7 +14,7 @@ import WalnutDesignSystem
 struct ActiveMedicationsListView: View {
 
     let patient: Patient
-    let medications: [Medication]
+    let medications: [Medication] = []
     let onEdit: (Medication) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -180,7 +180,6 @@ struct ActiveMedicationsListItem: View {
     NavigationView {
         ActiveMedicationsListView(
             patient: .samplePatient,
-            medications: [.sampleMedication, .complexMedication, .hourlyMedication],
             onEdit: { _ in }
         )
     }
@@ -191,7 +190,6 @@ struct ActiveMedicationsListItem: View {
     NavigationView {
         ActiveMedicationsListView(
             patient: .samplePatient,
-            medications: [],
             onEdit: { _ in }
         )
     }

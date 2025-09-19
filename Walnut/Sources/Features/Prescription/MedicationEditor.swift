@@ -73,8 +73,12 @@ struct MedicationEditor: View {
     
     private func submitForm() {
         withAnimation(.easeInOut(duration: 0.3)) {
-            save()
-            dismiss()
+            do {
+                try save()
+                dismiss()
+            } catch {
+                print(error)
+            }
         }
     }
     
@@ -274,7 +278,7 @@ struct MedicationEditor: View {
     }
     
     
-    private func save() {
+    private func save() throws {
         guard let medicationDuration = duration else { return }
         
         let medicationToSave: Medication
@@ -297,17 +301,6 @@ struct MedicationEditor: View {
                 patient: patient,
                 prescription: targetPrescription,
             )
-
-            // Only insert and add to prescription if there's a target prescription
-            if let targetPrescription = targetPrescription {
-                modelContext.insert(medicationToSave)
-
-                // Add to prescription's medications array
-                if targetPrescription.medications == nil {
-                    targetPrescription.medications = []
-                }
-                targetPrescription.medications?.append(medicationToSave)
-            }
         }
         
         // Update medication properties
@@ -317,19 +310,24 @@ struct MedicationEditor: View {
         medicationToSave.duration = medicationDuration
         medicationToSave.frequency = selectedFrequencies.isEmpty ? nil : selectedFrequencies
         
-        // Save context for new medications with prescriptions
-        if !isEditingMode && targetPrescription != nil {
-            do {
+        if self.medication == nil {
+            if self.targetPrescription == nil {
+                modelContext.insert(medicationToSave)
+            } else {
+                // Add to prescription's medications array
+                if self.targetPrescription!.medications == nil {
+                    targetPrescription!.medications = []
+                }
+                targetPrescription!.medications!.append(medicationToSave)
                 try modelContext.save()
-            } catch {
-                print("Failed to save new medication: \(error)")
             }
+        } else {
+            try modelContext.save()
         }
         
-        onSave(medicationToSave)
-
         // Schedule notifications for the medication
         scheduleNotifications(for: medicationToSave)
+        onSave(medicationToSave)
     }
 
     private func scheduleNotifications(for medication: Medication) {
