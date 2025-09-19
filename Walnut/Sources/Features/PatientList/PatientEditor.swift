@@ -292,9 +292,9 @@ struct PatientEditor: View {
     
     private func save() {
         let now = Date()
-        
+
         let finalDateOfBirth = selectedDateOfBirth ?? dateOfBirth
-        
+
         if let patient {
             // Edit existing patient
             patient.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -306,6 +306,20 @@ struct PatientEditor: View {
             patient.notes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
             patient.updatedAt = now
         } else {
+            // Check subscription limits for new patient creation
+            let subscriptionService = SubscriptionService.shared
+            if !subscriptionService.isPremiumFeatureAvailable() {
+                // For free users, check patient count limit (e.g., 3 patients max)
+                let descriptor = FetchDescriptor<Patient>()
+                let patientCount = (try? modelContext.fetchCount(descriptor)) ?? 0
+
+                if patientCount >= 3 {
+                    // Show upgrade prompt - this would typically be handled with an alert
+                    // For now, we'll just return without saving
+                    return
+                }
+            }
+
             // Create new patient
             let newPatient = Patient(
                 id: UUID(),

@@ -87,6 +87,9 @@ let project = Project(
             dependencies: [
                 .external(name: "PostHog"),
                 .external(name: "Atlantis"),
+                .external(name: "RevenueCat"),
+                .external(name: "RevenueCatUI"),
+
                 .project(target: "AIKit", path: "../AIKit"),
                 .project(target: "WalnutDesignSystem", path: "../WalnutDesignSystem"),
             ],

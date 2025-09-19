@@ -68,6 +68,7 @@ struct ModularDocumentPickerView: View {
                         .background(Color.blue)
                         .cornerRadius(12)
                         .padding(.horizontal)
+                        .requiresPremium(.aiDocumentParsing)
                     }
                 }
             }

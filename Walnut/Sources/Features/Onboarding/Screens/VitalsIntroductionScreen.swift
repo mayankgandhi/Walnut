@@ -30,21 +30,21 @@ struct VitalsIntroductionScreen: View {
                         icon: "chart.line.uptrend.xyaxis",
                         title: "Trend Analysis",
                         description: "Visualize your health data over time with interactive charts",
-                        color: .healthPrimary
+                        color: Color.healthPrimary
                     )
                     
                     FeatureRow(
                         icon: "bell.fill",
                         title: "Smart Reminders",
                         description: "Get reminded to take measurements at optimal times",
-                        color: .healthWarning
+                        color: Color.healthWarning
                     )
                     
                     FeatureRow(
                         icon: "square.and.arrow.up",
                         title: "Share with Doctors",
                         description: "Export reports to share with your healthcare team",
-                        color: .healthSuccess
+                        color: Color.healthSuccess
                     )
                     
                     FeatureRow(
