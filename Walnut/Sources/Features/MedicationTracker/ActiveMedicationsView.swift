@@ -9,12 +9,9 @@
 import SwiftUI
 import WalnutDesignSystem
 
-/// Clean UI component displaying today's active medications in a timeline format
-/// This is a pure view component that receives data and handles UI presentation only
 struct ActiveMedicationsView: View {
 
     // MARK: - Properties
-
     let patient: Patient
     let todaysMedications: [Medication]
     let onAddMedication: () -> Void

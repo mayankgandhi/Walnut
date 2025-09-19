@@ -25,7 +25,10 @@ struct PatientTabView: View {
             
             Tab("Meds", systemImage: "pills.fill") {
                 NavigationStack {
-                    MedicationsView(patient: patient)
+                    MedicationsView(
+                        patient: patient,
+                        modelContext: modelContext
+                    )
                 }
             }
             

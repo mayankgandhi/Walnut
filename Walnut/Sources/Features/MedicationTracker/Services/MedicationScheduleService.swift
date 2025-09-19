@@ -81,7 +81,6 @@ class MedicationScheduleService {
             for frequency in frequencies {
                 let doses = generateDosesForFrequency(frequency, medication: medication, date: date, calendar: calendar)
                 allDoses.append(contentsOf: doses)
-                
             }
         }
         

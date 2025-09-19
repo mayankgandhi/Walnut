@@ -14,18 +14,16 @@ import WalnutDesignSystem
 struct MedicationsView: View {
 
     // MARK: - Properties
-
     let patient: Patient
-
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel: MedicationsViewModel
 
     // MARK: - Initialization
 
-    init(patient: Patient) {
+    init(patient: Patient, modelContext: ModelContext) {
         self.patient = patient
         // Initialize with a placeholder - will be properly set in onAppear
-        self._viewModel = State(initialValue: MedicationsViewModel(patient: patient, modelContext: ModelContext(try! ModelContainer(for: Patient.self))))
+        self._viewModel = State(initialValue: MedicationsViewModel(patient: patient, modelContext: modelContext))
     }
 
     // MARK: - Body
@@ -39,8 +37,6 @@ struct MedicationsView: View {
             onEditMedication: viewModel.editMedication
         )
         .onAppear {
-            // Properly initialize ViewModel with actual modelContext
-            viewModel = MedicationsViewModel(patient: patient, modelContext: modelContext)
             viewModel.refreshData()
         }
         .refreshable {
@@ -81,8 +77,10 @@ struct MedicationsView: View {
 }
 
 #Preview {
+    let container = PreviewContainer.createModelContainer()
+
     NavigationStack {
-        MedicationsView(patient: .samplePatient)
+        MedicationsView(patient: .samplePatient, modelContext: container.mainContext)
     }
     .modelContainer(for: Patient.self, inMemory: true)
 }

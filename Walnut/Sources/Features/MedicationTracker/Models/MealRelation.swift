@@ -24,3 +24,18 @@ struct MealRelation: Equatable, Hashable {
 }
 
 
+/// Enhanced meal relation with utility methods
+extension MealRelation {
+    /// Calculate the actual time based on meal time and offset
+    func calculateActualTime(for date: Date) -> Date {
+        let mealTime = MealTimeConfiguration.shared.scheduledTime(for: self.mealTime, date: date)
+        let calendar = Calendar.current
+        return calendar.date(byAdding: .minute, value: offsetMinutes, to: mealTime) ?? mealTime
+    }
+    
+    /// Short display text for compact UI
+    var shortDisplayText: String {
+        let prefix = offsetMinutes < 0 ? "Before" : (offsetMinutes > 0 ? "After" : "With")
+        return "\(prefix) \(mealTime.displayName)"
+    }
+}

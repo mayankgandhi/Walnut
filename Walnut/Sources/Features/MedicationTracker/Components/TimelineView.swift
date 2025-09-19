@@ -106,7 +106,6 @@ private func sampleTimelineData() -> [TimeSlot: [ScheduledDose]] {
         scheduledTime: calendar.date(bySettingHour: 18, minute: 0, second: 0, of: today) ?? today,
         timeSlot: .evening,
         mealRelation: MealRelation(mealTime: .dinner, timing: .after, offsetMinutes: 30),
-        actualTakenTime: calendar.date(bySettingHour: 18, minute: 15, second: 0, of: today)
     )
     
     return [
