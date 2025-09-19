@@ -55,6 +55,15 @@ struct ActiveMedicationsView: View {
         .background {
             ContentBackgroundView(color: .yellow)
         }
+        .onAppear {
+            timelineViewModel.refreshData()
+        }
+        .refreshable {
+            timelineViewModel.refreshData()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .medicationDataChanged)) { _ in
+            timelineViewModel.refreshData()
+        }
     }
 
     // MARK: - Computed Properties

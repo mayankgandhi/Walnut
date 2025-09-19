@@ -10,6 +10,10 @@ import Foundation
 import SwiftUI
 import SwiftData
 
+extension Notification.Name {
+    static let medicationDataChanged = Notification.Name("medicationDataChanged")
+}
+
 @Observable
 class MedicationsViewModel {
 
@@ -31,7 +35,7 @@ class MedicationsViewModel {
         self.patient = patient
         self.modelContext = modelContext
     }
-    
+
     func showAddMedication() {
         showingAddMedication = true
     }
@@ -46,10 +50,15 @@ class MedicationsViewModel {
 
     func handleNewMedicationSave(_ medication: Medication) {
         showingAddMedication = false
+        // Trigger refresh by sending notification or updating state
+        NotificationCenter.default.post(name: .medicationDataChanged, object: nil)
     }
 
     func handleMedicationSave(_ medication: Medication) {
         showingAddMedication = false
+        medicationToEdit = nil
+        // Trigger refresh by sending notification or updating state
+        NotificationCenter.default.post(name: .medicationDataChanged, object: nil)
     }
 
     func dismissMedicationsList() {

@@ -11,14 +11,15 @@ import SwiftData
 import WalnutDesignSystem
 
 struct MedicationEditor: View {
-
+    
     @Environment(\.modelContext) var modelContext
     @Environment(\.notificationErrorHandler) private var errorHandler
+    
     let patient: Patient
     let medication: Medication?
     let targetPrescription: Prescription?
     let onSave: (Medication) -> Void
-
+    
     @State private var notificationManager = MedicationNotificationManager()
     
     // MARK: - Initializers
@@ -312,9 +313,16 @@ struct MedicationEditor: View {
         
         if self.medication == nil {
             if self.targetPrescription == nil {
+                // Adding standalone medication to patient
+                if self.patient.medications == nil {
+                    patient.medications = []
+                }
+                patient.medications!.append(medicationToSave)
                 modelContext.insert(medicationToSave)
+                try modelContext.save()
             } else {
-                // Add to prescription's medications array
+                // Adding medication to prescription
+                modelContext.insert(medicationToSave)
                 if self.targetPrescription!.medications == nil {
                     targetPrescription!.medications = []
                 }
@@ -322,6 +330,7 @@ struct MedicationEditor: View {
                 try modelContext.save()
             }
         } else {
+            // Updating existing medication
             try modelContext.save()
         }
         
@@ -329,7 +338,7 @@ struct MedicationEditor: View {
         scheduleNotifications(for: medicationToSave)
         onSave(medicationToSave)
     }
-
+    
     private func scheduleNotifications(for medication: Medication) {
         Task {
             // Reschedule all medications to enable grouping

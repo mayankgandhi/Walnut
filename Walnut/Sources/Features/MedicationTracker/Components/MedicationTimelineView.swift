@@ -13,11 +13,9 @@ import WalnutDesignSystem
 struct MedicationTimelineView: View {
     
     // MARK: - Properties
-    
     let scheduledDoses: [TimeSlot: [ScheduledDose]]
     
     // MARK: - Body
-    
     var body: some View {
         LazyVStack(spacing: Spacing.medium) {
             ForEach(TimeSlot.allCases) { timeSlot in
@@ -31,6 +29,7 @@ struct MedicationTimelineView: View {
         }
         .padding(.horizontal, Spacing.medium)
     }
+    
 }
 
 // MARK: - Time Slot Section Component
