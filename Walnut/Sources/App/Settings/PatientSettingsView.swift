@@ -43,10 +43,6 @@ struct PatientSettingsView: View {
                 patientSettingsSection
                     .padding(.horizontal, Spacing.medium)
 
-                // Subscription Section
-                subscriptionSection
-                    .padding(.horizontal, Spacing.medium)
-
                 // App Settings Section
                 appSettingsSection
                     .padding(.horizontal, Spacing.medium)
@@ -95,19 +91,6 @@ struct PatientSettingsView: View {
                 ICloudSyncView(patient: viewModel.patient)
                 AboutView(patient: viewModel.patient)
                 HelpSupportView(patient: viewModel.patient)
-            }
-        }
-    }
-
-    private var subscriptionSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.medium) {
-            Text("Subscription")
-                .font(.headline)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            VStack(spacing: Spacing.xs) {
-                SubscriptionSettingsView()
             }
         }
     }
