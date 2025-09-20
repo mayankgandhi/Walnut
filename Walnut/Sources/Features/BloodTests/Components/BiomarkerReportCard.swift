@@ -111,11 +111,11 @@ struct BiomarkerReportCard: View {
                 Label {
                     Text("\(abnormalCount) abnormal")
                         .font(.caption2.weight(.medium))
-                        .foregroundStyle(.healthError)
+                        .foregroundStyle(Color.healthError)
                 } icon: {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.caption2)
-                        .foregroundStyle(.healthError)
+                        .foregroundStyle(Color.healthError)
                 }
                 .labelStyle(.titleAndIcon)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -123,11 +123,11 @@ struct BiomarkerReportCard: View {
                 Label {
                     Text("All normal")
                         .font(.caption2.weight(.medium))
-                        .foregroundStyle(.healthSuccess)
+                        .foregroundStyle(Color.healthSuccess)
                 } icon: {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.caption2)
-                        .foregroundStyle(.healthSuccess)
+                        .foregroundStyle(Color.healthSuccess)
                 }
                 .labelStyle(.titleAndIcon)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -136,14 +136,3 @@ struct BiomarkerReportCard: View {
     }
 }
 
-
-// MARK: - Preview
-
-#Preview {
-    VStack(spacing: Spacing.medium) {
-        if let sampleReport = BioMarkerReport.sampleReport {
-            BiomarkerReportCard(report: sampleReport)
-        }
-    }
-    .padding()
-}

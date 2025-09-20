@@ -19,6 +19,9 @@ class BiomarkerReportListViewModel {
     var isLoading = false
     var errorMessage: String?
 
+    // Navigation State
+    var selectedBiomarkerReport: BioMarkerReport?
+
     init(modelContext: ModelContext, patient: Patient) {
         self.modelContext = modelContext
         self.patient = patient
@@ -109,6 +112,12 @@ class BiomarkerReportListViewModel {
     /// Get the most recent report for the patient
     func getMostRecentReport() -> BioMarkerReport? {
         return BiomarkerEngine.getMostRecentReportForPatient(from: biomarkerReports, patient: patient)
+    }
+
+    // MARK: - Navigation Actions
+
+    func selectBiomarkerReport(_ report: BioMarkerReport) {
+        selectedBiomarkerReport = report
     }
 }
 

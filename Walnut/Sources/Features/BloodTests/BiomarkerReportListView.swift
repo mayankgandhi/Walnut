@@ -56,6 +56,9 @@ struct BiomarkerReportListView: View {
         .onAppear {
             viewModel.loadBiomarkerReports()
         }
+        .navigationDestination(item: $viewModel.selectedBiomarkerReport) { report in
+            BioMarkerReportDetailView(bloodReport: report)
+        }
     }
 
     private var loadingView: some View {
@@ -141,6 +144,9 @@ struct BiomarkerReportListView: View {
             ) {
                 ForEach(reports, id: \.id) { report in
                     BiomarkerReportCard(report: report)
+                        .onTapGesture {
+                            viewModel.selectBiomarkerReport(report)
+                        }
                 }
             }
         }
