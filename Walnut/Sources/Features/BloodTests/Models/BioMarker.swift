@@ -39,7 +39,7 @@ public struct BioMarker {
         self.lastUpdated = lastUpdated
     }
     
-    init(from bloodTestResult: BloodTestResult) {
+    init(from bloodTestResult: BioMarkerResult) {
         self.id = bloodTestResult.id
         self.name = bloodTestResult.testName
         self.currentValue = bloodTestResult.value

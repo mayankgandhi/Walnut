@@ -95,7 +95,7 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
 
         // Add test results after blood report is inserted
         let testResults = parsedBloodReport.testResults.map { testResult in
-            BloodTestResult(
+            BioMarkerResult(
                 testName: testResult.testName,
                 value: testResult.value,
                 unit: testResult.unit,
@@ -135,7 +135,7 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
 
         // Add test results after blood report is inserted
         let testResults = parsedBloodReport.testResults.map { testResult in
-            BloodTestResult(
+            BioMarkerResult(
                 testName: testResult.testName,
                 value: testResult.value,
                 unit: testResult.unit,

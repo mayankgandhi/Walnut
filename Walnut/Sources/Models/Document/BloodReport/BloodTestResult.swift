@@ -1,5 +1,5 @@
 //
-//  BloodTestResult.swift
+//  BioMarkerResult.swift
 //  Walnut
 //
 //  Created by Mayank Gandhi on 28/07/25.
@@ -10,7 +10,7 @@ import Foundation
 import SwiftData
 
 @Model
-class BloodTestResult: Identifiable, Sendable {
+class BioMarkerResult: Identifiable, Sendable {
     
     var id: UUID?
     
@@ -40,11 +40,11 @@ class BloodTestResult: Identifiable, Sendable {
 }
 
 // MARK: - Sample Data
-extension BloodTestResult {
+extension BioMarkerResult {
     @MainActor
-    static func sampleResults(for bloodReport: BloodReport) -> [BloodTestResult] {
+    static func sampleResults(for bloodReport: BloodReport) -> [BioMarkerResult] {
         [
-            BloodTestResult(
+            BioMarkerResult(
                 testName: "Hemoglobin",
                 value: "14.2",
                 unit: "g/dL",
@@ -52,7 +52,7 @@ extension BloodTestResult {
                 isAbnormal: false,
                 bloodReport: bloodReport
             ),
-            BloodTestResult(
+            BioMarkerResult(
                 testName: "White Blood Cell Count",
                 value: "7.8",
                 unit: "K/uL",
@@ -60,7 +60,7 @@ extension BloodTestResult {
                 isAbnormal: false,
                 bloodReport: bloodReport
             ),
-            BloodTestResult(
+            BioMarkerResult(
                 testName: "Platelets",
                 value: "320",
                 unit: "K/uL",

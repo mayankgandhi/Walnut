@@ -1,5 +1,5 @@
 //
-//  BloodTestResultEditor.swift
+//  BioMarkerResultEditor.swift
 //  Walnut
 //
 //  Created by Mayank Gandhi on 03/09/25.
@@ -10,12 +10,12 @@ import SwiftUI
 import SwiftData
 import WalnutDesignSystem
 
-struct BloodTestResultEditor: View {
+struct BioMarkerResultEditor: View {
     
-    let bloodTestResult: BloodTestResult?
-    let onSave: (BloodTestResult) -> Void
+    let bloodTestResult: BioMarkerResult?
+    let onSave: (BioMarkerResult) -> Void
     
-    init(bloodTestResult: BloodTestResult? = nil, onSave: @escaping (BloodTestResult) -> Void) {
+    init(bloodTestResult: BioMarkerResult? = nil, onSave: @escaping (BioMarkerResult) -> Void) {
         self.bloodTestResult = bloodTestResult
         self.onSave = onSave
     }
@@ -230,7 +230,7 @@ struct BloodTestResultEditor: View {
             }
             .onAppear {
                 if let bloodTestResult {
-                    loadBloodTestResultData(bloodTestResult)
+                    loadBioMarkerResultData(bloodTestResult)
                 }
             }
         }
@@ -238,7 +238,7 @@ struct BloodTestResultEditor: View {
         .presentationDragIndicator(.visible)
     }
     
-    private func loadBloodTestResultData(_ bloodTestResult: BloodTestResult) {
+    private func loadBioMarkerResultData(_ bloodTestResult: BioMarkerResult) {
         testName = bloodTestResult.testName ?? ""
         value = bloodTestResult.value ?? ""
         unit = bloodTestResult.unit ?? ""
@@ -258,7 +258,7 @@ struct BloodTestResultEditor: View {
             onSave(bloodTestResult)
         } else {
             // Create new test result - just pass data to parent, no modelContext operations
-            let newBloodTestResult = BloodTestResult(
+            let newBioMarkerResult = BioMarkerResult(
                 id: UUID(),
                 testName: testName.trimmingCharacters(in: .whitespacesAndNewlines),
                 value: value.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -268,7 +268,7 @@ struct BloodTestResultEditor: View {
                 bloodReport: nil
             )
             
-            onSave(newBloodTestResult)
+            onSave(newBioMarkerResult)
         }
     }
 }
@@ -276,7 +276,7 @@ struct BloodTestResultEditor: View {
 // MARK: - Previews
 
 #Preview("Add Test Result") {
-    BloodTestResultEditor(bloodTestResult: nil) { _ in }
-        .modelContainer(for: BloodTestResult.self, inMemory: true)
+    BioMarkerResultEditor(bloodTestResult: nil) { _ in }
+        .modelContainer(for: BioMarkerResult.self, inMemory: true)
 }
 

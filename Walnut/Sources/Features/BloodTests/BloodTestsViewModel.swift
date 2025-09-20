@@ -1,5 +1,5 @@
 //
-//  BloodTestsViewModel.swift
+//  BioMarkersViewModel.swift
 //  Walnut
 //
 //  Created by Mayank Gandhi on 29/08/25.
@@ -12,7 +12,7 @@ import Observation
 import WalnutDesignSystem
 
 @Observable
-class BloodTestsViewModel {
+class BioMarkersViewModel {
     
     // MARK: - Published Properties
     var bloodReports: [BloodReport] = []
@@ -103,7 +103,7 @@ class BloodTestsViewModel {
             
             bloodReports = try modelContext.fetch(descriptor)
             
-            try await processBloodTestData()
+            try await processBioMarkerData()
             
         } catch {
             self.error = error
@@ -156,7 +156,7 @@ class BloodTestsViewModel {
     // MARK: - Data Processing (Using BiomarkerEngine)
 
     @MainActor
-    private func processBloodTestData() async {
+    private func processBioMarkerData() async {
         guard !bloodReports.isEmpty else {
             aggregatedBiomarkers = []
             return
@@ -174,20 +174,6 @@ class BloodTestsViewModel {
     /// Get biomarkers filtered by category using the engine
     func getBiomarkersForCategory(_ category: String) -> [AggregatedBiomarker] {
         return BiomarkerEngine.generateFilteredBiomarkers(from: bloodReports, category: category)
-    }
-
-    /// Get biomarkers for a specific date range
-    func getBiomarkersForDateRange(startDate: Date, endDate: Date) -> [AggregatedBiomarker] {
-        return BiomarkerEngine.generateBiomarkersForDateRange(
-            from: bloodReports,
-            startDate: startDate,
-            endDate: endDate
-        )
-    }
-
-    /// Get specific biomarker trends for detailed analysis
-    func getBiomarkerTrends(for testName: String) -> BiomarkerTrends? {
-        return BiomarkerEngine.getBiomarkerTrends(for: testName, from: bloodReports)
     }
 
     // MARK: - Utility Methods
@@ -213,7 +199,7 @@ class BloodTestsViewModel {
 
 // MARK: - Extensions
 
-extension BloodTestsViewModel {
+extension BioMarkersViewModel {
     
     /// Check if the view should show empty state
     var shouldShowEmptyState: Bool {

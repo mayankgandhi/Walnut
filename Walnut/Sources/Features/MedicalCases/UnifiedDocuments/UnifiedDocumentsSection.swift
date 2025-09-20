@@ -152,7 +152,7 @@ struct UnifiedDocumentsSection: View {
         MedicalCase.self,
         Prescription.self,
         BloodReport.self,
-        BloodTestResult.self,
+        BioMarkerResult.self,
         Document.self,
         Medication.self
     ])
@@ -198,7 +198,7 @@ struct UnifiedDocumentsSection: View {
         updatedAt: Date().addingTimeInterval(-86400 * 3),
         medicalCase: medicalCase,
         testResults: [
-            BloodTestResult(
+            BioMarkerResult(
                 testName: "Hemoglobin",
                 value: "14.2",
                 unit: "g/dL",

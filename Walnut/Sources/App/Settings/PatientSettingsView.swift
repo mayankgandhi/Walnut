@@ -26,7 +26,7 @@ struct PatientSettingsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: Spacing.medium) {
-            
+                
                 NavBarHeader(
                     iconName: "settings",
                     iconColor: .blue,
@@ -42,9 +42,12 @@ struct PatientSettingsView: View {
                 // Patient Settings Section
                 patientSettingsSection
                     .padding(.horizontal, Spacing.medium)
-
+                
                 // App Settings Section
                 appSettingsSection
+                    .padding(.horizontal, Spacing.medium)
+                
+                deadZoneSection
                     .padding(.horizontal, Spacing.medium)
                 
                 Spacer(minLength: Spacing.xl)
@@ -94,10 +97,10 @@ struct PatientSettingsView: View {
             }
         }
     }
-
+    
     private var deadZoneSection: some View {
         VStack(alignment: .leading, spacing: Spacing.medium) {
-            Text("Dead Zone")
+            Text("Data")
                 .font(.headline)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)

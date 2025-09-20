@@ -302,7 +302,7 @@ struct BloodReportDetailView: View {
     
     // Add comprehensive test results
     let testResults = [
-        BloodTestResult(
+        BioMarkerResult(
             testName: "Hemoglobin",
             value: "13.8",
             unit: "g/dL",
@@ -310,7 +310,7 @@ struct BloodReportDetailView: View {
             isAbnormal: false,
             bloodReport: sampleBloodReport
         ),
-        BloodTestResult(
+        BioMarkerResult(
             testName: "Hematocrit",
             value: "41.2",
             unit: "%",
@@ -318,7 +318,7 @@ struct BloodReportDetailView: View {
             isAbnormal: false,
             bloodReport: sampleBloodReport
         ),
-        BloodTestResult(
+        BioMarkerResult(
             testName: "White Blood Cell Count",
             value: "12.5",
             unit: "K/uL",
@@ -326,7 +326,7 @@ struct BloodReportDetailView: View {
             isAbnormal: true,
             bloodReport: sampleBloodReport
         ),
-        BloodTestResult(
+        BioMarkerResult(
             testName: "Red Blood Cell Count",
             value: "4.65",
             unit: "M/uL",
@@ -334,7 +334,7 @@ struct BloodReportDetailView: View {
             isAbnormal: false,
             bloodReport: sampleBloodReport
         ),
-        BloodTestResult(
+        BioMarkerResult(
             testName: "Platelets",
             value: "285",
             unit: "K/uL",
@@ -342,7 +342,7 @@ struct BloodReportDetailView: View {
             isAbnormal: false,
             bloodReport: sampleBloodReport
         ),
-        BloodTestResult(
+        BioMarkerResult(
             testName: "Glucose, Fasting",
             value: "110",
             unit: "mg/dL",
@@ -350,7 +350,7 @@ struct BloodReportDetailView: View {
             isAbnormal: true,
             bloodReport: sampleBloodReport
         ),
-        BloodTestResult(
+        BioMarkerResult(
             testName: "Total Cholesterol",
             value: "195",
             unit: "mg/dL",
@@ -358,7 +358,7 @@ struct BloodReportDetailView: View {
             isAbnormal: false,
             bloodReport: sampleBloodReport
         ),
-        BloodTestResult(
+        BioMarkerResult(
             testName: "HDL Cholesterol",
             value: "58",
             unit: "mg/dL",
@@ -366,7 +366,7 @@ struct BloodReportDetailView: View {
             isAbnormal: false,
             bloodReport: sampleBloodReport
         ),
-        BloodTestResult(
+        BioMarkerResult(
             testName: "LDL Cholesterol",
             value: "118",
             unit: "mg/dL",
@@ -374,7 +374,7 @@ struct BloodReportDetailView: View {
             isAbnormal: true,
             bloodReport: sampleBloodReport
         ),
-        BloodTestResult(
+        BioMarkerResult(
             testName: "Triglycerides",
             value: "95",
             unit: "mg/dL",
@@ -382,7 +382,7 @@ struct BloodReportDetailView: View {
             isAbnormal: false,
             bloodReport: sampleBloodReport
         ),
-        BloodTestResult(
+        BioMarkerResult(
             testName: "Creatinine",
             value: "0.95",
             unit: "mg/dL",
@@ -390,7 +390,7 @@ struct BloodReportDetailView: View {
             isAbnormal: false,
             bloodReport: sampleBloodReport
         ),
-        BloodTestResult(
+        BioMarkerResult(
             testName: "BUN",
             value: "18",
             unit: "mg/dL",

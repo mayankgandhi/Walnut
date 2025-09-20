@@ -22,7 +22,7 @@ struct WalnutApp: App {
                     MedicalCase.self,
                     Prescription.self,
                     BloodReport.self,
-                    BloodTestResult.self
+                    BioMarkerResult.self
                 ])
                 .preferredColorScheme(.light) // Force light mode
         }

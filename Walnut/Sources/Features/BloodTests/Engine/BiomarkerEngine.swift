@@ -9,7 +9,7 @@
 import Foundation
 
 /// Engine responsible for converting blood reports into aggregated biomarker data
-/// for visualization and analysis in the BloodTestsViewModel
+/// for visualization and analysis in the BioMarkersViewModel
 class BiomarkerEngine {
 
     // MARK: - Public Interface
@@ -96,8 +96,8 @@ class BiomarkerEngine {
 
     // MARK: - Data Grouping
 
-    private func groupTestResultsByName(from reports: [BloodReport]) -> [String: [BloodTestResult]] {
-        var testGroups: [String: [BloodTestResult]] = [:]
+    private func groupTestResultsByName(from reports: [BloodReport]) -> [String: [BioMarkerResult]] {
+        var testGroups: [String: [BioMarkerResult]] = [:]
 
         for report in reports {
             for testResult in report.testResults ?? [] {
@@ -116,9 +116,9 @@ class BiomarkerEngine {
 
     // MARK: - Biomarker Creation
 
-    private func createAggregatedBiomarker(from results: [BloodTestResult]) -> AggregatedBiomarker? {
+    private func createAggregatedBiomarker(from results: [BioMarkerResult]) -> AggregatedBiomarker? {
         // Filter results that have all required data
-        let validResults = results.compactMap { result -> (BloodTestResult, Date)? in
+        let validResults = results.compactMap { result -> (BioMarkerResult, Date)? in
             guard let bloodReport = result.bloodReport,
                   let resultDate = bloodReport.resultDate else {
                 return nil
@@ -201,7 +201,7 @@ class BiomarkerEngine {
 
     // MARK: - Health Status Determination
 
-    private func determineHealthStatus(for result: BloodTestResult, from dataPoints: [BiomarkerDataPoint]) -> HealthStatus {
+    private func determineHealthStatus(for result: BioMarkerResult, from dataPoints: [BiomarkerDataPoint]) -> HealthStatus {
         let isAbnormal = result.isAbnormal ?? false
 
         if isAbnormal {
@@ -253,39 +253,10 @@ class BiomarkerEngine {
 
 extension BiomarkerEngine {
 
-    /// Get specific biomarker trends for detailed analysis
-    /// - Parameters:
-    ///   - testName: Name of the test to analyze
-    ///   - bloodReports: Array of blood reports
-    /// - Returns: BiomarkerTrends object if found
-    static func getBiomarkerTrends(
-        for testName: String,
-        from bloodReports: [BloodReport]
-    ) -> BiomarkerTrends? {
-
-        let engine = BiomarkerEngine()
-        let testGroups = engine.groupTestResultsByName(from: bloodReports)
-
-        let normalizedTestName = testName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard let results = testGroups[normalizedTestName],
-              let aggregatedBiomarker = engine.createAggregatedBiomarker(from: results) else {
-            return nil
-        }
-
-        return BiomarkerTrends(
-            currentValue: aggregatedBiomarker.currentNumericValue,
-            currentValueText: aggregatedBiomarker.currentValue,
-            comparisonText: aggregatedBiomarker.trendText,
-            comparisonPercentage: aggregatedBiomarker.trendPercentage,
-            trendDirection: aggregatedBiomarker.trendDirection,
-            normalRange: aggregatedBiomarker.referenceRange
-        )
-    }
-
     /// Extract all test results from blood reports
     /// - Parameter reports: Blood reports to process
     /// - Returns: Flattened array of test results
-    static func extractTestResults(from reports: [BloodReport]) -> [BloodTestResult] {
+    static func extractTestResults(from reports: [BloodReport]) -> [BioMarkerResult] {
         return reports.flatMap { $0.testResults ?? [] }
     }
 

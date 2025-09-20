@@ -16,7 +16,7 @@ struct ParsedBloodReport: ParseableModel {
     let category: String
     let resultDate: Date
     let notes: String
-    let testResults: [ParsedBloodTestResult]
+    let testResults: [ParsedBioMarkerResult]
     
     static var tool: AIKit.ClaudeTool {
         AIKit.ClaudeTool(
@@ -107,7 +107,7 @@ struct ParsedBloodReport: ParseableModel {
 
 }
 
-struct ParsedBloodTestResult: Codable {
+struct ParsedBioMarkerResult: Codable {
     let testName: String
     let value: String
     let unit: String

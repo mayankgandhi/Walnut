@@ -1,5 +1,5 @@
 //
-//  BloodTestsView.swift
+//  BioMarkersView.swift
 //  Walnut
 //
 //  Created by Mayank Gandhi on 28/07/25.
@@ -10,13 +10,13 @@ import SwiftUI
 import SwiftData
 import WalnutDesignSystem
 
-struct BloodTestsView: View {
+struct BioMarkersView: View {
 
-    @State private var viewModel: BloodTestsViewModel
+    @State private var viewModel: BioMarkersViewModel
     @State private var showDocumentPicker = false
     @State private var documentPickerStore = DocumentPickerStore()
 
-    init(viewModel: BloodTestsViewModel) {
+    init(viewModel: BioMarkersViewModel) {
         self.viewModel = viewModel
     }
     
@@ -215,7 +215,7 @@ struct PreviewContainer {
             Patient.self,
             MedicalCase.self,
             BloodReport.self,
-            BloodTestResult.self
+            BioMarkerResult.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
         
@@ -232,7 +232,7 @@ struct PreviewContainer {
     let patient = Patient.samplePatient
     
     NavigationStack {
-        BloodTestsView(viewModel: BloodTestsViewModel(patient: patient, modelContext: container.mainContext))
+        BioMarkersView(viewModel: BioMarkersViewModel(patient: patient, modelContext: container.mainContext))
     }
     .modelContainer(container)
 }
@@ -242,7 +242,7 @@ struct PreviewContainer {
     let patient = Patient.samplePatient
     
     NavigationStack {
-        BloodTestsView(viewModel: BloodTestsViewModel(patient: patient, modelContext: container.mainContext))
+        BioMarkersView(viewModel: BioMarkersViewModel(patient: patient, modelContext: container.mainContext))
     }
     .modelContainer(container)
 }
@@ -252,7 +252,7 @@ struct PreviewContainer {
     let patient = Patient.samplePatientWithMedications
     
     NavigationStack {
-        BloodTestsView(viewModel: BloodTestsViewModel(patient: patient, modelContext: container.mainContext))
+        BioMarkersView(viewModel: BioMarkersViewModel(patient: patient, modelContext: container.mainContext))
     }
     .modelContainer(container)
 }

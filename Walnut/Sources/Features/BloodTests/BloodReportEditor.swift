@@ -56,11 +56,11 @@ struct BloodReportEditor: View {
     @State private var category = ""
     @State private var resultDate = Date()
     @State private var notes = ""
-    @State private var testResults: [BloodTestResult] = []
+    @State private var testResults: [BioMarkerResult] = []
     
     // Blood test result editor sheet states
     @State private var showTestResultEditor = false
-    @State private var testResultToEdit: BloodTestResult? = nil
+    @State private var testResultToEdit: BioMarkerResult? = nil
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -432,12 +432,12 @@ struct BloodReportEditor: View {
             }
             .sheet(isPresented: $showTestResultEditor) {
                 if let testResultToEdit = testResultToEdit {
-                    BloodTestResultEditor(
+                    BioMarkerResultEditor(
                         bloodTestResult: testResultToEdit,
                         onSave: handleTestResultSave
                     )
                 } else {
-                    BloodTestResultEditor(
+                    BioMarkerResultEditor(
                         bloodTestResult: nil,
                         onSave: handleTestResultSave
                     )
@@ -449,7 +449,7 @@ struct BloodReportEditor: View {
     }
     
     @ViewBuilder
-    private func testResultListItem(testResult: BloodTestResult) -> some View {
+    private func testResultListItem(testResult: BioMarkerResult) -> some View {
         HealthCard {
             HStack(spacing: Spacing.medium) {
                 // Test result icon
@@ -528,7 +528,7 @@ struct BloodReportEditor: View {
         }
     }
     
-    private func handleTestResultSave(_ testResult: BloodTestResult) {
+    private func handleTestResultSave(_ testResult: BioMarkerResult) {
         if let index = testResults.firstIndex(where: { $0.id == testResult.id }) {
             // Update existing test result
             testResults[index] = testResult
