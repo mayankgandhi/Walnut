@@ -11,12 +11,12 @@ import SwiftData
 import WalnutDesignSystem
 
 struct BioMarkersView: View {
-
+    
     @State private var viewModel: BioMarkersViewModel
     @State private var showDocumentPicker = false
     @State private var documentPickerStore = DocumentPickerStore()
     @State private var showBiomarkerReportsList = false
-
+    
     init(viewModel: BioMarkersViewModel) {
         self.viewModel = viewModel
     }
@@ -63,7 +63,7 @@ struct BioMarkersView: View {
                     }
                 )
                 .padding(.bottom, Spacing.small)
-
+                
                 if viewModel.isLoading || viewModel.isProcessingData {
                     loadingView
                 } else if viewModel.shouldShowEmptyFilteredResults {
@@ -116,12 +116,14 @@ struct BioMarkersView: View {
                 // Refresh data when list is dismissed
                 viewModel.refreshData()
             }) {
-                BiomarkerReportListView(
-                    patient: viewModel.currentPatient,
-                    modelContext: viewModel.currentModelContext
-                )
+                NavigationStack {
+                    BiomarkerReportListView(
+                        patient: viewModel.currentPatient,
+                        modelContext: viewModel.currentModelContext
+                    )
+                }
             }
-
+            
         }
     }
     

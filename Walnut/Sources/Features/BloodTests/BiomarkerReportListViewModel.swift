@@ -75,8 +75,8 @@ class BiomarkerReportListViewModel {
         }
     }
 
-    func groupedBiomarkerReports() -> [BiomarkerReportKey: [BioMarkerReport]] {
-        return Dictionary(grouping: biomarkerReports) { report in
+    func groupedBiomarkerReports() -> [(key: BiomarkerReportKey, reports: [BioMarkerReport])] {
+        let grouped = Dictionary(grouping: biomarkerReports) { report in
             // Group by medical case first, then by direct patient association
             if let medicalCase = report.medicalCase,
                let title = medicalCase.title {
@@ -97,6 +97,30 @@ class BiomarkerReportListViewModel {
                 )
             }
         }
+
+        // Sort groups by priority and then alphabetically
+        return grouped.map { (key: $0.key, reports: $0.value) }
+            .sorted { group1, group2 in
+                // Priority order: Direct Upload first, then alphabetical by source name
+                if group1.key.sourceName == "Direct Upload" && group2.key.sourceName != "Direct Upload" {
+                    return true
+                } else if group1.key.sourceName != "Direct Upload" && group2.key.sourceName == "Direct Upload" {
+                    return false
+                } else {
+                    // Both are either Direct Upload or medical cases, sort alphabetically
+                    return group1.key.sourceName < group2.key.sourceName
+                }
+            }
+            .map { group in
+                // Sort reports within each group by date (most recent first)
+                let sortedReports = group.reports.sorted { report1, report2 in
+                    guard let date1 = report1.resultDate, let date2 = report2.resultDate else {
+                        return false
+                    }
+                    return date1 > date2
+                }
+                return (key: group.key, reports: sortedReports)
+            }
     }
 
     /// Get reports that have abnormal results
