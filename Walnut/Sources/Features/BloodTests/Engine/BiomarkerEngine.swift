@@ -267,4 +267,126 @@ extension BiomarkerEngine {
         let engine = BiomarkerEngine()
         return engine.validateBioMarkerReports(reports)
     }
+
+    /// Filter biomarker reports that belong to a specific patient
+    /// - Parameters:
+    ///   - reports: All biomarker reports to filter
+    ///   - patient: The patient to filter for
+    /// - Returns: Array of reports associated with the patient
+    static func filterReportsForPatient(from reports: [BioMarkerReport], patient: Patient) -> [BioMarkerReport] {
+        return reports.filter { report in
+            if let patientID = report.patient?.id {
+                return patientID == patient.id
+            } else if let medicalCase = report.medicalCase {
+                return medicalCase.patient?.id == patient.id
+            } else {
+                return false
+            }
+        }
+    }
+
+    /// Filter biomarker reports that belong to a specific medical case
+    /// - Parameters:
+    ///   - reports: All biomarker reports to filter
+    ///   - medicalCase: The medical case to filter for
+    /// - Returns: Array of reports associated with the medical case
+    static func filterReportsForMedicalCase(from reports: [BioMarkerReport], medicalCase: MedicalCase) -> [BioMarkerReport] {
+        return reports.filter { report in
+            return report.medicalCase?.id == medicalCase.id
+        }
+    }
+
+    /// Get reports that have abnormal test results
+    /// - Parameter reports: Reports to check
+    /// - Returns: Array of reports containing abnormal results
+    static func filterAbnormalReports(from reports: [BioMarkerReport]) -> [BioMarkerReport] {
+        return reports.filter { report in
+            return report.testResults?.contains { $0.isAbnormal == true } ?? false
+        }
+    }
+
+    /// Get reports that have only normal test results
+    /// - Parameter reports: Reports to check
+    /// - Returns: Array of reports with all normal results
+    static func filterNormalReports(from reports: [BioMarkerReport]) -> [BioMarkerReport] {
+        return reports.filter { report in
+            guard let testResults = report.testResults, !testResults.isEmpty else { return false }
+            return !testResults.contains { $0.isAbnormal == true }
+        }
+    }
+
+    /// Get biomarker trends for a specific test across all reports
+    /// - Parameters:
+    ///   - testName: Name of the test to analyze
+    ///   - reports: Reports to search through
+    /// - Returns: BiomarkerTrends object with trend analysis
+    static func getBiomarkerTrends(for testName: String, from reports: [BioMarkerReport]) -> BiomarkerTrends? {
+        let validReports = validateBioMarkerReports(reports)
+
+        // Extract all test results for this specific test
+        let testResults = validReports.flatMap { report in
+            (report.testResults ?? []).compactMap { result -> (BioMarkerResult, Date)? in
+                guard let resultTestName = result.testName,
+                      resultTestName.lowercased() == testName.lowercased(),
+                      let resultDate = report.resultDate else {
+                    return nil
+                }
+                return (result, resultDate)
+            }
+        }.sorted { $0.1 < $1.1 } // Sort by date
+
+        guard let latestResult = testResults.last else { return nil }
+
+        // Create historical data points
+        let historicalValues = testResults.map { (result, date) in
+            BiomarkerDataPoint(
+                date: date,
+                value: Double(result.value ?? "0") ?? 0.0,
+                bloodReport: result.bloodReport?.testName,
+                document: result.bloodReport?.document
+            )
+        }
+
+        // Calculate trends
+        let engine = BiomarkerEngine()
+        let (trendDirection, trendText, trendPercentage) = engine.calculateTrend(from: historicalValues)
+
+        return BiomarkerTrends(
+            currentValue: Double(latestResult.0.value ?? "0") ?? 0.0,
+            currentValueText: latestResult.0.value ?? "0",
+            comparisonText: trendText,
+            comparisonPercentage: trendPercentage,
+            trendDirection: trendDirection,
+            normalRange: latestResult.0.referenceRange ?? "N/A"
+        )
+    }
+
+    /// Group biomarker reports by their source (medical case or direct patient)
+    /// - Parameter reports: Reports to group
+    /// - Returns: Dictionary mapping source information to reports
+    static func groupReportsBySource(_ reports: [BioMarkerReport]) -> [String: [BioMarkerReport]] {
+        return Dictionary(grouping: reports) { report in
+            if let medicalCase = report.medicalCase,
+               let title = medicalCase.title {
+                return title
+            } else if report.patient != nil {
+                return "Direct Upload"
+            } else {
+                return "Other"
+            }
+        }
+    }
+
+    /// Get the most recent report for a patient
+    /// - Parameters:
+    ///   - reports: Reports to search through
+    ///   - patient: Patient to filter for
+    /// - Returns: Most recent report for the patient, if any
+    static func getMostRecentReportForPatient(from reports: [BioMarkerReport], patient: Patient) -> BioMarkerReport? {
+        let patientReports = filterReportsForPatient(from: reports, patient: patient)
+        return patientReports.sorted {
+            guard let date1 = $0.resultDate, let date2 = $1.resultDate else { return false }
+            return date1 > date2
+        }.first
+    }
 }

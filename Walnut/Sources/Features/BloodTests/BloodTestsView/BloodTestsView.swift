@@ -15,6 +15,7 @@ struct BioMarkersView: View {
     @State private var viewModel: BioMarkersViewModel
     @State private var showDocumentPicker = false
     @State private var documentPickerStore = DocumentPickerStore()
+    @State private var showBiomarkerReportsList = false
 
     init(viewModel: BioMarkersViewModel) {
         self.viewModel = viewModel
@@ -32,7 +33,9 @@ struct BioMarkersView: View {
                         subtitle: "Visualise the latest trends in your health"
                     )
                     
-                    Button(action: {}) {
+                    Button(action: {
+                        showBiomarkerReportsList = true
+                    }) {
                         Image(systemName: "list.bullet")
                     }
                     .buttonStyle(.glass)
@@ -107,6 +110,15 @@ struct BioMarkersView: View {
                     patient: viewModel.currentPatient,
                     medicalCase: nil,
                     store: documentPickerStore
+                )
+            }
+            .sheet(isPresented: $showBiomarkerReportsList, onDismiss: {
+                // Refresh data when list is dismissed
+                viewModel.refreshData()
+            }) {
+                BiomarkerReportListView(
+                    patient: viewModel.currentPatient,
+                    modelContext: viewModel.currentModelContext
                 )
             }
 
