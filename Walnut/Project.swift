@@ -53,7 +53,7 @@ let infoPlist: InfoPlist = .extendingDefault(with: [
 
 let settings: SettingsDictionary = [
     "PRODUCT_NAME": .string("Walnut"),
-    "DISPLAY_NAME": .string("Walnut"),
+    "DISPLAY_NAME": .string("HealthStack"),
     "PRODUCT_BUNDLE_IDENTIFIER": .string("m.walnut"),
     "EXECUTABLE_NAME": .string("Walnut"),
     "CURRENT_PROJECT_VERSION": .string("1.0"),
