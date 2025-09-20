@@ -433,7 +433,7 @@ struct BiomarkerDetailView: View {
                     document: Document(
                         fileName: "blood_report_2024_01.pdf",
                         fileURL: "/Documents/blood_report_2024_01.pdf",
-                        documentType: .labResult,
+                        documentType: .biomarkerReport,
                         fileSize: 1024000
                     )
                 ),
@@ -444,7 +444,7 @@ struct BiomarkerDetailView: View {
                     document: Document(
                         fileName: "lab_results_image.jpg",
                         fileURL: "/Documents/lab_results_image.jpg",
-                        documentType: .labResult,
+                        documentType: .biomarkerReport,
                         fileSize: 512000
                     )
                 ),

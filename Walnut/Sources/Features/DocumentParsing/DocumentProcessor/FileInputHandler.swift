@@ -130,7 +130,7 @@ class FileInputHandler: FileInputHandling {
         switch documentType {
         case .prescription:
             return .prescriptions
-        case .labResult:
+        case .biomarkerReport:
             return .bloodReports
         case .unknown:
             return .unparsedDocuments

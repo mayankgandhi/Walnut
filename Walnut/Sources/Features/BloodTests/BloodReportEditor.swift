@@ -1,5 +1,5 @@
 //
-//  BloodReportEditor.swift
+//  BioMarkerReportEditor.swift
 //  Walnut
 //
 //  Created by Mayank Gandhi on 03/09/25.
@@ -10,28 +10,28 @@ import SwiftUI
 import SwiftData
 import WalnutDesignSystem
 
-struct BloodReportEditor: View {
+struct BioMarkerReportEditor: View {
 
-    let bloodReport: BloodReport?
+    let bloodReport: BioMarkerReport?
     let medicalCase: MedicalCase?
     let patient: Patient?
 
     // Convenience initializers for different workflows
-    init(bloodReport: BloodReport? = nil, medicalCase: MedicalCase) {
+    init(bloodReport: BioMarkerReport? = nil, medicalCase: MedicalCase) {
         self.bloodReport = bloodReport
         self.medicalCase = medicalCase
         self.patient = medicalCase.patient
     }
 
-    init(bloodReport: BloodReport? = nil, patient: Patient) {
+    init(bloodReport: BioMarkerReport? = nil, patient: Patient) {
         self.bloodReport = bloodReport
         self.medicalCase = nil
         self.patient = patient
     }
 
-    private init(bloodReport: BloodReport?, medicalCase: MedicalCase?, patient: Patient?) {
+    private init(bloodReport: BioMarkerReport?, medicalCase: MedicalCase?, patient: Patient?) {
         // Validation: Must have either medicalCase or patient
-        assert(medicalCase != nil || patient != nil, "BloodReportEditor requires either a medicalCase or patient")
+        assert(medicalCase != nil || patient != nil, "BioMarkerReportEditor requires either a medicalCase or patient")
 
         self.bloodReport = bloodReport
         self.medicalCase = medicalCase
@@ -427,7 +427,7 @@ struct BloodReportEditor: View {
             }
             .onAppear {
                 if let bloodReport {
-                    loadBloodReportData(bloodReport)
+                    loadBioMarkerReportData(bloodReport)
                 }
             }
             .sheet(isPresented: $showTestResultEditor) {
@@ -538,7 +538,7 @@ struct BloodReportEditor: View {
         }
     }
     
-    private func loadBloodReportData(_ bloodReport: BloodReport) {
+    private func loadBioMarkerReportData(_ bloodReport: BioMarkerReport) {
         testName = bloodReport.testName ?? ""
         labName = bloodReport.labName ?? ""
         category = bloodReport.category ?? ""
@@ -570,7 +570,7 @@ struct BloodReportEditor: View {
             }
         } else {
             // Create new blood report - determine association type
-            let newBloodReport = BloodReport(
+            let newBioMarkerReport = BioMarkerReport(
                 id: UUID(),
                 testName: testName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : testName.trimmingCharacters(in: .whitespacesAndNewlines),
                 labName: labName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : labName.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -587,7 +587,7 @@ struct BloodReportEditor: View {
 
             // Set bloodReport relationship for all test results
             for testResult in testResults {
-                testResult.bloodReport = newBloodReport
+                testResult.bloodReport = newBioMarkerReport
             }
 
             // Update appropriate parent timestamp
@@ -597,23 +597,23 @@ struct BloodReportEditor: View {
                 patient.updatedAt = now
             }
 
-            modelContext.insert(newBloodReport)
+            modelContext.insert(newBioMarkerReport)
         }
     }
 }
 
 #Preview("Add Blood Report - Medical Case") {
-    BloodReportEditor(bloodReport: nil, medicalCase: .sampleCase)
-        .modelContainer(for: BloodReport.self, inMemory: true)
+    BioMarkerReportEditor(bloodReport: nil, medicalCase: .sampleCase)
+        .modelContainer(for: BioMarkerReport.self, inMemory: true)
 }
 
 #Preview("Add Blood Report - Patient Direct") {
-    BloodReportEditor(bloodReport: nil, patient: .samplePatient)
-        .modelContainer(for: BloodReport.self, inMemory: true)
+    BioMarkerReportEditor(bloodReport: nil, patient: .samplePatient)
+        .modelContainer(for: BioMarkerReport.self, inMemory: true)
 }
 
 #Preview("Edit Blood Report - Medical Case") {
-    let sampleBloodReport = BloodReport(
+    let sampleBioMarkerReport = BioMarkerReport(
         id: UUID(),
         testName: "Complete Blood Count",
         labName: "LabCorp",
@@ -628,12 +628,12 @@ struct BloodReportEditor: View {
         testResults: []
     )
 
-    BloodReportEditor(bloodReport: sampleBloodReport, medicalCase: .sampleCase)
-        .modelContainer(for: BloodReport.self, inMemory: true)
+    BioMarkerReportEditor(bloodReport: sampleBioMarkerReport, medicalCase: .sampleCase)
+        .modelContainer(for: BioMarkerReport.self, inMemory: true)
 }
 
 #Preview("Edit Blood Report - Patient Direct") {
-    let sampleBloodReport = BloodReport(
+    let sampleBioMarkerReport = BioMarkerReport(
         id: UUID(),
         testName: "Lipid Panel",
         labName: "Quest Diagnostics",
@@ -648,6 +648,6 @@ struct BloodReportEditor: View {
         testResults: []
     )
 
-    BloodReportEditor(bloodReport: sampleBloodReport, patient: .samplePatient)
-        .modelContainer(for: BloodReport.self, inMemory: true)
+    BioMarkerReportEditor(bloodReport: sampleBioMarkerReport, patient: .samplePatient)
+        .modelContainer(for: BioMarkerReport.self, inMemory: true)
 }

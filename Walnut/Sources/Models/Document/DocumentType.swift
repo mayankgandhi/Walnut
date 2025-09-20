@@ -12,7 +12,7 @@ import SwiftUI
 @frozen public enum DocumentType: String, CaseIterable, Codable, Identifiable {
     
     case prescription
-    case labResult = "lab result"
+    case biomarkerReport = "lab result"
     case unknown
     case invoice
     case imaging = "imaging report"
@@ -23,7 +23,7 @@ import SwiftUI
         switch self {
         case .prescription:
             return "Rx"
-        case .labResult:
+        case .biomarkerReport:
             return "Lab"
         case .unknown:
             return "Doc"
@@ -42,7 +42,7 @@ import SwiftUI
         switch self {
         case .prescription:
             "prescription"
-        case .labResult:
+        case .biomarkerReport:
             "labresult"
         case .unknown:
             "document"
@@ -61,7 +61,7 @@ import SwiftUI
         switch self {
         case .prescription:
             return "pills.fill"
-        case .labResult:
+        case .biomarkerReport:
             return "flask.fill"
         case .unknown:
             return "doc.fill"
@@ -80,7 +80,7 @@ import SwiftUI
         switch self {
         case .prescription:
             return .blue
-        case .labResult:
+        case .biomarkerReport:
             return .red
         case .unknown:
             return .gray
@@ -99,7 +99,7 @@ import SwiftUI
         switch self {
         case .prescription:
             return .blue
-        case .labResult:
+        case .biomarkerReport:
             return .red
         case .unknown:
             return .gray
@@ -118,7 +118,7 @@ import SwiftUI
         switch self {
         case .prescription:
             return "Medications & dosages, Doctor visit notes"
-        case .labResult:
+        case .biomarkerReport:
             return "Blood tests & analysis"
         case .unknown:
             return "General documents"
@@ -137,7 +137,7 @@ import SwiftUI
         switch self {
         case .prescription:
             return "prescription document"
-        case .labResult:
+        case .biomarkerReport:
             return "lab result document"
         case .unknown:
             return "medical document"
@@ -169,7 +169,7 @@ import SwiftUI
         // Try alternative matches
         switch lowercased {
         case "lab result", "blood work", "lab", "laboratory", "test results", "blood test":
-            self = .labResult
+            self = .biomarkerReport
         case "prescription", "rx", "medication", "medicine", "drug", "pills", "discharge summary", "discharge", "summary", "hospital discharge",
             "consultation notes", "consultation", "notes", "visit notes", "doctor notes", "clinical notes":
             self = .prescription

@@ -174,21 +174,21 @@ actor DocumentProcessingUseCase {
                 fileURL: fileURL
             )
             
-        case .labResult:
-            let parsedBloodReport = try await aiService.parseDocument(from: fileURL, as: ParsedBloodReport.self)
+        case .biomarkerReport:
+            let parsedBioMarkerReport = try await aiService.parseDocument(from: fileURL, as: ParsedBioMarkerReport.self)
 
             // Determine save destination: patient-direct or medical case
             if let patient = patient, medicalCase == nil {
                 // Save directly to patient
-                return try await repository.saveBloodReportToPatient(
-                    parsedBloodReport,
+                return try await repository.saveBioMarkerReportToPatient(
+                    parsedBioMarkerReport,
                     to: patient,
                     fileURL: fileURL
                 )
             } else {
                 // Save to medical case (existing workflow)
-                return try await repository.saveBloodReport(
-                    parsedBloodReport,
+                return try await repository.saveBioMarkerReport(
+                    parsedBioMarkerReport,
                     to: medicalCase,
                     fileURL: fileURL
                 )

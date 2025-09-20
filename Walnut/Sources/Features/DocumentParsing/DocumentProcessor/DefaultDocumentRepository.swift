@@ -13,8 +13,8 @@ import AIKit
 /// Protocol for database operations
 protocol DocumentRepositoryProtocol {
     func savePrescription(_ parsedPrescription: ParsedPrescription, to medicalCase: MedicalCase, fileURL: URL) async throws -> PersistentIdentifier
-    func saveBloodReport(_ parsedBloodReport: ParsedBloodReport, to medicalCase: MedicalCase?, fileURL: URL) async throws -> PersistentIdentifier
-    func saveBloodReportToPatient(_ parsedBloodReport: ParsedBloodReport, to patient: Patient, fileURL: URL) async throws -> PersistentIdentifier
+    func saveBioMarkerReport(_ parsedBioMarkerReport: ParsedBioMarkerReport, to medicalCase: MedicalCase?, fileURL: URL) async throws -> PersistentIdentifier
+    func saveBioMarkerReportToPatient(_ parsedBioMarkerReport: ParsedBioMarkerReport, to patient: Patient, fileURL: URL) async throws -> PersistentIdentifier
     func saveDocument(_ document: Document, to medicalCase: MedicalCase) async throws -> PersistentIdentifier
     func saveUnparsedDocument(_ document: Document, to medicalCase: MedicalCase) async throws -> PersistentIdentifier
 }
@@ -49,15 +49,15 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
     }
     
     @MainActor
-    func saveBloodReport(
-        _ parsedBloodReport: ParsedBloodReport,
+    func saveBioMarkerReport(
+        _ parsedBioMarkerReport: ParsedBioMarkerReport,
         to medicalCase: MedicalCase?,
         fileURL: URL
     ) async throws -> PersistentIdentifier {
 
         // Route to appropriate save method based on medicalCase presence
         if let medicalCase = medicalCase {
-            return try await saveBloodReportToMedicalCase(parsedBloodReport, to: medicalCase, fileURL: fileURL)
+            return try await saveBioMarkerReportToMedicalCase(parsedBioMarkerReport, to: medicalCase, fileURL: fileURL)
         } else {
             // If no medical case provided, we need patient info - this should be handled at a higher level
             throw DocumentProcessingError.configurationError("No medical case provided for blood report saving")
@@ -65,17 +65,17 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
     }
 
     @MainActor
-    func saveBloodReportToPatient(
-        _ parsedBloodReport: ParsedBloodReport,
+    func saveBioMarkerReportToPatient(
+        _ parsedBioMarkerReport: ParsedBioMarkerReport,
         to patient: Patient,
         fileURL: URL
     ) async throws -> PersistentIdentifier {
-        let bloodReport = BloodReport(
-            testName: parsedBloodReport.testName,
-            labName: parsedBloodReport.labName,
-            category: parsedBloodReport.category,
-            resultDate: parsedBloodReport.resultDate,
-            notes: parsedBloodReport.notes
+        let bloodReport = BioMarkerReport(
+            testName: parsedBioMarkerReport.testName,
+            labName: parsedBioMarkerReport.labName,
+            category: parsedBioMarkerReport.category,
+            resultDate: parsedBioMarkerReport.resultDate,
+            notes: parsedBioMarkerReport.notes
         )
 
         // Set patient relationship directly
@@ -85,7 +85,7 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
         let document = Document(
             fileName: fileURL.lastPathComponent,
             fileURL: fileURL.lastPathComponent,
-            documentType: .labResult,
+            documentType: .biomarkerReport,
             fileSize: (try? FileManager.default.attributesOfItem(atPath: fileURL.path)[.size] as? Int64) ?? 0
         )
         bloodReport.document = document
@@ -94,7 +94,7 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
         modelContext.insert(document)
 
         // Add test results after blood report is inserted
-        let testResults = parsedBloodReport.testResults.map { testResult in
+        let testResults = parsedBioMarkerReport.testResults.map { testResult in
             BioMarkerResult(
                 testName: testResult.testName,
                 value: testResult.value,
@@ -117,24 +117,24 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
     }
 
     @MainActor
-    private func saveBloodReportToMedicalCase(
-        _ parsedBloodReport: ParsedBloodReport,
+    private func saveBioMarkerReportToMedicalCase(
+        _ parsedBioMarkerReport: ParsedBioMarkerReport,
         to medicalCase: MedicalCase,
         fileURL: URL
     ) async throws -> PersistentIdentifier {
-        let bloodReport = BloodReport(
-            testName: parsedBloodReport.testName,
-            labName: parsedBloodReport.labName,
-            category: parsedBloodReport.category,
-            resultDate: parsedBloodReport.resultDate,
-            notes: parsedBloodReport.notes,
+        let bloodReport = BioMarkerReport(
+            testName: parsedBioMarkerReport.testName,
+            labName: parsedBioMarkerReport.labName,
+            category: parsedBioMarkerReport.category,
+            resultDate: parsedBioMarkerReport.resultDate,
+            notes: parsedBioMarkerReport.notes,
             medicalCase: medicalCase,
             fileURL: fileURL
         )
         modelContext.insert(bloodReport)
 
         // Add test results after blood report is inserted
-        let testResults = parsedBloodReport.testResults.map { testResult in
+        let testResults = parsedBioMarkerReport.testResults.map { testResult in
             BioMarkerResult(
                 testName: testResult.testName,
                 value: testResult.value,

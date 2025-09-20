@@ -82,7 +82,7 @@ struct DocumentSourcePicker: View {
                             )
                         }
                         
-                    case .labResult:
+                    case .biomarkerReport:
                         if let patient = patient {
                             HStack {
                                 Rectangle()

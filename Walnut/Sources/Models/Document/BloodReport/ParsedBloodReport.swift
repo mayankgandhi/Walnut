@@ -1,5 +1,5 @@
 //
-//  ParsedBloodReport.swift
+//  ParsedBioMarkerReport.swift
 //  Walnut
 //
 //  Created by Mayank Gandhi on 28/07/25.
@@ -9,7 +9,7 @@
 import Foundation
 import AIKit
 
-struct ParsedBloodReport: ParseableModel {
+struct ParsedBioMarkerReport: ParseableModel {
   
     let testName: String
     let labName: String

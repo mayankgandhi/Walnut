@@ -150,7 +150,7 @@ public enum FileIconSize {
                 FileIcon(
                     filename: "Blood Test Results - Complete Panel",
                     subtitle: "Jan 15, 2024 • Quest Diagnostics",
-                    documentType: .labResult
+                    documentType: .biomarkerReport
                 )
                 
                 FileIcon(

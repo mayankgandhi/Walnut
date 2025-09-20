@@ -1,5 +1,5 @@
 //
-//  BloodReportDetailView.swift
+//  BioMarkerReportDetailView.swift
 //  Walnut
 //
 //  Created by Mayank Gandhi on 29/07/25.
@@ -11,9 +11,9 @@ import SwiftData
 import Charts
 import WalnutDesignSystem
 
-struct BloodReportDetailView: View {
+struct BioMarkerReportDetailView: View {
     
-    @Bindable var bloodReport: BloodReport
+    @Bindable var bloodReport: BioMarkerReport
     @Environment(\.dismiss) private var dismiss
     
     @State private var selectedCategory: String?
@@ -57,7 +57,7 @@ struct BloodReportDetailView: View {
                     systemImage: "exclamationmark.triangle.fill"
                 )
             } else {
-                BloodReportEditor(
+                BioMarkerReportEditor(
                     bloodReport: bloodReport,
                     medicalCase: bloodReport.medicalCase!
                 )
@@ -286,11 +286,11 @@ struct BloodReportDetailView: View {
     let sampleDocument = Document(
         fileName: "Complete_Blood_Count_Quest_Diagnostics.pdf",
         fileURL: "https://example.com/report.pdf",
-        documentType: .labResult,
+        documentType: .biomarkerReport,
         fileSize: 245760,
     )
     
-    let sampleBloodReport = BloodReport(
+    let sampleBioMarkerReport = BioMarkerReport(
         testName: "Complete Blood Count with Differential",
         labName: "Quest Diagnostics",
         category: "Hematology",
@@ -308,7 +308,7 @@ struct BloodReportDetailView: View {
             unit: "g/dL",
             referenceRange: "12.0-15.5",
             isAbnormal: false,
-            bloodReport: sampleBloodReport
+            bloodReport: sampleBioMarkerReport
         ),
         BioMarkerResult(
             testName: "Hematocrit",
@@ -316,7 +316,7 @@ struct BloodReportDetailView: View {
             unit: "%",
             referenceRange: "36.0-46.0",
             isAbnormal: false,
-            bloodReport: sampleBloodReport
+            bloodReport: sampleBioMarkerReport
         ),
         BioMarkerResult(
             testName: "White Blood Cell Count",
@@ -324,7 +324,7 @@ struct BloodReportDetailView: View {
             unit: "K/uL",
             referenceRange: "4.5-11.0",
             isAbnormal: true,
-            bloodReport: sampleBloodReport
+            bloodReport: sampleBioMarkerReport
         ),
         BioMarkerResult(
             testName: "Red Blood Cell Count",
@@ -332,7 +332,7 @@ struct BloodReportDetailView: View {
             unit: "M/uL",
             referenceRange: "4.20-5.40",
             isAbnormal: false,
-            bloodReport: sampleBloodReport
+            bloodReport: sampleBioMarkerReport
         ),
         BioMarkerResult(
             testName: "Platelets",
@@ -340,7 +340,7 @@ struct BloodReportDetailView: View {
             unit: "K/uL",
             referenceRange: "150-450",
             isAbnormal: false,
-            bloodReport: sampleBloodReport
+            bloodReport: sampleBioMarkerReport
         ),
         BioMarkerResult(
             testName: "Glucose, Fasting",
@@ -348,7 +348,7 @@ struct BloodReportDetailView: View {
             unit: "mg/dL",
             referenceRange: "70-99",
             isAbnormal: true,
-            bloodReport: sampleBloodReport
+            bloodReport: sampleBioMarkerReport
         ),
         BioMarkerResult(
             testName: "Total Cholesterol",
@@ -356,7 +356,7 @@ struct BloodReportDetailView: View {
             unit: "mg/dL",
             referenceRange: "<200",
             isAbnormal: false,
-            bloodReport: sampleBloodReport
+            bloodReport: sampleBioMarkerReport
         ),
         BioMarkerResult(
             testName: "HDL Cholesterol",
@@ -364,7 +364,7 @@ struct BloodReportDetailView: View {
             unit: "mg/dL",
             referenceRange: ">40",
             isAbnormal: false,
-            bloodReport: sampleBloodReport
+            bloodReport: sampleBioMarkerReport
         ),
         BioMarkerResult(
             testName: "LDL Cholesterol",
@@ -372,7 +372,7 @@ struct BloodReportDetailView: View {
             unit: "mg/dL",
             referenceRange: "<100",
             isAbnormal: true,
-            bloodReport: sampleBloodReport
+            bloodReport: sampleBioMarkerReport
         ),
         BioMarkerResult(
             testName: "Triglycerides",
@@ -380,7 +380,7 @@ struct BloodReportDetailView: View {
             unit: "mg/dL",
             referenceRange: "<150",
             isAbnormal: false,
-            bloodReport: sampleBloodReport
+            bloodReport: sampleBioMarkerReport
         ),
         BioMarkerResult(
             testName: "Creatinine",
@@ -388,7 +388,7 @@ struct BloodReportDetailView: View {
             unit: "mg/dL",
             referenceRange: "0.60-1.20",
             isAbnormal: false,
-            bloodReport: sampleBloodReport
+            bloodReport: sampleBioMarkerReport
         ),
         BioMarkerResult(
             testName: "BUN",
@@ -396,16 +396,16 @@ struct BloodReportDetailView: View {
             unit: "mg/dL",
             referenceRange: "7-20",
             isAbnormal: false,
-            bloodReport: sampleBloodReport
+            bloodReport: sampleBioMarkerReport
         )
     ]
     
     // Assign test results to the blood report
-    sampleBloodReport.testResults = testResults
+    sampleBioMarkerReport.testResults = testResults
     
     return NavigationStack {
-        BloodReportDetailView(bloodReport: sampleBloodReport)
+        BioMarkerReportDetailView(bloodReport: sampleBioMarkerReport)
     }
-    .modelContainer(for: BloodReport.self, inMemory: true)
+    .modelContainer(for: BioMarkerReport.self, inMemory: true)
 }
 

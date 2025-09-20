@@ -90,9 +90,9 @@ public struct AddBiomarkerReportManuallyButton: View {
         }
         .sheet(item: $presentDocumentPicker) { documentType in
             if let medicalCase {
-                BloodReportEditor(medicalCase: medicalCase)
+                BioMarkerReportEditor(medicalCase: medicalCase)
             } else if let patient = patient {
-                BloodReportEditor(patient: patient)
+                BioMarkerReportEditor(patient: patient)
             }
         }
     }

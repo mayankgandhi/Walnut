@@ -13,7 +13,7 @@ import Foundation
 enum DocumentItem {
     
     case prescription(Prescription)
-    case bloodReport(BloodReport)
+    case bloodReport(BioMarkerReport)
     case document(Document)
     case unparsedDocument(Document)
     

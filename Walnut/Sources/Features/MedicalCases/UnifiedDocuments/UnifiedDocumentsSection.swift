@@ -68,9 +68,9 @@ struct UnifiedDocumentsSection: View {
             .presentationDragIndicator(.visible)
             .presentationCornerRadius(Spacing.large)
         }
-        .sheet(item: $viewModel.navigationState.selectedBloodReport) { bloodReport in
+        .sheet(item: $viewModel.navigationState.selectedBioMarkerReport) { bloodReport in
             NavigationView {
-                BloodReportDetailView(bloodReport: bloodReport)
+                BioMarkerReportDetailView(bloodReport: bloodReport)
             }
             .presentationDragIndicator(.visible)
             .presentationCornerRadius(Spacing.large)
@@ -151,7 +151,7 @@ struct UnifiedDocumentsSection: View {
         Patient.self,
         MedicalCase.self,
         Prescription.self,
-        BloodReport.self,
+        BioMarkerReport.self,
         BioMarkerResult.self,
         Document.self,
         Medication.self
@@ -187,7 +187,7 @@ struct UnifiedDocumentsSection: View {
     )
     
     // Create sample blood report
-    let bloodReport = BloodReport(
+    let bloodReport = BioMarkerReport(
         id: UUID(),
         testName: "Complete Blood Count",
         labName: "LabCorp",
@@ -246,7 +246,7 @@ struct UnifiedDocumentsSection: View {
         Patient.self,
         MedicalCase.self,
         Prescription.self,
-        BloodReport.self,
+        BioMarkerReport.self,
         Document.self
     ])
     let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)

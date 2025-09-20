@@ -20,7 +20,7 @@ class BioMarkerResult: Identifiable, Sendable {
     var referenceRange: String?
     var isAbnormal: Bool?
     
-    var bloodReport: BloodReport?
+    var bloodReport: BioMarkerReport?
     
     init(id: UUID = UUID(),
          testName: String,
@@ -28,7 +28,7 @@ class BioMarkerResult: Identifiable, Sendable {
          unit: String,
          referenceRange: String,
          isAbnormal: Bool = false,
-         bloodReport: BloodReport? = nil) {
+         bloodReport: BioMarkerReport? = nil) {
         self.id = id
         self.testName = testName
         self.value = value
@@ -42,7 +42,7 @@ class BioMarkerResult: Identifiable, Sendable {
 // MARK: - Sample Data
 extension BioMarkerResult {
     @MainActor
-    static func sampleResults(for bloodReport: BloodReport) -> [BioMarkerResult] {
+    static func sampleResults(for bloodReport: BioMarkerReport) -> [BioMarkerResult] {
         [
             BioMarkerResult(
                 testName: "Hemoglobin",

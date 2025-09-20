@@ -27,7 +27,7 @@ class Document: Identifiable, Hashable {
 
     // Inverse Relationships
     var prescription: Prescription?
-    var bloodReport: BloodReport?
+    var bloodReport: BioMarkerReport?
     var medicalCase: MedicalCase?
         
     init(
@@ -58,7 +58,7 @@ extension Document {
         id: UUID(),
         fileName: "Blood_Test_Results_2024.pdf",
         fileURL: "file://",
-        documentType: .labResult,
+        documentType: .biomarkerReport,
         uploadDate: Date().addingTimeInterval(-86400 * 2),
         fileSize: 245760
     )
@@ -78,7 +78,7 @@ extension Document {
             id: UUID(),
             fileName: "Chest_XRay_Report.jpg",
             fileURL: "file://",
-            documentType: .labResult,
+            documentType: .biomarkerReport,
             uploadDate: Date().addingTimeInterval(-86400 * 10),
             fileSize: 2097152
         )

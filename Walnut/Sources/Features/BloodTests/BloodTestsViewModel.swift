@@ -15,7 +15,7 @@ import WalnutDesignSystem
 class BioMarkersViewModel {
     
     // MARK: - Published Properties
-    var bloodReports: [BloodReport] = []
+    var bloodReports: [BioMarkerReport] = []
     var aggregatedBiomarkers: [AggregatedBiomarker] = []
     var searchText = ""
     var isLoading = false
@@ -24,7 +24,7 @@ class BioMarkersViewModel {
     
     // Navigation State
     var selectedBiomarker: AggregatedBiomarker?
-    var selectedBloodReport: BloodReport?
+    var selectedBioMarkerReport: BioMarkerReport?
     
     // MARK: - Private Properties
     private let patient: Patient
@@ -83,12 +83,12 @@ class BioMarkersViewModel {
     // MARK: - Data Fetching (Following Hacking with Swift pattern)
     
     @MainActor
-    func fetchBloodReports(patientID: UUID) async {
+    func fetchBioMarkerReports(patientID: UUID) async {
         isLoading = true
         error = nil
         
         do {
-            let predicate = #Predicate<BloodReport> { report in
+            let predicate = #Predicate<BioMarkerReport> { report in
                 if let medicalCase = report.medicalCase,
                    let patient = medicalCase.patient {
                     return patient.id == patientID
@@ -96,7 +96,7 @@ class BioMarkersViewModel {
                     return false
                 }
             }
-            let descriptor = FetchDescriptor<BloodReport>(
+            let descriptor = FetchDescriptor<BioMarkerReport>(
                 predicate: predicate,
                 sortBy: [SortDescriptor(\.resultDate, order: .reverse)]
             )
@@ -115,7 +115,7 @@ class BioMarkersViewModel {
     func refreshData() {
         Task {
             if let patientID = patient.id {
-                await fetchBloodReports(patientID: patientID)
+                await fetchBioMarkerReports(patientID: patientID)
             }
         }
     }
@@ -149,8 +149,8 @@ class BioMarkersViewModel {
         selectedBiomarker = biomarker
     }
     
-    func selectBloodReport(_ bloodReport: BloodReport) {
-        selectedBloodReport = bloodReport
+    func selectBioMarkerReport(_ bloodReport: BioMarkerReport) {
+        selectedBioMarkerReport = bloodReport
     }
     
     // MARK: - Data Processing (Using BiomarkerEngine)

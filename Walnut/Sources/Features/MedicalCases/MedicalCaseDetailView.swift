@@ -204,7 +204,7 @@ struct MedicalCaseDetailView: View {
 
 #Preview {
     do {
-        let container = try ModelContainer(for: Patient.self, MedicalCase.self, Prescription.self, BloodReport.self, Document.self)
+        let container = try ModelContainer(for: Patient.self, MedicalCase.self, Prescription.self, BioMarkerReport.self, Document.self)
         let context = ModelContext(container)
         
         // Insert sample data

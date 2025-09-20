@@ -39,7 +39,7 @@ struct BioMarkersView: View {
                     
                     Button(action: {
                         // Pre-configure document picker for lab results
-                        documentPickerStore.selectDocumentType(.labResult)
+                        documentPickerStore.selectDocumentType(.biomarkerReport)
                         showDocumentPicker = true
                     }) {
                         Image(systemName: "plus")
@@ -95,8 +95,8 @@ struct BioMarkersView: View {
                     color: biomarker.healthStatusColor
                 )
             }
-            .navigationDestination(item: $viewModel.selectedBloodReport) { bloodReport in
-                BloodReportDetailView(bloodReport: bloodReport)
+            .navigationDestination(item: $viewModel.selectedBioMarkerReport) { bloodReport in
+                BioMarkerReportDetailView(bloodReport: bloodReport)
             }
             .sheet(isPresented: $showDocumentPicker, onDismiss: {
                 // Reset document picker store and refresh data
@@ -214,7 +214,7 @@ struct PreviewContainer {
         let schema = Schema([
             Patient.self,
             MedicalCase.self,
-            BloodReport.self,
+            BioMarkerReport.self,
             BioMarkerResult.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)

@@ -1,5 +1,5 @@
 //
-//  BloodReport.swift
+//  BioMarkerReport.swift
 //  Walnut
 //
 //  Created by Mayank Gandhi on 28/07/25.
@@ -10,7 +10,7 @@ import Foundation
 import SwiftData
 
 @Model
-class BloodReport: Identifiable, Sendable, Equatable {
+class BioMarkerReport: Identifiable, Sendable, Equatable {
     
     var id: UUID?
     
@@ -83,7 +83,7 @@ class BloodReport: Identifiable, Sendable, Equatable {
             document: Document(
                 fileName: fileURL.lastPathComponent,
                 fileURL: fileURL.lastPathComponent,
-                documentType: .labResult,
+                documentType: .biomarkerReport,
                 fileSize: fileSize
             ),
             testResults: testResults
@@ -92,10 +92,10 @@ class BloodReport: Identifiable, Sendable, Equatable {
 }
 
 // MARK: - Sample Data
-extension BloodReport {
+extension BioMarkerReport {
     @MainActor
-    static func sampleReport(for medicalCase: MedicalCase) -> BloodReport {
-        BloodReport(
+    static func sampleReport(for medicalCase: MedicalCase) -> BioMarkerReport {
+        BioMarkerReport(
             testName: "Complete Blood Count",
             labName: "LabCorp",
             category: "Hematology",

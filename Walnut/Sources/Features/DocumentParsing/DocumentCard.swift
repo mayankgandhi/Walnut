@@ -191,7 +191,7 @@ private extension Document {
     static let sampleImageDocument = Document(
         fileName: "Blood_Test_Results.jpg",
         fileURL: "file://blood_test.jpg",
-        documentType: .labResult,
+        documentType: .biomarkerReport,
         uploadDate: Date().addingTimeInterval(-86400), // 1 day ago
         fileSize: 512000,
         createdAt: Date().addingTimeInterval(-86400),

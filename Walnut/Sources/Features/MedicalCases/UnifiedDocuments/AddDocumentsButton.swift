@@ -78,7 +78,7 @@ struct AddDocumentsButton: View {
         Patient.self,
         MedicalCase.self,
         Prescription.self,
-        BloodReport.self,
+        BioMarkerReport.self,
         Document.self
     ])
     let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)

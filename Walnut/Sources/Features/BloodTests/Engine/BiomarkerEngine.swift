@@ -18,11 +18,11 @@ class BiomarkerEngine {
     /// - Parameter bloodReports: Array of blood reports to process
     /// - Returns: Array of aggregated biomarkers ready for display
     static func generateAggregatedBiomarkers(
-        from bloodReports: [BloodReport]
+        from bloodReports: [BioMarkerReport]
     ) -> [AggregatedBiomarker] {
 
         let engine = BiomarkerEngine()
-        return engine.processBloodReports(bloodReports)
+        return engine.processBioMarkerReports(bloodReports)
     }
 
     /// Generate biomarkers filtered by category
@@ -31,7 +31,7 @@ class BiomarkerEngine {
     ///   - category: Optional category filter
     /// - Returns: Filtered aggregated biomarkers
     static func generateFilteredBiomarkers(
-        from bloodReports: [BloodReport],
+        from bloodReports: [BioMarkerReport],
         category: String? = nil
     ) -> [AggregatedBiomarker] {
 
@@ -49,7 +49,7 @@ class BiomarkerEngine {
     ///   - endDate: End date for filtering
     /// - Returns: Date-filtered aggregated biomarkers
     static func generateBiomarkersForDateRange(
-        from bloodReports: [BloodReport],
+        from bloodReports: [BioMarkerReport],
         startDate: Date,
         endDate: Date
     ) -> [AggregatedBiomarker] {
@@ -64,9 +64,9 @@ class BiomarkerEngine {
 
     // MARK: - Private Implementation
 
-    private func processBloodReports(_ bloodReports: [BloodReport]) -> [AggregatedBiomarker] {
+    private func processBioMarkerReports(_ bloodReports: [BioMarkerReport]) -> [AggregatedBiomarker] {
         // Validate input data
-        let validReports = validateBloodReports(bloodReports)
+        let validReports = validateBioMarkerReports(bloodReports)
 
         guard !validReports.isEmpty else { return [] }
 
@@ -81,7 +81,7 @@ class BiomarkerEngine {
 
     // MARK: - Data Validation
 
-    private func validateBloodReports(_ reports: [BloodReport]) -> [BloodReport] {
+    private func validateBioMarkerReports(_ reports: [BioMarkerReport]) -> [BioMarkerReport] {
         return reports.filter { report in
             // Ensure report has basic required data
             guard report.resultDate != nil else { return false }
@@ -96,7 +96,7 @@ class BiomarkerEngine {
 
     // MARK: - Data Grouping
 
-    private func groupTestResultsByName(from reports: [BloodReport]) -> [String: [BioMarkerResult]] {
+    private func groupTestResultsByName(from reports: [BioMarkerReport]) -> [String: [BioMarkerResult]] {
         var testGroups: [String: [BioMarkerResult]] = [:]
 
         for report in reports {
@@ -159,7 +159,7 @@ class BiomarkerEngine {
             trendDirection: trendDirection,
             trendText: trendText,
             trendPercentage: trendPercentage,
-            latestBloodReport: latestResult.bloodReport!,
+            latestBioMarkerReport: latestResult.bloodReport!,
             testCount: results.count
         )
     }
@@ -256,15 +256,15 @@ extension BiomarkerEngine {
     /// Extract all test results from blood reports
     /// - Parameter reports: Blood reports to process
     /// - Returns: Flattened array of test results
-    static func extractTestResults(from reports: [BloodReport]) -> [BioMarkerResult] {
+    static func extractTestResults(from reports: [BioMarkerReport]) -> [BioMarkerResult] {
         return reports.flatMap { $0.testResults ?? [] }
     }
 
     /// Validate blood reports and return only valid ones
     /// - Parameter reports: Blood reports to validate
     /// - Returns: Array of valid blood reports
-    static func validateBloodReports(_ reports: [BloodReport]) -> [BloodReport] {
+    static func validateBioMarkerReports(_ reports: [BioMarkerReport]) -> [BioMarkerReport] {
         let engine = BiomarkerEngine()
-        return engine.validateBloodReports(reports)
+        return engine.validateBioMarkerReports(reports)
     }
 }

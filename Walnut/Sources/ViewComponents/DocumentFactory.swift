@@ -59,7 +59,7 @@ class DocumentFactory {
                     prescription: prescription
                 )
         case .bloodReport(let bloodReport):
-            return BloodReportActionHandler(bloodReport: bloodReport)
+            return BioMarkerReportActionHandler(bloodReport: bloodReport)
         case .unparsedDocument(let document):
             return UnparsedDocumentActionHandler(document: document)
         case .document(let document):
@@ -140,16 +140,16 @@ class PrescriptionActionHandler: DocumentActionHandler {
 // MARK: - Blood Report Action Handler
 
 @Observable
-class BloodReportActionHandler: DocumentActionHandler {
-    private let bloodReport: BloodReport
+class BioMarkerReportActionHandler: DocumentActionHandler {
+    private let bloodReport: BioMarkerReport
     private var navigationState = NavigationState()
     
-    init(bloodReport: BloodReport) {
+    init(bloodReport: BioMarkerReport) {
         self.bloodReport = bloodReport
     }
     
     func handleTap() {
-        navigationState.selectedBloodReport = bloodReport
+        navigationState.selectedBioMarkerReport = bloodReport
     }
     
     func getContextMenuItems() -> [DocumentContextMenuItem] {
@@ -158,7 +158,7 @@ class BloodReportActionHandler: DocumentActionHandler {
                 title: "View Details",
                 systemImage: "eye",
                 action: {
-                    self.navigationState.selectedBloodReport = self.bloodReport
+                    self.navigationState.selectedBioMarkerReport = self.bloodReport
                 }
             ),
             DocumentContextMenuItem(
@@ -180,9 +180,9 @@ class BloodReportActionHandler: DocumentActionHandler {
     }
     
     func getNavigationDestination() -> AnyView? {
-        if navigationState.selectedBloodReport != nil {
+        if navigationState.selectedBioMarkerReport != nil {
             return AnyView(
-                BloodReportDetailView(bloodReport: bloodReport)
+                BioMarkerReportDetailView(bloodReport: bloodReport)
             )
         }
         return nil
@@ -371,7 +371,7 @@ class OtherDocumentActionHandler: DocumentActionHandler {
 @Observable
 class NavigationState {
     var selectedPrescription: Prescription?
-    var selectedBloodReport: BloodReport?
+    var selectedBioMarkerReport: BioMarkerReport?
     var selectedDocument: Document?
 }
 

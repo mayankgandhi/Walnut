@@ -118,11 +118,11 @@ class UnifiedDocumentsSectionViewModel {
         return components.isEmpty ? "Prescription document" : components.joined(separator: " • ")
     }
     
-    func formatBloodReportTitle(_ bloodReport: BloodReport) -> String {
+    func formatBioMarkerReportTitle(_ bloodReport: BioMarkerReport) -> String {
         return bloodReport.testName ?? "Blood Report"
     }
     
-    func formatBloodReportSubtitle(_ bloodReport: BloodReport) -> String {
+    func formatBioMarkerReportSubtitle(_ bloodReport: BioMarkerReport) -> String {
         var components: [String?] = []
         
         if let resultDate = bloodReport.resultDate {
@@ -172,8 +172,8 @@ class UnifiedDocumentsSectionViewModel {
         navigationState.selectedPrescription = prescription
     }
     
-    func selectBloodReport(_ bloodReport: BloodReport) {
-        navigationState.selectedBloodReport = bloodReport
+    func selectBioMarkerReport(_ bloodReport: BioMarkerReport) {
+        navigationState.selectedBioMarkerReport = bloodReport
     }
     
     func selectDocument(_ document: Document) {

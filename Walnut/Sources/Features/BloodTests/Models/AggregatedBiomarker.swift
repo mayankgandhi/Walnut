@@ -34,7 +34,7 @@ struct AggregatedBiomarker: Identifiable, Hashable {
     let trendDirection: TrendDirection
     let trendText: String
     let trendPercentage: String
-    let latestBloodReport: BloodReport
+    let latestBioMarkerReport: BioMarkerReport
     let testCount: Int
     
     

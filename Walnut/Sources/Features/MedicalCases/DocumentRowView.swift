@@ -57,15 +57,15 @@ struct DocumentRowView: View {
     }
     
     @ViewBuilder
-    private func bloodReportRow(_ bloodReport: BloodReport) -> some View {
+    private func bloodReportRow(_ bloodReport: BioMarkerReport) -> some View {
         FileIcon(
-            filename: viewModel.formatBloodReportTitle(bloodReport),
-            subtitle: viewModel.formatBloodReportSubtitle(bloodReport),
-            documentType: .labResult
+            filename: viewModel.formatBioMarkerReportTitle(bloodReport),
+            subtitle: viewModel.formatBioMarkerReportSubtitle(bloodReport),
+            documentType: .biomarkerReport
         )
         .contentShape(Rectangle())
         .onTapGesture {
-            viewModel.selectBloodReport(bloodReport)
+            viewModel.selectBioMarkerReport(bloodReport)
         }
         .documentContextMenu(items: contextMenuItems)
     }
