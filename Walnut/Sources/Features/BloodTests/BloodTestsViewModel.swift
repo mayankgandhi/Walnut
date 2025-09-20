@@ -52,7 +52,7 @@ class BioMarkersViewModel {
         }
         
         // Sort by date (latest first)
-        filtered.sort { $0.latestDate > $1.latestDate }
+        filtered.sort { $0.testName < $1.testName }
         
         return filtered
     }
@@ -88,20 +88,14 @@ class BioMarkersViewModel {
         error = nil
         
         do {
-            let predicate = #Predicate<BioMarkerReport> { report in
-                if let medicalCase = report.medicalCase,
-                   let patient = medicalCase.patient {
-                    return patient.id == patientID
-                } else {
-                    return false
-                }
-            }
+            // Fetch all biomarker reports
             let descriptor = FetchDescriptor<BioMarkerReport>(
-                predicate: predicate,
                 sortBy: [SortDescriptor(\.resultDate, order: .reverse)]
             )
-            
-            bloodReports = try modelContext.fetch(descriptor)
+            let allReports = try modelContext.fetch(descriptor)
+
+            // Use BiomarkerEngine to filter reports for this patient (both direct and medical case)
+            bloodReports = BiomarkerEngine.filterReportsForPatient(from: allReports, patient: patient)
             
             try await processBioMarkerData()
             

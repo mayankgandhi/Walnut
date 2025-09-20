@@ -45,10 +45,12 @@ struct BiomarkerDetailView: View {
                 
                 heroSection
                     .padding(.horizontal, Spacing.medium)
-                
-                chartSection
-                    .padding(.horizontal, Spacing.medium)
-                
+
+                if isDataGraphable {
+                    chartSection
+                        .padding(.horizontal, Spacing.medium)
+                }
+
                 if viewModel.filteredDataPoints.count > 1 {
                     historicalDataSection
                         .padding(.horizontal, Spacing.medium)
@@ -66,7 +68,19 @@ struct BiomarkerDetailView: View {
             .presentationCornerRadius(Spacing.large)
         }
     }
-    
+
+    // MARK: - Computed Properties
+
+    /// Determines if the data can be graphed based on data quality and quantity
+    private var isDataGraphable: Bool {
+        let dataValues = viewModel.filteredDataPoints.map { $0.value }
+
+        // Check if we have valid numeric data
+        guard !dataValues.isEmpty, dataValues.allSatisfy({ $0.isFinite && !$0.isNaN }) else { return false }
+
+        return true
+    }
+
     // MARK: - Hero Section
     private var heroSection: some View {
         HealthCard {
@@ -419,6 +433,16 @@ struct BiomarkerDetailView: View {
     }
 }
 
+// MARK: - Extensions
+
+private extension Double {
+    /// Rounds a Double to a specified number of decimal places
+    func rounded(toPlaces places: Int) -> Double {
+        let divisor = pow(10.0, Double(places))
+        return (self * divisor).rounded() / divisor
+    }
+}
+
 #Preview {
     NavigationStack {
         BiomarkerDetailView(
@@ -475,6 +499,62 @@ struct BiomarkerDetailView: View {
                 )
             ],
             color: .healthPrimary
+        )
+    }
+}
+
+#Preview("Single Data Point - No Chart") {
+    NavigationStack {
+        BiomarkerDetailView(
+            biomarkerName: "Blood Type",
+            unit: "",
+            normalRange: "N/A",
+            dataPoints: [
+                BiomarkerDataPoint(
+                    date: Date(),
+                    value: 1,
+                    bloodReport: "Lab Result",
+                    document: nil
+                )
+            ],
+            color: .blue
+        )
+    }
+}
+
+#Preview("Flat Data - No Chart") {
+    NavigationStack {
+        BiomarkerDetailView(
+            biomarkerName: "pH Level",
+            unit: "",
+            normalRange: "7.35-7.45",
+            dataPoints: [
+                BiomarkerDataPoint(
+                    date: Calendar.current.date(byAdding: .month, value: -3, to: Date()) ?? Date(),
+                    value: 7.4,
+                    bloodReport: "Lab A",
+                    document: nil
+                ),
+                BiomarkerDataPoint(
+                    date: Calendar.current.date(byAdding: .month, value: -2, to: Date()) ?? Date(),
+                    value: 7.4,
+                    bloodReport: "Lab B",
+                    document: nil
+                ),
+                BiomarkerDataPoint(
+                    date: Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date(),
+                    value: 7.4,
+                    bloodReport: "Lab C",
+                    document: nil
+                ),
+                BiomarkerDataPoint(
+                    date: Date(),
+                    value: 7.4,
+                    bloodReport: "Lab D",
+                    document: nil
+                )
+            ],
+            color: .gray
         )
     }
 }

@@ -35,16 +35,6 @@ public struct BiomarkerListItemView: View {
     public var body: some View {
         HealthCard {
             HStack(alignment: .center, spacing: Spacing.medium) {
-                // Health status indicator with icon
-                Circle()
-                    .fill(color.opacity(0.15))
-                    .frame(width: 36, height: 36)
-                    .overlay {
-                        Image(systemName: iconName)
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundStyle(color)
-                    }
-                
                 // Biomarker info section - improved text handling
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     // Biomarker name with better handling for long names
@@ -55,7 +45,7 @@ public struct BiomarkerListItemView: View {
                         .minimumScaleFactor(0.8)
                         .multilineTextAlignment(.leading)
                         .allowsTightening(true)
-                    
+
                     // Current value with unit
                     HStack(alignment: .firstTextBaseline, spacing: 4) {
                         Text(biomarkerTrends.currentValueText)
@@ -63,7 +53,7 @@ public struct BiomarkerListItemView: View {
                             .foregroundStyle(.primary)
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
-                        
+
                         if !biomarkerInfo.unit.isEmpty {
                             Text(biomarkerInfo.unit)
                                 .font(.caption.weight(.medium))
@@ -72,7 +62,7 @@ public struct BiomarkerListItemView: View {
                                 .minimumScaleFactor(0.8)
                         }
                     }
-                    
+
                     // Reference range with improved formatting
                     if !biomarkerTrends.normalRange.isEmpty {
                         Text("Ref: \(biomarkerTrends.normalRange)")
@@ -82,20 +72,22 @@ public struct BiomarkerListItemView: View {
                             .minimumScaleFactor(0.8)
                     }
                 }
-                
+
                 Spacer()
-                
+
                 // Right side content
                 VStack(alignment: .trailing, spacing: Spacing.small) {
-                    // Mini chart
-                    miniChartView
-                    
+                    // Show chart only if data is graphable
+                    if isDataGraphable {
+                        miniChartView
+                    }
+
                     // Trend information with status badge design
                     HStack(spacing: Spacing.xs) {
                         Image(systemName: biomarkerTrends.trendDirection.iconName)
                             .font(.system(size: 10, weight: .bold))
                             .foregroundStyle(biomarkerTrends.trendDirection.color)
-                        
+
                         Text(biomarkerTrends.comparisonPercentage)
                             .font(.caption2.weight(.bold))
                             .foregroundStyle(biomarkerTrends.trendDirection.color)
@@ -110,7 +102,32 @@ public struct BiomarkerListItemView: View {
             }
         }
     }
-    
+
+    // MARK: - Computed Properties
+
+    /// Determines if the data can be graphed based on data quality and quantity
+    private var isDataGraphable: Bool {
+        // Need at least 2 data points to create a meaningful chart
+        guard data.count >= 2 else { return false }
+
+        // Check if we have valid numeric data
+        guard !data.isEmpty, data.allSatisfy({ $0.isFinite && !$0.isNaN }) else { return false }
+
+        // Check if there's any variation in the data (not all same values)
+        let uniqueValues = Set(data.map { $0.rounded(toPlaces: 2) })
+        guard uniqueValues.count > 1 else { return false }
+
+        // Check if the range of values is reasonable for visualization
+        let minValue = data.min() ?? 0
+        let maxValue = data.max() ?? 0
+        let range = maxValue - minValue
+
+        // If the range is too small (essentially flat line), don't show chart
+        guard range > 0.001 else { return false }
+
+        return true
+    }
+
     private var miniChartView: some View {
         let normalRange = parseNormalRange(biomarkerTrends.normalRange)
         
@@ -235,6 +252,16 @@ public struct BiomarkerListItemView: View {
     }
 }
 
+// MARK: - Extensions
+
+private extension Double {
+    /// Rounds a Double to a specified number of decimal places
+    func rounded(toPlaces places: Int) -> Double {
+        let divisor = pow(10.0, Double(places))
+        return (self * divisor).rounded() / divisor
+    }
+}
+
 #Preview("Enhanced Biomarker List") {
     ScrollView {
         VStack(spacing: Spacing.medium) {
@@ -356,6 +383,46 @@ public struct BiomarkerListItemView: View {
                     normalRange: "30-100"
                 ),
                 iconName: "sun.max.fill"
+            )
+
+            // Blood Type - non-graphable data (single value)
+            BiomarkerListItemView(
+                data: [1], // Single data point
+                color: .blue,
+                biomarkerInfo: BiomarkerInfo(
+                    name: "Blood Type",
+                    normalRange: "N/A",
+                    unit: ""
+                ),
+                biomarkerTrends: BiomarkerTrends(
+                    currentValue: 1,
+                    currentValueText: "A+",
+                    comparisonText: "No change",
+                    comparisonPercentage: "0%",
+                    trendDirection: .stable,
+                    normalRange: "N/A"
+                ),
+                iconName: "drop.fill"
+            )
+
+            // Lab Result - flat data (no variation)
+            BiomarkerListItemView(
+                data: [7.4, 7.4, 7.4, 7.4], // All same values
+                color: .gray,
+                biomarkerInfo: BiomarkerInfo(
+                    name: "pH Level",
+                    normalRange: "7.35-7.45",
+                    unit: ""
+                ),
+                biomarkerTrends: BiomarkerTrends(
+                    currentValue: 7.4,
+                    currentValueText: "7.4",
+                    comparisonText: "No change",
+                    comparisonPercentage: "0%",
+                    trendDirection: .stable,
+                    normalRange: "7.35-7.45"
+                ),
+                iconName: "waveform"
             )
         }
         .padding()

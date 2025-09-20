@@ -21,7 +21,6 @@ class MedicationEngine {
         from medications: [Medication],
         for date: Date = Date()
     ) -> [TimeSlot: [ScheduledDose]] {
-
         let engine = MedicationEngine()
         return engine.processMedications(medications, for: date)
     }
