@@ -27,17 +27,6 @@ struct ScheduledDose: Identifiable, Hashable {
 
 /// Enhanced scheduled dose with computed properties
 extension ScheduledDose {
-    /// Time until this dose is due (negative if overdue)
-    var timeUntilDue: TimeInterval {
-        scheduledTime.timeIntervalSinceNow
-    }
-    
-    /// Whether this dose is due soon (within 30 minutes)
-    var isDueSoon: Bool {
-        let timeUntil = timeUntilDue
-        return timeUntil > 0 && timeUntil <= 30 * 60 // 30 minutes in seconds
-    }
-    
     /// Human-readable time description
     var timeDescription: String {
         return displayTime

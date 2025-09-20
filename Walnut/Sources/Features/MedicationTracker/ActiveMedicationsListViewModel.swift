@@ -86,12 +86,30 @@ class ActiveMedicationsListViewModel {
             return .completed
         }
     }
+    
+    struct MedicationKey: Hashable {
+        let medicalCaseName: String
+        let medicationSpecialty: MedicalSpecialty?
+        
+        init(medicalCaseName: String, medicationSpecialty: MedicalSpecialty?) {
+            self.medicalCaseName = medicalCaseName
+            self.medicationSpecialty = medicationSpecialty
+        }
+    }
 
-    func groupedMedications() -> [String: [Medication]] {
+    func groupedMedications() -> [MedicationKey: [Medication]] {
         return Dictionary(grouping: activeMedications) { medication in
             guard let medicalCase = medication.prescription?.medicalCase,
-                  let title = medicalCase.title else { return "Other" }
-            return title
+                  let title = medicalCase.title else {
+                return MedicationKey(
+                    medicalCaseName: "Other",
+                    medicationSpecialty: nil
+                )
+            }
+            return MedicationKey(
+                    medicalCaseName: title,
+                    medicationSpecialty: medicalCase.specialty
+                )
         }
     }
 }
@@ -118,3 +136,4 @@ enum MedicationStatus {
         }
     }
 }
+

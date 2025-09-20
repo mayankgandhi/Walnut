@@ -17,12 +17,11 @@ public struct FolderSpecialtyIcon: View {
     public var body: some View {
         // Medical Case Icon
         Image("folder")
-            .renderingMode(.template)
             .resizable()
             .scaledToFit()
-            .foregroundStyle(
-                Color.blue.opacity(0.75)
-            )
+//            .foregroundStyle(
+//                Color.blue.opacity(0.75)
+//            )
             .overlay {
                 Image(specialty.icon)
                     .resizable()

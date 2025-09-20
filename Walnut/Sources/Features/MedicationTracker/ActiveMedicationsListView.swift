@@ -1,5 +1,5 @@
 //
-//  MedicationsListView.swift
+//  ActiveMedicationsListView.swift
 //  Walnut
 //
 //  Created by Mayank Gandhi on 19/09/25.
@@ -25,12 +25,23 @@ struct ActiveMedicationsListView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.medium) {
             
-            NavBarHeader(
-                iconName: "pills",
-                iconColor: .yellow,
-                title: "All Active Medications",
-                subtitle: "\(viewModel.activeMedications.count) Medications"
-            )
+            HStack(spacing: Spacing.small) {
+                NavBarHeader(
+                    iconName: "pills",
+                    iconColor: .yellow,
+                    title: "All Active Medications",
+                    subtitle: "\(viewModel.activeMedications.count) Medications"
+                )
+                                
+                Button(action: {
+                    dismiss()
+                }) {
+                    Image(systemName: "xmark")
+                }
+                .buttonStyle(.glass)
+            }
+            .padding(.top, Spacing.medium)
+            .padding(.trailing, Spacing.medium)
             
             ZStack {
                 if viewModel.isLoading {
@@ -41,7 +52,6 @@ struct ActiveMedicationsListView: View {
                     medicationsContent
                 }
             }
-            
         }
         .onAppear {
             viewModel.loadActiveMedications()
@@ -90,20 +100,27 @@ struct ActiveMedicationsListView: View {
         LazyVStack(spacing: Spacing.large) {
             let groupedMeds = viewModel.groupedMedications()
             
-            ForEach(Array(groupedMeds.keys.sorted()), id: \.self) { caseTitle in
+            ForEach(Array(groupedMeds.keys), id: \.self) { key in
                 medicationGroupSection(
-                    title: caseTitle,
-                    medications: groupedMeds[caseTitle] ?? []
+                    key: key,
+                    medications: groupedMeds[key] ?? []
                 )
             }
         }
     }
     
-    private func medicationGroupSection(title: String, medications: [Medication]) -> some View {
+    private func medicationGroupSection(key: ActiveMedicationsListViewModel.MedicationKey, medications: [Medication]) -> some View {
         VStack(alignment: .leading, spacing: Spacing.medium) {
-            HStack {
+            HStack(alignment: .center, spacing: Spacing.medium) {
+                
+                if let icon = key.medicationSpecialty?.icon {
+                    Image(icon)
+                        .resizable()
+                        .frame(width: 64, height: 64 )
+                }
+                
                 VStack(alignment: .leading, spacing: Spacing.xs) {
-                    Text(title)
+                    Text(key.medicalCaseName)
                         .font(.title3.weight(.semibold))
                         .foregroundStyle(.primary)
                     

@@ -207,11 +207,7 @@ struct MedicationDoseCard: View {
     
     /// Status color based on dose state
     private var statusColor: Color {
-        if dose.isDueSoon {
-            return .healthWarning
-        } else {
-            return .healthPrimary
-        }
+        return .healthPrimary
     }
     
     

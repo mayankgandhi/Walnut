@@ -48,12 +48,12 @@ struct MedicalCasesView: View {
             VStack(alignment: .leading, spacing: Spacing.medium) {
                 HStack {
                     NavBarHeader(
-                        iconName: "folder",
+                        iconName: "drawer",
                         iconColor: .red,
                         title: "Medical Cases",
                         subtitle: "\(viewModel.medicalCases.count) Cases"
                     )
-
+                    
                     Button(action: viewModel.showCreateMedicalCase) {
                         Image(systemName: "plus")
                     }

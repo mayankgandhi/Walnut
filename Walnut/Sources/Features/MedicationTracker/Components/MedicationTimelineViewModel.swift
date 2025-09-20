@@ -114,7 +114,7 @@ class MedicationTimelineViewModel {
                 medication: medication,
                 scheduledTime: morningTime,
                 timeSlot: .morning,
-                mealRelation: determineMealRelation(for: medication, timeSlot: .morning)
+                mealRelation: nil
             )
             doses.append(dose)
             return doses
@@ -130,7 +130,7 @@ class MedicationTimelineViewModel {
                 medication: medication,
                 scheduledTime: doseTime,
                 timeSlot: timeSlot,
-                mealRelation: determineMealRelation(for: medication, timeSlot: timeSlot)
+                mealRelation: nil
             )
             doses.append(dose)
         }
@@ -201,35 +201,5 @@ class MedicationTimelineViewModel {
             return .night
         }
     }
-
-    private func determineMealRelation(for medication: Medication, timeSlot: TimeSlot) -> MealRelation? {
-        // This is a simplified implementation - could be enhanced with medication-specific meal requirements
-        guard let instructions = medication.instructions?.lowercased() else { return nil }
-
-        if instructions.contains("with food") || instructions.contains("after meal") {
-            switch timeSlot {
-            case .morning:
-                return MealRelation(mealTime: .breakfast, timing: .after, offsetMinutes: 0)
-            case .midday:
-                return MealRelation(mealTime: .lunch, timing: .after, offsetMinutes: 0)
-            case .afternoon, .evening:
-                return MealRelation(mealTime: .dinner, timing: .after, offsetMinutes: 0)
-            case .night:
-                return nil
-            }
-        } else if instructions.contains("before meal") || instructions.contains("on empty stomach") {
-            switch timeSlot {
-            case .morning:
-                return MealRelation(mealTime: .breakfast, timing: .before, offsetMinutes: -30)
-            case .midday:
-                return MealRelation(mealTime: .lunch, timing: .before, offsetMinutes: -30)
-            case .afternoon, .evening:
-                return MealRelation(mealTime: .dinner, timing: .before, offsetMinutes: -30)
-            case .night:
-                return nil
-            }
-        }
-
-        return nil
-    }
+    
 }
