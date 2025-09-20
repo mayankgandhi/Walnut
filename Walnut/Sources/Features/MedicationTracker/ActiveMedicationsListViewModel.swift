@@ -30,20 +30,23 @@ class ActiveMedicationsListViewModel {
         errorMessage = nil
 
         do {
-            // Fetch all medications for this specific patient from active medical cases
+            // Fetch all medications for this specific patient
             let descriptor = FetchDescriptor<Medication>()
             let allMedications = try modelContext.fetch(descriptor)
 
-            // Filter medications that belong to this patient and are from active medical cases
-            activeMedications = allMedications.filter { medication in
+            // Filter medications that belong to this patient
+            let patientMedications = allMedications.filter { medication in
                 if let patientID = medication.patient?.id {
                     return patientID == patient.id
                 } else if let medicalCase = medication.prescription?.medicalCase {
-                    return medicalCase.isActive ?? true
+                    return medicalCase.patient?.id == patient.id && (medicalCase.isActive ?? true)
                 } else {
-                    return true
+                    return false
                 }
             }
+
+            // Use MedicationEngine to filter only active/ongoing medications
+            activeMedications = MedicationEngine.filterActiveMedications(from: patientMedications)
 
             // Sort by medication name for consistent display
             activeMedications.sort { ($0.name ?? "") < ($1.name ?? "") }
@@ -56,27 +59,8 @@ class ActiveMedicationsListViewModel {
     }
 
     func isOngoing(medication: Medication) -> Bool {
-        guard let duration = medication.duration else { return false }
-
-        switch duration {
-        case .ongoing, .asNeeded, .untilFollowUp:
-            return true
-        case .days(let days):
-            guard let prescription = medication.prescription,
-                  let dateIssued = prescription.dateIssued else { return false }
-            let endDate = Calendar.current.date(byAdding: .day, value: days, to: dateIssued) ?? dateIssued
-            return endDate > Date()
-        case .weeks(let weeks):
-            guard let prescription = medication.prescription,
-                  let dateIssued = prescription.dateIssued else { return false }
-            let endDate = Calendar.current.date(byAdding: .weekOfYear, value: weeks, to: dateIssued) ?? dateIssued
-            return endDate > Date()
-        case .months(let months):
-            guard let prescription = medication.prescription,
-                  let dateIssued = prescription.dateIssued else { return false }
-            let endDate = Calendar.current.date(byAdding: .month, value: months, to: dateIssued) ?? dateIssued
-            return endDate > Date()
-        }
+        // Use MedicationEngine for consistent activity determination
+        return MedicationEngine.isMedicationActive(medication)
     }
 
     func medicationStatus(for medication: Medication) -> MedicationStatus {

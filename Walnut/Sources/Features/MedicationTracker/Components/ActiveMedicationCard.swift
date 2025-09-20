@@ -120,21 +120,6 @@ struct ActiveMedicationCard: View {
     }
 }
 
-// MARK: - Label Style Extensions
-
-/// Custom label style for proper alignment and spacing
-private struct TitleAndIconLabelStyle: LabelStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        HStack(alignment: .center, spacing: Spacing.xs) {
-            configuration.icon
-            configuration.title
-        }
-    }
-}
-
-extension LabelStyle where Self == TitleAndIconLabelStyle {
-    static var titleAndIcon: TitleAndIconLabelStyle { TitleAndIconLabelStyle() }
-}
 
 // MARK: - Preview
 

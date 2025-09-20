@@ -392,4 +392,16 @@ extension MedicationEngine {
             .filter { $0.scheduledTime > currentTime }
             .min { $0.scheduledTime < $1.scheduledTime }
     }
+
+    /// Check if a single medication is currently active
+    static func isMedicationActive(_ medication: Medication, on date: Date = Date()) -> Bool {
+        let engine = MedicationEngine()
+        return engine.isMedicationActive(medication, on: date)
+    }
+
+    /// Filter a list of medications to only include active ones
+    static func filterActiveMedications(from medications: [Medication], on date: Date = Date()) -> [Medication] {
+        let engine = MedicationEngine()
+        return medications.filter { engine.isMedicationActive($0, on: date) }
+    }
 }
