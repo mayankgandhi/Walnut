@@ -1,6 +1,7 @@
 import ProjectDescription
 
 let infoPlist: InfoPlist = .extendingDefault(with: [
+    "UILaunchStoryboardName": .string("LaunchScreen"),
     "UILaunchScreen": .dictionary([
         "UIImageName": .string("display-app-icon"),
         "UIColorName": .string("blue"),
@@ -82,6 +83,7 @@ let project = Project(
             resources: [
                 "Resources/**/**",
                 "Resources/AppIcon.icon/*/**",
+                "Resources/LaunchScreen.storyboard",
             ],
             entitlements: .file(path: .relativeToRoot("Walnut/Walnut.entitlements")),
             dependencies: [
