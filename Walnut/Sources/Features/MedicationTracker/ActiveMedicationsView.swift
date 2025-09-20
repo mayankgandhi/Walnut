@@ -69,7 +69,7 @@ struct ActiveMedicationsView: View {
     // MARK: - Computed Properties
 
     private var totalDosesCount: Int {
-        timelineViewModel.scheduledDoses.values.reduce(0) { $0 + $1.count }
+        timelineViewModel.totalDosesForToday
     }
 
     // MARK: - Private Views

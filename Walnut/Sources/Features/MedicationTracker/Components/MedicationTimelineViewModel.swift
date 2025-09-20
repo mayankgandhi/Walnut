@@ -63,25 +63,9 @@ class MedicationTimelineViewModel {
 
     private func generateScheduledDoses() {
         let activeMedications = getActiveMedications()
-        var dosesByTimeSlot: [TimeSlot: [ScheduledDose]] = [:]
 
-        for medication in activeMedications {
-            let doses = generateDosesForMedication(medication)
-
-            for dose in doses {
-                if dosesByTimeSlot[dose.timeSlot] == nil {
-                    dosesByTimeSlot[dose.timeSlot] = []
-                }
-                dosesByTimeSlot[dose.timeSlot]?.append(dose)
-            }
-        }
-
-        // Sort doses within each time slot by scheduled time
-        for timeSlot in TimeSlot.allCases {
-            dosesByTimeSlot[timeSlot]?.sort { $0.scheduledTime < $1.scheduledTime }
-        }
-
-        self.scheduledDoses = dosesByTimeSlot
+        // Use MedicationEngine to generate the schedule
+        self.scheduledDoses = MedicationEngine.generateDailySchedule(from: activeMedications)
     }
 
     private func getActiveMedications() -> [Medication] {
@@ -104,102 +88,43 @@ class MedicationTimelineViewModel {
         }
     }
 
-    private func generateDosesForMedication(_ medication: Medication) -> [ScheduledDose] {
-        var doses: [ScheduledDose] = []
+    // MARK: - Additional Computed Properties
 
-        guard let frequency = medication.frequency, !frequency.isEmpty else {
-            // If no frequency specified, create a single morning dose
-            let morningTime = Calendar.current.date(bySettingHour: 8, minute: 0, second: 0, of: Date()) ?? Date()
-            let dose = ScheduledDose(
-                medication: medication,
-                scheduledTime: morningTime,
-                timeSlot: .morning,
-                mealRelation: nil
-            )
-            doses.append(dose)
-            return doses
-        }
-
-        // Generate doses based on frequency
-        let numberOfDoses = frequency.count
-        let doseTimes = generateDoseTimesForFrequency(numberOfDoses)
-
-        for (index, doseTime) in doseTimes.enumerated() {
-            let timeSlot = determineTimeSlot(for: doseTime)
-            let dose = ScheduledDose(
-                medication: medication,
-                scheduledTime: doseTime,
-                timeSlot: timeSlot,
-                mealRelation: nil
-            )
-            doses.append(dose)
-        }
-
-        return doses
+    /// Total number of doses scheduled for today
+    var totalDosesForToday: Int {
+        scheduledDoses.values.reduce(0) { $0 + $1.count }
     }
 
-    private func generateDoseTimesForFrequency(_ numberOfDoses: Int) -> [Date] {
-        let calendar = Calendar.current
-        let today = Date()
-        var doseTimes: [Date] = []
-
-        switch numberOfDoses {
-        case 1:
-            // Once daily - morning
-            if let time = calendar.date(bySettingHour: 8, minute: 0, second: 0, of: today) {
-                doseTimes.append(time)
-            }
-        case 2:
-            // Twice daily - morning and evening
-            if let morning = calendar.date(bySettingHour: 8, minute: 0, second: 0, of: today),
-               let evening = calendar.date(bySettingHour: 20, minute: 0, second: 0, of: today) {
-                doseTimes.append(contentsOf: [morning, evening])
-            }
-        case 3:
-            // Three times daily - morning, afternoon, evening
-            if let morning = calendar.date(bySettingHour: 8, minute: 0, second: 0, of: today),
-               let afternoon = calendar.date(bySettingHour: 14, minute: 0, second: 0, of: today),
-               let evening = calendar.date(bySettingHour: 20, minute: 0, second: 0, of: today) {
-                doseTimes.append(contentsOf: [morning, afternoon, evening])
-            }
-        case 4:
-            // Four times daily - morning, midday, afternoon, evening
-            if let morning = calendar.date(bySettingHour: 8, minute: 0, second: 0, of: today),
-               let midday = calendar.date(bySettingHour: 12, minute: 0, second: 0, of: today),
-               let afternoon = calendar.date(bySettingHour: 16, minute: 0, second: 0, of: today),
-               let evening = calendar.date(bySettingHour: 20, minute: 0, second: 0, of: today) {
-                doseTimes.append(contentsOf: [morning, midday, afternoon, evening])
-            }
-        default:
-            // For more than 4 doses, distribute evenly throughout the day
-            let hoursInterval = 24.0 / Double(numberOfDoses)
-            for i in 0..<numberOfDoses {
-                let hour = Int(8.0 + (Double(i) * hoursInterval)) % 24
-                if let time = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: today) {
-                    doseTimes.append(time)
-                }
-            }
-        }
-
-        return doseTimes
+    /// Next upcoming dose after current time
+    var nextUpcomingDose: ScheduledDose? {
+        let activeMedications = getActiveMedications()
+        return MedicationEngine.getNextUpcomingDose(from: activeMedications)
     }
 
-    private func determineTimeSlot(for date: Date) -> TimeSlot {
-        let calendar = Calendar.current
-        let hour = calendar.component(.hour, from: date)
-
-        switch hour {
-        case 6..<11:
-            return .morning
-        case 11..<14:
-            return .midday
-        case 14..<17:
-            return .afternoon
-        case 17..<21:
-            return .evening
-        default:
-            return .night
+    /// Description of next upcoming dose
+    var nextUpcomingDoseDescription: String {
+        guard let nextDose = nextUpcomingDose else {
+            return "No upcoming doses today"
         }
+        return "Next: \(nextDose.medication.name ?? "Unknown") at \(nextDose.displayTime)"
     }
-    
+
+    // MARK: - Additional Methods
+
+    /// Refresh schedule for a specific date
+    func refreshSchedule(for date: Date = Date()) {
+        let activeMedications = getActiveMedications()
+        self.scheduledDoses = MedicationEngine.generateDailySchedule(from: activeMedications, for: date)
+    }
+
+    /// Get schedule for multiple days
+    func getMultiDaySchedule(startDate: Date, numberOfDays: Int) -> [Date: [TimeSlot: [ScheduledDose]]] {
+        let activeMedications = getActiveMedications()
+        return MedicationEngine.generateMultiDaySchedule(
+            from: activeMedications,
+            startDate: startDate,
+            numberOfDays: numberOfDays
+        )
+    }
+
 }

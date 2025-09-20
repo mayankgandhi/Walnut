@@ -32,7 +32,7 @@ struct ActiveMedicationsListView: View {
                     title: "All Active Medications",
                     subtitle: "\(viewModel.activeMedications.count) Medications"
                 )
-                                
+                
                 Button(action: {
                     dismiss()
                 }) {
@@ -140,74 +140,12 @@ struct ActiveMedicationsListView: View {
                 spacing: Spacing.small
             ) {
                 ForEach(medications, id: \.id) { medication in
-                    medicationCard(medication)
+                    ActiveMedicationCard(medication: medication)
                 }
             }
         }
     }
     
-    private func medicationCard(_ medication: Medication) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.small) {
-            // Header with medication name and dosage
-            VStack(alignment: .leading, spacing: Spacing.small) {
-                VStack(alignment: .leading) {
-                    Text(medication.name ?? "Unknown")
-                        .font(.system(.subheadline, design: .rounded, weight: .semibold))
-                        .foregroundStyle(.primary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
-                    
-                    // Dosage information
-                    if let dosage = medication.dosage {
-                        Text(dosage)
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(Color.healthPrimary)
-                            .padding(.horizontal, Spacing.xs)
-                            .padding(.vertical, 2)
-                            .background(
-                                Color.healthPrimary.opacity(0.1),
-                                in: Capsule()
-                            )
-                    }
-                }
-            }
-            
-            // Frequency badges (compact)
-            if let frequencies = medication.frequency, !frequencies.isEmpty {
-                LazyVGrid(columns: [GridItem(.flexible())], spacing: 2) {
-                    ForEach(Array(frequencies.enumerated()), id: \.offset) { _, frequency in
-                        HStack(spacing: 4) {
-                            Image(systemName: frequency.icon)
-                                .font(.caption2)
-                                .foregroundStyle(frequency.color)
-                            
-                            Text(frequency.displayText)
-                                .font(.caption2.weight(.medium))
-                                .foregroundStyle(.primary)
-                                .lineLimit(1)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                }
-            }
-            
-            // Instructions (compact)
-            if let instructions = medication.instructions, !instructions.isEmpty {
-                Text(instructions.lowercased())
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(3)
-                    .truncationMode(.tail)
-            }
-            
-            Spacer()
-            
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(.thinMaterial)
-        .cornerRadius(12)
-    }
     
     private func statusBadge(for medication: Medication) -> some View {
         let status = viewModel.medicationStatus(for: medication)
