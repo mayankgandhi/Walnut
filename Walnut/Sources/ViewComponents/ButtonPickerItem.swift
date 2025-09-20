@@ -159,10 +159,8 @@ public struct ButtonPickerItem<T: ButtonPickable>: View {
         .sheet(isPresented: $showBottomSheet) {
             NavigationStack {
                     VStack(alignment: .leading, spacing: Spacing.medium) {
-                        Text(bottomSheetTitle)
-                            .font(.headline)
-                            .foregroundStyle(.primary)
-                            .padding(.horizontal, Spacing.medium)
+                        NavBarHeader(title: bottomSheetTitle)
+                        
                         ScrollView {
 
                         LazyVGrid(
@@ -184,14 +182,13 @@ public struct ButtonPickerItem<T: ButtonPickable>: View {
                                     )
                                 }
                                 .buttonStyle(.plain)
+                                .padding(Spacing.xs)
                             }
                         }
                         .padding(.horizontal, Spacing.medium)
 
                     }
                 }
-                .navigationTitle(bottomSheetTitle)
-                .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
                         Button("Cancel") {
@@ -285,7 +282,6 @@ struct OptionButton<T: ButtonPickable>: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(borderColor, lineWidth: isSelected ? 2 : 1)
         )
-        .scaleEffect(isSelected ? 1.05 : 1.0)
         .animation(.easeInOut(duration: 0.2), value: isSelected)
         
     }
