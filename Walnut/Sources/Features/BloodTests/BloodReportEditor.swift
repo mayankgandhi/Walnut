@@ -11,17 +11,44 @@ import SwiftData
 import WalnutDesignSystem
 
 struct BloodReportEditor: View {
-    
+
     let bloodReport: BloodReport?
-    let medicalCase: MedicalCase
-    
+    let medicalCase: MedicalCase?
+    let patient: Patient?
+
+    // Convenience initializers for different workflows
     init(bloodReport: BloodReport? = nil, medicalCase: MedicalCase) {
         self.bloodReport = bloodReport
         self.medicalCase = medicalCase
+        self.patient = medicalCase.patient
+    }
+
+    init(bloodReport: BloodReport? = nil, patient: Patient) {
+        self.bloodReport = bloodReport
+        self.medicalCase = nil
+        self.patient = patient
+    }
+
+    private init(bloodReport: BloodReport?, medicalCase: MedicalCase?, patient: Patient?) {
+        // Validation: Must have either medicalCase or patient
+        assert(medicalCase != nil || patient != nil, "BloodReportEditor requires either a medicalCase or patient")
+
+        self.bloodReport = bloodReport
+        self.medicalCase = medicalCase
+        self.patient = patient
     }
     
     private var editorTitle: String {
-        bloodReport == nil ? "Add Blood Report" : "Edit Blood Report"
+        let baseTitle = bloodReport == nil ? "Add Blood Report" : "Edit Blood Report"
+
+        // Add context suffix
+        if medicalCase != nil {
+            return baseTitle // Medical case context is implicit
+        } else if patient != nil {
+            return baseTitle // Keep it simple for now
+        } else {
+            return baseTitle
+        }
     }
     
     @State private var testName = ""
@@ -185,54 +212,110 @@ struct BloodReportEditor: View {
                         }
                     }
                     
-                    // Medical Case Information Section
-                    VStack(alignment: .leading, spacing: Spacing.small) {
-                        Text("Medical Case")
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                            .padding(.horizontal, Spacing.medium)
-                        HealthCard {
-                            HStack(spacing: Spacing.medium) {
-                                
-                                OptionalView(medicalCase.specialty) { specialty in
-                                    Circle()
-                                        .fill(specialty.color.opacity(0.15))
-                                        .frame(width: Size.avatarLarge, height: Size.avatarLarge)
-                                        .overlay {
-                                            Image(systemName: specialty.icon)
-                                                .font(.system(size: 18, weight: .semibold))
-                                                .foregroundStyle(specialty.color)
-                                        }
-                                }
-                                
-                                VStack(alignment: .leading, spacing: Spacing.small) {
-                                    
-                                    OptionalView(medicalCase.title) { title in
-                                        Text(title)
-                                            .font(.headline.weight(.semibold))
-                                            .foregroundStyle(.primary)
-                                    }
-                                    
+                    // Context Information Section (Medical Case or Patient)
+                    if let medicalCase = medicalCase {
+                        // Medical Case Information Section
+                        VStack(alignment: .leading, spacing: Spacing.small) {
+                            Text("Medical Case")
+                                .font(.headline)
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal, Spacing.medium)
+                            HealthCard {
+                                HStack(spacing: Spacing.medium) {
+
                                     OptionalView(medicalCase.specialty) { specialty in
-                                        Text(specialty.rawValue)
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
+                                        Circle()
+                                            .fill(specialty.color.opacity(0.15))
+                                            .frame(width: Size.avatarLarge, height: Size.avatarLarge)
+                                            .overlay {
+                                                Image(systemName: specialty.icon)
+                                                    .font(.system(size: 18, weight: .semibold))
+                                                    .foregroundStyle(specialty.color)
+                                            }
                                     }
-                                    
-                                    OptionalView(medicalCase.isActive) { isActive in
+
+                                    VStack(alignment: .leading, spacing: Spacing.small) {
+
+                                        OptionalView(medicalCase.title) { title in
+                                            Text(title)
+                                                .font(.headline.weight(.semibold))
+                                                .foregroundStyle(.primary)
+                                        }
+
+                                        OptionalView(medicalCase.specialty) { specialty in
+                                            Text(specialty.rawValue)
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+
+                                        OptionalView(medicalCase.isActive) { isActive in
+                                            HStack(spacing: Spacing.small) {
+                                                HealthStatusIndicator(
+                                                    status: isActive ? .good : .warning,
+                                                    showIcon: false
+                                                )
+
+                                                Text(isActive ? "Active" : "Inactive")
+                                                    .font(.caption2.weight(.medium))
+                                                    .foregroundStyle(isActive ? Color.healthSuccess : Color.healthWarning)
+                                            }
+                                        }
+
+                                        Spacer()
+                                    }
+                                }
+                            }
+                        }
+                    } else if let patient = patient {
+                        // Patient Information Section
+                        VStack(alignment: .leading, spacing: Spacing.small) {
+                            Text("Patient")
+                                .font(.headline)
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal, Spacing.medium)
+                            HealthCard {
+                                HStack(spacing: Spacing.medium) {
+
+                                    PatientAvatar(
+                                        name: patient.name ?? "Unknown Patient",
+                                        size: Spacing.large
+                                    )
+
+                                    VStack(alignment: .leading, spacing: Spacing.small) {
+
+                                        OptionalView(patient.name) { name in
+                                            Text(name)
+                                                .font(.headline.weight(.semibold))
+                                                .foregroundStyle(.primary)
+                                        }
+
+                                        HStack(spacing: Spacing.medium) {
+                                            if patient.age > 0 {
+                                                Text("\(patient.age) years old")
+                                                    .font(.caption)
+                                                    .foregroundStyle(.secondary)
+                                            }
+
+                                            OptionalView(patient.bloodType) { bloodType in
+                                                Text("Blood Type: \(bloodType)")
+                                                    .font(.caption)
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                        }
+
                                         HStack(spacing: Spacing.small) {
                                             HealthStatusIndicator(
-                                                status: isActive ? .good : .warning,
+                                                status: .good,
                                                 showIcon: false
                                             )
-                                            
-                                            Text(isActive ? "Active" : "Inactive")
+
+                                            Text("Direct to Patient")
                                                 .font(.caption2.weight(.medium))
-                                                .foregroundStyle(isActive ? Color.healthSuccess : Color.healthWarning)
+                                                .foregroundStyle(Color.healthPrimary)
                                         }
+
+                                        Spacer()
                                     }
-                                    
-                                    Spacer()
                                 }
                             }
                         }
@@ -468,7 +551,7 @@ struct BloodReportEditor: View {
     
     private func save() {
         let now = Date()
-        
+
         if let bloodReport {
             // Edit existing blood report
             bloodReport.testName = testName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : testName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -478,8 +561,15 @@ struct BloodReportEditor: View {
             bloodReport.notes = notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : notes.trimmingCharacters(in: .whitespacesAndNewlines)
             bloodReport.testResults = testResults
             bloodReport.updatedAt = now
+
+            // Update appropriate parent timestamp
+            if let medicalCase = bloodReport.medicalCase {
+                medicalCase.updatedAt = now
+            } else if let patient = bloodReport.patient {
+                patient.updatedAt = now
+            }
         } else {
-            // Create new blood report
+            // Create new blood report - determine association type
             let newBloodReport = BloodReport(
                 id: UUID(),
                 testName: testName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : testName.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -490,26 +580,39 @@ struct BloodReportEditor: View {
                 createdAt: now,
                 updatedAt: now,
                 medicalCase: medicalCase,
+                patient: medicalCase == nil ? patient : nil, // Only set patient if no medical case
                 document: nil,
                 testResults: testResults
             )
-            
+
             // Set bloodReport relationship for all test results
             for testResult in testResults {
                 testResult.bloodReport = newBloodReport
             }
-            
+
+            // Update appropriate parent timestamp
+            if let medicalCase = medicalCase {
+                medicalCase.updatedAt = now
+            } else if let patient = patient {
+                patient.updatedAt = now
+            }
+
             modelContext.insert(newBloodReport)
         }
     }
 }
 
-#Preview("Add Blood Report") {
+#Preview("Add Blood Report - Medical Case") {
     BloodReportEditor(bloodReport: nil, medicalCase: .sampleCase)
         .modelContainer(for: BloodReport.self, inMemory: true)
 }
 
-#Preview("Edit Blood Report") {
+#Preview("Add Blood Report - Patient Direct") {
+    BloodReportEditor(bloodReport: nil, patient: .samplePatient)
+        .modelContainer(for: BloodReport.self, inMemory: true)
+}
+
+#Preview("Edit Blood Report - Medical Case") {
     let sampleBloodReport = BloodReport(
         id: UUID(),
         testName: "Complete Blood Count",
@@ -520,10 +623,31 @@ struct BloodReportEditor: View {
         createdAt: Date(),
         updatedAt: Date(),
         medicalCase: .sampleCase,
+        patient: nil,
         document: nil,
         testResults: []
     )
-    
+
     BloodReportEditor(bloodReport: sampleBloodReport, medicalCase: .sampleCase)
+        .modelContainer(for: BloodReport.self, inMemory: true)
+}
+
+#Preview("Edit Blood Report - Patient Direct") {
+    let sampleBloodReport = BloodReport(
+        id: UUID(),
+        testName: "Lipid Panel",
+        labName: "Quest Diagnostics",
+        category: "Chemistry",
+        resultDate: Date().addingTimeInterval(-86400 * 5),
+        notes: "Cholesterol levels reviewed",
+        createdAt: Date(),
+        updatedAt: Date(),
+        medicalCase: nil,
+        patient: .samplePatient,
+        document: nil,
+        testResults: []
+    )
+
+    BloodReportEditor(bloodReport: sampleBloodReport, patient: .samplePatient)
         .modelContainer(for: BloodReport.self, inMemory: true)
 }

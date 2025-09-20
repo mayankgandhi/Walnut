@@ -14,18 +14,21 @@ import SwiftData
 /// Contains all the data needed to process a document
 struct DocumentProcessingInput {
     let fileSource: FileInputSource
-    let medicalCase: MedicalCase
+    let medicalCase: MedicalCase?
+    let patient: Patient?
     let documentType: DocumentType
     let processingDate: Date
-    
+
     init(
         fileSource: FileInputSource,
-        medicalCase: MedicalCase,
+        medicalCase: MedicalCase? = nil,
+        patient: Patient? = nil,
         documentType: DocumentType,
         processingDate: Date = Date()
     ) {
         self.fileSource = fileSource
         self.medicalCase = medicalCase
+        self.patient = patient
         self.documentType = documentType
         self.processingDate = processingDate
     }
@@ -36,7 +39,8 @@ struct DocumentProcessingInput {
 /// Data passed between processing stages
 struct DocumentProcessingStageData {
     let preparedFile: PreparedFileInput
-    let medicalCase: MedicalCase
+    let medicalCase: MedicalCase?
+    let patient: Patient?
     let documentType: DocumentType
 }
 
@@ -47,7 +51,8 @@ extension DocumentProcessingInput {
     /// Creates input from DocumentPickerStore (for compatibility)
     static func from(
         store: DocumentPickerStore,
-        medicalCase: MedicalCase,
+        medicalCase: MedicalCase?,
+        patient: Patient,
         documentType: DocumentType
     ) throws -> DocumentProcessingInput {
         
@@ -70,6 +75,7 @@ extension DocumentProcessingInput {
         return DocumentProcessingInput(
             fileSource: fileSource,
             medicalCase: medicalCase,
+            patient: patient,
             documentType: documentType
         )
     }

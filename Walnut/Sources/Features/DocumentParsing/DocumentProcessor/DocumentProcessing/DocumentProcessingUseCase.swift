@@ -41,10 +41,11 @@ actor DocumentProcessingUseCase {
             // Step 1: File Preparation
             let preparedFile = try await prepareFile(from: input)
             
-            // Step 2: Document Processing  
+            // Step 2: Document Processing
             let stageData = DocumentProcessingStageData(
                 preparedFile: preparedFile,
                 medicalCase: input.medicalCase,
+                patient: input.patient,
                 documentType: input.documentType
             )
             
@@ -59,13 +60,15 @@ actor DocumentProcessingUseCase {
     /// Legacy method for backward compatibility with DocumentPickerStore
     func execute(
         from store: DocumentPickerStore,
-        for medicalCase: MedicalCase,
+        for medicalCase: MedicalCase?,
+        patient: Patient,
         selectedDocumentType: DocumentType
     ) async throws -> ProcessingResult {
         
         let input = try DocumentProcessingInput.from(
             store: store,
             medicalCase: medicalCase,
+            patient: patient,
             documentType: selectedDocumentType
         )
         
@@ -103,7 +106,8 @@ actor DocumentProcessingUseCase {
             let modelId = try await parseAndSaveDocument(
                 fileURL: stageData.preparedFile.fileURL,
                 documentType: stageData.documentType,
-                medicalCase: stageData.medicalCase
+                medicalCase: stageData.medicalCase,
+                patient: stageData.patient
             )
             
             await updateProgress(1.0, "Complete!")
@@ -127,11 +131,14 @@ actor DocumentProcessingUseCase {
         stageData: DocumentProcessingStageData,
         error: Error
     ) async throws -> ProcessingResult {
+        guard let medicalCase = stageData.medicalCase else {
+            throw DocumentProcessingError.configurationError("Prescriptions require a medical case")
+        }
         await updateProgress(0.8, "Parsing failed, saving as unparsed document...")
         
         let modelId = try await saveUnparsedDocument(
             fileURL: stageData.preparedFile.fileURL,
-            medicalCase: stageData.medicalCase,
+            medicalCase: medicalCase,
             documentType: stageData.documentType
         )
         
@@ -149,12 +156,18 @@ actor DocumentProcessingUseCase {
     private func parseAndSaveDocument(
         fileURL: URL,
         documentType: DocumentType,
-        medicalCase: MedicalCase
+        medicalCase: MedicalCase?,
+        patient: Patient?
     ) async throws -> PersistentIdentifier {
         switch documentType {
         case .prescription:
+            // Prescriptions require a medical case
+            guard let medicalCase = medicalCase else {
+                throw DocumentProcessingError.configurationError("Prescriptions require a medical case")
+            }
+
             let parsedPrescription = try await aiService.parseDocument(from: fileURL, as: ParsedPrescription.self)
-            
+
             return try await repository.savePrescription(
                 parsedPrescription,
                 to: medicalCase,
@@ -163,15 +176,29 @@ actor DocumentProcessingUseCase {
             
         case .labResult:
             let parsedBloodReport = try await aiService.parseDocument(from: fileURL, as: ParsedBloodReport.self)
-            
-            return try await repository.saveBloodReport(
-                parsedBloodReport,
-                to: medicalCase,
-                fileURL: fileURL
-            )
+
+            // Determine save destination: patient-direct or medical case
+            if let patient = patient, medicalCase == nil {
+                // Save directly to patient
+                return try await repository.saveBloodReportToPatient(
+                    parsedBloodReport,
+                    to: patient,
+                    fileURL: fileURL
+                )
+            } else {
+                // Save to medical case (existing workflow)
+                return try await repository.saveBloodReport(
+                    parsedBloodReport,
+                    to: medicalCase,
+                    fileURL: fileURL
+                )
+            }
             
         default:
             // For non-parsing documents, save them directly as documents
+             guard let medicalCase = medicalCase else {
+                throw DocumentProcessingError.configurationError("Prescriptions require a medical case")
+            }
             return try await saveAsDocument(
                 fileURL: fileURL,
                 medicalCase: medicalCase,

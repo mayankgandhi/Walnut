@@ -24,7 +24,8 @@ class BloodReport: Identifiable, Sendable, Equatable {
     var updatedAt: Date?
     
     var medicalCase: MedicalCase?
-    
+    var patient: Patient?
+
     @Relationship(deleteRule: .cascade, inverse: \Document.bloodReport)
     var document: Document?
     
@@ -39,7 +40,8 @@ class BloodReport: Identifiable, Sendable, Equatable {
          notes: String? = nil,
          createdAt: Date = Date(),
          updatedAt: Date = Date(),
-         medicalCase: MedicalCase,
+         medicalCase: MedicalCase? = nil,
+         patient: Patient? = nil,
          document: Document? = nil,
          testResults: [BloodTestResult] = []) {
         self.id = id
@@ -51,6 +53,7 @@ class BloodReport: Identifiable, Sendable, Equatable {
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.medicalCase = medicalCase
+        self.patient = patient
         self.document = document
         self.testResults = testResults
     }
@@ -61,13 +64,14 @@ class BloodReport: Identifiable, Sendable, Equatable {
         category: String,
         resultDate: Date,
         notes: String = "",
-        medicalCase: MedicalCase,
+        medicalCase: MedicalCase? = nil,
+        patient: Patient? = nil,
         fileURL: URL,
         testResults: [BloodTestResult] = []
     ) {
         // Calculate actual file size
         let fileSize = (try? FileManager.default.attributesOfItem(atPath: fileURL.path)[.size] as? Int64) ?? 0
-        
+
         self.init(
             testName: testName,
             labName: labName,
@@ -75,6 +79,7 @@ class BloodReport: Identifiable, Sendable, Equatable {
             resultDate: resultDate,
             notes: notes,
             medicalCase: medicalCase,
+            patient: patient,
             document: Document(
                 fileName: fileURL.lastPathComponent,
                 fileURL: fileURL.lastPathComponent,

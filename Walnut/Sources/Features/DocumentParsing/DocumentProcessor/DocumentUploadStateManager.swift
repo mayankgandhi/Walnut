@@ -31,7 +31,8 @@ class DocumentUploadStateManager {
     
     @MainActor func processDocument(
         from store: DocumentPickerStore,
-        for medicalCase: MedicalCase,
+        for medicalCase: MedicalCase?,
+        patient: Patient,
         selectedDocumentType: DocumentType
     ) {
         guard let processingService = processingService else {
@@ -44,6 +45,7 @@ class DocumentUploadStateManager {
         processingService.processDocument(
             from: store,
             for: medicalCase,
+            patient: patient,
             selectedDocumentType: selectedDocumentType
         ) { result in
             DispatchQueue.main.async {

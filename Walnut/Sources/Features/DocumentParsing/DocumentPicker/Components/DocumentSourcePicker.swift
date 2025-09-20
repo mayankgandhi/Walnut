@@ -12,10 +12,23 @@ import UniformTypeIdentifiers
 import PhotosUI
 
 struct DocumentSourcePicker: View {
-    let patient: Patient
-    let medicalCase: MedicalCase
+    
+    let patient: Patient?
+    let medicalCase: MedicalCase?
     @State var store: DocumentPickerStore
     @State private var showingActionSheet = false
+    
+    init(
+        patient: Patient?,
+        medicalCase: MedicalCase?,
+        store: DocumentPickerStore,
+        showingActionSheet: Bool = false
+    ) {
+        self.patient = patient
+        self.medicalCase = medicalCase
+        self.store = store
+        self.showingActionSheet = showingActionSheet
+    }
     
     var body: some View {
         VStack(spacing: Spacing.large) {
@@ -45,28 +58,73 @@ struct DocumentSourcePicker: View {
             
             if let selectedDocumentType = store.selectedDocumentType {
                 switch selectedDocumentType {
-                    case .prescription, .labResult:
-                        
-                        HStack {
-                            Rectangle()
-                                .frame(height: 1)
-                                .foregroundColor(.secondary.opacity(0.3))
+                    case .prescription:
+                        if let patient, let medicalCase {
+                            HStack {
+                                Rectangle()
+                                    .frame(height: 1)
+                                    .foregroundColor(.secondary.opacity(0.3))
+                                
+                                Text("or")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                    .padding(.horizontal, 12)
+                                
+                                Rectangle()
+                                    .frame(height: 1)
+                                    .foregroundColor(.secondary.opacity(0.3))
+                            }
                             
-                            Text("or")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                                .padding(.horizontal, 12)
-                            
-                            Rectangle()
-                                .frame(height: 1)
-                                .foregroundColor(.secondary.opacity(0.3))
+                            AddPrescriptionManuallyButton(
+                                patient: patient,
+                                medicalCase: medicalCase,
+                                store: store
+                            )
                         }
                         
-                        AddManuallyButton(
-                            patient: patient,
-                            medicalCase: medicalCase,
-                            store: store
-                        )
+                    case .labResult:
+                        if let patient = patient {
+                            HStack {
+                                Rectangle()
+                                    .frame(height: 1)
+                                    .foregroundColor(.secondary.opacity(0.3))
+                                
+                                Text("or")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                    .padding(.horizontal, 12)
+                                
+                                Rectangle()
+                                    .frame(height: 1)
+                                    .foregroundColor(.secondary.opacity(0.3))
+                            }
+                            AddBiomarkerReportManuallyButton(
+                                patient: patient,
+                                store: store
+                            )
+                        } else if let medicalCase = medicalCase {
+                            HStack {
+                                Rectangle()
+                                    .frame(height: 1)
+                                    .foregroundColor(.secondary.opacity(0.3))
+                                
+                                Text("or")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                    .padding(.horizontal, 12)
+                                
+                                Rectangle()
+                                    .frame(height: 1)
+                                    .foregroundColor(.secondary.opacity(0.3))
+                            }
+                            AddBiomarkerReportManuallyButton(
+                                medicalCase: medicalCase,
+                                store: store
+                            )
+                        } else {
+                            EmptyView()
+                        }
+                        
                         
                     default:
                         EmptyView()

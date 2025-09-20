@@ -13,7 +13,8 @@ import AIKit
 /// Protocol for database operations
 protocol DocumentRepositoryProtocol {
     func savePrescription(_ parsedPrescription: ParsedPrescription, to medicalCase: MedicalCase, fileURL: URL) async throws -> PersistentIdentifier
-    func saveBloodReport(_ parsedBloodReport: ParsedBloodReport, to medicalCase: MedicalCase, fileURL: URL) async throws -> PersistentIdentifier
+    func saveBloodReport(_ parsedBloodReport: ParsedBloodReport, to medicalCase: MedicalCase?, fileURL: URL) async throws -> PersistentIdentifier
+    func saveBloodReportToPatient(_ parsedBloodReport: ParsedBloodReport, to patient: Patient, fileURL: URL) async throws -> PersistentIdentifier
     func saveDocument(_ document: Document, to medicalCase: MedicalCase) async throws -> PersistentIdentifier
     func saveUnparsedDocument(_ document: Document, to medicalCase: MedicalCase) async throws -> PersistentIdentifier
 }
@@ -50,6 +51,74 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
     @MainActor
     func saveBloodReport(
         _ parsedBloodReport: ParsedBloodReport,
+        to medicalCase: MedicalCase?,
+        fileURL: URL
+    ) async throws -> PersistentIdentifier {
+
+        // Route to appropriate save method based on medicalCase presence
+        if let medicalCase = medicalCase {
+            return try await saveBloodReportToMedicalCase(parsedBloodReport, to: medicalCase, fileURL: fileURL)
+        } else {
+            // If no medical case provided, we need patient info - this should be handled at a higher level
+            throw DocumentProcessingError.configurationError("No medical case provided for blood report saving")
+        }
+    }
+
+    @MainActor
+    func saveBloodReportToPatient(
+        _ parsedBloodReport: ParsedBloodReport,
+        to patient: Patient,
+        fileURL: URL
+    ) async throws -> PersistentIdentifier {
+        let bloodReport = BloodReport(
+            testName: parsedBloodReport.testName,
+            labName: parsedBloodReport.labName,
+            category: parsedBloodReport.category,
+            resultDate: parsedBloodReport.resultDate,
+            notes: parsedBloodReport.notes
+        )
+
+        // Set patient relationship directly
+        bloodReport.patient = patient
+
+        // Create document
+        let document = Document(
+            fileName: fileURL.lastPathComponent,
+            fileURL: fileURL.lastPathComponent,
+            documentType: .labResult,
+            fileSize: (try? FileManager.default.attributesOfItem(atPath: fileURL.path)[.size] as? Int64) ?? 0
+        )
+        bloodReport.document = document
+
+        modelContext.insert(bloodReport)
+        modelContext.insert(document)
+
+        // Add test results after blood report is inserted
+        let testResults = parsedBloodReport.testResults.map { testResult in
+            BloodTestResult(
+                testName: testResult.testName,
+                value: testResult.value,
+                unit: testResult.unit,
+                referenceRange: testResult.referenceRange,
+                isAbnormal: testResult.isAbnormal,
+                bloodReport: bloodReport
+            )
+        }
+
+        // Insert test results into model context
+        testResults.forEach { modelContext.insert($0) }
+        bloodReport.testResults = testResults
+
+        // Update patient timestamp to trigger UI refresh
+        patient.updatedAt = Date()
+
+        try modelContext.save()
+        return bloodReport.persistentModelID
+    }
+
+    @MainActor
+    private func saveBloodReportToMedicalCase(
+        _ parsedBloodReport: ParsedBloodReport,
         to medicalCase: MedicalCase,
         fileURL: URL
     ) async throws -> PersistentIdentifier {
@@ -63,7 +132,7 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
             fileURL: fileURL
         )
         modelContext.insert(bloodReport)
-        
+
         // Add test results after blood report is inserted
         let testResults = parsedBloodReport.testResults.map { testResult in
             BloodTestResult(
@@ -75,21 +144,14 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
                 bloodReport: bloodReport
             )
         }
-        
+
         // Insert test results into model context
         testResults.forEach { modelContext.insert($0) }
-        
-        // IMPORTANT: Add test results to the blood report's testResults array
-        // This establishes the bidirectional relationship properly
-        bloodReport.testResults?.append(contentsOf: testResults)
-        
-        // CRUCIAL: Add blood report to the medical case's bloodReports array
-        // This establishes the bidirectional relationship between MedicalCase and BloodReport
-        medicalCase.bloodReports?.append(bloodReport)
-        
+        bloodReport.testResults = testResults
+
         // Update medical case timestamp to trigger UI refresh
         medicalCase.updatedAt = Date()
-        
+
         try modelContext.save()
         return bloodReport.persistentModelID
     }

@@ -57,7 +57,8 @@ class DocumentProcessingService {
     @MainActor
     func processDocument(
         from store: DocumentPickerStore,
-        for medicalCase: MedicalCase,
+        for medicalCase: MedicalCase?,
+        patient: Patient,
         selectedDocumentType: DocumentType,
         onCompletion: @escaping (Result<ProcessingResult, Error>) -> Void
     ) {
@@ -81,6 +82,7 @@ class DocumentProcessingService {
                 let result = try await useCase.execute(
                     from: store,
                     for: medicalCase,
+                    patient: patient,
                     selectedDocumentType: selectedDocumentType
                 )
                 

@@ -11,9 +11,11 @@ import SwiftData
 import WalnutDesignSystem
 
 struct BloodTestsView: View {
-    
+
     @State private var viewModel: BloodTestsViewModel
-    
+    @State private var showDocumentPicker = false
+    @State private var documentPickerStore = DocumentPickerStore()
+
     init(viewModel: BloodTestsViewModel) {
         self.viewModel = viewModel
     }
@@ -21,13 +23,31 @@ struct BloodTestsView: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: Spacing.medium) {
-                NavBarHeader(
-                    iconName: "graph",
-                    iconColor: .green,
-                    title: "Trends",
-                    subtitle: "Visualise the latest trends in your health"
-                )
-
+                HStack(spacing: Spacing.small) {
+                    
+                    NavBarHeader(
+                        iconName: "graph",
+                        iconColor: .green,
+                        title: "Trends",
+                        subtitle: "Visualise the latest trends in your health"
+                    )
+                    
+                    Button(action: {}) {
+                        Image(systemName: "list.bullet")
+                    }
+                    .buttonStyle(.glass)
+                    
+                    Button(action: {
+                        // Pre-configure document picker for lab results
+                        documentPickerStore.selectDocumentType(.labResult)
+                        showDocumentPicker = true
+                    }) {
+                        Image(systemName: "plus")
+                    }
+                    .buttonStyle(.glass)
+                }
+                .padding(.trailing, Spacing.medium)
+                
                 // Search bar
                 SearchBar(
                     searchText: Binding(
@@ -56,6 +76,10 @@ struct BloodTestsView: View {
             .task {
                 viewModel.refreshData()
             }
+            .onAppear {
+                // Initialize document upload state manager
+                DocumentUploadStateManager.shared.initializeProcessingService(modelContext: viewModel.currentModelContext)
+            }
             .refreshable {
                 viewModel.refreshData()
             }
@@ -74,7 +98,18 @@ struct BloodTestsView: View {
             .navigationDestination(item: $viewModel.selectedBloodReport) { bloodReport in
                 BloodReportDetailView(bloodReport: bloodReport)
             }
-            
+            .sheet(isPresented: $showDocumentPicker, onDismiss: {
+                // Reset document picker store and refresh data
+                documentPickerStore.resetState()
+                viewModel.refreshData()
+            }) {
+                ModularDocumentPickerView(
+                    patient: viewModel.currentPatient,
+                    medicalCase: nil,
+                    store: documentPickerStore
+                )
+            }
+
         }
     }
     

@@ -64,6 +64,14 @@ class BloodTestsViewModel {
     var hasFilteredResults: Bool {
         return !filteredBiomarkers.isEmpty
     }
+
+    var currentPatient: Patient {
+        return patient
+    }
+
+    var currentModelContext: ModelContext {
+        return modelContext
+    }
     
     // MARK: - Initializer
     

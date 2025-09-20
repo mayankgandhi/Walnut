@@ -12,19 +12,19 @@ import AIKit
 import WalnutDesignSystem
 
 struct ModularDocumentPickerView: View {
-    
+
     // MARK: - Configuration
     let patient: Patient
-    let medicalCase: MedicalCase
-    
+    let medicalCase: MedicalCase?
+
     // MARK: - Environment
     @Environment(\.dismiss) private var dismiss
     @State private var store: DocumentPickerStore
     // MARK: - State
-    
+
     init(
         patient: Patient,
-        medicalCase: MedicalCase,
+        medicalCase: MedicalCase? = nil,
         store: DocumentPickerStore
     ) {
         self.patient = patient
@@ -98,6 +98,7 @@ struct ModularDocumentPickerView: View {
         DocumentUploadStateManager.shared.processDocument(
             from: store,
             for: medicalCase,
+            patient: patient,
             selectedDocumentType: documentType
         )
         

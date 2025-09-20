@@ -33,6 +33,9 @@ class Patient: Identifiable, Sendable, Hashable {
     
     @Relationship(deleteRule: .cascade, inverse: \Medication.patient)
     var medications: [Medication]?
+
+    @Relationship(deleteRule: .cascade, inverse: \BloodReport.patient)
+    var bloodReports: [BloodReport]?
     
     init(id: UUID, name: String, dateOfBirth: Date, gender: String, bloodType: String, emergencyContactName: String?, emergencyContactPhone: String?, notes: String, createdAt: Date, updatedAt: Date, medicalCases: [MedicalCase]) {
         self.id = id
