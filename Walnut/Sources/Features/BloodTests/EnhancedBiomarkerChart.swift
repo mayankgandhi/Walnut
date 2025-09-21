@@ -54,8 +54,7 @@ struct EnhancedBiomarkerChart: View {
         
         Chart {
             chartBackgroundRangeMarks(parsedNormalRange)
-            chartAreaMarks
-            chartLineMarks  
+            chartLineMarks
             chartPointMarks(parsedNormalRange)
         }
         .chartXAxis {
@@ -113,25 +112,7 @@ struct EnhancedBiomarkerChart: View {
             .foregroundStyle(Color.healthSuccess.opacity(0.15))
         }
     }
-    
-    @ChartContentBuilder
-    private var chartAreaMarks: some ChartContent {
-        ForEach(dataPoints) { point in
-            AreaMark(
-                x: .value("Date", point.date),
-                y: .value("Value", point.value)
-            )
-            .foregroundStyle(
-                LinearGradient(
-                    colors: [color.opacity(0.3), color.opacity(0.1)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
-            .opacity(animateChart ? 1.0 : 0.0)
-        }
-    }
-    
+  
     @ChartContentBuilder
     private var chartLineMarks: some ChartContent {
         ForEach(dataPoints) { point in
@@ -209,5 +190,251 @@ struct EnhancedBiomarkerChart: View {
     private func isValueInNormalRange(_ value: Double, normalRange: (min: Double, max: Double)?) -> Bool {
         guard let range = normalRange else { return true }
         return value >= range.min && value <= range.max
+    }
+}
+
+// MARK: - Previews
+
+#Preview("Normal Range - Cholesterol") {
+    @Previewable @State var selectedPoint: BiomarkerDataPoint? = nil
+
+    let sampleData = EnhancedBiomarkerChart.createSampleCholesterolData()
+
+    return NavigationView {
+        VStack {
+            Text("Cholesterol Levels")
+                .font(.headline)
+                .padding()
+
+            EnhancedBiomarkerChart(
+                dataPoints: sampleData,
+                color: .healthPrimary,
+                normalRange: "150-200",
+                selectedDataPoint: $selectedPoint,
+                animateChart: true
+            ) { dataPoint in
+                print("Selected: \(dataPoint.value) on \(dataPoint.date)")
+            }
+            .frame(height: 250)
+            .padding()
+
+            if let selected = selectedPoint {
+                Text("Selected: \(selected.value, specifier: "%.1f") on \(selected.date, style: .date)")
+                    .padding()
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(8)
+            }
+
+            Spacer()
+        }
+    }
+}
+
+#Preview("Abnormal Values - Blood Sugar") {
+    @Previewable @State var selectedPoint: BiomarkerDataPoint? = nil
+
+    let sampleData = EnhancedBiomarkerChart.createSampleBloodSugarData()
+
+    return VStack {
+        Text("Blood Sugar (High Values)")
+            .font(.headline)
+            .padding()
+
+        EnhancedBiomarkerChart(
+            dataPoints: sampleData,
+            color: .healthError,
+            normalRange: "70-99",
+            selectedDataPoint: $selectedPoint,
+            animateChart: true
+        )
+        .frame(height: 250)
+        .padding()
+
+        Text("Normal Range: 70-99 mg/dL")
+            .font(.caption)
+            .foregroundColor(.secondary)
+
+        Spacer()
+    }
+}
+
+#Preview("Single Data Point") {
+    @Previewable @State var selectedPoint: BiomarkerDataPoint? = nil
+
+    let singlePoint = [
+        BiomarkerDataPoint(
+            date: Date(),
+            value: 180.0,
+            bloodReport: "Recent Test"
+        )
+    ]
+
+    return VStack {
+        Text("Single Measurement")
+            .font(.headline)
+            .padding()
+
+        EnhancedBiomarkerChart(
+            dataPoints: singlePoint,
+            color: .healthSuccess,
+            normalRange: "<200",
+            selectedDataPoint: $selectedPoint,
+            animateChart: true
+        )
+        .frame(height: 250)
+        .padding()
+
+        Spacer()
+    }
+}
+
+#Preview("Empty Data") {
+    @Previewable @State var selectedPoint: BiomarkerDataPoint? = nil
+
+    return VStack {
+        Text("No Data Available")
+            .font(.headline)
+            .padding()
+
+        EnhancedBiomarkerChart(
+            dataPoints: [],
+            color: .healthPrimary,
+            normalRange: "12.0-15.5",
+            selectedDataPoint: $selectedPoint,
+            animateChart: false
+        )
+        .frame(height: 250)
+        .padding()
+        .border(Color.gray.opacity(0.3))
+
+        Text("Chart displays empty when no data points are provided")
+            .font(.caption)
+            .foregroundColor(.secondary)
+            .padding()
+
+        Spacer()
+    }
+}
+
+#Preview("Long Timeline - Hemoglobin") {
+    @Previewable @State var selectedPoint: BiomarkerDataPoint? = nil
+
+    let longTimelineData = EnhancedBiomarkerChart.createSampleHemoglobinData()
+
+    ScrollView {
+        VStack {
+            Text("Hemoglobin Over 12 Months")
+                .font(.headline)
+                .padding()
+
+            EnhancedBiomarkerChart(
+                dataPoints: longTimelineData,
+                color: .healthWarning,
+                normalRange: "12.0-15.5",
+                selectedDataPoint: $selectedPoint,
+                animateChart: true
+            )
+            .frame(height: 300)
+            .padding()
+
+            Text("Normal Range: 12.0-15.5 g/dL")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            Text("Data Points: \(longTimelineData.count)")
+                .font(.caption2)
+                .foregroundColor(Color.secondary)
+                .padding(.top, 5)
+        }
+    }
+}
+
+// MARK: - Sample Data Helpers
+
+extension EnhancedBiomarkerChart {
+
+    static func createSampleCholesterolData() -> [BiomarkerDataPoint] {
+        let calendar = Calendar.current
+        let today = Date()
+
+        return [
+            BiomarkerDataPoint(
+                date: calendar.date(byAdding: .month, value: -6, to: today) ?? today,
+                value: 185.0,
+                bloodReport: "Lab Test 1"
+            ),
+            BiomarkerDataPoint(
+                date: calendar.date(byAdding: .month, value: -4, to: today) ?? today,
+                value: 192.0,
+                bloodReport: "Lab Test 2"
+            ),
+            BiomarkerDataPoint(
+                date: calendar.date(byAdding: .month, value: -2, to: today) ?? today,
+                value: 178.0,
+                bloodReport: "Lab Test 3"
+            ),
+            BiomarkerDataPoint(
+                date: today,
+                value: 165.0,
+                bloodReport: "Lab Test 4"
+            )
+        ]
+    }
+
+    static func createSampleBloodSugarData() -> [BiomarkerDataPoint] {
+        let calendar = Calendar.current
+        let today = Date()
+
+        return [
+            BiomarkerDataPoint(
+                date: calendar.date(byAdding: .weekOfYear, value: -8, to: today) ?? today,
+                value: 95.0,
+                bloodReport: "Routine Check"
+            ),
+            BiomarkerDataPoint(
+                date: calendar.date(byAdding: .weekOfYear, value: -6, to: today) ?? today,
+                value: 110.0,
+                bloodReport: "Follow-up"
+            ),
+            BiomarkerDataPoint(
+                date: calendar.date(byAdding: .weekOfYear, value: -4, to: today) ?? today,
+                value: 125.0,
+                bloodReport: "Monitoring"
+            ),
+            BiomarkerDataPoint(
+                date: calendar.date(byAdding: .weekOfYear, value: -2, to: today) ?? today,
+                value: 135.0,
+                bloodReport: "Alert Test"
+            ),
+            BiomarkerDataPoint(
+                date: today,
+                value: 142.0,
+                bloodReport: "Latest Test"
+            )
+        ]
+    }
+
+    static func createSampleHemoglobinData() -> [BiomarkerDataPoint] {
+        let calendar = Calendar.current
+        let today = Date()
+        var dataPoints: [BiomarkerDataPoint] = []
+
+        // Create monthly data points for the past year
+        for month in (0...11).reversed() {
+            let date = calendar.date(byAdding: .month, value: -month, to: today) ?? today
+            let baseValue = 13.0
+            let variation = Double.random(in: -1.5...2.0)
+            let value = max(10.0, min(17.0, baseValue + variation))
+
+            dataPoints.append(
+                BiomarkerDataPoint(
+                    date: date,
+                    value: value,
+                    bloodReport: "Monthly Test \(12 - month)"
+                )
+            )
+        }
+
+        return dataPoints
     }
 }

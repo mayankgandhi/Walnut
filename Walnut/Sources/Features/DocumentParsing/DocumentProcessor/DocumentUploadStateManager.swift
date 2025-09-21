@@ -9,20 +9,27 @@
 import SwiftUI
 import SwiftData
 
+// MARK: - Created Document Type
+enum CreatedDocument {
+    case prescription(Prescription)
+    case bioMarkerReport(BioMarkerReport)
+}
+
 @Observable
 class DocumentUploadStateManager {
-    
+
     static let shared = DocumentUploadStateManager()
-    
+
     private init() {}
-    
+
     var isUploading = false
     var documentType: DocumentType?
     var uploadState: UploadViewBottomAccessory.UploadViewBottomAccessoryState = .preparing
     var progress: Double = 0.0
     var statusText: String?
     var error: Error?
-    
+    var createdDocument: CreatedDocument?
+
     private var processingService: DocumentProcessingService?
     
     func initializeProcessingService(modelContext: ModelContext) {
@@ -66,6 +73,7 @@ class DocumentUploadStateManager {
         self.progress = 0.0
         self.statusText = nil
         self.error = nil
+        self.createdDocument = nil
     }
     
     func updateProgress(_ progress: Double, status: String) {
@@ -108,6 +116,10 @@ class DocumentUploadStateManager {
         }
     }
     
+    func setCreatedDocument(_ document: CreatedDocument) {
+        self.createdDocument = document
+    }
+
     private func reset() {
         self.isUploading = false
         self.documentType = nil
@@ -115,5 +127,6 @@ class DocumentUploadStateManager {
         self.progress = 0.0
         self.statusText = nil
         self.error = nil
+        self.createdDocument = nil
     }
 }

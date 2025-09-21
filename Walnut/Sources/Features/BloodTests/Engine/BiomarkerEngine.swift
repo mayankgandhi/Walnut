@@ -133,14 +133,18 @@ class BiomarkerEngine {
         }
 
         // Create historical data points
-        let historicalValues = validResults.map { (result, date) in
+        let rawHistoricalValues = validResults.map { (result, date) in
             BiomarkerDataPoint(
                 date: date,
                 value: Double(result.value ?? "0") ?? 0.0,
                 bloodReport: result.bloodReport?.testName,
                 document: result.bloodReport?.document
             )
-        }.sorted { $0.date < $1.date }
+        }
+
+        // Remove duplicates based on date and value, keeping the most recent one
+        let historicalValues = removeDuplicateBiomarkerDataPoints(rawHistoricalValues)
+            .sorted { $0.date < $1.date }
 
         // Calculate trends and health status
         let (trendDirection, trendText, trendPercentage) = calculateTrend(from: historicalValues)
@@ -199,6 +203,32 @@ class BiomarkerEngine {
         return (direction, changeText, percentageText)
     }
 
+    // MARK: - Duplicate Removal
+
+    private func removeDuplicateBiomarkerDataPoints(_ dataPoints: [BiomarkerDataPoint]) -> [BiomarkerDataPoint] {
+        var uniqueDataPoints: [BiomarkerDataPoint] = []
+        var seenCombinations: Set<String> = []
+
+        // Sort by date to keep the latest entry when duplicates are found
+        let sortedDataPoints = dataPoints.sorted { $0.date > $1.date }
+
+        for dataPoint in sortedDataPoints {
+            // Create a unique key combining date (day precision) and value
+            let calendar = Calendar.current
+            let dateComponents = calendar.dateComponents([.year, .month, .day], from: dataPoint.date)
+            let dateKey = "\(dateComponents.year ?? 0)-\(dateComponents.month ?? 0)-\(dateComponents.day ?? 0)"
+            let combinationKey = "\(dateKey):\(dataPoint.value)"
+
+            // Only add if we haven't seen this combination before
+            if !seenCombinations.contains(combinationKey) {
+                seenCombinations.insert(combinationKey)
+                uniqueDataPoints.append(dataPoint)
+            }
+        }
+
+        return uniqueDataPoints
+    }
+
     // MARK: - Health Status Determination
 
     private func determineHealthStatus(for result: BioMarkerResult, from dataPoints: [BiomarkerDataPoint]) -> HealthStatus {
@@ -252,6 +282,14 @@ class BiomarkerEngine {
 // MARK: - Engine Extensions
 
 extension BiomarkerEngine {
+
+    /// Remove duplicate biomarker data points based on date and value
+    /// - Parameter dataPoints: Array of biomarker data points to deduplicate
+    /// - Returns: Array of unique biomarker data points, keeping the most recent when duplicates are found
+    static func removeDuplicateBiomarkerDataPoints(_ dataPoints: [BiomarkerDataPoint]) -> [BiomarkerDataPoint] {
+        let engine = BiomarkerEngine()
+        return engine.removeDuplicateBiomarkerDataPoints(dataPoints)
+    }
 
     /// Extract all test results from blood reports
     /// - Parameter reports: Blood reports to process
@@ -338,7 +376,7 @@ extension BiomarkerEngine {
         guard let latestResult = testResults.last else { return nil }
 
         // Create historical data points
-        let historicalValues = testResults.map { (result, date) in
+        let rawHistoricalValues = testResults.map { (result, date) in
             BiomarkerDataPoint(
                 date: date,
                 value: Double(result.value ?? "0") ?? 0.0,
@@ -346,6 +384,9 @@ extension BiomarkerEngine {
                 document: result.bloodReport?.document
             )
         }
+
+        // Remove duplicates based on date and value
+        let historicalValues = BiomarkerEngine.removeDuplicateBiomarkerDataPoints(rawHistoricalValues)
 
         // Calculate trends
         let engine = BiomarkerEngine()
@@ -388,5 +429,34 @@ extension BiomarkerEngine {
             guard let date1 = $0.resultDate, let date2 = $1.resultDate else { return false }
             return date1 > date2
         }.first
+    }
+
+    // MARK: - Test/Debug Helper Functions
+
+    /// Test function to demonstrate deduplication behavior
+    /// - Returns: A tuple containing (original count, deduplicated count, sample data points)
+    static func testDeduplication() -> (originalCount: Int, deduplicatedCount: Int, sampleData: [BiomarkerDataPoint]) {
+        // Create sample data with duplicates
+        let today = Date()
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today) ?? today
+        let twoDaysAgo = Calendar.current.date(byAdding: .day, value: -2, to: today) ?? today
+
+        let sampleDataPoints = [
+            BiomarkerDataPoint(date: today, value: 120.0, bloodReport: "Report 1"),
+            BiomarkerDataPoint(date: today, value: 120.0, bloodReport: "Report 2"), // Duplicate: same date and value
+            BiomarkerDataPoint(date: yesterday, value: 118.0, bloodReport: "Report 3"),
+            BiomarkerDataPoint(date: yesterday, value: 118.0, bloodReport: "Report 4"), // Duplicate: same date and value
+            BiomarkerDataPoint(date: yesterday, value: 119.0, bloodReport: "Report 5"), // Different value, same date
+            BiomarkerDataPoint(date: twoDaysAgo, value: 115.0, bloodReport: "Report 6"),
+            BiomarkerDataPoint(date: twoDaysAgo, value: 115.0, bloodReport: "Report 7"), // Duplicate: same date and value
+        ]
+
+        let deduplicatedData = removeDuplicateBiomarkerDataPoints(sampleDataPoints)
+
+        return (
+            originalCount: sampleDataPoints.count,
+            deduplicatedCount: deduplicatedData.count,
+            sampleData: deduplicatedData
+        )
     }
 }

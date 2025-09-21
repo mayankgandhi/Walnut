@@ -115,7 +115,8 @@ actor DocumentProcessingUseCase {
             return ProcessingResult(
                 documentType: stageData.documentType,
                 modelId: modelId,
-                originalFileName: stageData.preparedFile.originalFileName
+                originalFileName: stageData.preparedFile.originalFileName,
+                createdDocument: nil
             )
             
         } catch {
@@ -147,7 +148,8 @@ actor DocumentProcessingUseCase {
         return ProcessingResult(
             documentType: .unknown,
             modelId: modelId,
-            originalFileName: stageData.preparedFile.originalFileName
+            originalFileName: stageData.preparedFile.originalFileName,
+            createdDocument: nil
         )
     }
     

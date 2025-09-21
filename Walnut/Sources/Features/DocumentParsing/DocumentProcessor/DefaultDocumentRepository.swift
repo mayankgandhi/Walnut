@@ -12,6 +12,7 @@ import AIKit
 
 /// Protocol for database operations
 protocol DocumentRepositoryProtocol {
+    var modelContext: ModelContext { get }
     func savePrescription(_ parsedPrescription: ParsedPrescription, to medicalCase: MedicalCase, fileURL: URL) async throws -> PersistentIdentifier
     func saveBioMarkerReport(_ parsedBioMarkerReport: ParsedBioMarkerReport, to medicalCase: MedicalCase?, fileURL: URL) async throws -> PersistentIdentifier
     func saveBioMarkerReportToPatient(_ parsedBioMarkerReport: ParsedBioMarkerReport, to patient: Patient, fileURL: URL) async throws -> PersistentIdentifier
@@ -21,9 +22,9 @@ protocol DocumentRepositoryProtocol {
 
 // MARK: - Default Document Repository
 struct DefaultDocumentRepository: DocumentRepositoryProtocol {
-    
-    private let modelContext: ModelContext
-    
+
+    let modelContext: ModelContext
+
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
     }
@@ -40,10 +41,10 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
             fileURL: fileURL
         )
         modelContext.insert(prescription)
-        
+
         // Update medical case timestamp to trigger UI refresh
         medicalCase.updatedAt = Date()
-        
+
         try modelContext.save()
         return prescription.persistentModelID
     }
@@ -155,7 +156,7 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
         try modelContext.save()
         return bloodReport.persistentModelID
     }
-    
+
     @MainActor
     func saveDocument(
         _ document: Document,

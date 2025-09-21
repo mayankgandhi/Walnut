@@ -144,8 +144,15 @@ extension DocumentProcessingService: DocumentProcessingProgressDelegate {
     @MainActor
     func didCompleteProcessing(with result: Result<ProcessingResult, Error>) {
         switch result {
-        case .success:
-            DocumentUploadStateManager.shared.completeUpload()
+        case .success(let processingResult):
+            // Set the created document if available
+            if let createdDocument = processingResult.createdDocument {
+                DocumentUploadStateManager.shared.setCreatedDocument(createdDocument)
+                DocumentUploadStateManager.shared.completeUpload()
+            } else {
+                DocumentUploadStateManager.shared
+                    .setError(NSError(domain: "Document Upload Failed", code: -1))
+            }
         case .failure(let error):
             DocumentUploadStateManager.shared.setError(error)
         }
@@ -160,6 +167,7 @@ struct ProcessingResult {
     let documentType: DocumentType
     let modelId: PersistentIdentifier
     let originalFileName: String
+    let createdDocument: CreatedDocument?
 }
 
 // MARK: - Factory Methods

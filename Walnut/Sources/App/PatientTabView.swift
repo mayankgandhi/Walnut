@@ -15,6 +15,7 @@ struct PatientTabView: View {
     let patient: Patient
     @State private var uploadStateManager = DocumentUploadStateManager.shared
     @StateObject private var subscriptionService = SubscriptionService.shared
+    @State private var showDocumentReview = false
 
     init(patient: Patient) {
         self.patient = patient
@@ -85,12 +86,49 @@ struct PatientTabView: View {
                     documentType: documentType,
                     state: uploadStateManager.uploadState,
                     progress: uploadStateManager.progress,
-                    customStatusText: uploadStateManager.statusText
+                    customStatusText: uploadStateManager.statusText,
+                    onTapReview: {
+                        showDocumentReview = true
+                    }
                 )
             } else {
                 EmptyView()
                     .frame(height: 0)
                     .opacity(0)
+            }
+        }
+        .sheet(isPresented: $showDocumentReview) {
+            if let createdDocument = uploadStateManager.createdDocument {
+                documentReviewView(for: createdDocument)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func documentReviewView(for createdDocument: CreatedDocument) -> some View {
+        switch createdDocument {
+        case .prescription(let prescription):
+            if let medicalCase = prescription.medicalCase {
+                PrescriptionEditor(
+                    patient: patient,
+                    prescription: prescription,
+                    medicalCase: medicalCase
+                )
+            } else {
+                Text("Error: Prescription missing medical case")
+                    .foregroundColor(.red)
+            }
+        case .bioMarkerReport(let bioMarkerReport):
+            if let medicalCase = bioMarkerReport.medicalCase {
+                BioMarkerReportEditor(
+                    bloodReport: bioMarkerReport,
+                    medicalCase: medicalCase
+                )
+            } else {
+                BioMarkerReportEditor(
+                    bloodReport: bioMarkerReport,
+                    patient: patient
+                )
             }
         }
     }

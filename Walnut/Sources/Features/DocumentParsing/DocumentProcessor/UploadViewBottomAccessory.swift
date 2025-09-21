@@ -10,14 +10,14 @@ import SwiftUI
 import WalnutDesignSystem
 
 struct UploadViewBottomAccessory: View {
-    
+
     enum UploadViewBottomAccessoryState {
         case preparing
         case uploading
         case parsing
         case completed
         case failed
-        
+
         var iconImage: String {
             switch self {
                 case .preparing:
@@ -32,7 +32,7 @@ struct UploadViewBottomAccessory: View {
                     "document-failed"
             }
         }
-        
+
         func stateText(documentName: String) -> String {
             switch self {
                 case .preparing:
@@ -42,28 +42,31 @@ struct UploadViewBottomAccessory: View {
                 case .parsing:
                     "Processing \(documentName) doc..."
                 case .completed:
-                    "Completed!"
+                    "Tap to review"
                 case .failed:
                     "Failed parsing \(documentName)..."
             }
         }
     }
-    
+
     let documentType: DocumentType
     let state: UploadViewBottomAccessoryState
     let progress: Double
     let customStatusText: String?
-    
+    let onTapReview: (() -> Void)?
+
     init(
         documentType: DocumentType,
         state: UploadViewBottomAccessoryState,
         progress: Double = 0.0,
-        customStatusText: String? = nil
+        customStatusText: String? = nil,
+        onTapReview: (() -> Void)? = nil
     ) {
         self.documentType = documentType
         self.state = state
         self.progress = progress
         self.customStatusText = customStatusText
+        self.onTapReview = onTapReview
     }
     
     var body: some View {
@@ -71,19 +74,26 @@ struct UploadViewBottomAccessory: View {
             Image(documentType.iconImage)
                 .resizable()
                 .frame(width: 48, height: 48, alignment: .center)
-            
-            Text(state.stateText(documentName: documentType.displayName))
+
+            Text(customStatusText ?? state.stateText(documentName: documentType.displayName))
                 .font(.system(.body, design: .rounded, weight: .medium))
                 .foregroundColor(.primary)
                 .truncationMode(.middle)
                 .multilineTextAlignment(.leading)
                 .lineLimit(3)
-            
+
             Spacer()
-            
+
             CombinedPulseView(iconImage: state.iconImage)
         }
         .padding(.horizontal, Spacing.medium)
+        .background(state == .completed ? Color.healthPrimary.opacity(0.05) : Color.clear)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if state == .completed {
+                onTapReview?()
+            }
+        }
     }
 }
 
