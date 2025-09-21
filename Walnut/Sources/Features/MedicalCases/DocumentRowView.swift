@@ -25,19 +25,20 @@ struct DocumentRowView: View {
     var body: some View {
         Group {
             switch item {
-            case .prescription(let prescription):
-                prescriptionRow(prescription)
-                
-            case .bloodReport(let bloodReport):
-                bloodReportRow(bloodReport)
-                
-            case .document(let document):
-                documentRow(document, isUnparsed: false)
-                
-            case .unparsedDocument(let document):
-                documentRow(document, isUnparsed: true)
+                case .prescription(let prescription):
+                    prescriptionRow(prescription)
+                    
+                case .bloodReport(let bloodReport):
+                    bloodReportRow(bloodReport)
+                    
+                case .document(let document):
+                    documentRow(document, isUnparsed: false)
+                    
+                case .unparsedDocument(let document):
+                    documentRow(document, isUnparsed: true)
             }
         }
+        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 12))
     }
     
     // MARK: - Row Components

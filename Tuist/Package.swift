@@ -6,6 +6,8 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [.iOS(.v17)],
     dependencies: [
+        // Dependency Injection
+        .package(url: "git@github.com:hmlongco/Factory.git", from: "2.5.3")
         // Analytics
         .package(url: "git@github.com:PostHog/posthog-ios.git", from: "3.31.0"),
         // Network Debugging

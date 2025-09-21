@@ -176,11 +176,11 @@ extension DocumentProcessingService {
     
     /// Creates a DocumentProcessingService using AIKit's unified parsing
     static func createWithAIKit(
+        claudeKey: String,
+        openAIKey: String,
         modelContext: ModelContext
     ) -> DocumentProcessingService {
-        var claudeKey: String = PostHogSDK.shared.getFeatureFlagPayload("anthropic-api-key") as? String ?? ""
-        var openAIKey: String = PostHogSDK.shared.getFeatureFlagPayload("openai-api-key") as? String ?? ""
-                
+    
         let aiService = AIKitFactory.createUnifiedService(
             claudeKey: claudeKey,
             openAIKey: openAIKey

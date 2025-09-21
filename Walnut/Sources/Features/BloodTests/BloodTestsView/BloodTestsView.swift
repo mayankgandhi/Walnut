@@ -79,10 +79,6 @@ struct BioMarkersView: View {
             .task {
                 viewModel.refreshData()
             }
-            .onAppear {
-                // Initialize document upload state manager
-                DocumentUploadStateManager.shared.initializeProcessingService(modelContext: viewModel.currentModelContext)
-            }
             .refreshable {
                 viewModel.refreshData()
             }

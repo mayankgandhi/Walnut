@@ -88,6 +88,7 @@ let project = Project(
             ],
             entitlements: .file(path: .relativeToRoot("Walnut/Walnut.entitlements")),
             dependencies: [
+                .external(name: "FactoryKit"),
                 .external(name: "PostHog"),
                 .external(name: "Atlantis"),
                 .external(name: "RevenueCat"),

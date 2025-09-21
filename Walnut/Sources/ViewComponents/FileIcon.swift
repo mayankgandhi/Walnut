@@ -80,12 +80,6 @@ public struct FileIcon: View {
         }
         .padding(.horizontal, Spacing.xs)
         .padding(.vertical, Spacing.xs)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemGray6))
-                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
-        )
-        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityLabel(
             "\(filename), \(String(describing: documentType?.accessibilityDescription))"

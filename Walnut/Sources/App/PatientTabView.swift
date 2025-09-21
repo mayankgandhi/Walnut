@@ -8,19 +8,20 @@
 
 import SwiftUI
 import WalnutDesignSystem
+import PostHog
 
 struct PatientTabView: View {
-
+    
     @Environment(\.modelContext) private var modelContext
     let patient: Patient
     @State private var uploadStateManager = DocumentUploadStateManager.shared
     @StateObject private var subscriptionService = SubscriptionService.shared
     @State private var showDocumentReview = false
-
+    
     init(patient: Patient) {
         self.patient = patient
     }
-
+    
     var body: some View {
         TabView {
             
@@ -77,7 +78,14 @@ struct PatientTabView: View {
         }
         .tabBarMinimizeBehavior(.onScrollDown)
         .onAppear {
-            uploadStateManager.initializeProcessingService(modelContext: modelContext)
+            var claudeKey: String = PostHogSDK.shared.getFeatureFlagPayload("anthropic-api-key") as? String ?? ""
+            var openAIKey: String = PostHogSDK.shared.getFeatureFlagPayload("openai-api-key") as? String ?? ""
+            uploadStateManager
+                .initializeProcessingService(
+                    claudeAIKey: claudeKey,
+                    openAIKey: openAIKey,
+                    modelContext: modelContext
+                )
         }
         .tabViewBottomAccessory {
             // Always provide the accessory view, but conditionally show content
@@ -103,33 +111,33 @@ struct PatientTabView: View {
             }
         }
     }
-
+    
     @ViewBuilder
     private func documentReviewView(for createdDocument: CreatedDocument) -> some View {
         switch createdDocument {
-        case .prescription(let prescription):
-            if let medicalCase = prescription.medicalCase {
-                PrescriptionEditor(
-                    patient: patient,
-                    prescription: prescription,
-                    medicalCase: medicalCase
-                )
-            } else {
-                Text("Error: Prescription missing medical case")
-                    .foregroundColor(.red)
-            }
-        case .bioMarkerReport(let bioMarkerReport):
-            if let medicalCase = bioMarkerReport.medicalCase {
-                BioMarkerReportEditor(
-                    bloodReport: bioMarkerReport,
-                    medicalCase: medicalCase
-                )
-            } else {
-                BioMarkerReportEditor(
-                    bloodReport: bioMarkerReport,
-                    patient: patient
-                )
-            }
+            case .prescription(let prescription):
+                if let medicalCase = prescription.medicalCase {
+                    PrescriptionEditor(
+                        patient: patient,
+                        prescription: prescription,
+                        medicalCase: medicalCase
+                    )
+                } else {
+                    Text("Error: Prescription missing medical case")
+                        .foregroundColor(.red)
+                }
+            case .bioMarkerReport(let bioMarkerReport):
+                if let medicalCase = bioMarkerReport.medicalCase {
+                    BioMarkerReportEditor(
+                        bloodReport: bioMarkerReport,
+                        medicalCase: medicalCase
+                    )
+                } else {
+                    BioMarkerReportEditor(
+                        bloodReport: bioMarkerReport,
+                        patient: patient
+                    )
+                }
         }
     }
 }

@@ -8,6 +8,7 @@
 
 import SwiftUI
 import SwiftData
+import PostHog
 
 // MARK: - Created Document Type
 enum CreatedDocument {
@@ -32,8 +33,12 @@ class DocumentUploadStateManager {
 
     private var processingService: DocumentProcessingService?
     
-    func initializeProcessingService(modelContext: ModelContext) {
-        self.processingService = DocumentProcessingService.createWithAIKit(modelContext: modelContext)
+    func initializeProcessingService(claudeAIKey: String, openAIKey: String, modelContext: ModelContext) {   
+        self.processingService = DocumentProcessingService.createWithAIKit(
+            claudeKey: claudeAIKey,
+            openAIKey: openAIKey,
+            modelContext: modelContext
+        )
     }
     
     @MainActor func processDocument(
