@@ -9,7 +9,6 @@ import Foundation
 
 /// Protocol for services that need to be initialized during app startup
 /// Provides a clean way to manage service lifecycle and dependencies
-@MainActor
 protocol ApplicationService {
     /// The priority of this service's initialization (lower numbers initialize first)
     /// Use this to control initialization order when services have dependencies

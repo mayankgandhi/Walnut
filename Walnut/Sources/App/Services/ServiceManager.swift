@@ -8,7 +8,6 @@
 import Foundation
 
 /// Manages the initialization and lifecycle of all application services
-@MainActor
 final class ServiceManager {
 
     static let shared = ServiceManager()

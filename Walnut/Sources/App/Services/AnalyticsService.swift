@@ -12,12 +12,18 @@ import PostHog
 import Atlantis
 #endif
 
-/// Service responsible for initializing analytics and debugging tools
-@MainActor
 final class AnalyticsService: ApplicationService {
 
     static let shared = AnalyticsService()
-
+    
+    var claudeKey: String {
+        PostHogSDK.shared.getFeatureFlagPayload("anthropic-api-key") as? String ?? ""
+    }
+    
+    var openAIKey: String {
+        PostHogSDK.shared.getFeatureFlagPayload("openai-api-key") as? String ?? ""
+    }
+    
     var initializationPriority: Int { ServicePriority.analytics }
 
     private init() {}

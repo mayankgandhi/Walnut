@@ -54,7 +54,6 @@ class DocumentProcessingService {
         self.repository = repository
     }
     
-    @MainActor
     func processDocument(
         from store: DocumentPickerStore,
         for medicalCase: MedicalCase?,
@@ -64,13 +63,15 @@ class DocumentProcessingService {
     ) {
         guard store.validateSelection() else {
             let error = DocumentProcessingError.noSelection
-            handleProcessingCompletion(.failure(error))
+            Task { @MainActor in
+                handleProcessingCompletion(.failure(error))
+            }
             onCompletion(.failure(error))
             return
         }
-        
-        startProcessing()
-        
+        Task { @MainActor in
+            startProcessing()
+        }
         Task {
             do {
                 let useCase = DocumentProcessingUseCase(
@@ -114,13 +115,13 @@ class DocumentProcessingService {
         isProcessing = false
         
         switch result {
-        case .success:
-            processingProgress = 1.0
-            processingStatus = "Processing complete"
-            lastError = nil
-        case .failure(let error):
-            lastError = error
-            processingStatus = "Processing failed"
+            case .success:
+                processingProgress = 1.0
+                processingStatus = "Processing complete"
+                lastError = nil
+            case .failure(let error):
+                lastError = error
+                processingStatus = "Processing failed"
         }
         
         progressDelegate?.didCompleteProcessing(with: result)
@@ -144,17 +145,17 @@ extension DocumentProcessingService: DocumentProcessingProgressDelegate {
     @MainActor
     func didCompleteProcessing(with result: Result<ProcessingResult, Error>) {
         switch result {
-        case .success(let processingResult):
-            // Set the created document if available
-            if let createdDocument = processingResult.createdDocument {
-                DocumentUploadStateManager.shared.setCreatedDocument(createdDocument)
-                DocumentUploadStateManager.shared.completeUpload()
-            } else {
-                DocumentUploadStateManager.shared
-                    .setError(NSError(domain: "Document Upload Failed", code: -1))
-            }
-        case .failure(let error):
-            DocumentUploadStateManager.shared.setError(error)
+            case .success(let processingResult):
+                // Set the created document if available
+                if let createdDocument = processingResult.createdDocument {
+                    DocumentUploadStateManager.shared.setCreatedDocument(createdDocument)
+                    DocumentUploadStateManager.shared.completeUpload()
+                } else {
+                    DocumentUploadStateManager.shared
+                        .setError(NSError(domain: "Document Upload Failed", code: -1))
+                }
+            case .failure(let error):
+                DocumentUploadStateManager.shared.setError(error)
         }
     }
     
@@ -180,7 +181,7 @@ extension DocumentProcessingService {
         openAIKey: String,
         modelContext: ModelContext
     ) -> DocumentProcessingService {
-    
+        
         let aiService = AIKitFactory.createUnifiedService(
             claudeKey: claudeKey,
             openAIKey: openAIKey

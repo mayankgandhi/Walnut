@@ -18,11 +18,11 @@ enum CreatedDocument {
 
 @Observable
 class DocumentUploadStateManager {
-
+    
     static let shared = DocumentUploadStateManager()
-
+    
     private init() {}
-
+    
     var isUploading = false
     var documentType: DocumentType?
     var uploadState: UploadViewBottomAccessory.UploadViewBottomAccessoryState = .preparing
@@ -30,27 +30,21 @@ class DocumentUploadStateManager {
     var statusText: String?
     var error: Error?
     var createdDocument: CreatedDocument?
-
+    
     private var processingService: DocumentProcessingService?
     
-    func initializeProcessingService(claudeAIKey: String, openAIKey: String, modelContext: ModelContext) {   
-        self.processingService = DocumentProcessingService.createWithAIKit(
-            claudeKey: claudeAIKey,
-            openAIKey: openAIKey,
-            modelContext: modelContext
-        )
-    }
-    
-    @MainActor func processDocument(
+    func processDocument(
         from store: DocumentPickerStore,
         for medicalCase: MedicalCase?,
         patient: Patient,
-        selectedDocumentType: DocumentType
+        selectedDocumentType: DocumentType,
+        modelContext: ModelContext
     ) {
-        guard let processingService = processingService else {
-            setError(DocumentProcessingError.configurationError("Processing service not initialized"))
-            return
-        }
+        let processingService = DocumentProcessingService.createWithAIKit(
+            claudeKey: AnalyticsService.shared.claudeKey,
+            openAIKey: AnalyticsService.shared.openAIKey,
+            modelContext: modelContext
+        )
         
         startUpload(documentType: selectedDocumentType)
         
@@ -62,10 +56,10 @@ class DocumentUploadStateManager {
         ) { result in
             DispatchQueue.main.async {
                 switch result {
-                case .success:
-                    self.completeUpload()
-                case .failure(let error):
-                    self.setError(error)
+                    case .success:
+                        self.completeUpload()
+                    case .failure(let error):
+                        self.setError(error)
                 }
             }
         }
@@ -87,17 +81,17 @@ class DocumentUploadStateManager {
         
         // Update state based on progress
         switch progress {
-        case 0.0..<0.4:
-            self.uploadState = .preparing
-        case 0.4..<0.8:
-            self.uploadState = .uploading
-        case 0.8..<1.0:
-            self.uploadState = .parsing
-        case 1.0:
-            self.uploadState = .completed
-            hideAfterDelay()
-        default:
-            break
+            case 0.0..<0.4:
+                self.uploadState = .preparing
+            case 0.4..<0.8:
+                self.uploadState = .uploading
+            case 0.8..<1.0:
+                self.uploadState = .parsing
+            case 1.0:
+                self.uploadState = .completed
+                hideAfterDelay()
+            default:
+                break
         }
     }
     
@@ -124,7 +118,7 @@ class DocumentUploadStateManager {
     func setCreatedDocument(_ document: CreatedDocument) {
         self.createdDocument = document
     }
-
+    
     private func reset() {
         self.isUploading = false
         self.documentType = nil

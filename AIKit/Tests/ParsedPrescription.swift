@@ -18,11 +18,11 @@ import Foundation
 import AIKit
 
 struct ParsedPrescription: ParseableModel {
+    
     static var parseDefinition: String {
     ""
     }
 
-    
     struct Medication: Codable {
         var id: UUID
         var name: String
@@ -82,7 +82,7 @@ struct ParsedPrescription: ParseableModel {
                             "duration": [
                                 "type": "object",
                                 "required": ["type"],
-                                "oneOf": [
+                                "anyOf": [
                                     [
                                         "properties": [
                                             "type": [
@@ -127,7 +127,7 @@ struct ParsedPrescription: ParseableModel {
                             "frequency": [
                                 "type": "object",
                                 "required": ["type"],
-                                "oneOf": [
+                                "anyOf": [
                                     [
                                         "properties": [
                                             "type": [

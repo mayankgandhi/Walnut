@@ -77,16 +77,7 @@ struct PatientTabView: View {
             
         }
         .tabBarMinimizeBehavior(.onScrollDown)
-        .onAppear {
-            var claudeKey: String = PostHogSDK.shared.getFeatureFlagPayload("anthropic-api-key") as? String ?? ""
-            var openAIKey: String = PostHogSDK.shared.getFeatureFlagPayload("openai-api-key") as? String ?? ""
-            uploadStateManager
-                .initializeProcessingService(
-                    claudeAIKey: claudeKey,
-                    openAIKey: openAIKey,
-                    modelContext: modelContext
-                )
-        }
+     
         .tabViewBottomAccessory {
             // Always provide the accessory view, but conditionally show content
             if uploadStateManager.isUploading, let documentType = uploadStateManager.documentType {

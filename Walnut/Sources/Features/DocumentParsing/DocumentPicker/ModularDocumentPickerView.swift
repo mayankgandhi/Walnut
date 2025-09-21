@@ -19,6 +19,8 @@ struct ModularDocumentPickerView: View {
 
     // MARK: - Environment
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) var modelContext
+    
     @State private var store: DocumentPickerStore
     // MARK: - State
 
@@ -84,6 +86,10 @@ struct ModularDocumentPickerView: View {
                     }
                 }
             }
+            .onAppear {
+                dump(AnalyticsService.shared.claudeKey)
+                dump(AnalyticsService.shared.openAIKey)
+            }
         }
         
     }
@@ -98,7 +104,8 @@ struct ModularDocumentPickerView: View {
             from: store,
             for: medicalCase,
             patient: patient,
-            selectedDocumentType: documentType
+            selectedDocumentType: documentType,
+            modelContext: modelContext
         )
         
         // Dismiss picker immediately after starting upload

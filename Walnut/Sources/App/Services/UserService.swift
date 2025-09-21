@@ -8,7 +8,6 @@
 import Foundation
 
 /// Service responsible for managing user identity and cross-device synchronization
-@MainActor
 final class UserService: ApplicationService {
 
     static let shared = UserService()
