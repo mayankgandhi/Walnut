@@ -33,21 +33,20 @@ struct UploadViewBottomAccessory: View {
             }
         }
         
-        var stateText: String {
+        func stateText(documentName: String) -> String {
             switch self {
                 case .preparing:
-                    "Preparing file..."
+                    "Preparing \(documentName) doc..."
                 case .uploading:
-                    "Uploading..."
+                    "Uploading \(documentName) doc..."
                 case .parsing:
-                    "Processing, This may take a while..."
+                    "Processing \(documentName) doc..."
                 case .completed:
-                    "Complete!"
+                    "Completed!"
                 case .failed:
-                    "Failed"
+                    "Failed parsing \(documentName)..."
             }
         }
-        
     }
     
     let documentType: DocumentType
@@ -73,28 +72,18 @@ struct UploadViewBottomAccessory: View {
                 .resizable()
                 .frame(width: 48, height: 48, alignment: .center)
             
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Medical Case: \(documentType.displayName)")
-                    .font(.system(.body, design: .rounded, weight: .medium))
-                    .foregroundColor(.primary)
-                    .truncationMode(.middle)
-                    .multilineTextAlignment(.leading)
-                
-                Text(customStatusText ?? state.stateText)
-                    .font(.system(.caption, design: .rounded, weight: .regular))
-                    .foregroundColor(.secondary)
-                    .truncationMode(.tail)
-                    .multilineTextAlignment(.leading)
-                
-                
-            }
+            Text(state.stateText(documentName: documentType.displayName))
+                .font(.system(.body, design: .rounded, weight: .medium))
+                .foregroundColor(.primary)
+                .truncationMode(.middle)
+                .multilineTextAlignment(.leading)
+                .lineLimit(3)
             
             Spacer()
             
             CombinedPulseView(iconImage: state.iconImage)
-
         }
-        .padding(.horizontal)
+        .padding(.horizontal, Spacing.medium)
     }
 }
 

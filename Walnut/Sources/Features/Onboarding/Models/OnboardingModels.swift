@@ -134,7 +134,6 @@ struct PatientSetupData {
     var dateOfBirth: Date?
     var gender: String = ""
     var bloodType: String = ""
-    var notes: String = ""
 }
 
 /// Permission states

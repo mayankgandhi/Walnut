@@ -180,7 +180,7 @@ final class OnboardingViewModel {
             bloodType: patientSetupData.bloodType,
             emergencyContactName: nil,
             emergencyContactPhone: nil,
-            notes: patientSetupData.notes,
+            notes: nil,
             createdAt: Date(),
             updatedAt: Date(),
             medicalCases: []

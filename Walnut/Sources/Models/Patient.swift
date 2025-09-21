@@ -37,7 +37,7 @@ class Patient: Identifiable, Sendable, Hashable {
     @Relationship(deleteRule: .cascade, inverse: \BioMarkerReport.patient)
     var bloodReports: [BioMarkerReport]?
     
-    init(id: UUID, name: String, dateOfBirth: Date, gender: String, bloodType: String, emergencyContactName: String?, emergencyContactPhone: String?, notes: String, createdAt: Date, updatedAt: Date, medicalCases: [MedicalCase]) {
+    init(id: UUID, name: String, dateOfBirth: Date, gender: String, bloodType: String, emergencyContactName: String?, emergencyContactPhone: String?, notes: String?, createdAt: Date, updatedAt: Date, medicalCases: [MedicalCase]) {
         self.id = id
         self.name = name
         self.dateOfBirth = dateOfBirth

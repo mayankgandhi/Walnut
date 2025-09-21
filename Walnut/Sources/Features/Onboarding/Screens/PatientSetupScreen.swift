@@ -132,102 +132,7 @@ struct PatientSetupScreen: View {
                             )
                         }
                     }
-                    
-                    // Additional Information Section
-                    VStack(alignment: .leading, spacing: Spacing.medium) {
-                        HStack {
-                            Image(systemName: "note.text")
-                                .foregroundStyle(.orange)
-                                .font(.title3)
-                            
-                            Text("Additional Information")
-                                .font(.title3.bold())
-                                .foregroundStyle(.primary)
-                            
-                            Spacer()
-                        }
-                        .padding(.horizontal, Spacing.small)
-                        
-                        VStack(spacing: Spacing.medium) {
-                            // Additional Notes - Custom multi-line field
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack(spacing: Spacing.medium) {
-                                    // Icon section
-                                    ZStack {
-                                        Circle()
-                                            .fill(
-                                                LinearGradient(
-                                                    gradient: Gradient(colors: [
-                                                        Color.orange.opacity(0.08),
-                                                        Color.orange.opacity(0.12)
-                                                    ]),
-                                                    startPoint: .topLeading,
-                                                    endPoint: .bottomTrailing
-                                                )
-                                            )
-                                            .frame(width: 44, height: 44)
-                                        
-                                        Circle()
-                                            .stroke(Color.orange.opacity(0.12), lineWidth: 1)
-                                            .frame(width: 44, height: 44)
-                                        
-                                        Image(systemName: "note.text")
-                                            .font(.system(size: 18, weight: .semibold))
-                                            .foregroundStyle(Color.orange.opacity(0.8))
-                                    }
-                                    
-                                    // Content section
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        HStack(spacing: 4) {
-                                            Text("Additional Notes")
-                                                .font(.system(.subheadline, design: .rounded, weight: .medium))
-                                                .foregroundStyle(.secondary)
-                                            
-                                            Spacer()
-                                            
-                                            Text("Optional")
-                                                .font(.system(.caption, design: .rounded))
-                                                .foregroundStyle(.tertiary)
-                                                .padding(.horizontal, 8)
-                                                .padding(.vertical, 2)
-                                                .background(.quaternary.opacity(0.5), in: Capsule())
-                                        }
-                                        
-                                        TextField(
-                                            "Allergies, medical conditions, or other important information...",
-                                            text: $viewModel.patientSetupData.notes,
-                                            axis: .vertical
-                                        )
-                                        .font(.system(.body, design: .rounded))
-                                        .foregroundStyle(.primary)
-                                        .lineLimit(3...6)
-                                    }
-                                }
-                                .padding(.horizontal, Spacing.medium)
-                                .padding(.vertical, Spacing.small + 4)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color(.systemBackground))
-                                )
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color(.systemGray5), lineWidth: 1)
-                                )
-                                .shadow(
-                                    color: Color.black.opacity(0.05),
-                                    radius: 2,
-                                    x: 0,
-                                    y: 1
-                                )
-                                
-                                Text("Include any allergies, current medications, or medical conditions")
-                                    .font(.system(.caption, design: .rounded))
-                                    .foregroundStyle(.secondary)
-                                    .padding(.horizontal, Spacing.medium)
-                            }
-                        }
-                    }
+                 
                 }
                 
                 // Enhanced Validation Errors with better visual design
@@ -307,8 +212,8 @@ struct PatientSetupScreen: View {
                 Spacer()
                     .frame(height: Spacing.xl)
             }
+            .padding(.horizontal, Spacing.medium)
         }
-        .padding(.horizontal, Spacing.large)
         .onChange(of: selectedGender) { _, newValue in
             viewModel.patientSetupData.gender = newValue?.rawValue ?? ""
         }

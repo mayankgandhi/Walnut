@@ -88,8 +88,6 @@ struct PatientTabView: View {
                     customStatusText: uploadStateManager.statusText
                 )
             } else {
-                // Provide an empty view with zero height when not uploading
-                // This maintains view structure stability
                 EmptyView()
                     .frame(height: 0)
                     .opacity(0)
