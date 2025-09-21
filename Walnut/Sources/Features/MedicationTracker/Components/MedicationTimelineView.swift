@@ -187,7 +187,7 @@ struct MedicationDoseCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 12))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
     }
     
     // MARK: - Computed Properties

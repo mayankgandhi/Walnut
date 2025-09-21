@@ -27,7 +27,7 @@ struct BiomarkerReportListView: View {
             
             HStack(spacing: Spacing.small) {
                 NavBarHeader(
-                    iconName: "testtube.2",
+                    iconName: "health-journal",
                     iconColor: .green,
                     title: "All Biomarker Reports",
                     subtitle: "\(viewModel.biomarkerReports.count) Reports"

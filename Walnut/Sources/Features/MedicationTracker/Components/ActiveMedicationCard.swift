@@ -36,8 +36,7 @@ struct ActiveMedicationCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(.thinMaterial)
-        .cornerRadius(12)
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
     }
 
     // MARK: - Private Views

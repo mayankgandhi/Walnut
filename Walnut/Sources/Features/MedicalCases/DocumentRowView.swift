@@ -35,7 +35,7 @@ struct DocumentRowView: View {
                     documentRow(document)
             }
         }
-        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 12))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
     }
     
     // MARK: - Row Components

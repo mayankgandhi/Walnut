@@ -36,7 +36,7 @@ struct BioMarkersView: View {
                     Button(action: {
                         showBiomarkerReportsList = true
                     }) {
-                        Image(systemName: "list.bullet")
+                        Image(systemName: "document.on.document.fill")
                     }
                     .buttonStyle(.glass)
                     

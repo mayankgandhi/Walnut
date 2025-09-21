@@ -48,6 +48,8 @@ struct MedicalCaseListItem: View {
                 }
             
         }
+        .padding(.bottom, Spacing.xs)
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
     }
 }
 

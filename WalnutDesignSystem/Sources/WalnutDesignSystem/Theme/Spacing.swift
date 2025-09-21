@@ -50,10 +50,7 @@ public extension View {
                 if enableGlassEffect {
                     // iOS 26+ native glass effect
                     self
-                        .glassEffect(
-                            .clear,
-                            in: RoundedRectangle(cornerRadius: 12)
-                        )
+                        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
 
                 } else {
                     // Fallback to regular material
