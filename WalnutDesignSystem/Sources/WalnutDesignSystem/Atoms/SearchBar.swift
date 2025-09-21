@@ -59,8 +59,8 @@ public struct SearchBar: View {
             }
             .padding(.horizontal, Spacing.medium)
             .padding(.vertical, Spacing.small + 2)
-            .background(backgroundView)
             .clipShape(RoundedRectangle(cornerRadius: 12))
+            .glassEffect(.clear, shape: RoundedRectangle(cornerRadius: 12))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(strokeColor, lineWidth: 1)

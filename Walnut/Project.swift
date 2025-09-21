@@ -60,6 +60,7 @@ let settings: SettingsDictionary = [
     "CURRENT_PROJECT_VERSION": .string("1.0"),
     "MARKETING_VERSION": "1",
     "OTHER_LDFLAGS": "-ObjC",
+    "IPHONEOS_DEPLOYMENT_TARGET": "26.0",
 ]
     .automaticCodeSigning(devTeam: "Q7HVAVTGUP")
 

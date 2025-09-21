@@ -8,22 +8,25 @@
 
 import SwiftUI
 
-/// Simple healthcare card with native materials
+/// Simple healthcare card with native materials and glass effect
 public struct HealthCard<Content: View>: View {
     private let content: Content
     private let padding: CGFloat
+    private let enableGlassEffect: Bool
     
     public init(
+        enableGlassEffect: Bool = true,
         @ViewBuilder content: () -> Content
     ) {
         self.content = content()
         self.padding = Spacing.medium
+        self.enableGlassEffect = enableGlassEffect
     }
     
     public var body: some View {
         content
             .padding(padding)
-            .subtleCardStyle()
+            .healthCardStyle(enableGlassEffect: enableGlassEffect)
     }
 }
 
@@ -33,10 +36,11 @@ public struct HealthCard<Content: View>: View {
 #Preview("Health Cards") {
     ScrollView {
         VStack(spacing: Spacing.large) {
+            // Glass effect enabled (default)
             HealthCard {
                 VStack(alignment: .leading, spacing: Spacing.small) {
                     HStack {
-                        PatientAvatar(name: "WW")
+                        PatientAvatar(name: "JD")
                         
                         VStack(alignment: .leading) {
                             Text("John Doe")
@@ -45,19 +49,9 @@ public struct HealthCard<Content: View>: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
-                        
-                        Spacer()
-                        
                     }
-                    
-                    Divider()
-                    
-                  
                 }
             }
-            
-            
         }
-        .padding(Spacing.large)
     }
 }

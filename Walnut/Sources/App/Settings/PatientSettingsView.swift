@@ -34,10 +34,11 @@ struct PatientSettingsView: View {
                     subtitle: "Add your details and preferences here."
                 )
                 
-                HealthStackPro()
                 
                 PatientHeaderCard(patient: viewModel.patient)
                     .padding(.horizontal, Spacing.medium)
+                
+                HealthStackPro()
                 
                 // Patient Settings Section
                 patientSettingsSection

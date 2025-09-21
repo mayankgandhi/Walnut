@@ -43,6 +43,31 @@ public extension View {
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
     }
     
+    /// Apply health card styling with optional glass effect
+    func healthCardStyle(enableGlassEffect: Bool = true) -> some View {
+        self
+            .background {
+                if enableGlassEffect {
+                    // iOS 26+ native glass effect
+                    self
+                        .glassEffect(
+                            .regular,
+                            in: RoundedRectangle(cornerRadius: 12)
+                        )
+                } else {
+                    // Fallback to regular material
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(.ultraThinMaterial)
+                }
+            }
+            .shadow(
+                color: Color.black.opacity(enableGlassEffect ? 0.1 : 0.05),
+                radius: enableGlassEffect ? 8 : 4,
+                x: 0,
+                y: enableGlassEffect ? 4 : 2
+            )
+    }
+    
     /// Ensure minimum touch target size
     func touchTarget() -> some View {
         self
