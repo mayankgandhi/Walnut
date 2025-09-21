@@ -108,13 +108,14 @@ struct ClaudeMessage: Codable {
 enum ClaudeContent: Codable {
     case text(ClaudeTextContent)
     case document(ClaudeDocumentContent)
-    
+    case image(ClaudeImageContent)
+
     private enum CodingKeys: String, CodingKey {
         case type
     }
-    
+
     private enum ContentType: String, Codable {
-        case text, document
+        case text, document, image
     }
     
     func encode(to encoder: Encoder) throws {
@@ -122,6 +123,8 @@ enum ClaudeContent: Codable {
         case .text(let content):
             try content.encode(to: encoder)
         case .document(let content):
+            try content.encode(to: encoder)
+        case .image(let content):
             try content.encode(to: encoder)
         }
     }
@@ -137,23 +140,32 @@ enum ClaudeContent: Codable {
         case .document:
             let content = try ClaudeDocumentContent(from: decoder)
             self = .document(content)
+        case .image:
+            let content = try ClaudeImageContent(from: decoder)
+            self = .image(content)
         }
     }
 }
 
 struct ClaudeTextContent: Codable {
-    let type: String = "text"
+    let type: String
     let text: String
+
+    init(text: String) {
+        self.type = "text"
+        self.text = text
+    }
 }
 
 struct ClaudeDocumentContent: Codable {
-    let type: String = "document"
+    let type: String
     let source: ClaudeFileSource
     let title: String?
     let context: String?
     let citations: ClaudeCitations?
-    
+
     init(fileId: String, title: String? = nil, context: String? = nil, citations: ClaudeCitations? = nil) {
+        self.type = "document"
         self.source = ClaudeFileSource(fileId: fileId)
         self.title = title
         self.context = context
@@ -162,9 +174,14 @@ struct ClaudeDocumentContent: Codable {
 }
 
 struct ClaudeFileSource: Codable {
-    let type: String = "file"
+    let type: String
     let fileId: String
-    
+
+    init(fileId: String) {
+        self.type = "file"
+        self.fileId = fileId
+    }
+
     enum CodingKeys: String, CodingKey {
         case type
         case fileId = "file_id"
@@ -173,6 +190,34 @@ struct ClaudeFileSource: Codable {
 
 struct ClaudeCitations: Codable {
     let enabled: Bool
+}
+
+struct ClaudeImageContent: Codable {
+    let type: String
+    let source: ClaudeImageSource
+
+    init(mediaType: String, data: String) {
+        self.type = "image"
+        self.source = ClaudeImageSource(mediaType: mediaType, data: data)
+    }
+}
+
+struct ClaudeImageSource: Codable {
+    let type: String
+    let mediaType: String
+    let data: String
+
+    init(mediaType: String, data: String) {
+        self.type = "base64"
+        self.mediaType = mediaType
+        self.data = data
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case mediaType = "media_type"
+        case data
+    }
 }
 
 struct ClaudeMessageResponse<T: Codable>: Codable {

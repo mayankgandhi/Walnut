@@ -30,59 +30,54 @@ public final class DocumentParser {
         self.jsonParser = JSONResponseParser(jsonDecoder: jsonDecoder)
     }
     
-    // MARK: - Image Parsing (OpenAI Vision)
-    
+    // MARK: - Image Parsing (Claude Vision)
+
     public func parseImage<T: ParseableModel>(
-        data: Data, 
-        fileName: String, 
+        data: Data,
+        fileName: String,
         as type: T.Type
     ) async throws -> T {
         let base64Data = data.base64EncodedString()
         let mimeType = MimeTypeResolver.mimeType(for: fileName)
-        
+
         let prompt = """
-        Please analyze this document and extract the information according to the tool. Return the information as structured JSON matching the schema provided.
+        Please analyze this document and extract the information into the following JSON structure.
+        Return ONLY JSON and nothing else. Ensure that the values are properly cased as per the data: upper cased, lower cased, etc.
+        Make sure the data is grammatically correct.
+        \(T.parseDefinition)
+        The response is directly decoded by the same model shared.
         """
-        
-        let chatRequest = OpenAIChatRequest(
-            model: "gpt-4o",
+
+        let messageRequest = ClaudeMessageRequest(
+            model: "claude-sonnet-4-20250514",
+            maxTokens: 4096,
+            tools: [type.tool],
+            toolChoice: type.toolChoice,
             messages: [
-                OpenAIMessage(
+                ClaudeMessage(
                     role: "user",
                     content: [
-                        .text(OpenAITextContent(text: prompt)),
-                        .imageUrl(OpenAIImageContent(
-                            imageUrl: OpenAIImageUrl(url: "data:\(mimeType);base64,\(base64Data)")
-                        ))
+                        .text(ClaudeTextContent(text: prompt)),
+                        .image(ClaudeImageContent(mediaType: mimeType, data: base64Data))
                     ]
                 )
-            ],
-            maxTokens: 4096,
-            temperature: 0.1,
-            responseFormat: OpenAIResponseFormat(
-                type: "json_schema",
-                jsonSchema: OpenAIJSONSchemaWrapper(
-                    name: String(describing: type),
-                    strict: true,
-                    schema: type.jsonSchema
-                )
-            )
+            ]
         )
-        
-        let requestData = try JSONEncoder().encode(chatRequest)
-        let request = try openAIClient.createChatRequest(endpoint: "chat/completions", body: requestData)
-        let (data, httpResponse) = try await openAIClient.executeRequest(request)
-        
+
+        let requestData = try JSONEncoder().encode(messageRequest)
+        let request = try claudeClient.createMessageRequest(endpoint: "messages", body: requestData)
+        let (data, httpResponse) = try await claudeClient.executeRequest(request)
+
         guard httpResponse.statusCode == 200 else {
             let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
             throw AIKitError.parsingError(errorMessage)
         }
-        
-        let chatResponse = try jsonDecoder.decode(
-            OpenAIChatResponse.self,
+
+        let messageResponse = try jsonDecoder.decode(
+            ClaudeMessageResponse<T>.self,
             from: data
         )
-        return try jsonParser.parseOpenAIResponse(chatResponse, as: type)
+        return try jsonParser.parseClaudeResponse(messageResponse, as: type)
     }
     
     // MARK: - PDF Parsing (Claude with file upload)
