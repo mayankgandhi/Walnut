@@ -102,55 +102,22 @@ actor DocumentProcessingUseCase {
     private func processDocument(stageData: DocumentProcessingStageData) async throws -> ProcessingResult {
         await updateProgress(0.5, "Processing document...")
         
-        do {
-            let modelId = try await parseAndSaveDocument(
-                fileURL: stageData.preparedFile.fileURL,
-                documentType: stageData.documentType,
-                medicalCase: stageData.medicalCase,
-                patient: stageData.patient
-            )
-            
-            await updateProgress(1.0, "Complete!")
-            
-            return ProcessingResult(
-                documentType: stageData.documentType,
-                modelId: modelId,
-                originalFileName: stageData.preparedFile.originalFileName,
-                createdDocument: nil
-            )
-            
-        } catch {
-            // Fallback: Save as unparsed document
-            return try await handleParsingFailure(
-                stageData: stageData,
-                error: error
-            )
-        }
-    }
-    
-    private func handleParsingFailure(
-        stageData: DocumentProcessingStageData,
-        error: Error
-    ) async throws -> ProcessingResult {
-        guard let medicalCase = stageData.medicalCase else {
-            throw DocumentProcessingError.configurationError("Prescriptions require a medical case")
-        }
-        await updateProgress(0.8, "Parsing failed, saving as unparsed document...")
-        
-        let modelId = try await saveUnparsedDocument(
+        let modelId = try await parseAndSaveDocument(
             fileURL: stageData.preparedFile.fileURL,
-            medicalCase: medicalCase,
-            documentType: stageData.documentType
+            documentType: stageData.documentType,
+            medicalCase: stageData.medicalCase,
+            patient: stageData.patient
         )
         
-        await updateProgress(1.0, "Document saved as unparsed!")
+        await updateProgress(1.0, "Complete!")
         
         return ProcessingResult(
-            documentType: .unknown,
+            documentType: stageData.documentType,
             modelId: modelId,
             originalFileName: stageData.preparedFile.originalFileName,
             createdDocument: nil
         )
+        
     }
     
     // MARK: - Private Methods
@@ -207,24 +174,6 @@ actor DocumentProcessingUseCase {
                 documentType: documentType
             )
         }
-    }
-    
-    private func saveUnparsedDocument(
-        fileURL: URL,
-        medicalCase: MedicalCase,
-        documentType: DocumentType
-    ) async throws -> PersistentIdentifier {
-        let documentFileManager = DocumentFileManager()
-        let fileSize = try await documentFileManager.fileSize(at: fileURL)
-        
-        let document = Document(
-            fileName: fileURL.lastPathComponent,
-            fileURL: fileURL.lastPathComponent,
-            documentType: documentType,
-            fileSize: fileSize
-        )
-        
-        return try await repository.saveUnparsedDocument(document, to: medicalCase)
     }
     
     private func saveAsDocument(

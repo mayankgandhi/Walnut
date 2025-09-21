@@ -32,9 +32,6 @@ class MedicalCase: Identifiable, Sendable {
     var bloodReports: [BioMarkerReport]? = []
     
     @Relationship(deleteRule: .cascade, inverse: \Document.medicalCase)
-    var unparsedDocuments: [Document]? = []
-    
-    @Relationship(deleteRule: .cascade, inverse: \Document.medicalCase)
     var otherDocuments: [Document]? = []
     
     init(id: UUID,
@@ -47,8 +44,7 @@ class MedicalCase: Identifiable, Sendable {
          updatedAt: Date,
          patient: Patient? = nil,
          prescriptions: [Prescription] = [],
-         bloodReports: [BioMarkerReport] = [],
-         unparsedDocuments: [Document] = []) {
+         bloodReports: [BioMarkerReport] = []) {
         self.id = id
         self.title = title
         self.notes = notes
@@ -60,7 +56,6 @@ class MedicalCase: Identifiable, Sendable {
         self.patient = patient
         self.prescriptions = prescriptions
         self.bloodReports = bloodReports
-        self.unparsedDocuments = unparsedDocuments
     }
     
     init(
@@ -78,7 +73,6 @@ class MedicalCase: Identifiable, Sendable {
         self.patient = patient
         self.prescriptions = []
         self.bloodReports = []
-        self.unparsedDocuments = []
     }
     
 }

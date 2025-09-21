@@ -94,10 +94,6 @@ struct UnifiedDocumentsSection: View {
         .onChange(of: medicalCase.bloodReports?.count) { _, _ in
             viewModel.loadDocuments(from: medicalCase)
         }
-        .onChange(of: medicalCase.unparsedDocuments?.count) { _, _ in
-            viewModel.loadDocuments(from: medicalCase)
-        }
-        
     }
     
     // MARK: - View Components
@@ -265,7 +261,6 @@ struct UnifiedDocumentsSection: View {
         patient: patient,
         prescriptions: [],
         bloodReports: [],
-        unparsedDocuments: []
     )
     
     container.mainContext.insert(patient)

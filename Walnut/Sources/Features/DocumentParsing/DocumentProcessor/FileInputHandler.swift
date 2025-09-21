@@ -132,8 +132,6 @@ class FileInputHandler: FileInputHandling {
             return .prescriptions
         case .biomarkerReport:
             return .bloodReports
-        case .unknown:
-            return .unparsedDocuments
         default:
             return .otherDocuments
         }

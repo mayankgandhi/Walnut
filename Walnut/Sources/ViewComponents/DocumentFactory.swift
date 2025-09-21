@@ -60,8 +60,6 @@ class DocumentFactory {
                 )
         case .bloodReport(let bloodReport):
             return BioMarkerReportActionHandler(bloodReport: bloodReport)
-        case .unparsedDocument(let document):
-            return UnparsedDocumentActionHandler(document: document)
         case .document(let document):
             return OtherDocumentActionHandler(document: document)
         }
@@ -200,104 +198,6 @@ class BioMarkerReportActionHandler: DocumentActionHandler {
            let rootViewController = windowScene.windows.first?.rootViewController {
             rootViewController.present(activityController, animated: true)
         }
-    }
-}
-
-// MARK: - Unparsed Document Action Handler
-
-@Observable
-class UnparsedDocumentActionHandler: DocumentActionHandler {
-    private let document: Document
-    private var navigationState = NavigationState()
-    private var isRetrying = false
-    
-    init(document: Document) {
-        self.document = document
-    }
-    
-    func handleTap() {
-        navigationState.selectedDocument = document
-    }
-    
-    func getContextMenuItems() -> [DocumentContextMenuItem] {
-        [
-            DocumentContextMenuItem(
-                title: "Retry Parsing",
-                systemImage: "arrow.clockwise",
-                action: {
-                    self.retryParsing()
-                }
-            ),
-            DocumentContextMenuItem(
-                title: "View Document",
-                systemImage: "eye",
-                action: {
-                    self.navigationState.selectedDocument = self.document
-                }
-            ),
-            DocumentContextMenuItem(
-                title: "Share Document",
-                systemImage: "square.and.arrow.up",
-                action: {
-                    self.shareDocument(self.document)
-                }
-            ),
-            DocumentContextMenuItem(
-                title: "Delete Document",
-                systemImage: "trash",
-                action: {
-                    // TODO: Implement delete functionality
-                },
-                isDestructive: true
-            )
-        ]
-    }
-    
-    func getNavigationDestination() -> AnyView? {
-        if navigationState.selectedDocument != nil {
-            return AnyView(
-                DocumentViewer(document: document)
-            )
-        }
-        return nil
-    }
-    
-    private func retryParsing() {
-        isRetrying = true
-        // TODO: Implement retry parsing logic
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            self.isRetrying = false
-        }
-    }
-    
-    private func shareDocument(_ document: Document) {
-        let activityController = UIActivityViewController(
-            activityItems: [document.fileURL],
-            applicationActivities: nil
-        )
-        
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootViewController = windowScene.windows.first?.rootViewController {
-            rootViewController.present(activityController, animated: true)
-        }
-    }
-    
-    func getRetryButton() -> some View {
-        Button(action: { self.retryParsing() }) {
-            HStack(spacing: 4) {
-                if isRetrying {
-                    ProgressView()
-                        .controlSize(.mini)
-                        .tint(.orange)
-                } else {
-                    Image(systemName: "arrow.clockwise.circle.fill")
-                        .font(.title3)
-                }
-            }
-            .foregroundStyle(.orange)
-        }
-        .disabled(isRetrying)
-        .padding(.trailing, Spacing.medium)
     }
 }
 

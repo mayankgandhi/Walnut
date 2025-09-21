@@ -32,10 +32,7 @@ struct DocumentRowView: View {
                     bloodReportRow(bloodReport)
                     
                 case .document(let document):
-                    documentRow(document, isUnparsed: false)
-                    
-                case .unparsedDocument(let document):
-                    documentRow(document, isUnparsed: true)
+                    documentRow(document)
             }
         }
         .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 12))
@@ -72,23 +69,18 @@ struct DocumentRowView: View {
     }
     
     @ViewBuilder
-    private func documentRow(_ document: Document, isUnparsed: Bool) -> some View {
+    private func documentRow(_ document: Document) -> some View {
         HStack {
             FileIcon(
-                filename: viewModel.formatUnparsedDocumentTitle(document),
-                subtitle: viewModel.formatUnparsedDocumentSubtitle(document),
+                filename: viewModel.formatDocumentTitle(document),
+                subtitle: viewModel.formatDocumentSubtitle(document),
                 documentType: document.documentType ?? .unknown,
-                iconColor: isUnparsed ? .orange : document.documentType?.color,
-                backgroundColor: isUnparsed ? .orange : document.documentType?.backgroundColor
+                iconColor: document.documentType?.color,
+                backgroundColor: document.documentType?.backgroundColor
             )
             .contentShape(Rectangle())
             .onTapGesture {
                 viewModel.selectDocument(document)
-            }
-            
-            // Show retry button for unparsed documents
-            if isUnparsed, let unparsedHandler = actionHandler as? UnparsedDocumentActionHandler {
-                unparsedHandler.getRetryButton()
             }
         }
         .documentContextMenu(items: contextMenuItems)

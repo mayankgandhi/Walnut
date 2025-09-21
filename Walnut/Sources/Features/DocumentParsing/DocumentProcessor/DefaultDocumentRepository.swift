@@ -17,7 +17,6 @@ protocol DocumentRepositoryProtocol {
     func saveBioMarkerReport(_ parsedBioMarkerReport: ParsedBioMarkerReport, to medicalCase: MedicalCase?, fileURL: URL) async throws -> PersistentIdentifier
     func saveBioMarkerReportToPatient(_ parsedBioMarkerReport: ParsedBioMarkerReport, to patient: Patient, fileURL: URL) async throws -> PersistentIdentifier
     func saveDocument(_ document: Document, to medicalCase: MedicalCase) async throws -> PersistentIdentifier
-    func saveUnparsedDocument(_ document: Document, to medicalCase: MedicalCase) async throws -> PersistentIdentifier
 }
 
 // MARK: - Default Document Repository
@@ -163,30 +162,8 @@ struct DefaultDocumentRepository: DocumentRepositoryProtocol {
         to medicalCase: MedicalCase
     ) async throws -> PersistentIdentifier {
         modelContext.insert(document)
-        
-        // Add document to medical case's unparsed documents array
         medicalCase.otherDocuments?.append(document)
-        
-        // Update medical case timestamp to trigger UI refresh
         medicalCase.updatedAt = Date()
-        
-        try modelContext.save()
-        return document.persistentModelID
-    }
-        
-    @MainActor
-    func saveUnparsedDocument(
-        _ document: Document,
-        to medicalCase: MedicalCase
-    ) async throws -> PersistentIdentifier {
-        modelContext.insert(document)
-        
-        // Add document to medical case's unparsed documents array
-        medicalCase.unparsedDocuments?.append(document)
-        
-        // Update medical case timestamp to trigger UI refresh
-        medicalCase.updatedAt = Date()
-        
         try modelContext.save()
         return document.persistentModelID
     }

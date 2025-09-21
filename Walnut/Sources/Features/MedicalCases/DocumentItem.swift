@@ -15,7 +15,6 @@ enum DocumentItem {
     case prescription(Prescription)
     case bloodReport(BioMarkerReport)
     case document(Document)
-    case unparsedDocument(Document)
     
     var id: String {
         switch self {
@@ -25,8 +24,6 @@ enum DocumentItem {
             return "bloodReport-\(bloodReport.id)"
         case .document(let document):
             return "document-\(document.id)"
-        case .unparsedDocument(let document):
-            return "unparsedDocument-\(document.id)"
         }
     }
     
@@ -36,8 +33,6 @@ enum DocumentItem {
             return prescription.dateIssued
         case .bloodReport(let bloodReport):
             return bloodReport.resultDate
-        case .unparsedDocument(let document):
-            return document.uploadDate
         case .document(let document):
             return document.uploadDate
         }

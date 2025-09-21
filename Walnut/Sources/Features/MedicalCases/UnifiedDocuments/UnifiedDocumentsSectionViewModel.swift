@@ -25,7 +25,6 @@ class UnifiedDocumentsSectionViewModel {
     private var _allDocuments: [DocumentItem] = []
     private var _lastMedicalCaseUpdate: Date?
     private var _cachedTotalCount: Int = 0
-    private var _cachedUnparsedCount: Int = 0
     
     // MARK: - Private Properties
     private let factory: DocumentFactory
@@ -52,11 +51,7 @@ class UnifiedDocumentsSectionViewModel {
     var totalDocumentCount: Int {
         return _cachedTotalCount
     }
-    
-    var unparsedCount: Int {
-        return _cachedUnparsedCount
-    }
-    
+   
     var isEmpty: Bool {
         return _allDocuments.isEmpty
     }
@@ -146,11 +141,11 @@ class UnifiedDocumentsSectionViewModel {
         return components.compactMap({ $0 }).joined(separator: " • ")
     }
     
-    func formatUnparsedDocumentTitle(_ document: Document) -> String {
-        return document.fileName ?? "Unparsed Document"
+    func formatDocumentTitle(_ document: Document) -> String {
+        return document.fileName ?? "Document"
     }
     
-    func formatUnparsedDocumentSubtitle(_ document: Document) -> String {
+    func formatDocumentSubtitle(_ document: Document) -> String {
         var components: [String?] = []
         
         components.append( document.uploadDate == nil ? nil : dateFormatter.string(from: document.uploadDate!))
@@ -159,9 +154,6 @@ class UnifiedDocumentsSectionViewModel {
             let fileSize = ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file)
             components.append(fileSize)
         }
-        
-        
-        components.append("Parsing failed")
         
         return components.compactMap({ $0 }).joined(separator: " • ")
     }
@@ -217,11 +209,6 @@ class UnifiedDocumentsSectionViewModel {
                     return medicalCase.bloodReports?.map { DocumentItem.bloodReport($0) }
                 }
                 
-                // Load unparsed documents
-                group.addTask {
-                    return medicalCase.unparsedDocuments?.map { DocumentItem.unparsedDocument($0) }
-                }
-                
                 // Load other documents
                 group.addTask {
                     return medicalCase.otherDocuments?.map { DocumentItem.document($0) }
@@ -241,7 +228,6 @@ class UnifiedDocumentsSectionViewModel {
             // Update cache atomically on main thread
             _allDocuments = documents ?? []
             _cachedTotalCount = documents?.count ?? 0
-            _cachedUnparsedCount = medicalCase.unparsedDocuments?.count ?? 0
             _lastMedicalCaseUpdate = medicalCase.updatedAt ?? Date()
             
         } catch {
@@ -279,7 +265,6 @@ extension UnifiedDocumentsSectionViewModel {
     func clearCache() {
         _allDocuments.removeAll()
         _cachedTotalCount = 0
-        _cachedUnparsedCount = 0
         _lastMedicalCaseUpdate = nil
     }
 }

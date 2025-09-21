@@ -47,7 +47,6 @@ enum DocumentFileManagerError: LocalizedError {
 enum HealthRecordFilePrefix: String, CaseIterable {
     case prescriptions = "RX_"
     case bloodReports = "LAB_"
-    case unparsedDocuments = "UNP_"
     case otherDocuments = "DOC_"
 }
 
