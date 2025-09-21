@@ -135,7 +135,7 @@ final class OnboardingViewModel {
     func requestNotificationPermission() async {
         do {
             let granted = try await UNUserNotificationCenter.current().requestAuthorization(
-                options: [.alert, .badge, .sound]
+                options: [.alert, .badge, .sound, .criticalAlert]
             )
             permissions.notifications = granted ? .granted : .denied
             refreshAvailableScreens()
