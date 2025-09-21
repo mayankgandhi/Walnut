@@ -10,7 +10,7 @@ import SwiftUI
 import SwiftData
 
 @Model
-class Document: Identifiable, Hashable {
+class Document: Identifiable, Hashable, Sendable {
     
     var id: UUID?
     

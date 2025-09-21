@@ -52,7 +52,7 @@ enum OnboardingScreen: Int, CaseIterable {
 }
 
 /// Common chronic conditions for health profile setup
-enum ChronicCondition: String, CaseIterable {
+enum ChronicCondition: String, CaseIterable, Sendable {
 
     case hypertension = "Hypertension"
     case heartDisease = "Heart Disease"

@@ -25,6 +25,7 @@ protocol ApplicationService {
 
 // MARK: - Default Implementation
 extension ApplicationService {
+
     var initializationPriority: Int { 100 } // Default priority
 
     func cleanup() async {

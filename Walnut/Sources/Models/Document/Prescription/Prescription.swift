@@ -10,7 +10,7 @@ import SwiftData
 import Foundation
 
 @Model
-class Prescription {
+class Prescription: Sendable {
     
     var id: UUID?
     
