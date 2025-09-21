@@ -146,37 +146,29 @@ struct MedicationDoseCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.small) {
-            
-            // Header with status indicator and time
-            VStack(alignment: .leading, spacing: Spacing.small) {
+            VStack(alignment: .leading) {
+                Text(dose.medication.name ?? "Unknown")
+                    .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
                 
-                VStack(alignment: .leading) {
-                    
-                    Text(dose.medication.name ?? "Unknown")
-                        .font(.system(.subheadline, design: .rounded, weight: .semibold))
-                        .foregroundStyle(.primary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
-                    
-                    // Dosage information
-                    if let dosage = dose.medication.dosage {
-                        Text(dosage)
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(Color.healthPrimary)
-                            .padding(.horizontal, Spacing.xs)
-                            .padding(.vertical, 2)
-                            .background(
-                                Color.healthPrimary.opacity(0.1),
-                                in: Capsule()
-                            )
-                    }
+                // Dosage information
+                if let dosage = dose.medication.dosage {
+                    Text(dosage)
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(Color.healthPrimary)
+                        .padding(.horizontal, Spacing.xs)
+                        .padding(.vertical, 2)
+                        .background(
+                            Color.healthPrimary.opacity(0.1),
+                            in: Capsule()
+                        )
                 }
-                
-                Text(dose.displayTime)
-                    .font(.caption2.weight(.medium))
-                    .foregroundStyle(.secondary)
-                
             }
+            Text(dose.displayTime)
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(.secondary)
             
             // Meal relation badge
             if let mealRelation = dose.mealRelation {
@@ -192,15 +184,10 @@ struct MedicationDoseCard: View {
                     .truncationMode(.tail)
             }
             Spacer()
-            
-            
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        
-        .background(.thinMaterial)
-        
-        .cornerRadius(12)
+        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 12))
     }
     
     // MARK: - Computed Properties
