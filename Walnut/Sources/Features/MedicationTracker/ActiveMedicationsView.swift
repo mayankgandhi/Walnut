@@ -84,7 +84,7 @@ struct ActiveMedicationsView: View {
             )
 
             HStack(spacing: Spacing.small) {
-            
+
                 Button(action: onShowAllMedications) {
                     Image(systemName: "pills.circle.fill")
                 }
