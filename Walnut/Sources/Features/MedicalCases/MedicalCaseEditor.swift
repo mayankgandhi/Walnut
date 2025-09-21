@@ -170,32 +170,31 @@ struct MedicalCaseEditor: View {
                             .foregroundStyle(.secondary)
                             .padding(.horizontal, Spacing.medium)
                         
-                        HealthCard {
-                            HStack(spacing: Spacing.medium) {
-                                PatientAvatar(
-                                    name: patient?.name ?? "P",
-                                    color: Color.blue,
-                                    size: Size.avatarLarge
-                                )
+                        HStack(spacing: Spacing.medium) {
+                            PatientAvatar(
+                                name: patient?.name ?? "P",
+                                color: Color.blue,
+                                size: Size.avatarLarge
+                            )
+                            
+                            VStack(alignment: .leading, spacing: Spacing.xs) {
+                                Text(patient?.name ?? "Patient")
+                                    .font(.headline.weight(.semibold))
+                                    .foregroundStyle(.primary)
                                 
-                                VStack(alignment: .leading, spacing: Spacing.xs) {
-                                    Text(patient?.name ?? "Patient")
-                                        .font(.headline.weight(.semibold))
-                                        .foregroundStyle(.primary)
-                                    
-                                    if let age = patient?.age,
-                                       let gender = patient?.gender {
-                                        Text(
-                                            "\(age) years old • \(gender)"
-                                        )
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                    }
+                                if let age = patient?.age,
+                                   let gender = patient?.gender {
+                                    Text(
+                                        "\(age) years old • \(gender)"
+                                    )
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                                 }
-                                
-                                Spacer()
                             }
+                            
+                            Spacer()
                         }
+                        .padding(.horizontal, Spacing.medium)
                         
                     }
                     

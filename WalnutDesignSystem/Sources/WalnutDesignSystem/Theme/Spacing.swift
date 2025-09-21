@@ -54,6 +54,7 @@ public extension View {
                             .regular,
                             in: RoundedRectangle(cornerRadius: 12)
                         )
+
                 } else {
                     // Fallback to regular material
                     RoundedRectangle(cornerRadius: 12)

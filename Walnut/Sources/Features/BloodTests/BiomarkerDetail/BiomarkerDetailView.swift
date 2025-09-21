@@ -189,89 +189,90 @@ struct BiomarkerDetailView: View {
     
     // MARK: - Chart Section
     private var chartSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.medium)  {
-            headingView
+        HealthCard {
             
-            // Enhanced chart
-            EnhancedBiomarkerChart(
-                dataPoints: viewModel.filteredDataPoints.map { point in
-                    BiomarkerDataPoint(
-                        date: point.date,
-                        value: point.value,
-                        bloodReport: point.bloodReport,
-                        document: point.document
-                    )
-                },
-                color: viewModel.primaryColor,
-                normalRange: viewModel.normalRangeText,
-                selectedDataPoint: Binding<BiomarkerDataPoint?>(
-                    get: {
-                        guard let selected = viewModel.selectedDataPoint else { return nil }
-                        return BiomarkerDataPoint(
-                            date: selected.date,
-                            value: selected.value,
-                            bloodReport: selected.bloodReport,
-                            document: selected.document
+            VStack(alignment: .leading, spacing: Spacing.medium)  {
+                headingView
+                
+                // Enhanced chart
+                EnhancedBiomarkerChart(
+                    dataPoints: viewModel.filteredDataPoints.map { point in
+                        BiomarkerDataPoint(
+                            date: point.date,
+                            value: point.value,
+                            bloodReport: point.bloodReport,
+                            document: point.document
                         )
                     },
-                    set: { newValue in
-                        if let chartPoint = newValue {
-                            // Find the corresponding dataPoint in our array
-                            let dataPoint = viewModel.filteredDataPoints.first { point in
-                                point.date == chartPoint.date &&
-                                point.value == chartPoint.value &&
-                                point.bloodReport == chartPoint.bloodReport
+                    color: viewModel.primaryColor,
+                    normalRange: viewModel.normalRangeText,
+                    selectedDataPoint: Binding<BiomarkerDataPoint?>(
+                        get: {
+                            guard let selected = viewModel.selectedDataPoint else { return nil }
+                            return BiomarkerDataPoint(
+                                date: selected.date,
+                                value: selected.value,
+                                bloodReport: selected.bloodReport,
+                                document: selected.document
+                            )
+                        },
+                        set: { newValue in
+                            if let chartPoint = newValue {
+                                // Find the corresponding dataPoint in our array
+                                let dataPoint = viewModel.filteredDataPoints.first { point in
+                                    point.date == chartPoint.date &&
+                                    point.value == chartPoint.value &&
+                                    point.bloodReport == chartPoint.bloodReport
+                                }
+                                viewModel.selectDataPoint(dataPoint)
+                            } else {
+                                viewModel.selectDataPoint(nil)
                             }
-                            viewModel.selectDataPoint(dataPoint)
-                        } else {
-                            viewModel.selectDataPoint(nil)
                         }
-                    }
-                ),
-            )
-            .frame(height: 280)
-            
-            timeFrameSelector
+                    ),
+                )
+                .frame(height: 280)
+                
+                timeFrameSelector
+            }
         }
     }
     
     private var headingView: some View {
-        
-        HStack {
-            VStack(alignment: .leading, spacing: Spacing.xs) {
-                Text("Trend Analysis")
-                    .font(.headline.weight(.bold))
-                    .foregroundStyle(.primary)
-                
-                Text("\(viewModel.filteredDataPoints.count) readings over time")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            
-            Spacer()
-            
-            // Legend
-            HStack(spacing: Spacing.small) {
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(Color.healthSuccess.opacity(0.3))
-                        .frame(width: 8, height: 8)
-                    Text("Normal Range")
+            HStack {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    Text("Trend Analysis")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(.primary)
+                    
+                    Text("\(viewModel.filteredDataPoints.count) readings over time")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
                 
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(viewModel.primaryColor)
-                        .frame(width: 8, height: 8)
-                    Text("Your Values")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                Spacer()
+                
+                // Legend
+                HStack(spacing: Spacing.small) {
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(Color.healthSuccess.opacity(0.3))
+                            .frame(width: 8, height: 8)
+                        Text("Normal Range")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(viewModel.primaryColor)
+                            .frame(width: 8, height: 8)
+                        Text("Your Values")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
-            
-        }
     }
     
     private var historicalDataSection: some View {
