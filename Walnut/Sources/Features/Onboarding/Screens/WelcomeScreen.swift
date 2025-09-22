@@ -12,9 +12,9 @@ import WalnutDesignSystem
 
 /// Welcome screen introducing the app's value proposition
 struct WelcomeScreen: View {
-
+    
     @Bindable var viewModel: OnboardingViewModel
-
+    
     @State var showFeatures: Bool = false
     @State var showChildFeatures: Bool = false
     @State private var showDemoModeSheet = false
@@ -64,7 +64,7 @@ struct WelcomeScreen: View {
                         .resizable()
                         .scaledToFit()
                         .matchedGeometryEffect(id: "calendar", in: animation)
-                   
+                    
                     Image("journal")
                         .resizable()
                         .scaledToFit()
@@ -83,72 +83,94 @@ struct WelcomeScreen: View {
             DemoModeView()
         }
     }
-
+    
     // MARK: - Demo Mode View
-
+    
+    // MARK: - Demo Environment
+    
+    @MainActor
+    private class DemoEnvironment: ObservableObject {
+        let container: ModelContainer
+        let modelContext: ModelContext
+        
+        init(container: ModelContainer) {
+            self.container = container
+            self.modelContext = container.mainContext
+        }
+    }
+    
     @MainActor
     private struct DemoModeView: View {
         @Environment(\.dismiss) private var dismiss
         @State private var demoModelContainer: ModelContainer?
         @State private var isLoading = true
-
+        
         var body: some View {
-            NavigationStack {
+            Group {
                 if let container = demoModelContainer {
-                    PatientTabView(patient: getDemoPatient(from: container))
-                        .modelContainer(container)
+                    // Completely isolate the demo mode in its own environment
+                    NavigationStack {
+                        PatientTabView(patient: getDemoPatient(from: container))
+                            .navigationTitle("Demo Mode")
+                            .navigationBarTitleDisplayMode(.inline)
+                            .toolbar {
+                                ToolbarItem(placement: .navigationBarLeading) {
+                                    Button("Exit Demo") {
+                                        dismiss()
+                                    }
+                                }
+                            }
+                            .overlay(alignment: .top) {
+                                DemoModeBanner()
+                            }
+                    }
+                    .modelContainer(container)
+                    .environment(\.modelContext, container.mainContext)
+                    .environmentObject(DemoEnvironment(container: container))
+                } else if isLoading {
+                    NavigationStack {
+                        VStack(spacing: Spacing.medium) {
+                            ProgressView()
+                                .scaleEffect(1.2)
+                            
+                            Text("Loading demo data...")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .navigationTitle("Demo Mode")
                         .navigationBarTitleDisplayMode(.inline)
                         .toolbar {
                             ToolbarItem(placement: .navigationBarLeading) {
-                                Button("Exit Demo") {
+                                Button("Cancel") {
                                     dismiss()
                                 }
                             }
                         }
-                        .overlay(alignment: .top) {
-                            DemoModeBanner()
-                        }
-                } else if isLoading {
-                    VStack(spacing: Spacing.medium) {
-                        ProgressView()
-                            .scaleEffect(1.2)
-
-                        Text("Loading demo data...")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .navigationTitle("Demo Mode")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarLeading) {
-                            Button("Cancel") {
-                                dismiss()
-                            }
-                        }
                     }
                 } else {
-                    VStack(spacing: Spacing.medium) {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.title)
-                            .foregroundStyle(.orange)
-
-                        Text("Failed to load demo data")
-                            .font(.headline)
-
-                        Button("Retry") {
-                            setupDemoContainer()
+                    NavigationStack {
+                        VStack(spacing: Spacing.medium) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.title)
+                                .foregroundStyle(.orange)
+                            
+                            Text("Failed to load demo data")
+                                .font(.headline)
+                            
+                            Button("Retry") {
+                                setupDemoContainer()
+                            }
+                            .buttonStyle(.borderedProminent)
                         }
-                        .buttonStyle(.borderedProminent)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .navigationTitle("Demo Mode")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarLeading) {
-                            Button("Cancel") {
-                                dismiss()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .navigationTitle("Demo Mode")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .navigationBarLeading) {
+                                Button("Cancel") {
+                                    dismiss()
+                                }
                             }
                         }
                     }
@@ -158,10 +180,10 @@ struct WelcomeScreen: View {
                 setupDemoContainer()
             }
         }
-
+        
         private func setupDemoContainer() {
             isLoading = true
-
+            
             Task { @MainActor in
                 do {
                     let schema = Schema([
@@ -173,12 +195,12 @@ struct WelcomeScreen: View {
                         BioMarkerResult.self,
                         Document.self
                     ])
-
+                    
                     let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
                     let container = try ModelContainer(for: schema, configurations: [configuration])
-
+                    
                     await populateDemoData(in: container.mainContext)
-
+                    
                     self.demoModelContainer = container
                     self.isLoading = false
                 } catch {
@@ -187,7 +209,7 @@ struct WelcomeScreen: View {
                 }
             }
         }
-
+        
         private func populateDemoData(in context: ModelContext) async {
             // Create comprehensive demo patient
             let demoPatient = Patient(
@@ -203,29 +225,29 @@ struct WelcomeScreen: View {
                 updatedAt: Date(),
                 medicalCases: []
             )
-
+            
             context.insert(demoPatient)
-
+            
             // Create multiple comprehensive medical cases
             let medicalCases = createDemoMedicalCases(for: demoPatient, in: context)
             demoPatient.medicalCases = medicalCases
-
+            
             // Create comprehensive prescriptions and medications
             await createDemoMedications(for: demoPatient, cases: medicalCases, in: context)
-
+            
             // Create comprehensive biomarker reports
             await createDemoBiomarkerReports(for: demoPatient, in: context)
-
+            
             do {
                 try context.save()
             } catch {
                 print("❌ Failed to save demo data: \(error)")
             }
         }
-
+        
         private func createDemoMedicalCases(for patient: Patient, in context: ModelContext) -> [MedicalCase] {
             var cases: [MedicalCase] = []
-
+            
             // 1. Type 2 Diabetes Management (Active)
             let diabetesCase = MedicalCase(
                 id: UUID(),
@@ -239,7 +261,7 @@ struct WelcomeScreen: View {
                 patient: patient,
                 prescriptions: []
             )
-
+            
             // 2. Hypertension Monitoring (Active)
             let hypertensionCase = MedicalCase(
                 id: UUID(),
@@ -253,7 +275,7 @@ struct WelcomeScreen: View {
                 patient: patient,
                 prescriptions: []
             )
-
+            
             // 3. Annual Physical Exam (Active)
             let physicalCase = MedicalCase(
                 id: UUID(),
@@ -267,7 +289,7 @@ struct WelcomeScreen: View {
                 patient: patient,
                 prescriptions: []
             )
-
+            
             // 4. Vitamin D Deficiency (Active)
             let vitaminDCase = MedicalCase(
                 id: UUID(),
@@ -281,7 +303,7 @@ struct WelcomeScreen: View {
                 patient: patient,
                 prescriptions: []
             )
-
+            
             // 5. Seasonal Allergies (Resolved)
             let allergiesCase = MedicalCase(
                 id: UUID(),
@@ -295,7 +317,7 @@ struct WelcomeScreen: View {
                 patient: patient,
                 prescriptions: []
             )
-
+            
             // 6. Minor Injury - Ankle Sprain (Resolved)
             let injuryCase = MedicalCase(
                 id: UUID(),
@@ -309,7 +331,7 @@ struct WelcomeScreen: View {
                 patient: patient,
                 prescriptions: []
             )
-
+            
             // 7. COVID-19 Vaccination (Completed)
             let covidVaxCase = MedicalCase(
                 id: UUID(),
@@ -323,22 +345,22 @@ struct WelcomeScreen: View {
                 patient: patient,
                 prescriptions: []
             )
-
+            
             cases = [diabetesCase, hypertensionCase, physicalCase, vitaminDCase, allergiesCase, injuryCase, covidVaxCase]
-
+            
             for medicalCase in cases {
                 context.insert(medicalCase)
             }
-
+            
             return cases
         }
-
+        
         private func createDemoMedications(for patient: Patient, cases: [MedicalCase], in context: ModelContext) async {
             guard let diabetesCase = cases.first(where: { $0.title?.contains("Diabetes") == true }),
                   let hypertensionCase = cases.first(where: { $0.title?.contains("Hypertension") == true }),
                   let vitaminDCase = cases.first(where: { $0.title?.contains("Vitamin D") == true }),
                   let allergiesCase = cases.first(where: { $0.title?.contains("Allergies") == true }) else { return }
-
+            
             // Diabetes Medications
             let metforminPrescription = createPrescription(
                 medicationName: "Metformin ER",
@@ -354,7 +376,7 @@ struct WelcomeScreen: View {
                 daysAgo: 90,
                 in: context
             )
-
+            
             // Hypertension Medication
             let lisinoprilPrescription = createPrescription(
                 medicationName: "Lisinopril",
@@ -367,7 +389,7 @@ struct WelcomeScreen: View {
                 daysAgo: 120,
                 in: context
             )
-
+            
             // Vitamin D Supplement
             let vitaminDPrescription = createPrescription(
                 medicationName: "Vitamin D3 (Cholecalciferol)",
@@ -380,7 +402,7 @@ struct WelcomeScreen: View {
                 daysAgo: 60,
                 in: context
             )
-
+            
             // Omega-3 Supplement (General health)
             let omega3Prescription = createPrescription(
                 medicationName: "Omega-3 Fish Oil",
@@ -396,7 +418,7 @@ struct WelcomeScreen: View {
                 daysAgo: 45,
                 in: context
             )
-
+            
             // Allergy Medication (Seasonal - as needed)
             let allergyPrescription = createPrescription(
                 medicationName: "Cetirizine (Zyrtec)",
@@ -409,7 +431,7 @@ struct WelcomeScreen: View {
                 daysAgo: 180,
                 in: context
             )
-
+            
             // Multivitamin (Daily wellness)
             let multivitaminPrescription = createPrescription(
                 medicationName: "Adult Multivitamin",
@@ -422,14 +444,14 @@ struct WelcomeScreen: View {
                 daysAgo: 30,
                 in: context
             )
-
+            
             // Update medical cases with prescriptions
             diabetesCase.prescriptions = [metforminPrescription, omega3Prescription]
             hypertensionCase.prescriptions = [lisinoprilPrescription]
             vitaminDCase.prescriptions = [vitaminDPrescription, multivitaminPrescription]
             allergiesCase.prescriptions = [allergyPrescription]
         }
-
+        
         private func createPrescription(
             medicationName: String,
             dosage: String,
@@ -441,7 +463,7 @@ struct WelcomeScreen: View {
             daysAgo: Int,
             in context: ModelContext
         ) -> Prescription {
-
+            
             let prescription = Prescription(
                 id: UUID(),
                 followUpDate: Calendar.current.date(byAdding: .month, value: 3, to: Date()),
@@ -456,7 +478,7 @@ struct WelcomeScreen: View {
                 createdAt: Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date()) ?? Date(),
                 updatedAt: Date()
             )
-
+            
             let medication = Medication(
                 id: UUID(),
                 name: medicationName,
@@ -469,15 +491,15 @@ struct WelcomeScreen: View {
                 patient: medicalCase.patient!,
                 prescription: prescription
             )
-
+            
             prescription.medications = [medication]
-
+            
             context.insert(prescription)
             context.insert(medication)
-
+            
             return prescription
         }
-
+        
         private func createDemoBiomarkerReports(for patient: Patient, in context: ModelContext) async {
             // Recent Comprehensive Metabolic Panel
             let recentCMP = BioMarkerReport(
@@ -494,7 +516,7 @@ struct WelcomeScreen: View {
                 document: nil,
                 testResults: []
             )
-
+            
             let cmpResults = [
                 createBiomarkerResult("Glucose", "142", "mg/dL", "70-100", true, recentCMP, context),
                 createBiomarkerResult("BUN", "18", "mg/dL", "7-20", false, recentCMP, context),
@@ -506,7 +528,7 @@ struct WelcomeScreen: View {
                 createBiomarkerResult("CO2", "24", "mEq/L", "22-28", false, recentCMP, context)
             ]
             recentCMP.testResults = cmpResults
-
+            
             // HbA1c Test
             let hba1cReport = BioMarkerReport(
                 id: UUID(),
@@ -522,10 +544,10 @@ struct WelcomeScreen: View {
                 document: nil,
                 testResults: []
             )
-
+            
             let hba1cResult = createBiomarkerResult("Hemoglobin A1c", "6.8", "%", "<7.0", false, hba1cReport, context)
             hba1cReport.testResults = [hba1cResult]
-
+            
             // Lipid Panel
             let lipidReport = BioMarkerReport(
                 id: UUID(),
@@ -541,7 +563,7 @@ struct WelcomeScreen: View {
                 document: nil,
                 testResults: []
             )
-
+            
             let lipidResults = [
                 createBiomarkerResult("Total Cholesterol", "185", "mg/dL", "<200", false, lipidReport, context),
                 createBiomarkerResult("LDL Cholesterol", "95", "mg/dL", "<100", false, lipidReport, context),
@@ -549,7 +571,7 @@ struct WelcomeScreen: View {
                 createBiomarkerResult("Triglycerides", "128", "mg/dL", "<150", false, lipidReport, context)
             ]
             lipidReport.testResults = lipidResults
-
+            
             // Vitamin D Test
             let vitaminDReport = BioMarkerReport(
                 id: UUID(),
@@ -565,10 +587,10 @@ struct WelcomeScreen: View {
                 document: nil,
                 testResults: []
             )
-
+            
             let vitaminDResult = createBiomarkerResult("25-Hydroxyvitamin D", "35", "ng/mL", "30-100", false, vitaminDReport, context)
             vitaminDReport.testResults = [vitaminDResult]
-
+            
             // Complete Blood Count
             let cbcReport = BioMarkerReport(
                 id: UUID(),
@@ -584,7 +606,7 @@ struct WelcomeScreen: View {
                 document: nil,
                 testResults: []
             )
-
+            
             let cbcResults = [
                 createBiomarkerResult("WBC", "6.8", "K/uL", "4.0-11.0", false, cbcReport, context),
                 createBiomarkerResult("RBC", "4.5", "M/uL", "4.5-5.9", false, cbcReport, context),
@@ -593,7 +615,7 @@ struct WelcomeScreen: View {
                 createBiomarkerResult("Platelets", "285", "K/uL", "150-450", false, cbcReport, context)
             ]
             cbcReport.testResults = cbcResults
-
+            
             // Historical HbA1c for trends
             let historicalHba1c = BioMarkerReport(
                 id: UUID(),
@@ -609,16 +631,16 @@ struct WelcomeScreen: View {
                 document: nil,
                 testResults: []
             )
-
+            
             let historicalHba1cResult = createBiomarkerResult("Hemoglobin A1c", "7.4", "%", "<7.0", true, historicalHba1c, context)
             historicalHba1c.testResults = [historicalHba1cResult]
-
+            
             let reports = [recentCMP, hba1cReport, lipidReport, vitaminDReport, cbcReport, historicalHba1c]
             for report in reports {
                 context.insert(report)
             }
         }
-
+        
         private func createBiomarkerResult(
             _ testName: String,
             _ value: String,
@@ -637,15 +659,15 @@ struct WelcomeScreen: View {
                 isAbnormal: isAbnormal,
                 bloodReport: report
             )
-
+            
             context.insert(result)
             return result
         }
-
+        
         private func getDemoPatient(from container: ModelContainer) -> Patient {
             let context = container.mainContext
             let descriptor = FetchDescriptor<Patient>()
-
+            
             do {
                 let patients = try context.fetch(descriptor)
                 return patients.first ?? Patient(
