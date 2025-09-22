@@ -269,9 +269,11 @@ struct PatientEditor: View {
             .onAppear {
                 if let patient {
                     loadPatientData(patient)
+                    AnalyticsService.shared.track(.patient(.editorOpened))
                 } else {
                     // Set default date for new patients
                     selectedDateOfBirth = dateOfBirth
+                    AnalyticsService.shared.track(.patient(.editorOpened))
                 }
             }
         }
@@ -305,6 +307,8 @@ struct PatientEditor: View {
             patient.emergencyContactPhone = emergencyContactPhone.trimmingCharacters(in: .whitespacesAndNewlines)
             patient.notes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
             patient.updatedAt = now
+
+            AnalyticsService.shared.track(.patient(.updated))
         } else {
             // Check subscription limits for new patient creation
             let subscriptionService = SubscriptionService.shared
@@ -335,6 +339,8 @@ struct PatientEditor: View {
                 medicalCases: []
             )
             modelContext.insert(newPatient)
+
+            AnalyticsService.shared.track(.patient(.created))
         }
     }
 }

@@ -83,6 +83,9 @@ struct PrescriptionDetailView: View {
                 }
             }
             .navigationTitle(Text("Prescription"))
+            .onAppear {
+                AnalyticsService.shared.track(.prescription(.viewed))
+            }
         }
     }
     

@@ -19,6 +19,9 @@ struct PDFKitView: UIViewRepresentable {
         pdfView.autoScales = true
         pdfView.displayMode = .singlePageContinuous
         pdfView.displayDirection = .vertical
+
+        AnalyticsService.shared.track(.document(.viewed))
+
         return pdfView
     }
     

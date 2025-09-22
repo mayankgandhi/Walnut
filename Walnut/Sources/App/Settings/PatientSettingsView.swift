@@ -64,6 +64,9 @@ struct PatientSettingsView: View {
         } message: {
             Text(viewModel.error?.localizedDescription ?? "An unknown error occurred.")
         }
+        .onAppear {
+            AnalyticsService.shared.track(.app(.featureUsed))
+        }
     }
     
     // MARK: - View Components

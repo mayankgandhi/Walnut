@@ -101,6 +101,9 @@ struct PatientTabView: View {
                 documentReviewView(for: createdDocument)
             }
         }
+        .onAppear {
+            AnalyticsService.shared.track(.patient(.viewed))
+        }
     }
     
     @ViewBuilder

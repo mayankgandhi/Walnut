@@ -15,15 +15,15 @@ import Atlantis
 final class AnalyticsService: ApplicationService {
 
     static let shared = AnalyticsService()
-    
+
     var claudeKey: String {
         PostHogSDK.shared.getFeatureFlagPayload("anthropic-api-key") as? String ?? ""
     }
-    
+
     var openAIKey: String {
         PostHogSDK.shared.getFeatureFlagPayload("openai-api-key") as? String ?? ""
     }
-    
+
     var initializationPriority: Int { ServicePriority.analytics }
 
     private init() {}
@@ -48,6 +48,51 @@ final class AnalyticsService: ApplicationService {
         Atlantis.start()
         #endif
     }
+
+    // MARK: - Event Tracking
+
+    func track(_ event: AnalyticsEvent) {
+        PostHogSDK.shared.capture(event.eventName)
+    }
+
+    func track(eventName: String, properties: [String: Any] = [:]) {
+        PostHogSDK.shared.capture(eventName, properties: properties)
+    }
+
+    func identify(userId: String, properties: [String: Any] = [:]) {
+        PostHogSDK.shared.identify(userId, userProperties: properties)
+    }
+
+    func setUserProperty(key: String, value: Any) {
+        PostHogSDK.shared.identify(PostHogSDK.shared.getDistinctId(), userProperties: [key: value])
+    }
+
+    func alias(alias: String) {
+        PostHogSDK.shared.alias(alias)
+    }
+
+    func reset() {
+        PostHogSDK.shared.reset()
+    }
+
+    // MARK: - Feature Flags
+
+    func isFeatureEnabled(_ featureFlag: String) -> Bool {
+        return PostHogSDK.shared.isFeatureEnabled(featureFlag)
+    }
+
+    func getFeatureFlagPayload(_ featureFlag: String) -> Any? {
+        return PostHogSDK.shared.getFeatureFlagPayload(featureFlag)
+    }
+
+    // MARK: - Debug Helpers
+
+    #if DEBUG
+    func trackDebug(_ event: AnalyticsEvent) {
+        print("🔍 Analytics Event: \(event.eventName)")
+        track(event)
+    }
+    #endif
 
     func cleanup() async {
         // PostHog doesn't require explicit cleanup
