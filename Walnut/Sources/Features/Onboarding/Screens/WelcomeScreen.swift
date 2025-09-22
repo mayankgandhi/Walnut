@@ -120,9 +120,6 @@ struct WelcomeScreen: View {
                                     }
                                 }
                             }
-                            .overlay(alignment: .top) {
-                                DemoModeBanner()
-                            }
                     }
                     .modelContainer(container)
                     .environment(\.modelContext, container.mainContext)

@@ -32,9 +32,6 @@ public struct DemoModeActivationSheet: View {
                             }
                         }
                     }
-                    .overlay(alignment: .top) {
-                        DemoModeBanner()
-                    }
             } else if isLoading {
                 VStack(spacing: Spacing.medium) {
                     ProgressView()
