@@ -56,8 +56,10 @@ final class OnboardingViewModel {
             return true
         case .permissions:
             return true // Can proceed regardless of permission choices
-        case .patientSetup:
-            return true
+        case .patientName:
+            return validatePatientName()
+        case .patientDateOfBirth:
+            return validatePatientDateOfBirth()
         case .vitalsIntroduction:
             return true
         }
@@ -106,15 +108,15 @@ final class OnboardingViewModel {
     // MARK: - Dynamic Flow Calculation
     private func calculateAvailableScreens() -> [OnboardingScreen] {
         var screens: [OnboardingScreen] = [.welcome, .healthProfile]
-        
+
         // Only include permissions screen if notifications are not already granted
         if permissions.notifications != .granted {
             screens.append(.permissions)
         }
-        
-        // Always include patient setup and vitals introduction
-        screens.append(contentsOf: [.patientSetup, .vitalsIntroduction])
-        
+
+        // Always include patient name, date of birth, and vitals introduction
+        screens.append(contentsOf: [.patientName, .patientDateOfBirth, .vitalsIntroduction])
+
         return screens
     }
     
@@ -224,16 +226,54 @@ final class OnboardingViewModel {
     // MARK: - Validation
     func validatePatientSetup() -> [String] {
         var errors: [String] = []
-        
+
         if patientSetupData.name.isEmpty {
             errors.append("Name is required")
         }
-        
+
         if patientSetupData.dateOfBirth == nil {
             errors.append("Date of birth is required")
         }
-        
+
         return errors
+    }
+
+    func validatePatientName() -> Bool {
+        let trimmedName = patientSetupData.name.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedName.isEmpty else { return false }
+        guard trimmedName.count >= 2 else { return false }
+        guard trimmedName.count <= 100 else { return false }
+
+        // Check for valid characters (letters, spaces, common name characters)
+        let validNameCharacters = CharacterSet.letters
+            .union(.whitespaces)
+            .union(CharacterSet(charactersIn: "'-.,"))
+
+        guard trimmedName.unicodeScalars.allSatisfy(validNameCharacters.contains) else { return false }
+
+        // Check for at least one letter
+        guard trimmedName.contains(where: { $0.isLetter }) else { return false }
+
+        return true
+    }
+
+    func validatePatientDateOfBirth() -> Bool {
+        guard let date = patientSetupData.dateOfBirth else { return false }
+
+        let calendar = Calendar.current
+        let now = Date()
+        let minimumAge = calendar.date(byAdding: .year, value: -150, to: now) ?? now
+        let maximumAge = calendar.date(byAdding: .year, value: -1, to: now) ?? now
+
+        // Check if date is in the future
+        guard date <= now else { return false }
+
+        // Check for reasonable age limits
+        guard date >= minimumAge else { return false }
+        guard date <= maximumAge else { return false }
+
+        return true
     }
 }
 

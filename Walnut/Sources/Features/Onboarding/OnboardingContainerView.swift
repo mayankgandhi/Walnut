@@ -43,8 +43,10 @@ struct OnboardingContainerView: View {
                             HealthProfileScreen(viewModel: viewModel)
                         case .permissions:
                             PermissionsScreen(viewModel: viewModel)
-                        case .patientSetup:
-                            PatientSetupScreen(viewModel: viewModel)
+                        case .patientName:
+                            PatientNameScreen(viewModel: viewModel)
+                        case .patientDateOfBirth:
+                            PatientDateOfBirthScreen(viewModel: viewModel)
                         case .vitalsIntroduction:
                             VitalsIntroductionScreen(viewModel: viewModel)
                         }

@@ -15,7 +15,8 @@ enum OnboardingScreen: Int, CaseIterable {
     case welcome = 0
     case healthProfile
     case permissions
-    case patientSetup
+    case patientName
+    case patientDateOfBirth
     case vitalsIntroduction
     
     var title: String {
@@ -26,11 +27,13 @@ enum OnboardingScreen: Int, CaseIterable {
                 return "Health Profile"
             case .permissions:
                 return "Permissions"
-            case .patientSetup:
-                return "Patient Information"
+            case .patientName:
+                return "Your Name"
+            case .patientDateOfBirth:
+                return "Date of Birth"
             case .vitalsIntroduction:
                 return "Vitals Tracking"
-                
+
         }
     }
     
@@ -42,11 +45,13 @@ enum OnboardingScreen: Int, CaseIterable {
                 return "Tell us about your health conditions"
             case .permissions:
                 return "Enable features to get the most out of your health tracking"
-            case .patientSetup:
-                return "Let's set up your patient profile"
+            case .patientName:
+                return "What should we call you?"
+            case .patientDateOfBirth:
+                return "Help us personalize your health experience"
             case .vitalsIntroduction:
                 return "Track your vital signs and health metrics"
-                
+
         }
     }
 }
