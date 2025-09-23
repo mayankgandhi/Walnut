@@ -85,35 +85,23 @@ struct WelcomeScreen: View {
         }
     }
     
-    // MARK: - Demo Mode View
     
-    // MARK: - Demo Environment
-    
-    @MainActor
-    private class DemoEnvironment: ObservableObject {
-        let container: ModelContainer
-        let modelContext: ModelContext
-        
-        init(container: ModelContainer) {
-            self.container = container
-            self.modelContext = container.mainContext
-        }
-    }
     
     @MainActor
     private struct DemoModeView: View {
         @Environment(\.dismiss) private var dismiss
         @State private var demoModelContainer: ModelContainer?
         @State private var isLoading = true
-
+        
         private let demoModeManager = DemoModeManager.shared
-
+        
         var body: some View {
             Group {
-                if let container = demoModelContainer {
+                if let container = demoModelContainer,
+                   demoModeManager.demoPatient != nil {
                     // Completely isolate the demo mode in its own environment
                     NavigationStack {
-                        PatientTabView(patient: getDemoPatient(from: container))
+                        PatientTabView(patient: demoModeManager.demoPatient!)
                             .navigationTitle("Demo Mode")
                             .navigationBarTitleDisplayMode(.inline)
                             .toolbar {
@@ -126,13 +114,12 @@ struct WelcomeScreen: View {
                     }
                     .modelContainer(container)
                     .environment(\.modelContext, container.mainContext)
-                    .environmentObject(DemoEnvironment(container: container))
                 } else if isLoading {
                     NavigationStack {
                         VStack(spacing: Spacing.medium) {
                             ProgressView()
                                 .scaleEffect(1.2)
-
+                            
                             Text("Loading demo data...")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
@@ -154,10 +141,10 @@ struct WelcomeScreen: View {
                             Image(systemName: "exclamationmark.triangle")
                                 .font(.title)
                                 .foregroundStyle(.orange)
-
+                            
                             Text("Failed to load demo data")
                                 .font(.headline)
-
+                            
                             Button("Retry") {
                                 setupDemoContainer()
                             }
@@ -183,7 +170,7 @@ struct WelcomeScreen: View {
         
         private func setupDemoContainer() {
             isLoading = true
-
+            
             Task { @MainActor in
                 do {
                     let schema = Schema([
@@ -195,57 +182,19 @@ struct WelcomeScreen: View {
                         BioMarkerResult.self,
                         Document.self
                     ])
-
+                    
                     let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
                     let container = try ModelContainer(for: schema, configurations: [configuration])
-
+                    
                     // Use DemoModeManager to populate demo data
                     demoModeManager.populateDemoData(in: container.mainContext)
-
+                    
                     self.demoModelContainer = container
                     self.isLoading = false
                 } catch {
                     print("❌ Failed to create demo container: \(error)")
                     self.isLoading = false
                 }
-            }
-        }
-        
-        
-        private func getDemoPatient(from container: ModelContainer) -> Patient {
-            let context = container.mainContext
-            let descriptor = FetchDescriptor<Patient>()
-            
-            do {
-                let patients = try context.fetch(descriptor)
-                return patients.first ?? Patient(
-                    id: UUID(),
-                    name: "Demo Patient",
-                    dateOfBirth: Date(),
-                    gender: "Other",
-                    bloodType: "O+",
-                    emergencyContactName: "Emergency Contact",
-                    emergencyContactPhone: "555-0123",
-                    notes: "Fallback demo patient",
-                    createdAt: Date(),
-                    updatedAt: Date(),
-                    medicalCases: []
-                )
-            } catch {
-                print("❌ Failed to fetch demo patient: \(error)")
-                return Patient(
-                    id: UUID(),
-                    name: "Demo Patient",
-                    dateOfBirth: Date(),
-                    gender: "Other",
-                    bloodType: "O+",
-                    emergencyContactName: "Emergency Contact",
-                    emergencyContactPhone: "555-0123",
-                    notes: "Fallback demo patient",
-                    createdAt: Date(),
-                    updatedAt: Date(),
-                    medicalCases: []
-                )
             }
         }
     }
