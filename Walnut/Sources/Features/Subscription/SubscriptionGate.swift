@@ -4,6 +4,7 @@ import RevenueCat
 import RevenueCatUI
 
 struct SubscriptionGate: ViewModifier {
+
     @StateObject private var subscriptionService = SubscriptionService.shared
     @State private var showPaywall = false
     

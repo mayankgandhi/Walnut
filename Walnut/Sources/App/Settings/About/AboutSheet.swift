@@ -61,7 +61,7 @@ struct AboutSheet: View {
                 Spacer()
             }
             .padding(Spacing.medium)
-            .navigationTitle(Text("About").font(.system(.largeTitle, design: .rounded)))
+            .navigationTitle(Text("About"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

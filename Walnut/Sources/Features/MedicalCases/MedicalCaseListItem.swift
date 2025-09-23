@@ -48,7 +48,9 @@ struct MedicalCaseListItem: View {
                 }
             
         }
-        .padding(.bottom, Spacing.xs)
+        .padding(.vertical, Spacing.small)
+        .padding(.horizontal, Spacing.medium)
+        .frame(minHeight: 120)
         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
     }
 }

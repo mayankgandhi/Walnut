@@ -145,9 +145,9 @@ struct MedicalCasesView: View {
     private func medicalCasesList(viewModel: MedicalCasesViewModel) -> some View {
         ScrollView {
             LazyVGrid(
-                columns: [.init(), .init(), .init()],
+                columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.medium), count: adaptiveColumnCount),
                 alignment: .leading,
-                spacing: .zero
+                spacing: Spacing.medium
             ) {
                 ForEach(viewModel.filteredAndSortedCases) { medicalCase in
                     Button {
@@ -162,7 +162,16 @@ struct MedicalCasesView: View {
                 }
             }
             .padding(.horizontal, Spacing.medium)
+            .padding(.bottom, Spacing.large)
         }
+    }
+
+    private var adaptiveColumnCount: Int {
+        #if os(iOS)
+        return UIDevice.current.userInterfaceIdiom == .pad ? 4 : 2
+        #else
+        return 3
+        #endif
     }
     
     @ViewBuilder
