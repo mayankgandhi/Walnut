@@ -30,6 +30,7 @@ struct WelcomeScreen: View {
                 .frame(width: 96, height: 96)
                 .onLongPressGesture(minimumDuration: 3.0) {
                     showDemoModeSheet = true
+                    AnalyticsService.shared.track(.app(.featureUsed))
                 }
             
             VStack(alignment: .center, spacing: Spacing.medium) {

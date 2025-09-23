@@ -64,8 +64,12 @@ struct OnboardingContainerView: View {
             }
             .environment(viewModel)
             .navigationBarHidden(true)
+            .onAppear {
+                AnalyticsService.shared.track(.app(.featureUsed))
+            }
             .onReceive(NotificationCenter.default.publisher(for: .onboardingCompleted)) { _ in
                 Task { @MainActor in
+                    AnalyticsService.shared.track(.app(.featureUsed))
                     onOnboardingComplete()
                 }
             }

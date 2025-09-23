@@ -224,6 +224,7 @@ struct PatientSetupScreen: View {
             // Initialize selected values from view model
             selectedGender = GenderOption.allCases.first { $0.rawValue == viewModel.patientSetupData.gender }
             selectedBloodType = BloodTypeOption.allCases.first { $0.rawValue == viewModel.patientSetupData.bloodType }
+            AnalyticsService.shared.track(.app(.featureUsed))
         }
         
     }
