@@ -9,6 +9,7 @@
 import SwiftUI
 import SwiftData
 import Observation
+import UserNotifications
 
 @Observable
 class DeleteAllDataViewModel {
@@ -71,7 +72,11 @@ class DeleteAllDataViewModel {
             for fileURL in contents {
                 try FileManager.default.removeItem(at: fileURL)
             }
-            
+
+            // Clear all notifications
+            UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+            UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+
             isDeleting = false
             showDeleteConfirmation = false
             showDeleteSuccess = true
