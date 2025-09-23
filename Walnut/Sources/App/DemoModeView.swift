@@ -23,8 +23,9 @@ struct DemoModeView: View {
     var body: some View {
         Group {
             if !isLoading,
-               let container = demoModelContainer,
-               let demoPatient = demoModeManager.demoPatient {
+               let container = demoModelContainer {
+                // Fetch the demo patient from the container
+                if let demoPatient = fetchDemoPatient(from: container) {
                 // Completely isolate the demo mode in its own environment
                 NavigationStack {
                     PatientTabView(patient: demoPatient)
@@ -40,6 +41,34 @@ struct DemoModeView: View {
                 }
                 .modelContainer(container)
                 .environment(\.modelContext, container.mainContext)
+                } else {
+                    // Demo patient not found
+                    NavigationStack {
+                        VStack(spacing: Spacing.medium) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.title)
+                                .foregroundStyle(.orange)
+
+                            Text("Demo patient not found")
+                                .font(.headline)
+
+                            Button("Retry") {
+                                setupDemoContainer()
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .navigationTitle("Demo Mode")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .navigationBarLeading) {
+                                Button("Cancel") {
+                                    dismiss()
+                                }
+                            }
+                        }
+                    }
+                }
             } else if isLoading {
                 NavigationStack {
                     VStack(spacing: Spacing.medium) {
@@ -132,6 +161,22 @@ struct DemoModeView: View {
                 print("❌ Failed to create demo container: \(error)")
                 self.isLoading = false
             }
+        }
+    }
+
+    private func fetchDemoPatient(from container: ModelContainer) -> Patient? {
+        do {
+            let descriptor = FetchDescriptor<Patient>()
+            let patients = try container.mainContext.fetch(descriptor)
+
+            // Look for demo patient
+            return patients.first { patient in
+                (patient.name == "Alex Demo Patient") ||
+                (patient.notes?.contains("demo-patient-walnut-app") == true)
+            }
+        } catch {
+            print("❌ Failed to fetch demo patient: \(error)")
+            return nil
         }
     }
 }
