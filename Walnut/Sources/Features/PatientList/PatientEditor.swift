@@ -310,19 +310,6 @@ struct PatientEditor: View {
 
             AnalyticsService.shared.track(.patient(.updated))
         } else {
-            // Check subscription limits for new patient creation
-            let subscriptionService = SubscriptionService.shared
-            if !subscriptionService.isPremiumFeatureAvailable() {
-                // For free users, check patient count limit (e.g., 3 patients max)
-                let descriptor = FetchDescriptor<Patient>()
-                let patientCount = (try? modelContext.fetchCount(descriptor)) ?? 0
-
-                if patientCount >= 3 {
-                    // Show upgrade prompt - this would typically be handled with an alert
-                    // For now, we'll just return without saving
-                    return
-                }
-            }
 
             // Create new patient
             let newPatient = Patient(

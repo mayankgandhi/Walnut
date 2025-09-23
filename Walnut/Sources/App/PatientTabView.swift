@@ -47,21 +47,12 @@ struct PatientTabView: View {
             
             Tab("Trends", systemImage: "chart.line.uptrend.xyaxis") {
                 NavigationStack {
-                    if subscriptionService.isSubscribed {
-                        BioMarkersView(
-                            viewModel: BioMarkersViewModel(
-                                patient: patient,
-                                modelContext: modelContext
-                            )
+                    BioMarkersView(
+                        viewModel: BioMarkersViewModel(
+                            patient: patient,
+                            modelContext: modelContext
                         )
-                    } else {
-                        BioMarkersView(
-                            viewModel: BioMarkersViewModel(
-                                patient: patient,
-                                modelContext: modelContext
-                            )
-                        )
-                    }
+                    )
                 }
             }
             
