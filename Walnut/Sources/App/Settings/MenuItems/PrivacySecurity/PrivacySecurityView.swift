@@ -27,12 +27,6 @@ struct PrivacySecurityView: View {
         ) {
             viewModel.presentPrivacySettings()
         }
-        // TODO: Add sheet presentation when PrivacySettingsView is implemented
-        // .sheet(isPresented: $viewModel.showPrivacySettings, onDismiss: {
-        //     viewModel.dismissPrivacySettings()
-        // }) {
-        //     PrivacySettingsView()
-        // }
     }
 }
 

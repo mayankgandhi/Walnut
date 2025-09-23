@@ -13,9 +13,6 @@ import Observation
 @Observable
 class PrivacySecurityViewModel {
     
-    // MARK: - Published Properties
-    var showPrivacySettings = false
-    
     // MARK: - Private Properties
     private let patient: Patient
     
@@ -39,11 +36,8 @@ class PrivacySecurityViewModel {
     
     // MARK: - Actions
     func presentPrivacySettings() {
-        showPrivacySettings = true
-        // TODO: Implement privacy settings navigation
-    }
-    
-    func dismissPrivacySettings() {
-        showPrivacySettings = false
+        if let url = URL(string: "https://mayankgandhi.com/walnut/privacy-policy") {
+            UIApplication.shared.open(url)
+        }
     }
 }
