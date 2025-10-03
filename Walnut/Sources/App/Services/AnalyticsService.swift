@@ -49,16 +49,6 @@ final class AnalyticsService: ApplicationService {
         #endif
     }
 
-
-
-    // MARK: - Debug Helpers
-
-    #if DEBUG
-    func trackDebug(_ event: AnalyticsEvent) {
-        print("🔍 Analytics Event: \(event.eventName)")
-    }
-    #endif
-
     func cleanup() async {
         // PostHog doesn't require explicit cleanup
         // Atlantis stops automatically when the app terminates
