@@ -98,9 +98,6 @@ struct PatientDateOfBirthScreen: View {
             }
             .padding(.horizontal, Spacing.medium)
         }
-        .onAppear {
-            AnalyticsService.shared.track(.app(.featureUsed))
-        }
         .onChange(of: viewModel.patientSetupData.dateOfBirth) { _, newValue in
             validateDateOfBirth(newValue)
         }

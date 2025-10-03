@@ -21,7 +21,6 @@ public struct ContentView: View {
             } else {
                 OnboardingContainerView {
                     hasCompletedOnboarding = true
-                    AnalyticsService.shared.track(.app(.featureUsed))
                 }
             }
         }

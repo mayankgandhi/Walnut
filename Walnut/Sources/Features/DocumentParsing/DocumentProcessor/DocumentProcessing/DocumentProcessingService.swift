@@ -10,7 +10,6 @@ import SwiftUI
 import SwiftData
 import Foundation
 import AIKit
-import PostHog
 
 // MARK: - Protocols
 

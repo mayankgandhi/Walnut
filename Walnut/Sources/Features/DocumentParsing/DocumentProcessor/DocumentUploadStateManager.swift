@@ -8,7 +8,6 @@
 
 import SwiftUI
 import SwiftData
-import PostHog
 
 // MARK: - Created Document Type
 enum CreatedDocument {
@@ -73,8 +72,6 @@ class DocumentUploadStateManager {
         self.statusText = nil
         self.error = nil
         self.createdDocument = nil
-
-        AnalyticsService.shared.track(.document(.uploadStarted))
     }
     
     func updateProgress(_ progress: Double, status: String) {
@@ -101,16 +98,12 @@ class DocumentUploadStateManager {
         self.error = error
         self.uploadState = .failed
         hideAfterDelay()
-
-        AnalyticsService.shared.track(.document(.parseFailed))
     }
     
     func completeUpload() {
         self.uploadState = .completed
         self.progress = 1.0
         hideAfterDelay()
-
-        AnalyticsService.shared.track(.document(.uploadCompleted))
     }
     
     private func hideAfterDelay() {
@@ -123,8 +116,6 @@ class DocumentUploadStateManager {
     
     func setCreatedDocument(_ document: CreatedDocument) {
         self.createdDocument = document
-
-        AnalyticsService.shared.track(.document(.parseSucceeded))
     }
     
     private func reset() {

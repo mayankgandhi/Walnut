@@ -8,7 +8,6 @@
 
 import SwiftUI
 import WalnutDesignSystem
-import PostHog
 
 struct PatientTabView: View {
     
@@ -91,9 +90,6 @@ struct PatientTabView: View {
             if let createdDocument = uploadStateManager.createdDocument {
                 documentReviewView(for: createdDocument)
             }
-        }
-        .onAppear {
-            AnalyticsService.shared.track(.patient(.viewed))
         }
     }
     

@@ -74,7 +74,6 @@ struct PermissionsScreen: View {
         .padding(.horizontal, Spacing.large)
         .onAppear {
             viewModel.checkNotificationPermission()
-            AnalyticsService.shared.track(.app(.featureUsed))
         }
     }
 }

@@ -87,7 +87,6 @@ struct PatientNameScreen: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 isNameFocused = true
             }
-            AnalyticsService.shared.track(.app(.featureUsed))
         }
         .onChange(of: viewModel.patientSetupData.name) { _, newValue in
             // Clear error when user starts typing

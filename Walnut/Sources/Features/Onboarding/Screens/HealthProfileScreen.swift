@@ -51,9 +51,6 @@ struct HealthProfileScreen: View {
                 .frame(height: Spacing.xl)
         }
         .padding(.horizontal, Spacing.large)
-        .onAppear {
-            AnalyticsService.shared.track(.app(.featureUsed))
-        }
     }
     
     

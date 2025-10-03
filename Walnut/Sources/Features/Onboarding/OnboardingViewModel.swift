@@ -84,7 +84,6 @@ final class OnboardingViewModel {
         } else {
             withAnimation(.easeInOut(duration: 0.3)) {
                 currentScreenIndex += 1
-                AnalyticsService.shared.track(.app(.featureUsed))
             }
         }
     }
@@ -130,14 +129,12 @@ final class OnboardingViewModel {
             healthProfile.selectedConditions.remove(condition)
         } else {
             healthProfile.selectedConditions.insert(condition)
-            AnalyticsService.shared.track(.app(.featureUsed))
         }
     }
     
     // MARK: - Permission Handling
     @MainActor
     func requestNotificationPermission() async {
-        AnalyticsService.shared.track(.app(.featureUsed))
         do {
             let granted = try await UNUserNotificationCenter.current().requestAuthorization(
                 options: [.alert, .badge, .sound, .criticalAlert]
@@ -147,7 +144,6 @@ final class OnboardingViewModel {
         } catch {
             permissions.notifications = .denied
             refreshAvailableScreens()
-            AnalyticsService.shared.track(.app(.errorOccurred))
         }
     }
     
@@ -204,7 +200,6 @@ final class OnboardingViewModel {
         }
         
         try modelContext.save()
-        AnalyticsService.shared.track(.patient(.created))
         return patient
     }
     
@@ -215,9 +210,6 @@ final class OnboardingViewModel {
 
         // Store onboarding completion in UserDefaults
         UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
-
-        // Track onboarding completion
-        AnalyticsService.shared.track(.app(.featureUsed))
 
         // Post notification that onboarding is complete
         NotificationCenter.default.post(name: .onboardingCompleted, object: nil)

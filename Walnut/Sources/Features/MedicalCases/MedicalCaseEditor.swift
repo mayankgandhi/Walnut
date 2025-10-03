@@ -266,9 +266,6 @@ struct MedicalCaseEditor: View {
             .onAppear {
                 if let medicalCase {
                     loadMedicalCaseData(medicalCase)
-                    AnalyticsService.shared.track(.medicalCase(.editorOpened))
-                } else {
-                    AnalyticsService.shared.track(.medicalCase(.editorOpened))
                 }
             }
         }
@@ -304,8 +301,6 @@ struct MedicalCaseEditor: View {
             medicalCase.specialty = selectedSpecialty
             medicalCase.isActive = isActive
             medicalCase.updatedAt = now
-
-            AnalyticsService.shared.track(.medicalCase(.updated))
         } else {
             // Create new medical case
             let newMedicalCase = MedicalCase(
@@ -320,8 +315,6 @@ struct MedicalCaseEditor: View {
                 patient: patient
             )
             modelContext.insert(newMedicalCase)
-
-            AnalyticsService.shared.track(.medicalCase(.created))
         }
     }
 }

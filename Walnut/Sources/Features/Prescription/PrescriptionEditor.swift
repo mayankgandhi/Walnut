@@ -386,9 +386,6 @@ struct PrescriptionEditor: View {
             .onAppear {
                 if let prescription {
                     loadPrescriptionData(prescription)
-                    AnalyticsService.shared.track(.prescription(.editorOpened))
-                } else {
-                    AnalyticsService.shared.track(.prescription(.editorOpened))
                 }
             }
             .sheet(isPresented: $showMedicationEditor) {
@@ -487,11 +484,9 @@ struct PrescriptionEditor: View {
         if let index = medications.firstIndex(where: { $0.id == medication.id }) {
             // Update existing medication
             medications[index] = medication
-            AnalyticsService.shared.track(.medication(.updated))
         } else {
             // Add new medication
             medications.append(medication)
-            AnalyticsService.shared.track(.medication(.added))
         }
     }
     
@@ -532,7 +527,6 @@ struct PrescriptionEditor: View {
             // Update medications relationship - ensure proper linking
             prescription.medications = medications
 
-            AnalyticsService.shared.track(.prescription(.updated))
 
         } else {
             // Create new prescription
@@ -558,7 +552,6 @@ struct PrescriptionEditor: View {
                 modelContext.insert(medication)
             }
 
-            AnalyticsService.shared.track(.prescription(.created))
         }
         
         // Save the context

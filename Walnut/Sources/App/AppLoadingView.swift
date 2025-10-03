@@ -40,7 +40,6 @@ struct AppLoadingView: View {
                 await MainActor.run {
                     withAnimation(.easeOut(duration: 0.3)) {
                         isServicesInitialized = true
-                        AnalyticsService.shared.track(.app(.launched))
                     }
                 }
             } catch {
@@ -48,7 +47,6 @@ struct AppLoadingView: View {
 
                 await MainActor.run {
                     initializationError = error
-                    AnalyticsService.shared.track(.app(.errorOccurred))
                 }
             }
         }

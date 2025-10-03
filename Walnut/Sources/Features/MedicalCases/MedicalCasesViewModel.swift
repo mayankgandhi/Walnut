@@ -88,7 +88,6 @@ class MedicalCasesViewModel {
             medicalCases = try modelContext.fetch(descriptor)
         } catch {
             self.error = error
-            AnalyticsService.shared.track(.app(.errorOccurred))
         }
         
         isLoading = false
@@ -116,9 +115,6 @@ class MedicalCasesViewModel {
             
             await MainActor.run {
                 self?.searchText = newText
-                if !newText.isEmpty {
-                    AnalyticsService.shared.track(.userExperience(.searchPerformed))
-                }
             }
         }
     }
@@ -163,10 +159,8 @@ class MedicalCasesViewModel {
             // Clear delete state
             self.caseToDelete = nil
             showDeleteAlert = false
-
         } catch {
             self.error = error
-            AnalyticsService.shared.track(.app(.errorOccurred))
         }
     }
     

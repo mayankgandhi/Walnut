@@ -55,7 +55,6 @@ final class ServiceManager {
             } catch {
                 let serviceName = String(describing: type(of: service))
                 print("❌ ServiceManager: Failed to initialize \(serviceName): \(error)")
-                AnalyticsService.shared.track(.app(.errorOccurred))
                 throw ServiceManagerError.serviceInitializationFailed(serviceName: serviceName, error: error)
             }
         }

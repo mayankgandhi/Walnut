@@ -55,9 +55,6 @@ struct MedicalCaseDetailView: View {
                     .padding(.horizontal, Spacing.medium)
                     .padding(.vertical, Spacing.small)
                 }
-                .onAppear {
-                    AnalyticsService.shared.track(.medicalCase(.viewed))
-                }
             } else {
                 // Handle case where medical case might be deleted or not found
                 ContentUnavailableView(
