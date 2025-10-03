@@ -25,9 +25,6 @@ final class UserService: ApplicationService {
         let userResult = await userIDManager.getUserID()
         cachedUserID = userResult.id
         print("User ID: \(userResult.id) from \(userResult.source)")
-
-        // Start monitoring sync for iCloud users
-        userIDManager.startMonitoringSync()
     }
 
     // MARK: - Public Interface
@@ -43,11 +40,6 @@ final class UserService: ApplicationService {
     /// Get the full user ID with source information
     func getUserIDWithSource() async -> (id: String, source: UniversalUserID.UserIDSource) {
         return await userIDManager.getUserID()
-    }
-
-    /// Get iCloud availability status and recommendations
-    func getiCloudStatus() -> (available: Bool, recommendation: String?) {
-        return userIDManager.getiCloudStatus()
     }
 
     func cleanup() async {
