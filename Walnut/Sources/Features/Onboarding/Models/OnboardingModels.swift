@@ -40,15 +40,15 @@ enum OnboardingScreen: Int, CaseIterable {
     var subtitle: String {
         switch self {
             case .welcome:
-                return "Your comprehensive health management companion"
+                return "Your personal health journal"
             case .healthProfile:
-                return "Tell us about your health conditions"
+                return "Tell us about your conditions"
             case .permissions:
-                return "Enable features to get the most out of your health tracking"
+                return "Enable features to get the most out of your experience"
             case .patientName:
                 return "What should we call you?"
             case .patientDateOfBirth:
-                return "Help us personalize your health experience"
+                return "Help us personalize your experience"
             case .vitalsIntroduction:
                 return "Track your vital signs and health metrics"
 

@@ -135,9 +135,6 @@ public class DemoModeManager {
             }
 
             for demoPatient in demoPatients {
-                // SwiftData will automatically handle cascade deletion for relationships
-                // This will delete all associated medical cases, prescriptions, medications,
-                // biomarker reports, etc. due to the @Relationship(deleteRule: .cascade) setup
                 modelContext.delete(demoPatient)
             }
 

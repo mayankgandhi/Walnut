@@ -29,7 +29,7 @@ struct UploadViewBottomAccessory: View {
                 case .completed:
                     "checked"
                 case .failed:
-                    "document-failed"
+                    "failed"
             }
         }
 
