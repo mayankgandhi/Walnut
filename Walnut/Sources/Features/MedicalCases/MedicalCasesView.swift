@@ -20,15 +20,15 @@ struct MedicalCasesView: View {
     
     private var emptyStateView: some View {
         ContentUnavailableView {
-            Label(viewModel.searchText.isEmpty ? "No Medical Cases" : "No Results",
-                  systemImage: viewModel.searchText.isEmpty ? "doc.text" : "magnifyingglass")
+            Label(viewModel.searchText.isEmpty ? "Start Your Health Journal" : "No Results",
+                  systemImage: viewModel.searchText.isEmpty ? "book.pages" : "magnifyingglass")
         } description: {
             Text(viewModel.searchText.isEmpty ?
-                 "Create your first medical case to get started" :
-                 "No cases match your search criteria")
+                 "Document your health visits, symptoms, and appointments. Create your first entry to begin." :
+                 "No entries match your search criteria")
         } actions: {
             if viewModel.searchText.isEmpty {
-                Button("Create Medical Case") {
+                Button("Create First Entry") {
                     viewModel.showCreateMedicalCase()
                 }
                 .buttonStyle(.borderedProminent)
@@ -49,7 +49,7 @@ struct MedicalCasesView: View {
                 HStack {
                     NavBarHeader(
                         iconName: "drawer",
-                        iconColor: .red,
+                        iconColor: .blue,
                         title: "Cases",
                         subtitle: "\(viewModel.medicalCases.count) Cases"
                     )

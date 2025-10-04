@@ -18,7 +18,7 @@ struct HealthProfileScreen: View {
         
         VStack(spacing: Spacing.xl) {
             
-            OnboardingHeader(icon: "heart.circle.fill", title: "Health Profile", subtitle: "Tell us about your health conditions and emergency contacts")
+            OnboardingHeader(icon: "heart.circle.fill", title: "Health Profile", subtitle: "Adding these conditions will automatically create journal entries in Cases")
             
             // Chronic Conditions Section
             VStack(spacing: Spacing.medium) {

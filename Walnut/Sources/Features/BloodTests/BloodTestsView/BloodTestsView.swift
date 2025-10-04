@@ -172,17 +172,23 @@ struct BioMarkersView: View {
     
     private var emptyStateView: some View {
         ContentUnavailableView {
-            Label("No Blood Tests", systemImage: "testtube.2")
+            Label("Track Your Health Trends", systemImage: "chart.line.uptrend.xyaxis")
         } description: {
             VStack(spacing: Spacing.small) {
-                Text("Upload lab reports to track your biomarkers and health trends over time.")
+                Text("Upload lab reports to visualize your health markers and track changes over time.")
                     .multilineTextAlignment(.center)
-                
-                Text("Your blood test history will appear here once you upload reports from your medical cases.")
+
+                Text("Add your first report to start tracking your wellness journey.")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
                     .multilineTextAlignment(.center)
             }
+        } actions: {
+            Button("Upload Lab Report") {
+                documentPickerStore.selectDocumentType(.biomarkerReport)
+                showDocumentPicker = true
+            }
+            .buttonStyle(.borderedProminent)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -192,22 +198,22 @@ struct BioMarkersView: View {
             ContentUnavailableView {
                 Label("No Matching Results", systemImage: "magnifyingglass")
             } description: {
-                Text("Try adjusting your search terms or filters to find blood test results.")
+                Text("Try adjusting your search terms to find health markers.")
                     .multilineTextAlignment(.center)
             } actions: {
-                Button("Clear Filters") {
+                Button("Clear Search") {
                     viewModel.clearSearch()
                 }
                 .buttonStyle(.bordered)
             }
         } else {
             ContentUnavailableView {
-                Label("No Blood Results", systemImage: "testtube.2")
+                Label("No Results Found", systemImage: "chart.xyaxis.line")
             } description: {
-                Text("Add Blood reports under your medical cases to see them here.")
+                Text("Upload lab reports to your health journal entries to see trends here.")
                     .multilineTextAlignment(.center)
             } actions: {
-                Button("Clear Filters") {
+                Button("Clear Search") {
                     viewModel.clearSearch()
                 }
                 .buttonStyle(.bordered)

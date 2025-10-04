@@ -26,7 +26,7 @@ class PrivacySecurityViewModel {
         SettingsMenuItem(
             icon: "shield.fill",
             title: "Privacy & Security",
-            subtitle: "Data protection settings",
+            subtitle: "Review our privacy policy",
             iconColor: .green,
             action: { [weak self] in
                 self?.presentPrivacySettings()

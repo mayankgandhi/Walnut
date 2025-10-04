@@ -24,7 +24,7 @@ struct WelcomeScreen: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .center, spacing: Spacing.medium) {
-                HStack(alignment: .center, spacing: Spacing.medium) {
+                VStack(alignment: .center, spacing: Spacing.medium) {
                     
                     Image("NewWalnutAppIcon")
                         .resizable()
@@ -68,7 +68,6 @@ struct WelcomeScreen: View {
                             .resizable()
                             .scaledToFit()
                             .matchedGeometryEffect(id: "calendar", in: animation)
-                        
                         Image("journal")
                             .resizable()
                             .scaledToFit()

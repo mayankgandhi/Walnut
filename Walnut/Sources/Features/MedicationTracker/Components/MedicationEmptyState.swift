@@ -12,15 +12,15 @@ import WalnutDesignSystem
 /// Empty state view for when no medications are scheduled
 struct MedicationEmptyState: View {
     // MARK: - Body
-    
+
     var body: some View {
         VStack(spacing: Spacing.large) {
             ContentUnavailableView {
-                Label("No Medications Scheduled", systemImage: "pills")
+                Label("Start Tracking Medications", systemImage: "pills")
             } description: {
-                Text("Add medications to your prescriptions to track dosages and schedules throughout the day.")
+                Text("Keep track of your daily medications and supplements. Add them to get started with your health journal.")
             } actions: {
-               
+
             }
             .padding(Spacing.large)
         }

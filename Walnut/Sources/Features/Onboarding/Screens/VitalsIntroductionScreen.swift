@@ -41,13 +41,6 @@ struct VitalsIntroductionScreen: View {
                     )
 
                     FeatureRow(
-                        icon: "square.and.arrow.up",
-                        title: "Export & Share",
-                        description: "Export your journal entries whenever you need them",
-                        color: Color.healthSuccess
-                    )
-
-                    FeatureRow(
                         icon: "target",
                         title: "Personal Goals",
                         description: "Set wellness goals and celebrate your achievements",
