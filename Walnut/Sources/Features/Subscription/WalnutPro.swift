@@ -1,5 +1,5 @@
 //
-//  HealthStackPro.swift
+//  WalnutPro.swift
 //  Walnut
 //
 //  Created by Mayank Gandhi on 19/09/25.
@@ -10,7 +10,7 @@ import SwiftUI
 import WalnutDesignSystem
 import RevenueCatUI
 
-struct HealthStackPro: View {
+struct WalnutPro: View {
     @StateObject private var subscriptionService = SubscriptionService.shared
     @State private var showPaywall = false
     @State private var showSubscriptionManagement = false
@@ -60,7 +60,7 @@ struct HealthStackPro: View {
 
     private var headerSection: some View {
         HStack(spacing: Spacing.small) {
-            Text("Health Stack Pro")
+            Text("Walnut Pro")
                 .font(.system(.title3, design: .rounded, weight: .bold))
                 .foregroundStyle(Color.white)
 
@@ -153,5 +153,5 @@ struct HealthStackPro: View {
 }
 
 #Preview {
-    HealthStackPro()
+    WalnutPro()
 }

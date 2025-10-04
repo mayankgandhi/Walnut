@@ -50,7 +50,10 @@ struct PatientSettingsView: View {
                 
                 deadZoneSection
                     .padding(.horizontal, Spacing.medium)
-                
+
+                disclaimerSection
+                    .padding(.horizontal, Spacing.medium)
+
                 Spacer(minLength: Spacing.xl)
             }
         }
@@ -91,8 +94,8 @@ struct PatientSettingsView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             VStack(spacing: Spacing.xs) {
-                AppearanceView(patient: viewModel.patient)
                 AboutView(patient: viewModel.patient)
+                FAQView(patient: viewModel.patient)
                 HelpSupportView(patient: viewModel.patient)
             }
         }
@@ -104,9 +107,37 @@ struct PatientSettingsView: View {
                 .font(.headline)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            
+
             VStack(spacing: Spacing.xs) {
                 DeleteAllDataView(patient: viewModel.patient, modelContext: viewModel.modelContext)
+            }
+        }
+    }
+
+    private var disclaimerSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.small) {
+            Text("Medical Disclaimer")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            HealthCard {
+                VStack(alignment: .leading, spacing: Spacing.small) {
+                    Image(systemName: "info.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.orange)
+
+                    Text("This is a personal health journal app, not a medical or health tracking app. It is not intended to diagnose, treat, cure, or prevent any disease or medical condition.")
+                        .font(.subheadline)
+                        .foregroundStyle(.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Text("Please consult your personal medical health practitioners for any medical advice, diagnosis, or treatment. Always seek the advice of qualified health providers with any questions you may have regarding a medical condition.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }

@@ -8,6 +8,42 @@
       "blur-material" : 0.5,
       "layers" : [
         {
+          "image-name" : "image-0wWd0fmMGDqRaxwYng6SmU0su3RmJm.png",
+          "name" : "image-0wWd0fmMGDqRaxwYng6SmU0su3RmJm",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              137.578125,
+              312.5
+            ]
+          }
+        },
+        {
+          "image-name" : "image-rqbkXC57PxSNmsUh03O6RfoKbD9R1j.png",
+          "name" : "image-rqbkXC57PxSNmsUh03O6RfoKbD9R1j",
+          "position-specializations" : [
+            {
+              "value" : {
+                "scale" : 1,
+                "translation-in-points" : [
+                  22.9765625,
+                  28.75
+                ]
+              }
+            },
+            {
+              "idiom" : "square",
+              "value" : {
+                "scale" : 1,
+                "translation-in-points" : [
+                  0,
+                  0
+                ]
+              }
+            }
+          ]
+        },
+        {
           "blend-mode" : "normal",
           "glass-specializations" : [
             {
@@ -18,7 +54,7 @@
           "hidden-specializations" : [
             {
               "idiom" : "square",
-              "value" : false
+              "value" : true
             }
           ],
           "image-name" : "healthstack.png",
@@ -36,10 +72,10 @@
             {
               "idiom" : "square",
               "value" : {
-                "scale" : 0.95,
+                "scale" : 0.9,
                 "translation-in-points" : [
-                  0,
-                  36
+                  17.390625,
+                  29.359375
                 ]
               }
             }

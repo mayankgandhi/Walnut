@@ -26,7 +26,7 @@ struct WelcomeScreen: View {
             VStack(alignment: .center, spacing: Spacing.medium) {
                 HStack(alignment: .center, spacing: Spacing.medium) {
                     
-                    Image("display-app-icon")
+                    Image("NewWalnutAppIcon")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 96, height: 96)
@@ -35,7 +35,7 @@ struct WelcomeScreen: View {
                         }
                     
                     VStack(alignment: .center) {
-                        Text("HealthStack")
+                        Text("Walnut")
                             .font(.title2.bold())
                             .foregroundStyle(.primary)
                         

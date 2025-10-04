@@ -187,9 +187,22 @@ struct DocumentUploadArea: View {
                         .cornerRadius(8)
                 }
             } else {
-                Text("Supports PDF, images from Photos, or Camera")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                VStack(spacing: Spacing.xs) {
+                    Text("Supports PDF, images from Photos, or Camera")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+
+                    HStack(spacing: 4) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.caption2)
+                            .foregroundColor(.orange)
+
+                        Text("AI can make mistakes. Please verify all information.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.top, 4)
+                }
             }
         }
         .frame(maxWidth: .infinity)

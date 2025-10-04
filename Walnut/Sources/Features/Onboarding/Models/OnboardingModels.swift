@@ -22,7 +22,7 @@ enum OnboardingScreen: Int, CaseIterable {
     var title: String {
         switch self {
             case .welcome:
-                return "Welcome to HealthStack"
+                return "Welcome to Walnut"
             case .healthProfile:
                 return "Health Profile"
             case .permissions:

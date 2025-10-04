@@ -50,7 +50,7 @@ struct SubscriptionManagementView: View {
                         .foregroundStyle(Color.healthPrimary)
 
                     VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("Health Stack Pro")
+                        Text("Walnut Pro")
                             .font(.title2)
                             .fontWeight(.bold)
 

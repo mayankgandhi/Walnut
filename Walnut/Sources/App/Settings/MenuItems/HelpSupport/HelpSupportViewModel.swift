@@ -9,21 +9,22 @@
 import SwiftUI
 import SwiftData
 import Observation
+import MessageUI
 
 @Observable
 class HelpSupportViewModel {
-    
+
     // MARK: - Published Properties
-    var showHelpSupport = false
-    
+    var showMailCompose = false
+
     // MARK: - Private Properties
     private let patient: Patient
-    
+
     // MARK: - Initializer
     init(patient: Patient) {
         self.patient = patient
     }
-    
+
     // MARK: - Public Properties
     var menuItem: SettingsMenuItem {
         SettingsMenuItem(
@@ -36,14 +37,20 @@ class HelpSupportViewModel {
             }
         )
     }
-    
+
     // MARK: - Actions
     func presentHelpSupport() {
-        showHelpSupport = true
-        // TODO: Implement help and support navigation
+        if MFMailComposeViewController.canSendMail() {
+            showMailCompose = true
+        } else {
+            // Fallback to mailto URL if mail is not configured
+            if let url = URL(string: "mailto:healthstack@mayankgandhi.com") {
+                UIApplication.shared.open(url)
+            }
+        }
     }
-    
-    func dismissHelpSupport() {
-        showHelpSupport = false
+
+    func dismissMailCompose() {
+        showMailCompose = false
     }
 }
