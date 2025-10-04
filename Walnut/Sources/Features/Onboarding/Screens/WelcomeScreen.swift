@@ -23,7 +23,7 @@ struct WelcomeScreen: View {
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .center, spacing: Spacing.medium) {
+            VStack(alignment: .center, spacing: Spacing.large) {
                 VStack(alignment: .center, spacing: Spacing.medium) {
                     
                     Image("NewWalnutAppIcon")
@@ -76,26 +76,37 @@ struct WelcomeScreen: View {
                 }
                 
                 if showDisclaimer {
-                    HStack {
-                        Image("message")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 64, height: 64)
-                        
-                        VStack(alignment: .leading, spacing: Spacing.xs) {
-                            Text("Not Medical Advice")
+                    VStack(alignment: .leading, spacing: Spacing.small) {
+                        HStack(spacing: Spacing.small) {
+                            Image(systemName: "info.circle.fill")
+                                .font(.title2)
+                                .foregroundStyle(.blue)
+
+                            Text("Important Notice")
                                 .font(.headline.bold())
                                 .foregroundStyle(.primary)
-                            
-                            Text("While we're here to support your wellness journey, this app doesn't provide medical advice. Please work with your healthcare provider for personalized medical guidance.")
-                                .font(.caption.weight(.light))
+                        }
+
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text("This app is a personal health journal and does not provide medical advice, diagnosis, or treatment.")
+                                .font(.subheadline)
                                 .foregroundStyle(.primary)
+
+                            Text("Always consult with your healthcare provider for medical decisions and personalized guidance.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
                     }
                     .padding(Spacing.medium)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .background(.red.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(.blue.opacity(0.08))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .strokeBorder(.blue.opacity(0.2), lineWidth: 1)
+                            )
+                    )
                 }
                 
                 Spacer()
