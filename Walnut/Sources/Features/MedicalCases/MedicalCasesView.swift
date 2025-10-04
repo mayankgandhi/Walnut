@@ -50,7 +50,7 @@ struct MedicalCasesView: View {
                     NavBarHeader(
                         iconName: "drawer",
                         iconColor: .red,
-                        title: "Medical Cases",
+                        title: "Cases",
                         subtitle: "\(viewModel.medicalCases.count) Cases"
                     )
                     

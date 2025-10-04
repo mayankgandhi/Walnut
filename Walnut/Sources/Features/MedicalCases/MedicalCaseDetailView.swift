@@ -58,7 +58,7 @@ struct MedicalCaseDetailView: View {
             } else {
                 // Handle case where medical case might be deleted or not found
                 ContentUnavailableView(
-                    "Medical Case Not Found",
+                    "Case Not Found",
                     systemImage: "exclamationmark.triangle",
                     description: Text("The medical case may have been deleted or is no longer available.")
                 )

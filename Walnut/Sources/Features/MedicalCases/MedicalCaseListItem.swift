@@ -24,7 +24,7 @@ struct MedicalCaseListItem: View {
                 )
             }
             
-            Text(medicalCase.title ?? "Medical Case")
+            Text(medicalCase.title ?? "Case")
                 .font(.system(.subheadline, design: .rounded, weight: .semibold))
                 .foregroundStyle(.primary)
                 .lineLimit(2)

@@ -216,7 +216,7 @@ struct BioMarkerReportEditor: View {
                     if let medicalCase = medicalCase {
                         // Medical Case Information Section
                         VStack(alignment: .leading, spacing: Spacing.small) {
-                            Text("Medical Case")
+                            Text("Case")
                                 .font(.headline)
                                 .foregroundStyle(.secondary)
                                 .padding(.horizontal, Spacing.medium)

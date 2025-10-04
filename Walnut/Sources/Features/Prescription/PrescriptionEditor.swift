@@ -151,7 +151,7 @@ struct PrescriptionEditor: View {
                             
                             TextFieldItem(
                                 icon: "building.2.fill",
-                                title: "Medical Facility",
+                                title: "Facility",
                                 text: $facilityName,
                                 placeholder: "Enter medical facility name",
                                 iconColor: .blue,
@@ -180,11 +180,11 @@ struct PrescriptionEditor: View {
                     // Medical Case Information Section
                     
                     VStack(alignment: .leading, spacing: Spacing.small) {
-                        Text("Medical Case")
+                        Text("Case")
                             .font(.headline)
                             .foregroundStyle(.secondary)
                             .padding(.horizontal, Spacing.medium)
-                        HealthCard {
+                        HealthCard(enableGlassEffect: false) {
                             HStack(spacing: Spacing.medium) {
                                 
                                 OptionalView(medicalCase.specialty) { specialty in
@@ -226,9 +226,9 @@ struct PrescriptionEditor: View {
                                         }
                                     }
                                     
-                                    Spacer()
                                 }
                             }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
                     

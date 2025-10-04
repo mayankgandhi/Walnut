@@ -13,7 +13,7 @@ import WalnutDesignSystem
 
 @MainActor
 struct DemoModeView: View {
-
+    
     @Environment(\.dismiss) private var dismiss
     @State private var demoModelContainer: ModelContainer?
     @State private var isLoading = true
@@ -26,21 +26,21 @@ struct DemoModeView: View {
                let container = demoModelContainer {
                 // Fetch the demo patient from the container
                 if let demoPatient = fetchDemoPatient(from: container) {
-                // Completely isolate the demo mode in its own environment
-                NavigationStack {
-                    PatientTabView(patient: demoPatient)
-                        .navigationTitle("Demo Mode")
-                        .navigationBarTitleDisplayMode(.inline)
-                        .toolbar {
-                            ToolbarItem(placement: .navigationBarLeading) {
-                                Button("Exit Demo") {
-                                    dismiss()
+                    // Completely isolate the demo mode in its own environment
+                    NavigationStack {
+                        PatientTabView(patient: demoPatient)
+                            .navigationTitle("Demo Mode")
+                            .navigationBarTitleDisplayMode(.inline)
+                            .toolbar {
+                                ToolbarItem(placement: .navigationBarLeading) {
+                                    Button("Exit Demo") {
+                                        dismiss()
+                                    }
                                 }
                             }
-                        }
-                }
-                .modelContainer(container)
-                .environment(\.modelContext, container.mainContext)
+                    }
+                    .modelContainer(container)
+                    .environment(\.modelContext, container.mainContext)
                 } else {
                     // Demo patient not found
                     NavigationStack {
@@ -48,10 +48,10 @@ struct DemoModeView: View {
                             Image(systemName: "exclamationmark.triangle")
                                 .font(.title)
                                 .foregroundStyle(.orange)
-
+                            
                             Text("Demo patient not found")
                                 .font(.headline)
-
+                            
                             Button("Retry") {
                                 setupDemoContainer()
                             }
@@ -146,10 +146,10 @@ struct DemoModeView: View {
                 if !originalDemoState {
                     demoModeManager.isDemoModeEnabled = true
                 }
-
+                
                 // Use DemoModeManager to populate demo data
                 demoModeManager.populateDemoData(in: container.mainContext)
-
+                
                 // Restore original demo mode state if it was changed
                 if !originalDemoState {
                     demoModeManager.isDemoModeEnabled = false
@@ -163,12 +163,12 @@ struct DemoModeView: View {
             }
         }
     }
-
+    
     private func fetchDemoPatient(from container: ModelContainer) -> Patient? {
         do {
             let descriptor = FetchDescriptor<Patient>()
             let patients = try container.mainContext.fetch(descriptor)
-
+            
             // Look for demo patient
             return patients.first { patient in
                 (patient.name == "Alex Demo Patient") ||

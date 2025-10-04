@@ -130,7 +130,7 @@ struct PrescriptionDetailView: View {
                                 .lineLimit(2)
                                 .multilineTextAlignment(.leading)
                         } else {
-                            Text("Medical Prescription")
+                            Text("Prescription")
                                 .font(.title.weight(.bold))
                                 .foregroundStyle(.primary)
                         }

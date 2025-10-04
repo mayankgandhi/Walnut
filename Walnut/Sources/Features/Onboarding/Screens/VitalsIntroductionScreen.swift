@@ -9,48 +9,48 @@
 import SwiftUI
 import WalnutDesignSystem
 
-/// Vitals tracking introduction screen showcasing health monitoring features
+/// Personal health journal introduction screen showcasing wellness tracking features
 struct VitalsIntroductionScreen: View {
     @Bindable var viewModel: OnboardingViewModel
-    
+
     var body: some View {
         VStack(spacing: Spacing.xl) {
-            
-            OnboardingHeader(icon: "heart.text.square.fill", title: "Vitals Tracking", subtitle: "Track your vital signs and health metrics with ease")
-            
-            
+
+            OnboardingHeader(icon: "book.fill", title: "Your Health Journal", subtitle: "Document your wellness journey and track what matters to you")
+
+
             // Features Section
             VStack(spacing: Spacing.medium) {
                 Text("Powerful Features")
                     .font(.title3.bold())
                     .frame(maxWidth: .infinity, alignment: .leading)
-                
+
                 VStack(spacing: Spacing.medium) {
                     FeatureRow(
                         icon: "chart.line.uptrend.xyaxis",
-                        title: "Trend Analysis",
-                        description: "Visualize your health data over time with interactive charts",
+                        title: "Track Progress",
+                        description: "Visualize your wellness trends over time with beautiful charts",
                         color: Color.healthPrimary
                     )
-                    
+
                     FeatureRow(
                         icon: "bell.fill",
-                        title: "Smart Reminders",
-                        description: "Get reminded to take measurements at optimal times",
+                        title: "Daily Reminders",
+                        description: "Build healthy habits with gentle reminders",
                         color: Color.healthWarning
                     )
-                    
+
                     FeatureRow(
                         icon: "square.and.arrow.up",
-                        title: "Share with Doctors",
-                        description: "Export reports to share with your healthcare team",
+                        title: "Export & Share",
+                        description: "Export your journal entries whenever you need them",
                         color: Color.healthSuccess
                     )
-                    
+
                     FeatureRow(
                         icon: "target",
                         title: "Personal Goals",
-                        description: "Set targets and track your progress toward better health",
+                        description: "Set wellness goals and celebrate your achievements",
                         color: .purple
                     )
                 }

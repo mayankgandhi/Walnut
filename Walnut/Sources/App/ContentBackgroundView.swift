@@ -22,10 +22,6 @@ struct ContentBackgroundView: View {
     }
 }
 
-#Preview {
-    ContentBackgroundView(color: .blue)
-}
-
 struct PatternBackground: UIViewRepresentable {
     func makeUIView(context _: Context) -> UIView {
         let view = UIView()

@@ -150,7 +150,7 @@ struct MedicalCaseEditor: View {
                             
                             ButtonPickerItem(
                                 icon: "stethoscope",
-                                title: "Medical Specialty",
+                                title: "Specialty",
                                 selectedOption: $selectedSpecialty,
                                 options: Array(MedicalSpecialty.allCases),
                                 placeholder: "Select specialty",

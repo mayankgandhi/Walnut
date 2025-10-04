@@ -30,7 +30,7 @@ struct WelcomeScreen: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 96, height: 96)
-                        .onLongPressGesture(minimumDuration: 3.0) {
+                        .onLongPressGesture(minimumDuration: 2.0) {
                             showDemoModeSheet = true
                         }
                     
