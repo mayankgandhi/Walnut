@@ -44,7 +44,7 @@ class HelpSupportViewModel {
             showMailCompose = true
         } else {
             // Fallback to mailto URL if mail is not configured
-            if let url = URL(string: "mailto:healthstack@mayankgandhi.com") {
+            if let url = URL(string: "mailto:walnut@mayankgandhi.com") {
                 UIApplication.shared.open(url)
             }
         }

@@ -30,7 +30,7 @@ struct HelpSupportView: View {
         }
         .sheet(isPresented: $viewModel.showMailCompose) {
             MailComposeView(
-                recipients: ["healthstack@mayankgandhi.com"],
+                recipients: ["walnut@mayankgandhi.com"],
                 subject: "Help & Support",
                 onDismiss: { viewModel.dismissMailCompose() }
             )
