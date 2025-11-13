@@ -90,14 +90,12 @@ let project = Project(
             ],
             entitlements: .file(path: .relativeToRoot("Walnut/Walnut.entitlements")),
             dependencies: [
-                .external(name: "Factory"),
-                .external(name: "PostHog"),
                 .external(name: "Atlantis"),
+                .external(name: "Gate"),
+                .external(name: "Telemetry"),
 
-                .project(target: "Gate", path: "../../Gate"),
                 .project(target: "AIKit", path: "../AIKit"),
                 .project(target: "WalnutDesignSystem", path: "../WalnutDesignSystem"),
-                .project(target: "Telemetry", path: "../../Telemetry"),
             ],
             settings: .settings(base: settings,
                                 configurations: [

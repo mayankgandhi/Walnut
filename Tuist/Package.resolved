@@ -10,21 +10,21 @@
       }
     },
     {
-      "identity" : "factory",
+      "identity" : "gate",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/hmlongco/Factory.git",
+      "location" : "git@github.com:mayankgandhi/Gate.git",
       "state" : {
-        "revision" : "ccc898f21992ebc130bc04cc197460a5ae230bcf",
-        "version" : "2.5.3"
+        "revision" : "965a00d1d950d4b75fc59e8871a7649faa21a608",
+        "version" : "1.0.0"
       }
     },
     {
       "identity" : "posthog-ios",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/PostHog/posthog-ios",
+      "location" : "https://github.com/PostHog/posthog-ios.git",
       "state" : {
-        "revision" : "f381818bc153f63fbe13d6822e65cc7233ba4647",
-        "version" : "3.31.0"
+        "revision" : "b71b7b1ba861391377d01251479530b938881ce0",
+        "version" : "3.35.0"
       }
     },
     {
@@ -32,8 +32,26 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/RevenueCat/purchases-ios.git",
       "state" : {
-        "revision" : "fe140799a0f27fdfd36f8d4f25ff5ec1e3d24075",
-        "version" : "5.39.2"
+        "revision" : "517162f2045989b43f691327aeb1b5847c9a5a6d",
+        "version" : "5.47.1"
+      }
+    },
+    {
+      "identity" : "roadmap",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/AvdLee/Roadmap",
+      "state" : {
+        "revision" : "faacea19bfa486f6ceef5ed191bd5662a77a6643",
+        "version" : "1.1.0"
+      }
+    },
+    {
+      "identity" : "telemetry",
+      "kind" : "remoteSourceControl",
+      "location" : "git@github.com:mayankgandhi/Telemetry.git",
+      "state" : {
+        "revision" : "17ba7b399a710adaf88f24f8136078be86759763",
+        "version" : "1.0.0"
       }
     }
   ],
