@@ -8,6 +8,7 @@
 
 import SwiftUI
 import WalnutDesignSystem
+import Gate
 
 struct PatientTabView: View {
     

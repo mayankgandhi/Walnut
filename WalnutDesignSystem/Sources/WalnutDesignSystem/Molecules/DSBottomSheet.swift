@@ -144,6 +144,7 @@ public extension View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(UIColor.systemGroupedBackground))
         .navigationTitle("Demo")
+        .toolbarTitleDisplayMode(.inlineLarge)
     }
     .bottomSheet(
         isPresented: .constant(true),

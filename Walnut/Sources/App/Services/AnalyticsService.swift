@@ -7,6 +7,8 @@
 
 import Foundation
 import PostHog
+import Telemetry
+import Gate
 
 #if DEBUG
 import Atlantis
@@ -16,6 +18,8 @@ final class AnalyticsService: ApplicationService {
 
     static let shared = AnalyticsService()
 
+    // Note: Using PostHog SDK directly for feature flag payloads
+    // since Telemetry currently only supports boolean feature flags
     var claudeKey: String {
         PostHogSDK.shared.getFeatureFlagPayload("anthropic-api-key") as? String ?? ""
     }
@@ -29,18 +33,22 @@ final class AnalyticsService: ApplicationService {
     private init() {}
 
     func initialize() async throws {
-        await initializePostHog()
+        await initializeTelemetry()
         initializeDebugTools()
     }
 
     // MARK: - Private Methods
 
-    private func initializePostHog() async {
-        let apiKey = "phc_rroYMTGzc0NBbseeG0kMSqvLP8UtrhRXk4l4kcOTrYw"
-        let host = "https://us.i.posthog.com"
+    private func initializeTelemetry() async {
+        let provider = PostHogProvider(
+            apiKey: "phc_rroYMTGzc0NBbseeG0kMSqvLP8UtrhRXk4l4kcOTrYw",
+            host: "https://us.i.posthog.com"
+        )
 
-        let config = PostHogConfig(apiKey: apiKey, host: host)
-        PostHogSDK.shared.setup(config)
+        TelemetryService.shared.configure(provider: provider)
+
+        // Configure the PostHog provider
+        await provider.configure()
     }
 
     private func initializeDebugTools() {

@@ -184,7 +184,7 @@ private struct ColorSelectionView: View {
                 .padding(.top, Spacing.medium)
             }
             .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
+            .toolbarTitleDisplayMode(.inlineLarge)
             .navigationBarItems(
                 trailing: Button("Done") {
                     dismiss()

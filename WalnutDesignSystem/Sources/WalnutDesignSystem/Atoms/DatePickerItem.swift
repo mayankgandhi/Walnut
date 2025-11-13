@@ -149,7 +149,7 @@ public struct DatePickerItem: View {
                     }
                     .padding()
                     .navigationTitle(title)
-                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbarTitleDisplayMode(.inlineLarge)
                     .navigationBarItems(
                         leading: Button("Cancel") {
                             showingPicker = false

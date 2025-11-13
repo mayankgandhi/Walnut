@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Gate
 
 /// Manages the initialization and lifecycle of all application services
 final class ServiceManager {
@@ -22,6 +23,18 @@ final class ServiceManager {
     // MARK: - Service Registration
 
     private func registerServices() {
+        // Configure UserService with Walnut-specific settings
+        UserService.shared.configure(
+            userDefaultsKey: "com.walnut.userID",
+            userDefaults: .standard
+        )
+
+        // Configure Gate SubscriptionService with Walnut-specific settings
+        SubscriptionService.shared.configure(
+            configuration: .walnut,
+            userIDProvider: { UserService.shared.getCurrentUserID() }
+        )
+
         services = [
             UserService.shared,
             AnalyticsService.shared,

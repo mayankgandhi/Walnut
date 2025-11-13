@@ -38,7 +38,7 @@ struct PatientSettingsView: View {
                 PatientHeaderCard(patient: viewModel.patient)
                     .padding(.horizontal, Spacing.medium)
                 
-//                HealthStackPro()
+                WalnutPro()
                 
                 // Patient Settings Section
                 patientSettingsSection

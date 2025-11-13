@@ -9,7 +9,7 @@ let project = Project(
     targets: [
         .target(
             name: "WalnutDesignSystem",
-            destinations: .iOS,
+            destinations: [.iPhone, .iPad, .mac],
             product: .framework,
             bundleId: "m.walnut.designsystem",
             sources: [
@@ -32,7 +32,7 @@ let project = Project(
         ),
         .target(
             name: "WalnutDesignSystemTests",
-            destinations: .iOS,
+            destinations: [.iPhone, .iPad, .mac],
             product: .unitTests,
             bundleId: "m.walnut.designsystem.tests",
             sources: [

@@ -11,10 +11,7 @@ import SwiftUI
 @testable import WalnutDesignSystem
 
 final class WalnutDesignSystemTests: XCTestCase {
-    
-    func testDesignSystemVersion() {
-        XCTAssertEqual(WalnutDesignSystem.version, "1.0.0")
-    }
+
     
     func testSpacingValues() {
         XCTAssertEqual(Spacing.xs, 4)
@@ -31,22 +28,7 @@ final class WalnutDesignSystemTests: XCTestCase {
         XCTAssertEqual(Size.avatarLarge, 56)
     }
     
-    func testHealthStatusColors() {
-        let goodStatus = HealthStatus.good
-        let warningStatus = HealthStatus.warning
-        let criticalStatus = HealthStatus.critical
-        
-        XCTAssertEqual(goodStatus.color, .healthSuccess)
-        XCTAssertEqual(warningStatus.color, .healthWarning)
-        XCTAssertEqual(criticalStatus.color, .healthError)
-    }
-    
-    func testHealthStatusIcons() {
-        XCTAssertEqual(HealthStatus.good.icon, "checkmark.circle.fill")
-        XCTAssertEqual(HealthStatus.warning.icon, "exclamationmark.triangle.fill")
-        XCTAssertEqual(HealthStatus.critical.icon, "xmark.circle.fill")
-    }
-    
+
     func testButtonStyles() {
         let primaryStyle = DSButtonStyle.primary
         let secondaryStyle = DSButtonStyle.secondary

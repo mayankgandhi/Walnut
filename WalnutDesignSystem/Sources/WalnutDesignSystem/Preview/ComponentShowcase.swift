@@ -177,6 +177,7 @@ public struct ComponentShowcase: View {
                         }
                         .padding()
                         .navigationTitle("Menu")
+                        .toolbarTitleDisplayMode(.inlineLarge)
                     }
                 }
                 

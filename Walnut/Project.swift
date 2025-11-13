@@ -74,9 +74,10 @@ let project = Project(
     targets: [
         .target(
             name: "Walnut",
-            destinations: .iOS,
+            destinations: [.iPhone, .iPad],
             product: .app,
             bundleId: "m.walnut",
+            deploymentTargets: .iOS("26.0"),
             infoPlist: infoPlist,
             sources: [
                 "Sources/**",  // This includes files directly in Sources/
@@ -89,14 +90,14 @@ let project = Project(
             ],
             entitlements: .file(path: .relativeToRoot("Walnut/Walnut.entitlements")),
             dependencies: [
-                .external(name: "FactoryKit"),
+                .external(name: "Factory"),
                 .external(name: "PostHog"),
                 .external(name: "Atlantis"),
-                .external(name: "RevenueCat"),
-                .external(name: "RevenueCatUI"),
 
+                .project(target: "Gate", path: "../../Gate"),
                 .project(target: "AIKit", path: "../AIKit"),
                 .project(target: "WalnutDesignSystem", path: "../WalnutDesignSystem"),
+                .project(target: "Telemetry", path: "../../Telemetry"),
             ],
             settings: .settings(base: settings,
                                 configurations: [
@@ -107,9 +108,10 @@ let project = Project(
         ),
         .target(
             name: "WalnutTests",
-            destinations: .iOS,
+            destinations: [.iPhone, .iPad],
             product: .unitTests,
             bundleId: "io.tuist.WalnutTests",
+            deploymentTargets: .iOS("26.0"),
             infoPlist: .default,
             sources: [
                 "Tests/**"

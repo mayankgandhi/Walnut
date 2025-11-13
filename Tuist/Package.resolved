@@ -1,5 +1,4 @@
 {
-  "originHash" : "b9746461401f20907f038f86c85271fa273275beb0442b05512bf405bc86cf7e",
   "pins" : [
     {
       "identity" : "atlantis",
@@ -22,21 +21,21 @@
     {
       "identity" : "posthog-ios",
       "kind" : "remoteSourceControl",
-      "location" : "git@github.com:PostHog/posthog-ios.git",
+      "location" : "https://github.com/PostHog/posthog-ios",
       "state" : {
         "revision" : "f381818bc153f63fbe13d6822e65cc7233ba4647",
         "version" : "3.31.0"
       }
     },
     {
-      "identity" : "purchases-ios-spm",
+      "identity" : "purchases-ios",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/RevenueCat/purchases-ios-spm.git",
+      "location" : "https://github.com/RevenueCat/purchases-ios.git",
       "state" : {
         "revision" : "fe140799a0f27fdfd36f8d4f25ff5ec1e3d24075",
         "version" : "5.39.2"
       }
     }
   ],
-  "version" : 3
+  "version" : 2
 }

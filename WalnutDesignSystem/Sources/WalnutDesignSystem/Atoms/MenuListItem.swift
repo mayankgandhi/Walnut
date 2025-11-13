@@ -80,6 +80,7 @@ public struct MenuListItem: View {
                     .stroke(Color.clear, lineWidth: 1)
             )
             .scaleEffect(isPressed ? 0.98 : 1.0)
+            .contentShape(.rect)
             .animation(.easeInOut(duration: 0.1), value: isPressed)
             .shadow(
                 color:  Color.black.opacity(0.05),
